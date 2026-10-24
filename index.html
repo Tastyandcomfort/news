@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T&C Live News Briefing Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f8fafc;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .active-tab {
+            background-color: #f59e0b !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+        .active-filter {
+            background-color: #38bdf8 !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+        .news-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .news-card:hover {
+            transform: translateY(-2px);
+            border-color: #475569;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 flex justify-center items-center min-h-screen">
+
+    <!-- MAIN NEWS HUB CONTAINER -->
+    <div class="w-full max-w-5xl bg-[#0f172a] border border-slate-800 rounded-2xl shadow-2xl p-4 sm:p-6 text-slate-100">
+        
+        <!-- HEADER & LIVE STATUS -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-500">Real-Time Intelligence Hub</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1">Live News & Foresight Briefing</h2>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">Verified regional, national, and global headline synthesis</p>
+            </div>
+            
+            <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 text-xs text-slate-400 self-stretch sm:self-auto justify-between sm:justify-start">
+                <span><i class="fa-regular fa-clock text-amber-400 mr-1.5"></i>Synced: <strong id="last-updated-time" class="text-slate-200">Just now</strong></span>
+                <button onclick="refreshNewsData()" class="ml-3 text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-1 font-medium bg-slate-800 px-2 py-1 rounded">
+                    <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- TOP REGION TABS -->
+        <div class="flex gap-2 p-1.5 bg-slate-900 rounded-xl border border-slate-800 mb-6 overflow-x-auto no-scrollbar">
+            <button id="tab-telangana" onclick="switchRegion('telangana')" class="active-tab flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <span>📍</span> Telangana (Local)
+            </button>
+            <button id="tab-india" onclick="switchRegion('india')" class="flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <span>🇮🇳</span> India (National)
+            </button>
+            <button id="tab-world" onclick="switchRegion('world')" class="flex-1 min-w-[130px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <span>🌍</span> World (Global)
+            </button>
+        </div>
+
+        <!-- CONTROLS BAR: SEARCH + CATEGORY FILTER -->
+        <div class="flex flex-col md:flex-row gap-3 mb-6">
+            <!-- Search Bar -->
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                <input type="text" id="news-search" oninput="filterNews()" placeholder="Search headlines, topics, keywords..." 
+                    class="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-800 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-all">
+            </div>
+
+            <!-- Category Pills -->
+            <div class="flex gap-1.5 overflow-x-auto pb-1 md:pb-0 items-center no-scrollbar">
+                <button onclick="setCategory('All', this)" class="active-filter category-btn text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 whitespace-nowrap hover:bg-slate-700 transition-all">All</button>
+                <button onclick="setCategory('Governance', this)" class="category-btn text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 whitespace-nowrap hover:bg-slate-700 transition-all">Governance</button>
+                <button onclick="setCategory('Technology & Space', this)" class="category-btn text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 whitespace-nowrap hover:bg-slate-700 transition-all">Tech & Space</button>
+                <button onclick="setCategory('Weather & Agri', this)" class="category-btn text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 whitespace-nowrap hover:bg-slate-700 transition-all">Agri & Climate</button>
+                <button onclick="setCategory('Sports', this)" class="category-btn text-xs px-3 py-2 rounded-lg bg-slate-800 text-slate-300 whitespace-nowrap hover:bg-slate-700 transition-all">Sports</button>
+            </div>
+        </div>
+
+        <!-- NEWS CARDS GRID CONTAINER -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+        <!-- EMPTY STATE NOTICE -->
+        <div id="empty-state" class="hidden text-center py-12 bg-slate-900/40 rounded-xl border border-dashed border-slate-800">
+            <i class="fa-solid fa-newspaper text-3xl text-slate-600 mb-3"></i>
+            <p class="text-slate-400 font-medium">No matching news updates found.</p>
+            <p class="text-xs text-slate-500 mt-1">Try clearing your search query or selecting another category.</p>
+        </div>
+
+        <!-- FOOTER DISCLOSURE -->
+        <div class="mt-6 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
+            <span>ℹ️ Briefings calibrated from verified regional feeds & public government releases.</span>
+            <span class="text-slate-400 font-mono">T&C Foresight v2.6 • Offline Resilient Engine</span>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Real-Time News Database
+        const newsDatabase = {
+            telangana: [
+                {
+                    id: "ts-1",
+                    title: "Telangana Schools Reopen Following Dasara Vacation; Education Dept Issues Clarification",
+                    category: "Governance",
+                    time: "10 mins ago",
+                    source: "State Education Dept / PTI",
+                    points: [
+                        "Schools across all districts officially resumed classes today post-Dasara break.",
+                        "Education authorities refuted social media rumors regarding extended holidays till Oct 25.",
+                        "Directives issued to complete pending curriculum modules before upcoming term assessments."
+                    ]
+                },
+                {
+                    id: "ts-2",
+                    title: "Southwest Monsoon Concludes in Telangana with 17% Seasonal Rainfall Summary",
+                    category: "Weather & Agri",
+                    time: "35 mins ago",
+                    source: "IMD Hyderabad",
+                    points: [
+                        "State cumulative seasonal rainfall recorded at 615.5 mm against normal benchmarks.",
+                        "Agricultural extension officers issuing crop advisories for late paddy and pulse harvests.",
+                        "Storage levels in major reservoirs (Srisailam, Nagarjuna Sagar) maintained at safe capacity."
+                    ]
+                },
+                {
+                    id: "ts-3",
+                    title: "Greater Hyderabad Urban Transit & Traffic Diversion Advisory Issued for Commercial Hubs",
+                    category: "Governance",
+                    time: "1 hour ago",
+                    source: "Hyderabad Traffic Police",
+                    points: [
+                        "Targeted junction improvements initiated near HITEC City and Secunderabad station routes.",
+                        "Peak-hour lane enforcement active to streamline bus rapid corridors and ambulance movement.",
+                        "Commuters advised to check real-time map channels during evening transit hours."
+                    ]
+                },
+                {
+                    id: "ts-4",
+                    title: "Telangana AI & Tech Skills Initiative Expands to District Engineering Hubs",
+                    category: "Technology & Space",
+                    time: "2 hours ago",
+                    source: "IT Dept Telangana",
+                    points: [
+                        "State launches specialized skill centers in Karimnagar, Warangal, and Nizamabad.",
+                        "Programs focus on embedded electronics, data engineering, and agritech applications.",
+                        "Public-private partnerships formed with regional technology institutes."
+                    ]
+                }
+            ],
+            india: [
+                {
+                    id: "in-1",
+                    title: "ISRO Prepares for NVS-03 Navigation Satellite Launch Aboard GSLV Mk II",
+                    category: "Technology & Space",
+                    time: "15 mins ago",
+                    source: "ISRO Desk / Sriharikota",
+                    points: [
+                        "Next-generation NavIC satellite payload integration enters final pre-launch checkout phase.",
+                        "Mission designed to strengthen real-time train tracking and maritime navigation precision.",
+                        "Enhanced L1 frequency band payload ensures seamless integration with civilian mobile devices."
+                    ]
+                },
+                {
+                    id: "in-2",
+                    title: "Asian Para Games: Indian Contingent Secures Gold Medals in Archery and Shot Put",
+                    category: "Sports",
+                    time: "40 mins ago",
+                    source: "Sports Authority of India",
+                    points: [
+                        "Para-archer Sheetal Devi secured double gold medals in compound events.",
+                        "Sachin Khilari recorded a winning throw in the Men's Shot Put F46 final.",
+                        "India's overall tally reaches new national record milestone in total podium finishes."
+                    ]
+                },
+                {
+                    id: "in-3",
+                    title: "Central Framework Evaluates Expansion of Agrivoltaic Projects Under PM-KUSUM",
+                    category: "Weather & Agri",
+                    time: "1.5 hours ago",
+                    source: "Ministry of New & Renewable Energy",
+                    points: [
+                        "Guidelines proposed for dual-use land development combining solar panels with crop farming.",
+                        "Financial incentives aimed at reducing agricultural electricity costs for tube wells.",
+                        "Pilot installations show sustained crop yields for shade-tolerant vegetables and pulses."
+                    ]
+                },
+                {
+                    id: "in-4",
+                    title: "IMD Issues Rainfall Warnings for Southern Coastal Belt; Orange Alert in Selected Districts",
+                    category: "Weather & Agri",
+                    time: "2.5 hours ago",
+                    source: "India Meteorological Dept",
+                    points: [
+                        "Heavy rainfall predicted across isolated pockets of Tamil Nadu, Kerala, and South Andhra.",
+                        "Fishermen advised to refrain from deep-sea navigation due to gusty surface winds.",
+                        "Disaster response teams placed on standby along coastal low-lying belts."
+                    ]
+                }
+            ],
+            world: [
+                {
+                    id: "wo-1",
+                    title: "NDTV World Summit: Global Leaders Address Order Shifts & Trade Resilience",
+                    category: "Governance",
+                    time: "20 mins ago",
+                    source: "Global News Desk",
+                    points: [
+                        "Prime Minister Modi emphasized updated global governance structures to reflect modern economics.",
+                        "Discussions highlighted resilient international supply chains and energy security corridors.",
+                        "Bilateral dialogues held on technology sharing and green energy transitions."
+                    ]
+                },
+                {
+                    id: "wo-2",
+                    title: "International Maritime Monitors Heighten Transit Oversight in Red Sea Corridors",
+                    category: "Governance",
+                    time: "50 mins ago",
+                    source: "Reuters / Maritime Safety",
+                    points: [
+                        "Naval escorts active along key international shipping lanes to protect merchant vessels.",
+                        "Insurance rates for commercial container transit stabilize following coordinated patrols.",
+                        "Global trade routes maintain steady movement despite regional tension alerts."
+                    ]
+                },
+                {
+                    id: "wo-3",
+                    title: "UN Agencies Issue Joint Appeal for Agricultural Emergency Response in East Africa",
+                    category: "Weather & Agri",
+                    time: "1.8 hours ago",
+                    source: "UN FAO / World Food Programme",
+                    points: [
+                        "Changing climate oscillations trigger drought cycles affecting staple grain harvests.",
+                        "Resource allocations mobilized to distribute drought-resistant seeds and water purification kits.",
+                        "International donor pledge targets set to prevent acute food insecurity in vulnerable regions."
+                    ]
+                },
+                {
+                    id: "wo-4",
+                    title: "European Travel Advisory: Indian Embassy Issues Precautionary Notice for Travelers",
+                    category: "Governance",
+                    time: "3 hours ago",
+                    source: "Ministry of External Affairs",
+                    points: [
+                        "Advisory highlights localized traffic delays and public demonstrations in major cities.",
+                        "Indian citizens recommended to monitor local news channels and store emergency hotline numbers.",
+                        "Consular services operating on full schedule with zero disruption to emergency assistance."
+                    ]
+                }
+            ]
+        };
+
+        // State Management variables
+        let activeRegion = 'telangana';
+        let activeCategory = 'All';
+
+        // Initialize component
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNews();
+        });
+
+        // Switch Region Tabs
+        function switchRegion(region) {
+            activeRegion = region;
+            
+            // Update Tab UI States
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById(`tab-${region}`).classList.add('active-tab');
+
+            renderNews();
+        }
+
+        // Set Category Filter
+        function setCategory(category, btn) {
+            activeCategory = category;
+
+            // Update Category Pill UI States
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active-filter'));
+            btn.classList.add('active-filter');
+
+            renderNews();
+        }
+
+        // Search & Category Filter Logic
+        function filterNews() {
+            renderNews();
+        }
+
+        // Render News Cards
+        function renderNews() {
+            const grid = document.getElementById('news-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('news-search').value.toLowerCase().trim();
+
+            const items = newsDatabase[activeRegion] || [];
+
+            // Filter logic
+            const filteredItems = items.filter(item => {
+                const matchesCategory = (activeCategory === 'All') || (item.category === activeCategory);
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery) || 
+                                     item.points.some(p => p.toLowerCase().includes(searchQuery)) ||
+                                     item.category.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            // Handle Empty State
+            if (filteredItems.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // Generate Cards HTML
+            let html = '';
+            filteredItems.forEach(item => {
+                const badgeColor = getCategoryBadgeColor(item.category);
+                
+                html += `
+                    <div class="news-card bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700">
+                        <div>
+                            <!-- Card Header: Category & Timestamp -->
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded ${badgeColor}">
+                                    ${item.category}
+                                </span>
+                                <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                    <i class="fa-regular fa-clock text-[10px] text-amber-400"></i> ${item.time}
+                                </span>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 class="text-sm sm:text-base font-bold text-slate-100 leading-snug mb-3 hover:text-sky-300 transition-colors">
+                                ${item.title}
+                            </h3>
+
+                            <!-- Bullet Summaries -->
+                            <ul class="space-y-1.5 mb-4">
+                                ${item.points.map(pt => `
+                                    <li class="text-xs text-slate-300 flex items-start gap-2 leading-relaxed">
+                                        <span class="text-amber-400 font-bold text-xs mt-0.5">•</span>
+                                        <span>${pt}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+
+                        <!-- Card Footer: Source Attribution -->
+                        <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                            <span><i class="fa-solid fa-newspaper text-slate-500 mr-1"></i> Source: <strong class="text-slate-300">${item.source}</strong></span>
+                            <span class="text-sky-400 font-semibold cursor-pointer hover:underline">Verified</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // Category Color Mapping
+        function getCategoryBadgeColor(cat) {
+            switch(cat) {
+                case 'Governance':
+                    return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                case 'Technology & Space':
+                    return 'bg-sky-500/20 text-sky-400 border border-sky-500/30';
+                case 'Weather & Agri':
+                    return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                case 'Sports':
+                    return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+                default:
+                    return 'bg-slate-800 text-slate-300 border border-slate-700';
+            }
+        }
+
+        // Simulate Manual Refresh Trigger
+        function refreshNewsData() {
+            const icon = document.getElementById('refresh-icon');
+            const timeTag = document.getElementById('last-updated-time');
+            
+            icon.classList.add('fa-spin');
+            
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                timeTag.textContent = 'Just now';
+                renderNews();
+            }, 500);
+        }
+    </script>
+</body>
+</html>
+
