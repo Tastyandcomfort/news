@@ -322,7 +322,7 @@
         <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> USGS Quakes: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
       </div>
       <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Pos: <b id="ticker-iss-pos">Syncing...</b></span>
+        <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Cord: <b id="ticker-iss-pos">Syncing...</b></span>
       </div>
     </div>
   </div>
@@ -343,7 +343,7 @@
               <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2">
                 <i class="fa-solid fa-earth-americas"></i> World Highlights
               </h2>
-              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Live RSS</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Latest</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div class="text-xs italic" style="color: var(--text-sub);">Connecting to live RSS feed...</div>
@@ -387,7 +387,7 @@
           <div class="apple-card p-4 sm:p-5">
             <div class="flex items-center justify-between mb-4 pb-2 border-b" style="border-color: var(--border-color);">
               <h3 class="text-sm font-bold" style="color: var(--text-main);">
-                <span id="active-scope-title">Telangana (State) Live Headlines</span>
+                <span id="active-scope-title">Telangana State Live Headlines</span>
               </h3>
               <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);">Syncing...</span>
             </div>
@@ -406,15 +406,15 @@
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-3">
                 <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Headlines</h3>
+                <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Networks</h3>
               </div>
 
               <!-- Channel Selector Bar with Desktop Scrollbar -->
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
-                <button id="btn-video" onclick="setMode('video', this)">News</button>
+                <button id="btn-video" onclick="setMode('video', this)">TV9 </button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
-                <button id="btn-ntv" onclick="setMode('ntv', this)">NTV Telugu</button>
+                <button id="btn-france24" onclick="setMode('france24', this)">France24</button>
                 <button id="btn-v6" onclick="setMode('v6', this)">T News</button>
                 <button id="btn-skynews" onclick="setMode('skynews', this)">Sky News</button>
                 <button id="btn-cnn" onclick="setMode('cnn', this)">CNN</button>
@@ -424,8 +424,8 @@
                 <button id="btn-nasa" onclick="setMode('nasa', this)">NASA</button>
                 <button id="btn-airport" onclick="setMode('airport', this)">Airside</button>
                 <button id="btn-hindu" onclick="setMode('hindu', this)">Bhagavat Geetha</button>
-                <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
-                <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
+                <button id="btn-muslim" onclick="setMode('muslim', this)">Quran</button>
+                <button id="btn-christian" onclick="setMode('christian', this)">Bible</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
                 <button id="btn-file" onclick="setMode('file', this)">Media</button>
                 <button id="btn-xrated" onclick="setMode('xrated', this)">Adults</button>
@@ -438,7 +438,7 @@
             </div>
 
             <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
-              <div class="tc-subtle-watermark">T&C Hub</div>
+              <div class="tc-subtle-watermark"> </div>
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
@@ -745,7 +745,7 @@
 
           let sourceName = "Trusted by T&C";
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
-          else if (link.includes("ntv")) sourceName = "NTV News";
+          else if (link.includes("france24")) sourceName = "France24";
           else if (link.includes("hindu")) sourceName = "The Hindu";
 
           html += `
@@ -871,12 +871,12 @@
             streamUrl = "https://www.youtube.com/embed/g0gXzt8JqYA?autoplay=1&mute=1";
             channelName = "India Today Live";
             break;
-          case 'ntv':
-            streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
-            channelName = "NTV Telugu Live";
+          case 'france24':
+            streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1";
+            channelName = "France24 Live";
             break;
           case 'v6':
-            streamUrl = "https://www.youtube.com/embed/_jnDy56dehA?autoplay=1&mute=1";
+            streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1";
             channelName = "V6 News Live";
             break;
           case 'skynews':
@@ -884,7 +884,7 @@
             channelName = "Sky News Live";
             break;
           case 'cnn':
-            streamUrl = "https://www.youtube.com/embed/hDKg1kI2U_Y?autoplay=1&mute=1";
+            streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1";
             channelName = "CNN International Live";
             break;
           case 'wildlife':
@@ -938,7 +938,7 @@
       leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
       
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+        attribution: '&copy; New Modern Mission by T&C',
         maxZoom: 18
       }).addTo(leafletMap);
 
