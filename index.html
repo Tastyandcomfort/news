@@ -247,25 +247,23 @@
 
         </section>
 
-        <!-- TAB 2: LIVE TV & MEDIA PLAYER -->
+        <!-- TAB 2: LIVE TV & MEDIA PLAYER (T&C setMode Architecture) -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg relative">
             
             <!-- T&C Channel Selector Header -->
             <div class="news-main-container mb-4">
               <div class="title-left flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                    <h3 id="current-channel-title" class="text-base font-bold text-brand-blue">Headlines</h3>
-                  </div>
+                <div class="flex items-center gap-2">
+                  <span id="live-indicator" class="live-dot" style="display: none;"></span>
+                  <h3 id="current-channel-title" class="text-base font-bold text-brand-blue">Headlines</h3>
                 </div>
 
-                <!-- Extended Channel Buttons -->
+                <!-- Channel Buttons -->
                 <div class="view-selector">
                   <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>
-                  <button id="btn-video" onclick="setMode('video', this)">TV9 News</button>
-                  <button id="btn-live" onclick="setMode('live', this)">T&C Live</button>
+                  <button id="btn-video" onclick="setMode('video', this)">News</button>
+                  <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                   <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
                   <button id="btn-ntv" onclick="setMode('ntv', this)">NTV Telugu</button>
                   <button id="btn-v6" onclick="setMode('v6', this)">V6 News</button>
@@ -280,18 +278,27 @@
                   <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
                   <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
                   <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
+                  <button id="btn-file" onclick="setMode('file', this)">Media</button>    
                 </div>
               </div>
             </div>
 
-            <!-- Single Active Player Display Container with Subtle Transparent Watermark -->
+            <!-- View Containers -->
             <div id="text-view" class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center text-xs text-slate-400">
-              Select any live news broadcast or media channel above to watch the continuous stream.
+              Select any live broadcast or media channel above to watch the continuous stream.
             </div>
 
             <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
               <div class="tc-subtle-watermark">T&C News</div>
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+
+            <!-- Repository Media Stream Container -->
+            <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
+              <div class="tc-subtle-watermark">T&C News</div>
+              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls>
+                Your browser does not support video playback.
+              </video>
             </div>
 
           </div>
@@ -651,7 +658,7 @@
       }
     }
 
-    // Unified Single Player Mode Switcher (Zero Duplication Bug)
+    // T&C setMode Architecture supporting GitHub Repository Media Streaming & Live Channels
     function setMode(mode, element) {
       document.querySelectorAll('.view-selector button').forEach(btn => {
         btn.classList.remove('active-mode');
@@ -663,18 +670,31 @@
       const textView = document.getElementById('text-view');
       const activeVideoContainer = document.getElementById('active-video-container');
       const masterPlayer = document.getElementById('master-video-player');
+      const fileView = document.getElementById('file-view');
+      const filePlayer = document.getElementById('file-video-player');
       const title = document.getElementById('current-channel-title');
       const dot = document.getElementById('live-indicator');
 
       textView.style.display = 'none';
       activeVideoContainer.style.display = 'none';
+      fileView.style.display = 'none';
       masterPlayer.src = "";
+      filePlayer.pause();
+      filePlayer.src = "";
 
       if (mode === 'text') {
         if (title) title.innerText = "Latest Updates";
         if (dot) dot.style.display = "none";
         textView.style.display = 'block';
       } 
+      else if (mode === 'file') {
+        if (title) title.innerText = "Media Streaming";
+        if (dot) dot.style.display = "inline-block";
+        fileView.style.display = 'block';
+        filePlayer.src = "videos/sample-video.mp4"; // Update path to your GitHub repo video file
+        filePlayer.load();
+        filePlayer.play().catch(e => console.log("Autoplay restricted"));
+      }
       else {
         checkAndShowHeadphonesNotice();
         activeVideoContainer.style.display = 'block';
