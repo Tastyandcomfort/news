@@ -96,22 +96,22 @@
       box-shadow: 0 0 8px #10b981;
     }
 
-    /* Custom T&C Watermark Overlay on Video Players */
-    .tc-player-watermark {
+    /* Lightly Transparent T&C Watermark Overlay on Video Players */
+    .tc-subtle-watermark {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 14px;
+      right: 14px;
       z-index: 30;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 4px 10px;
+      background: rgba(11, 17, 32, 0.4);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
       border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -246,7 +246,7 @@
 
         </section>
 
-        <!-- TAB 2: LIVE TV & MEDIA PLAYER (With T&C Player Watermark + Extended 24/7 News Channels) -->
+        <!-- TAB 2: LIVE TV & MEDIA PLAYER (Single Active Player Frame + Subtle Watermark) -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg relative">
             
@@ -260,7 +260,7 @@
                   </div>
                 </div>
 
-                <!-- Extended Channel Buttons (Including India Today, NTV, V6, Sky News, CNN) -->
+                <!-- Extended Channel Buttons -->
                 <div class="view-selector">
                   <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>
                   <button id="btn-video" onclick="setMode('video', this)">TV9 News</button>
@@ -279,47 +279,19 @@
                   <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
                   <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
                   <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
-                  <button id="btn-file" onclick="setMode('file', this)">Media</button>    
                 </div>
               </div>
             </div>
 
-            <!-- View Containers with Permanent T&C Watermark Overlay -->
+            <!-- Single Active Player Display Container with Subtle Transparent Watermark -->
             <div id="text-view" class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center text-xs text-slate-400">
               Select any live news broadcast or media channel above to watch the continuous stream.
             </div>
 
-            <div id="video-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
-              <div class="tc-player-watermark"><span class="w-2 h-2 rounded-full bg-brand-red pulse-live"></span><span class="text-[10px] font-extrabold text-brand-blue tracking-wider">T&C NEWS</span></div>
-              <iframe id="news-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
+              <div class="tc-subtle-watermark">T&C News</div>
+              <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
-
-            <div id="live-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
-              <div class="tc-player-watermark"><span class="w-2 h-2 rounded-full bg-brand-red pulse-live"></span><span class="text-[10px] font-extrabold text-brand-blue tracking-wider">T&C NEWS</span></div>
-              <iframe id="tc-live-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div id="wildlife-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
-              <div class="tc-player-watermark"><span class="w-2 h-2 rounded-full bg-brand-red pulse-live"></span><span class="text-[10px] font-extrabold text-brand-blue tracking-wider">T&C NEWS</span></div>
-              <iframe id="wildlife-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div id="sports-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
-              <div class="tc-player-watermark"><span class="w-2 h-2 rounded-full bg-brand-red pulse-live"></span><span class="text-[10px] font-extrabold text-brand-blue tracking-wider">T&C NEWS</span></div>
-              <iframe id="sports-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div id="music-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
-              <div class="tc-player-watermark"><span class="w-2 h-2 rounded-full bg-brand-red pulse-live"></span><span class="text-[10px] font-extrabold text-brand-blue tracking-wider">T&C NEWS</span></div>
-              <iframe id="music-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <!-- Local Media File Upload Box -->
-            <div id="media-upload-box" class="hidden mt-4 p-4 bg-slate-950 border border-brand-border rounded-xl flex items-center justify-between gap-4">
-              <span class="text-xs text-slate-300">Upload or play your downloaded local video file:</span>
-              <input type="file" id="local-video-input" accept="video/*" class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-blue file:text-slate-950 hover:file:bg-sky-400 cursor-pointer" onchange="handleLocalVideoUpload(event)">
-            </div>
-            <video id="file-video-player" controls class="hidden w-full aspect-video rounded-xl bg-black mt-3">Your browser does not support HTML5 video.</video>
 
           </div>
         </section>
@@ -668,7 +640,7 @@
       }
     }
 
-    // T&C Exact setMode Channel Selector Logic (With India Today, NTV, V6, Sky News, CNN)
+    // Unified Single Player Mode Switcher (Zero Duplication Bug)
     function setMode(mode, element) {
       document.querySelectorAll('.view-selector button').forEach(btn => {
         btn.classList.remove('active-mode');
@@ -677,169 +649,99 @@
         element.classList.add('active-mode');
       }
 
-      const views = {
-        text: document.getElementById('text-view'),
-        video: document.getElementById('video-view'),
-        live: document.getElementById('live-view'),
-        wildlife: document.getElementById('wildlife-view'),
-        sports: document.getElementById('sports-view'),
-        music: document.getElementById('music-view')
-      };
-      
-      const players = {
-        news: document.getElementById('news-video-player'),
-        live: document.getElementById('tc-live-player'),
-        wildlife: document.getElementById('wildlife-player'),
-        sports: document.getElementById('sports-player'),
-        music: document.getElementById('music-player'),
-        indiatoday: document.getElementById('news-video-player'),
-        ntv: document.getElementById('news-video-player'),
-        v6: document.getElementById('news-video-player'),
-        skynews: document.getElementById('news-video-player'),
-        cnn: document.getElementById('news-video-player'),
-        nasa: document.getElementById('news-video-player'),
-        airport: document.getElementById('news-video-player'),
-        hindu: document.getElementById('news-video-player'),
-        muslim: document.getElementById('news-video-player'),
-        christian: document.getElementById('news-video-player'),
-        law: document.getElementById('news-video-player'),
-        file: document.getElementById('file-video-player')
-      };
-
+      const textView = document.getElementById('text-view');
+      const activeVideoContainer = document.getElementById('active-video-container');
+      const masterPlayer = document.getElementById('master-video-player');
       const title = document.getElementById('current-channel-title');
       const dot = document.getElementById('live-indicator');
-      const uploadBox = document.getElementById('media-upload-box');
 
-      Object.keys(views).forEach(key => {
-        if(views[key]) views[key].style.display = 'none';
-      });
-      Object.keys(players).forEach(key => {
-        if(players[key] && key !== 'file') players[key].src = "";
-      });
-      if(uploadBox) uploadBox.classList.add('hidden');
-      if(views.video) views.video.style.display = 'none';
+      // Clear state
+      textView.style.display = 'none';
+      activeVideoContainer.style.display = 'none';
+      masterPlayer.src = "";
 
       if (mode === 'text') {
         if (title) title.innerText = "Latest Updates";
         if (dot) dot.style.display = "none";
-        if (views.text) views.text.style.display = 'block';
+        textView.style.display = 'block';
       } 
       else {
         checkAndShowHeadphonesNotice();
+        activeVideoContainer.style.display = 'block';
+        if (dot) dot.style.display = "inline-block";
 
-        if (mode === 'video') {
-          if (title) title.innerText = "TV9 Live News";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.news) players.news.src = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1";
-        } 
-        else if (mode === 'live') {
-          if (title) title.innerText = "T&C Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.live) views.live.style.display = 'block';
-          if (players.live) players.live.src = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
-        }
-        else if (mode === 'indiatoday') {
-          if (title) title.innerText = "India Today Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.indiatoday) players.indiatoday.src = "https://www.youtube.com/embed/g0gXzt8JqYA?autoplay=1&mute=1";
-        }
-        else if (mode === 'ntv') {
-          if (title) title.innerText = "NTV Telugu Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.ntv) players.ntv.src = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
-        }
-        else if (mode === 'v6') {
-          if (title) title.innerText = "V6 News Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.v6) players.v6.src = "https://www.youtube.com/embed/_jnDy56dehA?autoplay=1&mute=1";
-        }
-        else if (mode === 'skynews') {
-          if (title) title.innerText = "Sky News Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.skynews) players.skynews.src = "https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1";
-        }
-        else if (mode === 'cnn') {
-          if (title) title.innerText = "CNN International Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.cnn) players.cnn.src = "https://www.youtube.com/embed/hDKg1kI2U_Y?autoplay=1&mute=1";
-        }
-        else if (mode === 'wildlife') {
-          if (title) title.innerText = "Wild Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.wildlife) views.wildlife.style.display = 'block';
-          if (players.wildlife) players.wildlife.src = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1";
-        }
-        else if (mode === 'sports') {
-          if (title) title.innerText = "Sports Live";
-          if (dot) dot.style.display = "inline-block";
-          if (views.sports) views.sports.style.display = 'block';
-          if (players.sports) players.sports.src = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1";
-        }
-        else if (mode === 'music') {
-          if (title) title.innerText = "Music";
-          if (dot) dot.style.display = "inline-block"; 
-          if (views.music) views.music.style.display = 'block';
-          if (players.music) players.music.src = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1";
-        }
-        else if (mode === 'nasa') {
-          if (title) title.innerText = "NASA";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.nasa) players.nasa.src = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1";
-        } 
-        else if (mode === 'airport') {
-          if (title) title.innerText = "Airside";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.airport) players.airport.src = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1";
-        } 
-        else if (mode === 'hindu') {
-          if (title) title.innerText = "Bhagavat Geetha";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.hindu) players.hindu.src = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1";
-        } 
-        else if (mode === 'muslim') {
-          if (title) title.innerText = "Khuran";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.muslim) players.muslim.src = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
-        } 
-        else if (mode === 'christian') {
-          if (title) title.innerText = "Bibul";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.christian) players.christian.src = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
-        } 
-        else if (mode === 'law') {
-          if (title) title.innerText = "Constitution";
-          if (dot) dot.style.display = "inline-block";
-          if (views.video) views.video.style.display = 'block';
-          if (players.law) players.law.src = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
-        } 
-        else if (mode === 'file') {
-          if (title) title.innerText = "Media Upload & Player";
-          if (dot) dot.style.display = "inline-block";
-          if(uploadBox) uploadBox.classList.remove('hidden');
-          const fileVid = document.getElementById('file-video-player');
-          if(fileVid) fileVid.style.display = 'block';
-        }
-      }
-    }
+        let streamUrl = "";
+        let channelName = "Live Stream";
 
-    function handleLocalVideoUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const fileVid = document.getElementById('file-video-player');
-      if (fileVid) {
-        fileVid.src = URL.createObjectURL(file);
-        fileVid.play();
+        switch(mode) {
+          case 'video':
+            streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1";
+            channelName = "TV9 Live News";
+            break;
+          case 'live':
+            streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
+            channelName = "T&C Live";
+            break;
+          case 'indiatoday':
+            streamUrl = "https://www.youtube.com/embed/g0gXzt8JqYA?autoplay=1&mute=1";
+            channelName = "India Today Live";
+            break;
+          case 'ntv':
+            streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
+            channelName = "NTV Telugu Live";
+            break;
+          case 'v6':
+            streamUrl = "https://www.youtube.com/embed/_jnDy56dehA?autoplay=1&mute=1";
+            channelName = "V6 News Live";
+            break;
+          case 'skynews':
+            streamUrl = "https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1";
+            channelName = "Sky News Live";
+            break;
+          case 'cnn':
+            streamUrl = "https://www.youtube.com/embed/hDKg1kI2U_Y?autoplay=1&mute=1";
+            channelName = "CNN International Live";
+            break;
+          case 'wildlife':
+            streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1";
+            channelName = "Wild Live";
+            break;
+          case 'sports':
+            streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1";
+            channelName = "Sports Live";
+            break;
+          case 'music':
+            streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1";
+            channelName = "Music";
+            break;
+          case 'nasa':
+            streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1";
+            channelName = "NASA";
+            break;
+          case 'airport':
+            streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1";
+            channelName = "Airside";
+            break;
+          case 'hindu':
+            streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1";
+            channelName = "Bhagavat Geetha";
+            break;
+          case 'muslim':
+            streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
+            channelName = "Khuran";
+            break;
+          case 'christian':
+            streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
+            channelName = "Bibul";
+            break;
+          case 'law':
+            streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
+            channelName = "Constitution";
+            break;
+        }
+
+        if (title) title.innerText = channelName;
+        masterPlayer.src = streamUrl;
       }
     }
 
