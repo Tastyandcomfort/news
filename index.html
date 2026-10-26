@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>T&C Live News & Global Media Portal</title>
+  <title>T&C News Hub</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,23 +35,58 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #0b1120;
-      color: #f8fafc;
-    }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-    
-    .glass-header {
-      background: rgba(11, 17, 32, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Upgraded Gold Pulse Light matching T&C Theme */
+    /* Apple Style Light Theme Variables */
+    :root {
+      --bg-main: #f5f5f7;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-sub: #e5e5ea;
+      --text-main: #1d1d1f;
+      --text-sub: #86868b;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --header-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Apple Style Dark Theme Variables */
+    .dark {
+      --bg-main: #000000;
+      --bg-card: rgba(28, 28, 30, 0.75);
+      --bg-sub: #1c1c1e;
+      --text-main: #f5f5f7;
+      --text-sub: #86868b;
+      --border-color: rgba(255, 255, 255, 0.15);
+      --header-bg: rgba(0, 0, 0, 0.8);
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .apple-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+    }
+
+    .apple-header {
+      background-color: var(--header-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+    
     .pulse-gold {
       box-shadow: 0 0 10px #fbbf24;
       animation: pulseGold 1.6s infinite;
@@ -62,7 +97,6 @@
       100% { opacity: 0.4; }
     }
 
-    /* T&C Channel Selector Styles */
     .view-selector {
       display: flex;
       gap: 6px;
@@ -70,9 +104,9 @@
       padding-bottom: 4px;
     }
     .view-selector button {
-      background: #0f172a;
-      color: #94a3b8;
-      border: 1px solid #334155;
+      background: var(--bg-sub);
+      color: var(--text-sub);
+      border: 1px solid var(--border-color);
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 0.75rem;
@@ -82,33 +116,33 @@
       transition: all 0.2s;
     }
     .view-selector button.active-mode {
-      background: #38bdf8;
-      color: #0f172a;
-      font-weight: 800;
-      border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+      background: #0071e3;
+      color: #ffffff;
+      font-weight: 700;
+      border-color: #0071e3;
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
     }
+
     .live-dot {
       width: 8px;
       height: 8px;
-      background-color: #10b981;
+      background-color: #34c759;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 8px #10b981;
+      box-shadow: 0 0 8px #34c759;
     }
 
-    /* Lightly Transparent T&C Watermark Overlay on Video Players */
     .tc-subtle-watermark {
       position: absolute;
       top: 14px;
       right: 14px;
       z-index: 30;
-      background: rgba(11, 17, 32, 0.4);
+      background: rgba(0, 0, 0, 0.4);
       backdrop-filter: blur(4px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 3px 8px;
       border-radius: 6px;
-      color: rgba(255, 255, 255, 0.65);
+      color: rgba(255, 255, 255, 0.75);
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.5px;
@@ -118,148 +152,150 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased">
 
-  <!-- TOP HEADER -->
-  <header class="glass-header sticky top-0 z-50 border-b border-brand-border px-4 py-3">
+  <!-- TOP APPLE HEADER -->
+  <header class="apple-header sticky top-0 z-50 px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
-      <!-- Brand Logo with Gold Pulse Light -->
+      <!-- Brand Logo -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
         <div class="w-3 h-3 rounded-full bg-amber-400 pulse-gold"></div>
-        <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-brand-blue flex items-center gap-2">
-          <span class="bg-sky-500/10 border border-sky-500/30 px-2.5 py-1 rounded-lg text-brand-blue shadow-inner">T&C</span>
-          <span class="text-white text-sm md:text-base font-medium border-l border-brand-border pl-2">LIVE NEWS & MEDIA PORTAL</span>
+        <h1 class="text-lg md:text-xl font-semibold tracking-tight flex items-center gap-2">
+          <span class="bg-blue-500/10 border border-blue-500/30 px-2.5 py-1 rounded-lg text-blue-500 shadow-inner">T&C</span>
+          <span class="text-sm md:text-base font-medium border-l border-[var(--border-color)] pl-2" style="color: var(--text-sub);">LIVE NEWS & MEDIA</span>
         </h1>
       </div>
 
-      <!-- Mode Switcher Tabs -->
-      <nav class="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-brand-border">
-        <button id="tab-btn-news" onclick="switchMainTab('news')" 
-          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md">
-          <i class="fa-solid fa-newspaper mr-1.5"></i>News Feeds
+      <!-- Mode Switcher & Apple Theme Toggle -->
+      <div class="flex items-center gap-3">
+        <nav class="flex items-center gap-1.5 p-1 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <button id="tab-btn-news" onclick="switchMainTab('news')" 
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-blue-600 text-white shadow-sm">
+            <i class="fa-solid fa-newspaper mr-1"></i>News
+          </button>
+          <button id="tab-btn-video" onclick="switchMainTab('video')" 
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
+            <i class="fa-solid fa-tv mr-1"></i>TV & Media
+          </button>
+          <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
+            <i class="fa-solid fa-wind mr-1"></i>Radar
+          </button>
+        </nav>
+
+        <!-- Apple Style Theme Toggle Button -->
+        <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);" title="Toggle Light/Dark Mode">
+          <i id="theme-icon" class="fa-solid fa-moon text-sm text-blue-400"></i>
         </button>
-        <button id="tab-btn-video" onclick="switchMainTab('video')" 
-          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-tv mr-1.5"></i>Live TV & Media
-        </button>
-        <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
-          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-wind mr-1.5"></i>Windy Radar & OSINT
-        </button>
-      </nav>
+      </div>
 
     </div>
   </header>
 
   <!-- LIVE REAL-TIME TELEMETRY TICKER -->
-  <div class="bg-slate-950 border-b border-brand-border py-2 px-4 text-xs text-slate-300 overflow-x-auto whitespace-nowrap shadow-inner">
+  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-brand-amber"></i> USD/INR (Live): <b class="text-white" id="ticker-usdinr">Loading...</b></span>
-        <span class="flex items-center gap-1.5 text-brand-red"><i class="fa-solid fa-volcano"></i> USGS Quakes (24h): <b class="text-slate-200" id="ticker-quake-count">Fetching...</b></span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
+        <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> USGS Quakes (24h): <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
       </div>
-      <div class="flex items-center gap-4 text-slate-400">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-satellite text-brand-blue"></i> ISS Pos: <b class="text-brand-blue" id="ticker-iss-pos">Syncing...</b></span>
-        <span class="hidden md:inline text-brand-green flex items-center gap-1"><i class="fa-solid fa-signal"></i> Real-Time Stream Online</span>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Pos: <b id="ticker-iss-pos">Syncing...</b></span>
       </div>
     </div>
   </div>
 
   <!-- AUDIO NOTICE TOAST -->
-  <div id="audio-notice-toast" class="hidden fixed top-20 right-4 z-50 bg-slate-900 border border-brand-amber text-brand-amber text-xs p-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300">
-    <i class="fa-solid fa-headphones text-lg"></i>
+  <div id="audio-notice-toast" class="hidden fixed top-20 right-4 z-50 apple-card p-3 shadow-2xl flex items-center gap-3 transition-all duration-300 border-amber-500/50">
+    <i class="fa-solid fa-headphones text-lg text-amber-500"></i>
     <div>
-      <p class="font-bold">Headphone Audio Notice</p>
-      <p class="text-slate-400 text-[11px]">Stream audio muted on switch. Unmute directly on the video player controls.</p>
+      <p class="font-bold text-xs" style="color: var(--text-main);">Headphone Audio Notice</p>
+      <p class="text-[11px]" style="color: var(--text-sub);">Stream audio muted on switch. Unmute directly on player controls.</p>
     </div>
-    <button onclick="dismissAudioToast()" class="ml-2 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <button onclick="dismissAudioToast()" class="ml-2" style="color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
   <!-- MAIN BODY CONTENT AREA -->
   <div class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- LEFT PRIMARY CONTENT COLUMN -->
+      <!-- LEFT PRIMARY COLUMN -->
       <div class="lg:col-span-8 flex flex-col gap-6">
 
-        <!-- TAB 1: NEWS FEEDS VIEW -->
+        <!-- TAB 1: NEWS FEEDS -->
         <section id="view-news" class="flex flex-col gap-6">
           
-          <!-- Pinned Top World Headlines Card -->
-          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3 mb-3">
-              <h2 class="text-xs font-bold uppercase tracking-wider text-brand-amber flex items-center gap-2">
-                <i class="fa-solid fa-earth-americas"></i> Pinned Real-Time World Highlights
+          <!-- Pinned World News -->
+          <div class="apple-card p-4 shadow-sm">
+            <div class="flex items-center justify-between border-b pb-3 mb-3" style="border-color: var(--border-color);">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2">
+                <i class="fa-solid fa-earth-americas"></i> Pinned World Highlights
               </h2>
-              <span class="text-[10px] bg-brand-amber/10 text-brand-amber border border-brand-amber/30 px-2 py-0.5 rounded-full font-semibold">Live RSS</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Live RSS</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="text-xs text-slate-400 italic">Connecting to live world RSS feed...</div>
+              <div class="text-xs italic" style="color: var(--text-sub);">Connecting to live RSS feed...</div>
             </div>
           </div>
 
-          <!-- Scope & Date Control Panel -->
-          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <!-- Scope & Date Panel -->
+          <div class="apple-card p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             
-            <!-- Category Scope Switchers -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
               <button id="scope-btn-local" onclick="setNewsScope('local')" 
-                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-slate-950 shadow-md">
-                <i class="fa-solid fa-location-dot mr-1.5"></i>Telangana (State)
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm">
+                <i class="fa-solid fa-location-dot mr-1.5"></i>Telangana
               </button>
               <button id="scope-btn-national" onclick="setNewsScope('national')" 
-                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
                 <i class="fa-solid fa-flag mr-1.5"></i>India
               </button>
               <button id="scope-btn-world" onclick="setNewsScope('world')" 
-                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
                 <i class="fa-solid fa-globe mr-1.5"></i>World
               </button>
             </div>
 
-            <!-- Strict Date Selector & Refresh -->
             <div class="flex items-center gap-2">
-              <div class="flex items-center gap-2 bg-slate-950 border border-brand-border px-3 py-1.5 rounded-xl">
-                <i class="fa-regular fa-calendar text-brand-blue text-xs"></i>
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+                <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
                 <input type="date" id="news-date-picker" onchange="onDateFilterChange()" 
-                  class="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+                  class="bg-transparent text-xs focus:outline-none cursor-pointer" style="color: var(--text-main);">
               </div>
-              <button onclick="fetchPortalNews()" class="p-2 bg-slate-800 hover:bg-slate-700 text-brand-blue border border-brand-border rounded-xl transition-all" title="Refresh Live Data">
+              <button onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
 
           </div>
 
-          <!-- Dynamic News Cards Feed Container -->
-          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
-            <div class="flex items-center justify-between mb-4 pb-2 border-b border-brand-border">
-              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <!-- News Feed Container -->
+          <div class="apple-card p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b" style="border-color: var(--border-color);">
+              <h3 class="text-sm font-bold" style="color: var(--text-main);">
                 <span id="active-scope-title">Telangana (State) Live Headlines</span>
               </h3>
-              <span id="news-status-badge" class="text-[11px] text-slate-400">Syncing...</span>
+              <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);">Syncing...</span>
             </div>
 
-            <!-- Feed List Container -->
             <div id="news-feed-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              <div class="text-center py-10 text-slate-400 text-sm">Querying real-time RSS API...</div>
+              <div class="text-center py-10 text-xs" style="color: var(--text-sub);">Querying real-time RSS API...</div>
             </div>
           </div>
 
         </section>
 
-        <!-- TAB 2: LIVE TV & MEDIA PLAYER (T&C setMode Architecture) -->
+        <!-- TAB 2: TV & MEDIA PLAYER -->
         <section id="view-video" class="hidden flex-col gap-6">
-          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg relative">
+          <div class="apple-card p-5 shadow-sm relative">
             
-            <!-- T&C Channel Selector Header -->
             <div class="news-main-container mb-4">
               <div class="title-left flex flex-col gap-3">
                 <div class="flex items-center gap-2">
                   <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                  <h3 id="current-channel-title" class="text-base font-bold text-brand-blue">Headlines</h3>
+                  <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Headlines</h3>
                 </div>
 
-                <!-- Channel Buttons -->
+                <!-- Channels Bar -->
                 <div class="view-selector">
                   <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>
                   <button id="btn-video" onclick="setMode('video', this)">News</button>
@@ -283,18 +319,18 @@
               </div>
             </div>
 
-            <!-- View Containers -->
-            <div id="text-view" class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center text-xs text-slate-400">
+            <!-- Display Views -->
+            <div id="text-view" class="p-6 rounded-xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
               Select any live broadcast or media channel above to watch the continuous stream.
             </div>
 
-            <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
+            <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&C News</div>
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
-            <!-- Repository Media Stream Container -->
-            <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl" style="display:none;">
+            <!-- Repository Media Streamer -->
+            <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&C News</div>
               <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls>
                 Your browser does not support video playback.
@@ -304,19 +340,18 @@
           </div>
         </section>
 
-        <!-- TAB 3: WINDY REAL-TIME WEATHER RADAR & SEISMIC OSINT DESK -->
+        <!-- TAB 3: RADAR & OSINT -->
         <section id="view-osint" class="hidden flex-col gap-6">
-          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
+          <div class="apple-card p-5 shadow-sm">
             
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
+              <h2 class="text-base font-bold text-blue-500 flex items-center gap-2">
                 <i class="fa-solid fa-wind"></i> Real-Time Live Windy Weather & Radar Map
               </h2>
-              <span class="text-xs bg-brand-green/10 text-brand-green border border-brand-green/30 px-2.5 py-1 rounded-full font-bold">100% Watermark Free</span>
+              <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">Trusted by T&C</span>
             </div>
 
-            <!-- Embedded Windy Live Satellite & Radar Map -->
-            <div class="w-full h-[420px] rounded-xl overflow-hidden border border-brand-border shadow-inner mb-4">
+            <div class="w-full h-[420px] rounded-xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color);">
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -326,31 +361,29 @@
               </iframe>
             </div>
 
-            <!-- USGS Live Seismic Radar -->
             <div class="mb-4">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-brand-red mb-2 flex items-center gap-2">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
                 <i class="fa-solid fa-volcano"></i> Real-Time USGS Earthquakes Map (24h Live Stream)
               </h3>
-              <div id="osint-map" class="h-64 rounded-xl border border-brand-border overflow-hidden"></div>
+              <div id="osint-map" class="h-64 rounded-xl overflow-hidden" style="border: 1px solid var(--border-color);"></div>
             </div>
 
-            <!-- Real-Time Stats Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-950 p-4 rounded-xl border border-brand-border">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">ISS Altitude</p>
-                <p class="text-sm font-extrabold text-brand-blue" id="osint-iss-alt">Fetching...</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Altitude</p>
+                <p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">ISS Velocity</p>
-                <p class="text-sm font-extrabold text-brand-green" id="osint-iss-spd">Fetching...</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Velocity</p>
+                <p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">Space Crew Active</p>
-                <p class="text-sm font-extrabold text-brand-amber" id="osint-iss-crew">Fetching...</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">Space Crew Active</p>
+                <p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">USGS M4.5+ Quakes</p>
-                <p class="text-sm font-extrabold text-brand-red" id="osint-quake-count">Fetching...</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">USGS M4.5+ Quakes</p>
+                <p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p>
               </div>
             </div>
 
@@ -359,52 +392,52 @@
 
       </div>
 
-      <!-- RIGHT SIDEBAR COLUMN -->
+      <!-- RIGHT SIDEBAR -->
       <div class="lg:col-span-4 flex flex-col gap-6">
         
-        <!-- Real-Time Market Radar -->
-        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-line"></i> Live Exchange Rates & Forex API
+        <!-- Forex Markets -->
+        <div class="apple-card p-4 shadow-sm">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line"></i> Live Exchange Rates & Forex
           </h3>
           <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
-              <span class="font-bold text-white">USD / INR Real-Time</span>
-              <span class="text-brand-amber font-extrabold" id="side-usdinr">Syncing...</span>
+            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <span class="font-bold" style="color: var(--text-main);">USD / INR Real-Time</span>
+              <span class="text-amber-500 font-extrabold" id="side-usdinr">Syncing...</span>
             </div>
-            <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
-              <span class="font-bold text-white">EUR / INR Real-Time</span>
-              <span class="text-brand-green font-extrabold" id="side-eurinr">Syncing...</span>
+            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <span class="font-bold" style="color: var(--text-main);">EUR / INR Real-Time</span>
+              <span class="text-green-500 font-extrabold" id="side-eurinr">Syncing...</span>
             </div>
           </div>
         </div>
 
-        <!-- Fact Check Links Card -->
-        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
+        <!-- Fact Check Links -->
+        <div class="apple-card p-4 shadow-sm">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
             <i class="fa-solid fa-shield-halved"></i> Fact-Check & Verification
           </h3>
           <div class="flex flex-col gap-2 text-xs">
             <a href="https://factly.in" target="_blank" rel="noopener" 
-              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
+              class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <span>Factly India Portal</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
             <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" 
-              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
+              class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <span>USGS Earthquakes Direct</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
           </div>
         </div>
 
-        <!-- Real-Time Space Station Astronaut Manifest -->
-        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-amber mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-user-astronaut"></i> Real-Time Space Crew Manifest (ISS)
+        <!-- ISS Crew Manifest -->
+        <div class="apple-card p-4 shadow-sm">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-user-astronaut"></i> Space Crew Manifest (ISS)
           </h3>
-          <div id="iss-crew-list" class="space-y-1.5 text-xs text-slate-300 max-h-48 overflow-y-auto">
-            <div class="text-slate-500 italic">Querying live space manifest...</div>
+          <div id="iss-crew-list" class="space-y-1.5 text-xs max-h-48 overflow-y-auto" style="color: var(--text-sub);">
+            <div class="italic">Querying live space manifest...</div>
           </div>
         </div>
 
@@ -413,51 +446,15 @@
     </div>
   </div>
 
-  <!-- FLOATING AI NEWS ASSISTANT -->
-  <div class="fixed bottom-6 right-6 z-50">
-    <button onclick="toggleAIChatModal()" 
-      class="w-12 h-12 md:w-14 md:h-14 bg-brand-blue text-slate-950 rounded-full shadow-2xl flex items-center justify-center text-xl hover:scale-105 transition-all">
-      <i class="fa-solid fa-robot"></i>
-    </button>
-
-    <div id="ai-chat-modal" class="hidden absolute bottom-16 right-0 w-80 md:w-96 bg-slate-900 border border-brand-border rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
-      <div class="bg-slate-950 px-4 py-3 border-b border-brand-border flex items-center justify-between">
-        <div class="flex items-center gap-2 text-xs font-bold text-brand-blue">
-          <i class="fa-solid fa-brain"></i> T&C AI News Assistant
-        </div>
-        <button onclick="toggleAIChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
-      <div class="p-2 bg-slate-950/50 border-b border-brand-border flex items-center gap-1.5 overflow-x-auto text-[10px]">
-        <button onclick="sendQuickPrompt('Top Headlines Today')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Top Headlines Today</button>
-        <button onclick="sendQuickPrompt('Telangana News')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Telangana News</button>
-      </div>
-
-      <div id="ai-chat-body" class="p-4 h-64 overflow-y-auto space-y-3 text-xs">
-        <div class="bg-slate-800/80 p-3 rounded-xl border border-brand-border text-slate-200">
-          Hello! Ask me about current live headlines, weather radar, or space telemetry.
-        </div>
-      </div>
-
-      <div class="p-2 bg-slate-950 border-t border-brand-border flex items-center gap-2">
-        <input type="text" id="ai-chat-input" placeholder="Type query..." onkeypress="if(event.key==='Enter') sendAIMessage()"
-          class="flex-grow bg-slate-900 border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
-        <button onclick="sendAIMessage()" class="px-3 py-1.5 bg-brand-blue text-slate-950 font-bold rounded-xl text-xs hover:bg-sky-300">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- FOOTER -->
-  <footer class="bg-slate-950 border-t border-brand-border mt-12 py-8 px-4 text-xs text-slate-400">
+  <footer class="py-8 px-4 text-xs shadow-inner mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-[11px]">
-      <div><b>Tasty & Comfort (T&C) Live Media Hub</b> • 100% Real-Time API Data</div>
-      <div>© 2026 T&C Media Portal. All rights reserved.</div>
+      <div><b>Tasty & Comfort (T&C) News Hub</b>•</div>
+      <div>© 2026 T&C News Hub.</div>
     </div>
   </footer>
 
-  <!-- LEAFLET & PORTAL ENGINE JS -->
+  <!-- SCRIPT ENGINE -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     let currentScope = 'local';
@@ -480,6 +477,20 @@
       initISSManifest();
     });
 
+    // Apple Theme Toggle Engine
+    function toggleAppleTheme() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
+      } else {
+        htmlEl.classList.add('dark');
+        themeIcon.className = "fa-solid fa-moon text-sm text-blue-400";
+      }
+    }
+
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-video').classList.add('hidden');
@@ -490,18 +501,20 @@
       const btnOsint = document.getElementById('tab-btn-osint');
 
       [btnNews, btnVideo, btnOsint].forEach(b => {
-        b.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800";
+        b.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all";
+        b.style.color = "var(--text-sub)";
+        b.style.backgroundColor = "transparent";
       });
 
       if (tab === 'news') {
         document.getElementById('view-news').classList.remove('hidden');
-        btnNews.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+        btnNews.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-blue-600 text-white shadow-sm";
       } else if (tab === 'video') {
         document.getElementById('view-video').classList.remove('hidden');
-        btnVideo.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+        btnVideo.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-blue-600 text-white shadow-sm";
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
-        btnOsint.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+        btnOsint.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-blue-600 text-white shadow-sm";
         if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 200);
       }
     }
@@ -509,11 +522,17 @@
     function setNewsScope(scope) {
       currentScope = scope;
       document.querySelectorAll('.scope-btn').forEach(btn => {
-        btn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border";
+        btn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all";
+        btn.style.backgroundColor = "var(--bg-sub)";
+        btn.style.color = "var(--text-sub)";
+        btn.style.border = "1px solid var(--border-color)";
       });
 
       const activeBtn = document.getElementById(`scope-btn-${scope}`);
-      if (activeBtn) activeBtn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-slate-950 shadow-md";
+      if (activeBtn) {
+        activeBtn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm";
+        activeBtn.style.border = "none";
+      }
 
       const titleMap = {
         'local': 'Telangana (State) Live Headlines',
@@ -533,14 +552,13 @@
       fetchPortalNews();
     }
 
-    // STRICT DATE FILTERING WITH SOURCE ARCHIVE LINK FALLBACK
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
       const selectedDateStr = document.getElementById('news-date-picker').value;
 
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying live news proxy...</div>';
+      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying live news proxy...</div>';
 
       try {
         const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
@@ -562,14 +580,14 @@
           const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
 
           feedContainer.innerHTML = `
-            <div class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center flex flex-col items-center gap-3">
-              <i class="fa-solid fa-calendar-xmark text-2xl text-brand-amber"></i>
+            <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
               <div>
-                <h4 class="text-xs font-bold text-white">No Live RSS Items Published on ${selectedDateStr}</h4>
-                <p class="text-[11px] text-slate-400 mt-1">Live cache rolled over for this date. Access the direct source archive below:</p>
+                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Live RSS Items Published on ${selectedDateStr}</h4>
+                <p class="text-[11px] mt-1" style="color: var(--text-sub);">Live cache rolled over for this date. Access direct archive below:</p>
               </div>
               <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
-                class="px-4 py-2 bg-brand-blue text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-sky-300 transition-all flex items-center gap-1.5">
+                class="px-4 py-2 bg-blue-600 text-white text-xs font-extrabold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Source Archive (${selectedDateStr})
               </a>
             </div>
@@ -585,25 +603,23 @@
           const pubDate = item.querySelector("pubDate")?.textContent || "";
           const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
 
-          let sourceName = "T&C Verified News";
+          let sourceName = "Trusted by T&C";
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
           else if (link.includes("ntv")) sourceName = "NTV News";
           else if (link.includes("hindu")) sourceName = "The Hindu";
-          else if (link.includes("ndtv")) sourceName = "NDTV";
-          else if (link.includes("bbc")) sourceName = "BBC News";
 
           html += `
-            <div class="p-3.5 bg-slate-950/70 hover:bg-slate-800/80 border border-brand-border rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
-                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold text-white hover:text-brand-blue transition-colors line-clamp-2">
+                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold hover:text-blue-400 transition-colors line-clamp-2" style="color: var(--text-main);">
                   ${title}
                 </a>
-                <div class="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
-                  <span class="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
+                <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
+                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
                   <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted} (${selectedDateStr})</span>
                 </div>
               </div>
-              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-sky-500/10 border border-sky-500/30 text-brand-blue hover:bg-brand-blue hover:text-slate-950 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
                 <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
               </a>
             </div>
@@ -613,7 +629,7 @@
         feedContainer.innerHTML = html;
         badge.textContent = `Live (${filteredItems.length} Stories)`;
       } catch (err) {
-        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-brand-red font-semibold">Live news feed currently unreachable.</div>`;
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Live news feed currently unreachable.</div>`;
         badge.textContent = "Error";
       }
     }
@@ -631,14 +647,14 @@
           const title = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           html += `
-            <a href="${link}" target="_blank" rel="noopener" class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-xs text-slate-200 hover:text-brand-blue transition-all line-clamp-2">
+            <a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">
               • ${title}
             </a>
           `;
         });
         container.innerHTML = html;
       } catch (e) {
-        container.innerHTML = '<div class="text-xs text-slate-500">World highlights loading...</div>';
+        container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">World highlights loading...</div>';
       }
     }
 
@@ -658,7 +674,7 @@
       }
     }
 
-    // T&C setMode Architecture supporting GitHub Repository Media Streaming & Live Channels
+    // Unified Single Player Mode Switcher
     function setMode(mode, element) {
       document.querySelectorAll('.view-selector button').forEach(btn => {
         btn.classList.remove('active-mode');
@@ -691,7 +707,7 @@
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
-        filePlayer.src = "videos/sample-video.mp4"; // Update path to your GitHub repo video file
+        filePlayer.src = "videos/sample-video.mp4"; // GitHub repository video path
         filePlayer.load();
         filePlayer.play().catch(e => console.log("Autoplay restricted"));
       }
@@ -855,47 +871,12 @@
 
         let html = '';
         issPeople.forEach(person => {
-          html += `<div class="p-1.5 bg-slate-950 rounded border border-brand-border/50">• ${person.name}</div>`;
+          html += `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${person.name}</div>`;
         });
-        container.innerHTML = html || '<div class="text-slate-500">No active manifest data.</div>';
+        container.innerHTML = html || '<div class="italic">No active manifest data.</div>';
       } catch(e) {
-        container.innerHTML = '<div class="text-slate-500 text-[11px]">Real-time manifest stream offline</div>';
+        container.innerHTML = '<div class="italic text-[11px]">Manifest stream offline</div>';
       }
-    }
-
-    function toggleAIChatModal() {
-      const modal = document.getElementById('ai-chat-modal');
-      modal.classList.toggle('hidden');
-    }
-
-    function sendQuickPrompt(promptText) {
-      document.getElementById('ai-chat-input').value = promptText;
-      sendAIMessage();
-    }
-
-    function sendAIMessage() {
-      const input = document.getElementById('ai-chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const chatBody = document.getElementById('ai-chat-body');
-      
-      chatBody.innerHTML += `
-        <div class="bg-brand-blue/20 text-brand-blue p-2.5 rounded-xl border border-brand-blue/30 self-end ml-6">
-          ${text}
-        </div>
-      `;
-      input.value = '';
-
-      setTimeout(() => {
-        let aiReply = "Connected to live API streams. You can filter real-time news by scope or publish date above!";
-        chatBody.innerHTML += `
-          <div class="bg-slate-800 p-2.5 rounded-xl border border-brand-border text-slate-200 mr-6">
-            ${aiReply}
-          </div>
-        `;
-        chatBody.scrollTop = chatBody.scrollHeight;
-      }, 500);
     }
   </script>
 </body>
