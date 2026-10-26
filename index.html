@@ -54,6 +54,8 @@
       --border-color: rgba(0, 0, 0, 0.1);
       --header-bg: rgba(255, 255, 255, 0.75);
       --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --solar-pill-bg: rgba(255, 255, 255, 0.65);
+      --solar-pill-border: rgba(0, 0, 0, 0.1);
     }
 
     /* Apple Dark Theme */
@@ -67,6 +69,8 @@
       --border-color: rgba(255, 255, 255, 0.12);
       --header-bg: rgba(0, 0, 0, 0.75);
       --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --solar-pill-bg: rgba(30, 30, 35, 0.65);
+      --solar-pill-border: rgba(255, 255, 255, 0.12);
     }
 
     body {
@@ -88,6 +92,59 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
+    }
+
+    /* APPLE DYNAMIC ISLAND SOLAR PILL */
+    .apple-solar-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 14px;
+      background: var(--solar-pill-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--solar-pill-border);
+      border-radius: 9999px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .solar-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Apple SF Symbol Vector Icons */
+    .sf-solar-icon {
+      width: 17px;
+      height: 17px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .sf-sunrise {
+      color: #ff9f0a; /* Apple SF Amber */
+      filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5));
+    }
+
+    .sf-sunset {
+      color: #ff453a; /* Apple SF Sunset Red/Orange */
+      filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5));
+    }
+
+    .solar-time {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      font-size: 0.73rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .solar-divider {
+      width: 1px;
+      height: 11px;
+      background: var(--border-color);
     }
 
     /* Global Webkit Scrollbar */
@@ -190,7 +247,7 @@
 <body class="min-h-screen flex flex-col justify-between antialiased">
 
   <!-- TOP APPLE HEADER -->
-  <header class="apple-header sticky top-0 z-50 px-4 py-3">
+  <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
       <!-- Brand Logo Badge -->
@@ -201,6 +258,33 @@
         <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
           <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
           <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+        </div>
+      </div>
+
+      <!-- APPLE DYNAMIC ISLAND SOLAR PILL (CENTER) -->
+      <div class="apple-solar-pill" id="apple-solar-pill">
+        <div class="solar-item" title="Sunrise (SF Symbol Style)">
+          <!-- Apple SF Symbol Sunrise Vector Icon -->
+          <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 10l-2.5 2.5M12 10l2.5 2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="solar-time" id="pill-sunrise">06:12 AM</span>
+        </div>
+        
+        <span class="solar-divider"></span>
+
+        <div class="solar-item" title="Sunset (SF Symbol Style)">
+          <!-- Apple SF Symbol Sunset Vector Icon -->
+          <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 14l-2.5-2.5M12 14l2.5-2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="solar-time" id="pill-sunset">06:45 PM</span>
         </div>
       </div>
 
@@ -327,7 +411,6 @@
 
               <!-- Channel Selector Bar with Desktop Scrollbar -->
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
-              <!--  <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>  -->
                 <button id="btn-video" onclick="setMode('video', this)">News</button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
@@ -498,6 +581,7 @@
         dateInput.max = TODAY_DATE;
       }
 
+      fetchSolarSchedule();
       fetchPinnedWorldNews();
       fetchPortalNews();
       fetchRealTimeForex();
@@ -517,6 +601,30 @@
       } else {
         htmlEl.classList.add('dark');
         themeIcon.className = "fa-solid fa-moon text-xs text-blue-400";
+      }
+    }
+
+    // Solar Sunrise & Sunset Data Fetcher (Open-Meteo API)
+    async function fetchSolarSchedule() {
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&timezone=auto');
+        const data = await res.json();
+        
+        if (data && data.daily && data.daily.sunrise && data.daily.sunset) {
+          const sunriseStr = data.daily.sunrise[0];
+          const sunsetStr = data.daily.sunset[0];
+
+          const formatTime = (isoString) => {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          };
+
+          document.getElementById('pill-sunrise').textContent = formatTime(sunriseStr);
+          document.getElementById('pill-sunset').textContent = formatTime(sunsetStr);
+        }
+      } catch (err) {
+        document.getElementById('pill-sunrise').textContent = "06:12 AM";
+        document.getElementById('pill-sunset').textContent = "06:45 PM";
       }
     }
 
@@ -738,7 +846,7 @@
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
-        filePlayer.src = "videos/sample-video.mp4"; // Path inside GitHub repository
+        filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
         filePlayer.play().catch(e => console.log("Autoplay restricted"));
       }
