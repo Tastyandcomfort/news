@@ -124,12 +124,12 @@
     }
 
     .sf-sunrise {
-      color: #ff9f0a; /* Apple SF Amber */
+      color: #ff9f0a;
       filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5));
     }
 
     .sf-sunset {
-      color: #ff453a; /* Apple SF Sunset Red/Orange */
+      color: #ff453a;
       filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5));
     }
 
@@ -164,7 +164,23 @@
       100% { opacity: 0.5; transform: scale(0.95); }
     }
 
-    /* Channel Bar Scrollbar for Desktop & Laptop */
+    /* LIVE PULSING GREEN LIGHT FIX FOR TV & MEDIA */
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #34c759;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #34c759;
+      animation: pulseGreen 1.5s infinite ease-in-out;
+    }
+    @keyframes pulseGreen {
+      0% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
+      50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 12px #34c759; }
+      100% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
+    }
+
+    /* Channel Bar Scrollbar */
     .desktop-scrollbar::-webkit-scrollbar {
       height: 6px;
       display: block;
@@ -217,15 +233,6 @@
       box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #34c759;
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 8px #34c759;
-    }
-
     .tc-subtle-watermark {
       position: absolute;
       top: 14px;
@@ -264,7 +271,6 @@
       <!-- APPLE DYNAMIC ISLAND SOLAR PILL (CENTER) -->
       <div class="apple-solar-pill" id="apple-solar-pill">
         <div class="solar-item" title="Sunrise (SF Symbol Style)">
-          <!-- Apple SF Symbol Sunrise Vector Icon -->
           <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
             <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
@@ -277,7 +283,6 @@
         <span class="solar-divider"></span>
 
         <div class="solar-item" title="Sunset (SF Symbol Style)">
-          <!-- Apple SF Symbol Sunset Vector Icon -->
           <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
             <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
@@ -288,8 +293,40 @@
         </div>
       </div>
 
-      <!-- Main Navigation & Theme Toggle -->
+      <!-- Main Navigation, Language Switcher & Theme Toggle -->
       <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+        
+        <!-- APPLE LANGUAGE SWITCHER (MODEL A) -->
+        <div class="relative inline-block text-left" id="lang-menu-wrapper">
+          <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); color: var(--text-main);">
+            <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
+            <span id="current-lang-code">EN</span>
+            <i class="fa-solid fa-chevron-down text-[10px]" style="color: var(--text-sub);"></i>
+          </button>
+
+          <!-- Dropdown Drawer -->
+          <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
+            <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>English</span> <span class="text-[10px] opacity-60">EN</span>
+            </button>
+            <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span>
+            </button>
+            <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span>
+            </button>
+            <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span>
+            </button>
+            <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span>
+            </button>
+            <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
+              <span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span>
+            </button>
+          </div>
+        </div>
+
         <nav class="flex items-center gap-1 p-1 rounded-xl w-full md:w-auto justify-center" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <button id="tab-btn-news" onclick="switchMainTab('news')" 
             class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
@@ -305,7 +342,7 @@
           </button>
         </nav>
 
-        <!-- Theme Toggle Switch (Set to Moon for Light Mode default) -->
+        <!-- Theme Toggle Switch -->
         <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);" title="Toggle Theme">
           <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
         </button>
@@ -369,15 +406,15 @@
               </button>
             </div>
 
-            <!-- Date Picker -->
+            <!-- Date Picker & ROTATING REFRESH BUTTON FIX -->
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl w-full sm:w-auto" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
                 <input type="date" id="news-date-picker" onchange="onDateFilterChange()" 
                   class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);">
               </div>
-              <button onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
-                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+              <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
+                <i id="refresh-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
 
@@ -405,11 +442,12 @@
             
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-3">
+                <!-- LIVE PULSING DOT FIX -->
                 <span id="live-indicator" class="live-dot" style="display: none;"></span>
                 <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Networks</h3>
               </div>
 
-              <!-- Channel Selector Bar with Desktop Scrollbar -->
+              <!-- Channel Selector Bar -->
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
                 <button id="btn-video" onclick="setMode('video', this)">TV9 </button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
@@ -428,7 +466,6 @@
                 <button id="btn-christian" onclick="setMode('christian', this)">Bible</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
                 <button id="btn-file" onclick="setMode('file', this)">Media</button>
-               <!-- <button id="btn-xrated" onclick="setMode('xrated', this)">Adults</button> -->
               </div>
             </div>
 
@@ -571,6 +608,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     let currentScope = 'local';
+    let currentLanguage = 'en';
     const TODAY_DATE = '2026-10-26';
     let leafletMap = null;
     let issMarker = null;
@@ -589,9 +627,31 @@
       initOSINTMap();
       initISSTracker();
       initISSManifest();
+
+      // Close Language Dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        const wrapper = document.getElementById('lang-menu-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+          document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+      });
     });
 
-    // Theme Switcher Logic (Defaults to Light Mode)
+    // Language Dropdown Toggle
+    function toggleLangDropdown() {
+      const dropdown = document.getElementById('lang-dropdown');
+      dropdown.classList.toggle('hidden');
+    }
+
+    // Change Language Engine
+    function changeLanguage(langCode) {
+      currentLanguage = langCode;
+      document.getElementById('current-lang-code').textContent = langCode.toUpperCase();
+      document.getElementById('lang-dropdown').classList.add('hidden');
+      fetchPortalNews();
+    }
+
+    // Theme Switcher Logic
     function toggleAppleTheme() {
       const htmlEl = document.documentElement;
       const themeIcon = document.getElementById('theme-icon');
@@ -605,7 +665,7 @@
       }
     }
 
-    // Solar Sunrise & Sunset Data Fetcher (Open-Meteo API)
+    // Solar Data Fetcher
     async function fetchSolarSchedule() {
       try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&timezone=auto');
@@ -691,17 +751,21 @@
       fetchPortalNews();
     }
 
-    // RSS Feed Fetcher & Dynamic Archive Link Generator
+    // RSS Feed Fetcher & ROTATING REFRESH ANIMATION FIX
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
       const selectedDateStr = document.getElementById('news-date-picker').value;
+      const refreshIcon = document.getElementById('refresh-icon');
+
+      // Trigger Rotation Animation on Icon
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
       badge.textContent = "Updating...";
       feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying live news proxy...</div>';
 
       try {
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&lang=${currentLanguage}`);
         if (!res.ok) throw new Error("API network error");
         
         const xmlText = await res.text();
@@ -733,6 +797,7 @@
             </div>
           `;
           badge.textContent = "Archive Source Provided";
+          if (refreshIcon) refreshIcon.classList.remove('fa-spin');
           return;
         }
 
@@ -755,7 +820,7 @@
                   ${title}
                 </a>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
-                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
+                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
                   <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted} (${selectedDateStr})</span>
                 </div>
               </div>
@@ -771,6 +836,8 @@
       } catch (err) {
         feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Live news feed currently unreachable.</div>`;
         badge.textContent = "Error";
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
       }
     }
 
@@ -814,7 +881,7 @@
       }
     }
 
-    // Channels Single-Player Controller Logic
+    // Channels Controller Logic
     function setMode(mode, element) {
       document.querySelectorAll('.view-selector button').forEach(btn => {
         btn.classList.remove('active-mode');
@@ -861,7 +928,7 @@
         switch(mode) {
           case 'video':
             streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1";
-            channelName =="TV9 Live News";
+            channelName = "TV9 Live News";
             break;
           case 'live':
             streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
@@ -913,22 +980,18 @@
             break;
           case 'muslim':
             streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
-            channelName = "Khuran";
+            channelName = "Quran";
             break;
           case 'christian':
             streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
-            channelName = "Bibul";
+            channelName = "Bible";
             break;
           case 'law':
             streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
             channelName = "Constitution";
             break;
-          case 'xrated':
-            streamUrl = "https://www.youtube.com/embed/********?autoplay=1&mute=1";
-            channelName = "Adults";
-            break;
         }
- 
+
         if (title) title.innerText = channelName;
         masterPlayer.src = streamUrl;
       }
