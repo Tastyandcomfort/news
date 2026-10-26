@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,7 +43,7 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Apple Light Theme */
+    /* Apple Light Theme (DEFAULT) */
     :root {
       --bg-main: #f5f5f7;
       --bg-card: rgba(255, 255, 255, 0.82);
@@ -305,9 +305,9 @@
           </button>
         </nav>
 
-        <!-- Theme Toggle Switch -->
+        <!-- Theme Toggle Switch (Set to Moon for Light Mode default) -->
         <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);" title="Toggle Theme">
-          <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-400"></i>
+          <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
         </button>
       </div>
 
@@ -387,7 +387,7 @@
           <div class="apple-card p-4 sm:p-5">
             <div class="flex items-center justify-between mb-4 pb-2 border-b" style="border-color: var(--border-color);">
               <h3 class="text-sm font-bold" style="color: var(--text-main);">
-                <span id="active-scope-title">Telangana State Live Headlines</span>
+                <span id="active-scope-title">Telangana (State) Live Headlines</span>
               </h3>
               <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);">Syncing...</span>
             </div>
@@ -406,7 +406,7 @@
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-3">
                 <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                <h3 id="current-channel-title" class="text-base font-bold text-blue-500">T&C Presents</h3>
+                <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Headlines</h3>
               </div>
 
               <!-- Channel Selector Bar with Desktop Scrollbar -->
@@ -427,8 +427,8 @@
                 <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
                 <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
-                <button id="btn-law" onclick="setMode('law', this)">X-Rated</button>
-                <button id="btn-file" onclick="setMode('file', this)">Media</button>    
+                <button id="btn-file" onclick="setMode('file', this)">Media</button>
+                <button id="btn-xrated" onclick="setMode('xrated', this)">Adults</button>
               </div>
             </div>
 
@@ -445,7 +445,7 @@
             <!-- Repository Media Streamer -->
             <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&C News</div>
-              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls>
+              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls preload="metadata" playsinline>
                 Your browser does not support video playback.
               </video>
             </div>
@@ -591,17 +591,17 @@
       initISSManifest();
     });
 
-    // Theme Switcher
+    // Theme Switcher Logic (Defaults to Light Mode)
     function toggleAppleTheme() {
       const htmlEl = document.documentElement;
       const themeIcon = document.getElementById('theme-icon');
       
       if (htmlEl.classList.contains('dark')) {
         htmlEl.classList.remove('dark');
-        themeIcon.className = "fa-solid fa-sun text-xs text-amber-500";
+        themeIcon.className = "fa-solid fa-moon text-xs text-blue-500";
       } else {
         htmlEl.classList.add('dark');
-        themeIcon.className = "fa-solid fa-moon text-xs text-blue-400";
+        themeIcon.className = "fa-solid fa-sun text-xs text-amber-500";
       }
     }
 
@@ -847,7 +847,7 @@
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
-        filePlayer.src = "images.jpg";
+        filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
         filePlayer.play().catch(e => console.log("Autoplay restricted"));
       }
@@ -861,7 +861,7 @@
         switch(mode) {
           case 'video':
             streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1";
-            channelName = "TV9 Live News";
+            channelName =="TV9 Live News";
             break;
           case 'live':
             streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
@@ -913,22 +913,22 @@
             break;
           case 'muslim':
             streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
-            channelName = "Qhuran";
+            channelName = "Khuran";
             break;
           case 'christian':
             streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
-            channelName = "Bible";
+            channelName = "Bibul";
             break;
           case 'law':
             streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
             channelName = "Constitution";
             break;
-          case 'law':
+          case 'xrated':
             streamUrl = "https://www.youtube.com/embed/zHVBsGodwHI?autoplay=1&mute=1";
-            channelName = "Constitution";
+            channelName = "Adults";
             break;
         }
-
+ 
         if (title) title.innerText = channelName;
         masterPlayer.src = streamUrl;
       }
