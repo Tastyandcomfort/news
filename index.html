@@ -92,6 +92,8 @@
             </button>
         </div>
 
+
+        
         <!-- CONTROLS BAR: SEARCH + CATEGORY FILTER -->
         <div class="flex flex-col md:flex-row gap-3 mb-6">
             <!-- Search Bar -->
@@ -111,6 +113,125 @@
             </div>
         </div>
 
+
+
+        <!-- News Card -->
+        <div class="news-main-container">
+          <div class="title-left">
+            <span id="live-indicator" class="live-dot" style="display: none;"></span>
+            <h3 id="current-channel-title">Headlines</h3>
+            <div class="view-selector">
+              <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>
+              <button id="btn-video" onclick="setMode('video', this)">News</button>
+              <button id="btn-live" onclick="setMode('live', this)">T&C</button>
+              <button id="btn-wildlife" onclick="setMode('wildlife', this)">Wild</button>
+              <button id="btn-sports" onclick="setMode('sports', this)">Sports</button>
+              <button id="btn-music" onclick="setMode('music', this)">Music</button>
+              <button id="btn-nasa" onclick="setMode('nasa', this)">NASA</button>
+              <button id="btn-airport" onclick="setMode('airport', this)">Airside</button>
+              <button id="btn-hindu" onclick="setMode('hindu', this)">Bhagavat_Geetha</button>
+              <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
+              <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
+              <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
+              <button id="btn-file" onclick="setMode('file', this)">Media</button>    
+            </div>
+          </div>
+
+          <div id="content-area">
+            <div id="text-view" class="view-mode">
+              <div style="text-align: right; margin-bottom: 5px;">
+                <button id="refresh-btn" onclick="fetchNews()">
+                  <i id="refresh-icon" class="fa-solid fa-sync"></i> Refresh
+                </button>
+              </div>
+              <div id="news-container" class="news-list">Please refresh...</div>
+            </div>
+
+            <div id="headphones-ticker" class="audio-ticker-bar" style="display: none;">
+              <span class="ticker-icon">🎧</span>
+              <div class="ticker-text-wrap">
+                <p class="ticker-text">Audio muted formulation active. Plug-in headphones for audio output. Thank you for your cooperation.</p>
+              </div>
+            </div>
+
+            <div id="video-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="news-video-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="live-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="tc-live-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+          
+            <div id="wildlife-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="wildlife-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+            
+            <div id="sports-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="sports-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="music-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="music-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+          
+            <div id="nasa-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="nasa-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="airport-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="airport-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="hindu-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="hindu-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="muslim-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="muslim-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="christian-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="christian-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="law-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <iframe id="law-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <div id="file-view" class="view-mode" style="display: none;">
+              <div class="video-wrapper">
+                <source id="video-source" src="" type="video/mp4"></source>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        
+        
         <!-- NEWS CARDS GRID CONTAINER -->
         <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Dynamic Content Injected Here -->
