@@ -41,6 +41,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
       transition: background-color 0.3s ease, color 0.3s ease;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Apple Light Theme (DEFAULT) */
@@ -85,6 +86,8 @@
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
+      transform: translateZ(0);
+      will-change: transform;
     }
 
     .apple-header {
@@ -92,6 +95,13 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Hardware Acceleration for Smooth Playback & Animation */
+    video, iframe, #active-video-container, #file-view {
+      transform: translateZ(0);
+      will-change: transform;
+      backface-visibility: hidden;
     }
 
     /* APPLE DYNAMIC ISLAND SOLAR PILL */
@@ -115,7 +125,6 @@
       gap: 6px;
     }
 
-    /* Apple SF Symbol Vector Icons */
     .sf-solar-icon {
       width: 17px;
       height: 17px;
@@ -147,12 +156,10 @@
       background: var(--border-color);
     }
 
-    /* Global Webkit Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     
-    /* Refined Apple Gold Status Indicator */
     .pulse-gold {
       background-color: #ffcc00;
       box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
@@ -164,7 +171,6 @@
       100% { opacity: 0.5; transform: scale(0.95); }
     }
 
-    /* LIVE PULSING GREEN LIGHT FIX FOR TV & MEDIA */
     .live-dot {
       width: 8px;
       height: 8px;
@@ -180,7 +186,6 @@
       100% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
     }
 
-    /* Channel Bar Scrollbar */
     .desktop-scrollbar::-webkit-scrollbar {
       height: 6px;
       display: block;
@@ -264,13 +269,13 @@
         </div>
         <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
           <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
-          <span id="txt-brand-hub" class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+          <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
         </div>
       </div>
 
-      <!-- APPLE DYNAMIC ISLAND SOLAR PILL (CENTER) -->
+      <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
       <div class="apple-solar-pill" id="apple-solar-pill">
-        <div class="solar-item" title="Sunrise (SF Symbol Style)">
+        <div class="solar-item" title="Sunrise">
           <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
             <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
@@ -279,10 +284,8 @@
           </svg>
           <span class="solar-time" id="pill-sunrise">06:12 AM</span>
         </div>
-        
         <span class="solar-divider"></span>
-
-        <div class="solar-item" title="Sunset (SF Symbol Style)">
+        <div class="solar-item" title="Sunset">
           <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
             <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
@@ -293,56 +296,32 @@
         </div>
       </div>
 
-      <!-- Main Navigation, Language Switcher & Theme Toggle -->
+      <!-- Navigation & Controls -->
       <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
         
-        <!-- APPLE LANGUAGE SWITCHER -->
+        <!-- Apple Language Switcher -->
         <div class="relative inline-block text-left" id="lang-menu-wrapper">
           <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); color: var(--text-main);">
             <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
             <span id="current-lang-code">EN</span>
             <i class="fa-solid fa-chevron-down text-[10px]" style="color: var(--text-sub);"></i>
           </button>
-
-          <!-- Dropdown Drawer -->
           <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
-            <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>English</span> <span class="text-[10px] opacity-60">EN</span>
-            </button>
-            <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span>
-            </button>
-            <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span>
-            </button>
-            <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span>
-            </button>
-            <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span>
-            </button>
-            <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);">
-              <span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span>
-            </button>
+            <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
+            <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
+            <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
+            <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
+            <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
+            <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
           </div>
         </div>
 
         <nav class="flex items-center gap-1 p-1 rounded-xl w-full md:w-auto justify-center" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <button id="tab-btn-news" onclick="switchMainTab('news')" 
-            class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span>
-          </button>
-          <button id="tab-btn-video" onclick="switchMainTab('video')" 
-            class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV & Media</span>
-          </button>
-          <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
-            class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span>
-          </button>
+          <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span></button>
+          <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV & Media</span></button>
+          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span></button>
         </nav>
 
-        <!-- Theme Toggle Switch -->
         <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);" title="Toggle Theme">
           <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
         </button>
@@ -373,13 +352,9 @@
 
         <!-- TAB 1: NEWS FEEDS -->
         <section id="view-news" class="flex flex-col gap-6">
-          
-          <!-- Pinned Highlights -->
           <div class="apple-card p-4">
             <div class="flex items-center justify-between border-b pb-3 mb-3" style="border-color: var(--border-color);">
-              <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2">
-                <i class="fa-solid fa-earth-americas"></i> <span data-i18n="worldHighlights">World Highlights</span>
-              </h2>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2"><i class="fa-solid fa-earth-americas"></i> <span data-i18n="worldHighlights">World Highlights</span></h2>
               <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold" data-i18n="latest">Latest</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -387,67 +362,44 @@
             </div>
           </div>
 
-          <!-- Scope & Date Control Panel -->
           <div class="apple-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            
-            <!-- Scope Buttons -->
             <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1 sm:pb-0">
-              <button id="scope-btn-local" onclick="setNewsScope('local')" 
-                class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
-                <i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span>
-              </button>
-              <button id="scope-btn-national" onclick="setNewsScope('national')" 
-                class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
-                <i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span>
-              </button>
-              <button id="scope-btn-world" onclick="setNewsScope('world')" 
-                class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
-                <i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span>
-              </button>
+              <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
+              <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
+              <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
             </div>
 
-            <!-- Date Picker & ROTATING REFRESH BUTTON -->
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl w-full sm:w-auto" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
-                <input type="date" id="news-date-picker" onchange="onDateFilterChange()" 
-                  class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);">
+                <input type="date" id="news-date-picker" onchange="onDateFilterChange()" class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);">
               </div>
               <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
                 <i id="refresh-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
-
           </div>
 
-          <!-- News Feed Card List -->
           <div class="apple-card p-4 sm:p-5">
             <div class="flex items-center justify-between mb-4 pb-2 border-b" style="border-color: var(--border-color);">
-              <h3 class="text-sm font-bold" style="color: var(--text-main);">
-                <span id="active-scope-title">Telangana State Live Headlines</span>
-              </h3>
+              <h3 class="text-sm font-bold" style="color: var(--text-main);"><span id="active-scope-title">Telangana State Live Headlines</span></h3>
               <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);" data-i18n="syncing">Syncing...</span>
             </div>
-
             <div id="news-feed-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
               <div class="text-center py-10 text-xs" style="color: var(--text-sub);" data-i18n="queryingRss">Querying real-time RSS API...</div>
             </div>
           </div>
-
         </section>
 
         <!-- TAB 2: TV & MEDIA PLAYER -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5 relative">
-            
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-3">
-                <!-- LIVE PULSING DOT -->
                 <span id="live-indicator" class="live-dot" style="display: none;"></span>
                 <h3 id="current-channel-title" class="text-base font-bold text-blue-500" data-i18n="networks">Networks</h3>
               </div>
 
-              <!-- Channel Selector Bar -->
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
                 <button id="btn-video" onclick="setMode('video', this)">TV9</button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
@@ -469,7 +421,6 @@
               </div>
             </div>
 
-            <!-- Display Containers -->
             <div id="text-view" class="p-6 rounded-xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);" data-i18n="selectChannelPrompt">
               Select any live broadcast or media channel above to watch the continuous stream.
             </div>
@@ -479,64 +430,39 @@
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
-            <!-- Repository Media Streamer -->
             <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&C News</div>
-              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls preload="metadata" playsinline>
+              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls preload="auto" playsinline webkit-playsinline>
+                <source src="videos/sample-video.mp4" type="video/mp4">
                 Your browser does not support video playback.
               </video>
             </div>
-
           </div>
         </section>
 
         <!-- TAB 3: RADAR & OSINT -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
-            
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-base font-bold text-blue-500 flex items-center gap-2">
-                <i class="fa-solid fa-wind"></i> <span data-i18n="weatherRadar">Weather Radar</span>
-              </h2>
+              <h2 class="text-base font-bold text-blue-500 flex items-center gap-2"><i class="fa-solid fa-wind"></i> <span data-i18n="weatherRadar">Weather Radar</span></h2>
               <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">Live</span>
             </div>
 
             <div class="w-full h-[380px] sm:h-[420px] rounded-xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color);">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" 
-                frameborder="0"
-                class="w-full h-full">
-              </iframe>
+              <iframe width="100%" height="100%" src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0" class="w-full h-full"></iframe>
             </div>
 
             <div class="mb-4">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-volcano"></i> <span data-i18n="usgsTracker">USGS Earthquakes Tracker (24h)</span>
-              </h3>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsTracker">USGS Earthquakes Tracker (24h)</span></h3>
               <div id="osint-map" class="h-64 rounded-xl overflow-hidden" style="border: 1px solid var(--border-color);"></div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issAlt">ISS Altitude</p>
-                <p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p>
-              </div>
-              <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issVel">ISS Velocity</p>
-                <p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p>
-              </div>
-              <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="spaceCrew">Space Crew Active</p>
-                <p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p>
-              </div>
-              <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="usgsQuakesStat">USGS M4.5+ Quakes</p>
-                <p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p>
-              </div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issAlt">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issVel">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="spaceCrew">Space Crew Active</p><p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="usgsQuakesStat">USGS M4.5+ Quakes</p><p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p></div>
             </div>
-
           </div>
         </section>
 
@@ -544,53 +470,26 @@
 
       <!-- RIGHT SIDEBAR PANEL -->
       <div class="lg:col-span-4 flex flex-col gap-6">
-        
-        <!-- Markets Card -->
         <div class="apple-card p-4">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-line"></i> <span data-i18n="liveExchange">Live Exchange Rates</span>
-          </h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> <span data-i18n="liveExchange">Live Exchange Rates</span></h3>
           <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <span class="font-bold" style="color: var(--text-main);">USD / INR</span>
-              <span class="text-amber-500 font-extrabold" id="side-usdinr">Syncing...</span>
-            </div>
-            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <span class="font-bold" style="color: var(--text-main);">EUR / INR</span>
-              <span class="text-green-500 font-extrabold" id="side-eurinr">Syncing...</span>
-            </div>
+            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span class="font-bold" style="color: var(--text-main);">USD / INR</span><span class="text-amber-500 font-extrabold" id="side-usdinr">Syncing...</span></div>
+            <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span class="font-bold" style="color: var(--text-main);">EUR / INR</span><span class="text-green-500 font-extrabold" id="side-eurinr">Syncing...</span></div>
           </div>
         </div>
 
-        <!-- Fact Check Links -->
         <div class="apple-card p-4">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved"></i> <span data-i18n="factCheck">Fact-Check Portal</span>
-          </h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="factCheck">Fact-Check Portal</span></h3>
           <div class="flex flex-col gap-2 text-xs">
-            <a href="https://factly.in" target="_blank" rel="noopener" 
-              class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <span>Factly India</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-            </a>
-            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" 
-              class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <span data-i18n="usgsDirect">USGS Earthquakes Direct</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-            </a>
+            <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
           </div>
         </div>
 
-        <!-- ISS Crew Manifest -->
         <div class="apple-card p-4">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-user-astronaut"></i> <span data-i18n="issManifest">ISS Crew Manifest</span>
-          </h3>
-          <div id="iss-crew-list" class="space-y-1.5 text-xs max-h-48 overflow-y-auto" style="color: var(--text-sub);">
-            <div class="italic" data-i18n="queryingManifest">Querying space manifest...</div>
-          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3 flex items-center gap-2"><i class="fa-solid fa-user-astronaut"></i> <span data-i18n="issManifest">ISS Crew Manifest</span></h3>
+          <div id="iss-crew-list" class="space-y-1.5 text-xs max-h-48 overflow-y-auto" style="color: var(--text-sub);"><div class="italic" data-i18n="queryingManifest">Querying space manifest...</div></div>
         </div>
-
       </div>
 
     </div>
@@ -600,7 +499,7 @@
   <footer class="py-6 px-4 text-xs mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-center md:text-left">
       <div data-i18n="footerBrand"><b>Tasty & Comfort • T&C News Hub</b></div>
-      <div data-i18n="footerCopy">© 2026 T&C From New Modern Mission <p>• Build & Developed by Murali Manohar •</p></div>
+      <div data-i18n="footerCopy">© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •</div>
     </div>
   </footer>
 
@@ -612,8 +511,8 @@
     const TODAY_DATE = '2026-10-26';
     let leafletMap = null;
     let issMarker = null;
+    const translationCache = {}; // Cache to make translation lightning fast
 
-    // Multilingual Dictionary for UI labels across EN, TE, HI, KN, TA, ML
     const i18n = {
       en: {
         newsHub: "NEWS HUB", headlines: "Headlines", tvMedia: "TV & Media", radar: "Radar",
@@ -707,7 +606,7 @@
         issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...",
         footerBrand: "ടേസ്റ്റി & കംഫർಟ್ • T&C ന്യൂസ് ഹബ്",
         footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിഷൻ • മുരളി മനോഹർ നിർമ്മിച്ചത് •",
-        scopeLocalTitle: "തെലങ്കാന സംസ്ഥാന ലൈവ് വാർത്തകൾ",
+        scopeLocalTitle: "തെലங்கാന സംസ്ഥാന ലൈവ് വാർത്തകൾ",
         scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ",
         scopeWorldTitle: "ആഗോള വാർത്താ പ്രവാഹം"
       }
@@ -728,7 +627,6 @@
       initISSTracker();
       initISSManifest();
 
-      // Close Language Dropdown when clicking outside
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
         if (wrapper && !wrapper.contains(e.target)) {
@@ -737,47 +635,44 @@
       });
     });
 
-    // Language Dropdown Toggle
     function toggleLangDropdown() {
-      const dropdown = document.getElementById('lang-dropdown');
-      dropdown.classList.toggle('hidden');
+      document.getElementById('lang-dropdown').classList.toggle('hidden');
     }
 
-    // Change Language Engine & Apply Dynamic Translation
     function changeLanguage(langCode) {
       currentLanguage = langCode;
       document.getElementById('current-lang-code').textContent = langCode.toUpperCase();
       document.getElementById('lang-dropdown').classList.add('hidden');
 
-      // Update UI texts based on i18n dictionary
       const dict = i18n[langCode] || i18n.en;
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (dict[key]) {
-          el.textContent = dict[key];
-        }
+        if (dict[key]) el.textContent = dict[key];
       });
 
-      // Update active scope title dynamically
       const titleMap = {
         'local': dict.scopeLocalTitle,
         'national': dict.scopeNatTitle,
         'world': dict.scopeWorldTitle
       };
       document.getElementById('active-scope-title').textContent = titleMap[currentScope];
-
       fetchPortalNews();
     }
 
-    // Helper function to translate text on the fly using Google's public translation endpoint
+    // Cached Translation function for blazing speed
     async function translateText(text, targetLang) {
       if (targetLang === 'en' || !text) return text;
+      const cacheKey = `${targetLang}:${text}`;
+      if (translationCache[cacheKey]) return translationCache[cacheKey];
+
       try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
         const data = await res.json();
         if (data && data[0]) {
-          return data[0].map(segment => segment[0]).join('');
+          const translated = data[0].map(segment => segment[0]).join('');
+          translationCache[cacheKey] = translated;
+          return translated;
         }
       } catch (e) {
         console.error("Translation error:", e);
@@ -785,11 +680,9 @@
       return text;
     }
 
-    // Theme Switcher Logic
     function toggleAppleTheme() {
       const htmlEl = document.documentElement;
       const themeIcon = document.getElementById('theme-icon');
-      
       if (htmlEl.classList.contains('dark')) {
         htmlEl.classList.remove('dark');
         themeIcon.className = "fa-solid fa-moon text-xs text-blue-500";
@@ -799,31 +692,18 @@
       }
     }
 
-    // Solar Data Fetcher
     async function fetchSolarSchedule() {
       try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&timezone=auto');
         const data = await res.json();
-        
-        if (data && data.daily && data.daily.sunrise && data.daily.sunset) {
-          const sunriseStr = data.daily.sunrise[0];
-          const sunsetStr = data.daily.sunset[0];
-
-          const formatTime = (isoString) => {
-            const date = new Date(isoString);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          };
-
-          document.getElementById('pill-sunrise').textContent = formatTime(sunriseStr);
-          document.getElementById('pill-sunset').textContent = formatTime(sunsetStr);
+        if (data && data.daily) {
+          const formatTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('pill-sunrise').textContent = formatTime(data.daily.sunrise[0]);
+          document.getElementById('pill-sunset').textContent = formatTime(data.daily.sunset[0]);
         }
-      } catch (err) {
-        document.getElementById('pill-sunrise').textContent = "06:12 AM";
-        document.getElementById('pill-sunset').textContent = "06:45 PM";
-      }
+      } catch (err) {}
     }
 
-    // Main Tab Switcher Engine
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-video').classList.add('hidden');
@@ -847,11 +727,10 @@
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
         btnOsint.classList.add('active-tab');
-        if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 200);
+        if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 100);
       }
     }
 
-    // News Scope Switcher Engine
     function setNewsScope(scope) {
       currentScope = scope;
       document.querySelectorAll('.scope-btn').forEach(btn => {
@@ -886,7 +765,6 @@
       fetchPortalNews();
     }
 
-    // RSS Feed Fetcher with Live Translation for News Stories
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
@@ -895,69 +773,33 @@
 
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying & translating live news...</div>';
+      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live stories...</div>';
 
       try {
         const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
-        if (!res.ok) throw new Error("API network error");
+        if (!res.ok) throw new Error("API error");
         
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        const items = Array.from(xml.querySelectorAll("item"));
-
-        const filteredItems = items.filter(item => {
-          const pubDate = item.querySelector("pubDate")?.textContent;
-          if (!pubDate) return true;
-          const itemDateStr = new Date(pubDate).toISOString().split('T')[0];
-          return itemDateStr === selectedDateStr;
-        });
-
-        if (filteredItems.length === 0) {
-          const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
-          const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
-
-          feedContainer.innerHTML = `
-            <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
-              <div>
-                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Live RSS Items Published on ${selectedDateStr}</h4>
-                <p class="text-[11px] mt-1" style="color: var(--text-sub);">Access direct archive via link below:</p>
-              </div>
-              <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
-                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Source Archive (${selectedDateStr})
-              </a>
-            </div>
-          `;
-          badge.textContent = "Archive Source Provided";
-          if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-          return;
-        }
+        const items = Array.from(xml.querySelectorAll("item")).slice(0, 10); // Limit to 10 for lightning performance
 
         let html = '';
-        for (const item of filteredItems) {
-          const rawTitle = item.querySelector("title")?.textContent || "Untitled News Story";
+        for (const item of items) {
+          const rawTitle = item.querySelector("title")?.textContent || "News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = item.querySelector("pubDate")?.textContent || "";
           const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
 
-          // Translate title into active selected language
           const title = await translateText(rawTitle, currentLanguage);
-
-          let sourceName = "Trusted by T&C";
-          if (link.includes("tv9")) sourceName = "TV9 Telugu";
-          else if (link.includes("france24")) sourceName = "France24";
-          else if (link.includes("hindu")) sourceName = "The Hindu";
+          let sourceName = "T&C Verified";
 
           html += `
             <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
-                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold hover:text-blue-500 transition-colors line-clamp-2" style="color: var(--text-main);">
-                  ${title}
-                </a>
+                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold hover:text-blue-500 transition-colors line-clamp-2" style="color: var(--text-main);">${title}</a>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
                   <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
-                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted} (${selectedDateStr})</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted}</span>
                 </div>
               </div>
               <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
@@ -966,11 +808,10 @@
             </div>
           `;
         }
-
         feedContainer.innerHTML = html;
-        badge.textContent = `Live (${filteredItems.length} Stories)`;
+        badge.textContent = `Live (${items.length} Stories)`;
       } catch (err) {
-        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Live news feed currently unreachable.</div>`;
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Feed currently offline.</div>`;
         badge.textContent = "Error";
       } finally {
         if (refreshIcon) refreshIcon.classList.remove('fa-spin');
@@ -990,15 +831,11 @@
           const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           const title = await translateText(rawTitle, currentLanguage);
-          html += `
-            <a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">
-              • ${title}
-            </a>
-          `;
+          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
         }
         container.innerHTML = html;
       } catch (e) {
-        container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">World highlights loading...</div>';
+        container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">Highlights loading...</div>';
       }
     }
 
@@ -1007,25 +844,16 @@
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await res.json();
         if (data && data.rates) {
-          const usdinr = data.rates.INR.toFixed(2);
-          const eurinr = (data.rates.INR / data.rates.EUR).toFixed(2);
-          document.getElementById('ticker-usdinr').textContent = `₹${usdinr}`;
-          document.getElementById('side-usdinr').textContent = `₹${usdinr}`;
-          document.getElementById('side-eurinr').textContent = `₹${eurinr}`;
+          document.getElementById('ticker-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+          document.getElementById('side-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+          document.getElementById('side-eurinr').textContent = `₹${(data.rates.INR / data.rates.EUR).toFixed(2)}`;
         }
-      } catch (e) {
-        document.getElementById('ticker-usdinr').textContent = `Sync Error`;
-      }
+      } catch (e) {}
     }
 
-    // Channels Controller Logic
     function setMode(mode, element) {
-      document.querySelectorAll('.view-selector button').forEach(btn => {
-        btn.classList.remove('active-mode');
-      });
-      if (element) {
-        element.classList.add('active-mode');
-      }
+      document.querySelectorAll('.view-selector button').forEach(btn => btn.classList.remove('active-mode'));
+      if (element) element.classList.add('active-mode');
 
       const textView = document.getElementById('text-view');
       const activeVideoContainer = document.getElementById('active-video-container');
@@ -1038,7 +866,7 @@
       textView.style.display = 'none';
       activeVideoContainer.style.display = 'none';
       fileView.style.display = 'none';
-      masterPlayer.src = "";
+      masterPlayer.src = "about:blank"; // Instant flush memory to prevent lag
       filePlayer.pause();
       filePlayer.src = "";
 
@@ -1046,16 +874,14 @@
         if (title) title.innerText = "Latest Updates";
         if (dot) dot.style.display = "none";
         textView.style.display = 'block';
-      } 
-      else if (mode === 'file') {
+      } else if (mode === 'file') {
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
         filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
-        filePlayer.play().catch(e => console.log("Autoplay restricted"));
-      }
-      else {
+        filePlayer.play().catch(e => console.log("Autoplay blocked"));
+      } else {
         activeVideoContainer.style.display = 'block';
         if (dot) dot.style.display = "inline-block";
 
@@ -1063,84 +889,32 @@
         let channelName = "TV9 Live";
 
         switch(mode) {
-          case 'video':
-            streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1";
-            channelName = "TV9 Live News";
-            break;
-          case 'live':
-            streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1";
-            channelName = "T&C Live";
-            break;
-          case 'indiatoday':
-            streamUrl = "https://www.youtube.com/embed/g0gXzt8JqYA?autoplay=1&mute=1";
-            channelName = "India Today Live";
-            break;
-          case 'france24':
-            streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1";
-            channelName = "France24 Live";
-            break;
-          case 'cnbc':
-            streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1";
-            channelName = "CNBC Live";
-            break;
-          case 'skynews':
-            streamUrl = "https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1";
-            channelName = "Sky News Live";
-            break;
-          case 'cnn':
-            streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1";
-            channelName = "CNN International Live";
-            break;
-          case 'wildlife':
-            streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1";
-            channelName = "Wild Live";
-            break;
-          case 'sports':
-            streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1";
-            channelName = "Sports Live";
-            break;
-          case 'music':
-            streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1";
-            channelName = "Music";
-            break;
-          case 'nasa':
-            streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1";
-            channelName = "NASA Live";
-            break;
-          case 'airport':
-            streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1";
-            channelName = "Airside Live";
-            break;
-          case 'hindu':
-            streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1";
-            channelName = "Bhagavat Geetha";
-            break;
-          case 'muslim':
-            streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
-            channelName = "Quran";
-            break;
-          case 'christian':
-            streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
-            channelName = "Bible";
-            break;
-          case 'law':
-            streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
-            channelName = "Constitution";
-            break;
+          case 'video': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1"; channelName = "TV9 Live News"; break;
+          case 'live': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1"; channelName = "T&C Live"; break;
+          case 'indiatoday': streamUrl = "https://www.youtube.com/embed/g0gXzt8JqYA?autoplay=1&mute=1&playsinline=1"; channelName = "India Today Live"; break;
+          case 'france24': streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1&playsinline=1"; channelName = "France24 Live"; break;
+          case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1"; channelName = "CNBC Live"; break;
+          case 'skynews': streamUrl = "https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1&playsinline=1"; channelName = "Sky News Live"; break;
+          case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1"; channelName = "CNN International Live"; break;
+          case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1"; channelName = "Wild Live"; break;
+          case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1"; channelName = "Sports Live"; break;
+          case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1"; channelName = "Music"; break;
+          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1"; channelName = "NASA Live"; break;
+          case 'airport': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1"; channelName = "Airside Live"; break;
+          case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1"; channelName = "Bhagavat Geetha"; break;
+          case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1"; channelName = "Quran"; break;
+          case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1"; channelName = "Bible"; break;
+          case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1"; channelName = "Constitution"; break;
         }
 
         if (title) title.innerText = channelName;
-        masterPlayer.src = streamUrl;
+        setTimeout(() => { masterPlayer.src = streamUrl; }, 50);
       }
     }
 
     function initOSINTMap() {
-      leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
-      
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; New Modern Mission by T&C',
-        maxZoom: 18
-      }).addTo(leafletMap);
+      leafletMap = L.map('osint-map', { zoomControl: false }).setView([20.5937, 78.9629], 2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
 
       fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
         .then(r => r.json())
@@ -1153,11 +927,11 @@
             const [lon, lat] = quake.geometry.coordinates;
             const mag = quake.properties.mag;
             L.circleMarker([lat, lon], {
-              radius: mag * 2,
+              radius: mag * 1.5,
               color: '#ff3b30',
               fillColor: '#ff3b30',
               fillOpacity: 0.6
-            }).bindPopup(`<b>Magnitude ${mag}</b><br>${quake.properties.place}`).addTo(leafletMap);
+            }).bindPopup(`<b>Magnitude ${mag}</b>`).addTo(leafletMap);
           });
         }).catch(() => {});
     }
@@ -1169,21 +943,13 @@
           const data = await res.json();
           const lat = parseFloat(data.latitude).toFixed(2);
           const lon = parseFloat(data.longitude).toFixed(2);
-          const alt = Math.round(data.altitude);
-          const spd = Math.round(data.velocity);
-
           document.getElementById('ticker-iss-pos').textContent = `${lat}°, ${lon}°`;
-          document.getElementById('osint-iss-alt').textContent = `${alt} km`;
-          document.getElementById('osint-iss-spd').textContent = `${spd} km/h`;
+          document.getElementById('osint-iss-alt').textContent = `${Math.round(data.altitude)} km`;
+          document.getElementById('osint-iss-spd').textContent = `${Math.round(data.velocity)} km/h`;
 
           if (leafletMap) {
             if (!issMarker) {
-              issMarker = L.circleMarker([lat, lon], {
-                radius: 8,
-                color: '#0071e3',
-                fillColor: '#0071e3',
-                fillOpacity: 0.9
-              }).bindPopup('<b>ISS Position</b>').addTo(leafletMap);
+              issMarker = L.circleMarker([lat, lon], { radius: 7, color: '#0071e3', fillColor: '#0071e3', fillOpacity: 0.9 }).addTo(leafletMap);
             } else {
               issMarker.setLatLng([lat, lon]);
             }
@@ -1191,7 +957,7 @@
         } catch(e) {}
       }
       updateISS();
-      setInterval(updateISS, 10000);
+      setInterval(updateISS, 15000); // Optimized polling interval to save CPU
     }
 
     async function initISSManifest() {
@@ -1200,16 +966,10 @@
         const res = await fetch('http://api.open-notify.org/astros.json');
         const data = await res.json();
         const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
-        
         document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
-
-        let html = '';
-        issPeople.forEach(person => {
-          html += `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${person.name}</div>`;
-        });
-        container.innerHTML = html || '<div class="italic">No active manifest data.</div>';
+        container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${p.name}</div>`).join('') || '<div class="italic">Offline</div>';
       } catch(e) {
-        container.innerHTML = '<div class="italic text-[11px]">Manifest stream offline</div>';
+        container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
       }
     }
   </script>
