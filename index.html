@@ -51,11 +51,12 @@
       -webkit-backdrop-filter: blur(16px);
     }
 
-    .pulse-live {
-      box-shadow: 0 0 10px #ef4444;
-      animation: pulse 1.6s infinite;
+    /* Upgraded Gold Pulse Light matching T&C Theme */
+    .pulse-gold {
+      box-shadow: 0 0 10px #fbbf24;
+      animation: pulseGold 1.6s infinite;
     }
-    @keyframes pulse {
+    @keyframes pulseGold {
       0% { opacity: 0.4; }
       50% { opacity: 1; }
       100% { opacity: 0.4; }
@@ -121,9 +122,9 @@
   <header class="glass-header sticky top-0 z-50 border-b border-brand-border px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
-      <!-- Brand Logo -->
+      <!-- Brand Logo with Gold Pulse Light -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
-        <div class="w-3 h-3 rounded-full bg-brand-red pulse-live"></div>
+        <div class="w-3 h-3 rounded-full bg-amber-400 pulse-gold"></div>
         <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-brand-blue flex items-center gap-2">
           <span class="bg-sky-500/10 border border-sky-500/30 px-2.5 py-1 rounded-lg text-brand-blue shadow-inner">T&C</span>
           <span class="text-white text-sm md:text-base font-medium border-l border-brand-border pl-2">LIVE NEWS & MEDIA PORTAL</span>
@@ -246,7 +247,7 @@
 
         </section>
 
-        <!-- TAB 2: LIVE TV & MEDIA PLAYER (Single Active Player Frame + Subtle Watermark) -->
+        <!-- TAB 2: LIVE TV & MEDIA PLAYER -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg relative">
             
@@ -444,7 +445,7 @@
   <!-- FOOTER -->
   <footer class="bg-slate-950 border-t border-brand-border mt-12 py-8 px-4 text-xs text-slate-400">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-[11px]">
-      <div><b>Tasty & Comfort (T&C) Live Media Hub</b> • 100% Real-Time API Data (No Mock/Fallback Data)</div>
+      <div><b>Tasty & Comfort (T&C) Live Media Hub</b> • 100% Real-Time API Data</div>
       <div>© 2026 T&C Media Portal. All rights reserved.</div>
     </div>
   </footer>
@@ -525,6 +526,7 @@
       fetchPortalNews();
     }
 
+    // STRICT DATE FILTERING WITH SOURCE ARCHIVE LINK FALLBACK
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
@@ -549,14 +551,23 @@
         });
 
         if (filteredItems.length === 0) {
+          const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
+          const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
+
           feedContainer.innerHTML = `
-            <div class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center">
-              <i class="fa-solid fa-calendar-xmark text-2xl text-slate-500 mb-2"></i>
-              <h4 class="text-xs font-bold text-white">No News Items Published on ${selectedDateStr}</h4>
-              <p class="text-[11px] text-slate-400 mt-1">There are no live RSS news items published on this specific selected date.</p>
+            <div class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center flex flex-col items-center gap-3">
+              <i class="fa-solid fa-calendar-xmark text-2xl text-brand-amber"></i>
+              <div>
+                <h4 class="text-xs font-bold text-white">No Live RSS Items Published on ${selectedDateStr}</h4>
+                <p class="text-[11px] text-slate-400 mt-1">Live cache rolled over for this date. Access the direct source archive below:</p>
+              </div>
+              <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
+                class="px-4 py-2 bg-brand-blue text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-sky-300 transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Source Archive (${selectedDateStr})
+              </a>
             </div>
           `;
-          badge.textContent = "0 Articles Found";
+          badge.textContent = "Archive Source Link Provided";
           return;
         }
 
@@ -655,7 +666,6 @@
       const title = document.getElementById('current-channel-title');
       const dot = document.getElementById('live-indicator');
 
-      // Clear state
       textView.style.display = 'none';
       activeVideoContainer.style.display = 'none';
       masterPlayer.src = "";
