@@ -427,6 +427,7 @@
                 <button id="btn-muslim" onclick="setMode('muslim', this)">Khuran</button>
                 <button id="btn-christian" onclick="setMode('christian', this)">Bibul</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
+                <button id="btn-law" onclick="setMode('law', this)">X-Rated</button>
                 <button id="btn-file" onclick="setMode('file', this)">Media</button>    
               </div>
             </div>
@@ -912,14 +913,18 @@
             break;
           case 'muslim':
             streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1";
-            channelName = "Khuran";
+            channelName = "Qhuran";
             break;
           case 'christian':
             streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1";
-            channelName = "Bibul";
+            channelName = "Bible";
             break;
           case 'law':
             streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1";
+            channelName = "Constitution";
+            break;
+          case 'law':
+            streamUrl = "https://www.youtube.com/embed/zHVBsGodwHI?autoplay=1&mute=1";
             channelName = "Constitution";
             break;
         }
