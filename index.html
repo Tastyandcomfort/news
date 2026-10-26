@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>T&C Live News & Media Portal</title>
+  <title>T&C News Hub</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -195,7 +195,7 @@
         <nav class="flex items-center gap-1 p-1 rounded-xl w-full md:w-auto justify-center" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <button id="tab-btn-news" onclick="switchMainTab('news')" 
             class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-newspaper mr-1.5"></i>News
+            <i class="fa-solid fa-newspaper mr-1.5"></i>Headlines
           </button>
           <button id="tab-btn-video" onclick="switchMainTab('video')" 
             class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
@@ -243,12 +243,12 @@
           <div class="apple-card p-4">
             <div class="flex items-center justify-between border-b pb-3 mb-3" style="border-color: var(--border-color);">
               <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2">
-                <i class="fa-solid fa-earth-americas"></i> Pinned World Highlights
+                <i class="fa-solid fa-earth-americas"></i> World Highlights
               </h2>
-              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Live RSS</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Latest</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="text-xs italic" style="color: var(--text-sub);">Connecting to live RSS feed...</div>
+              <div class="text-xs italic" style="color: var(--text-sub);">Connecting live feed...</div>
             </div>
           </div>
 
@@ -313,12 +313,12 @@
 
               <!-- Channel Selector Bar -->
               <div class="view-selector no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
-                <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button>
-                <button id="btn-video" onclick="setMode('video', this)">News</button>
+              <!--  <button id="btn-text" class="active-mode" onclick="setMode('text', this)">Headlines</button> -->
+                <button id="btn-video" onclick="setMode('video', this)">TV9 Telugu</button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
-                <button id="btn-ntv" onclick="setMode('ntv', this)">NTV Telugu</button>
-                <button id="btn-v6" onclick="setMode('v6', this)">V6 News</button>
+              <!--  <button id="btn-ntv" onclick="setMode('ntv', this)">NTV Telugu</button>  -->
+                <button id="btn-v6" onclick="setMode('v6', this)">T News</button>
                 <button id="btn-skynews" onclick="setMode('skynews', this)">Sky News</button>
                 <button id="btn-cnn" onclick="setMode('cnn', this)">CNN</button>
                 <button id="btn-wildlife" onclick="setMode('wildlife', this)">Wild</button>
@@ -340,7 +340,7 @@
             </div>
 
             <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
-              <div class="tc-subtle-watermark">T&C News</div>
+              <div class="tc-subtle-watermark">T&C Hub</div>
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
@@ -361,9 +361,9 @@
             
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-base font-bold text-blue-500 flex items-center gap-2">
-                <i class="fa-solid fa-wind"></i> Real-Time Windy Radar Map
+                <i class="fa-solid fa-wind"></i> Weather Radar 
               </h2>
-              <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">100% Watermark Free</span>
+              <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">Live</span>
             </div>
 
             <div class="w-full h-[380px] sm:h-[420px] rounded-xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color);">
@@ -464,8 +464,8 @@
   <!-- FOOTER -->
   <footer class="py-6 px-4 text-xs mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-center md:text-left">
-      <div><b>Tasty & Comfort (T&C) Live Media Hub</b> • Apple Responsive Design</div>
-      <div>© 2026 T&C Media Portal. All rights reserved.</div>
+      <div><b> • Tasty & Comfort | T&C News Hub</b> </div>
+      <div>© 2026 T&C From New Modern Mission </div>
     </div>
   </footer>
 
@@ -551,7 +551,7 @@
       }
 
       const titleMap = {
-        'local': 'Telangana (State) Live Headlines',
+        'local': 'Telangana State Live Headlines',
         'national': 'India National News Bulletins',
         'world': 'Global Worldwide News Stream'
       };
@@ -600,8 +600,8 @@
             <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
               <div>
-                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Live RSS Items Published on ${selectedDateStr}</h4>
-                <p class="text-[11px] mt-1" style="color: var(--text-sub);">Access direct archive via link below:</p>
+                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Feed Items Published on ${selectedDateStr}</h4>
+                <p class="text-[11px] mt-1" style="color: var(--text-sub);">Access from direct source via link below:</p>
               </div>
               <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
                 class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
@@ -618,9 +618,9 @@
           const title = item.querySelector("title")?.textContent || "Untitled News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = item.querySelector("pubDate")?.textContent || "";
-          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
+          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Listed';
 
-          let sourceName = "T&C Verified News";
+          let sourceName = "Trusted by T&C";
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
           else if (link.includes("ntv")) sourceName = "NTV News";
           else if (link.includes("hindu")) sourceName = "The Hindu";
@@ -646,7 +646,7 @@
         feedContainer.innerHTML = html;
         badge.textContent = `Live (${filteredItems.length} Stories)`;
       } catch (err) {
-        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Live news feed currently unreachable.</div>`;
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Live news currently unreachable.</div>`;
         badge.textContent = "Error";
       }
     }
