@@ -264,7 +264,7 @@
         </div>
         <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
           <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
-          <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+          <span id="txt-brand-hub" class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
         </div>
       </div>
 
@@ -296,7 +296,7 @@
       <!-- Main Navigation, Language Switcher & Theme Toggle -->
       <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
         
-        <!-- APPLE LANGUAGE SWITCHER (MODEL A) -->
+        <!-- APPLE LANGUAGE SWITCHER -->
         <div class="relative inline-block text-left" id="lang-menu-wrapper">
           <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); color: var(--text-main);">
             <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
@@ -330,15 +330,15 @@
         <nav class="flex items-center gap-1 p-1 rounded-xl w-full md:w-auto justify-center" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <button id="tab-btn-news" onclick="switchMainTab('news')" 
             class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-newspaper mr-1.5"></i>Headlines
+            <i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span>
           </button>
           <button id="tab-btn-video" onclick="switchMainTab('video')" 
             class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-tv mr-1.5"></i>TV & Media
+            <i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV & Media</span>
           </button>
           <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
             class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);">
-            <i class="fa-solid fa-wind mr-1.5"></i>Radar
+            <i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span>
           </button>
         </nav>
 
@@ -356,7 +356,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
         <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
-        <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> USGS Quakes: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
+        <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
       </div>
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Cord: <b id="ticker-iss-pos">Syncing...</b></span>
@@ -378,12 +378,12 @@
           <div class="apple-card p-4">
             <div class="flex items-center justify-between border-b pb-3 mb-3" style="border-color: var(--border-color);">
               <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-2">
-                <i class="fa-solid fa-earth-americas"></i> World Highlights
+                <i class="fa-solid fa-earth-americas"></i> <span data-i18n="worldHighlights">World Highlights</span>
               </h2>
-              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">Latest</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold" data-i18n="latest">Latest</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="text-xs italic" style="color: var(--text-sub);">Connecting to live RSS feed...</div>
+              <div class="text-xs italic" style="color: var(--text-sub);" data-i18n="connectingRss">Connecting to live RSS feed...</div>
             </div>
           </div>
 
@@ -394,19 +394,19 @@
             <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1 sm:pb-0">
               <button id="scope-btn-local" onclick="setNewsScope('local')" 
                 class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
-                <i class="fa-solid fa-location-dot mr-1.5"></i>Telangana
+                <i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span>
               </button>
               <button id="scope-btn-national" onclick="setNewsScope('national')" 
                 class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
-                <i class="fa-solid fa-flag mr-1.5"></i>India
+                <i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span>
               </button>
               <button id="scope-btn-world" onclick="setNewsScope('world')" 
                 class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
-                <i class="fa-solid fa-globe mr-1.5"></i>World
+                <i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span>
               </button>
             </div>
 
-            <!-- Date Picker & ROTATING REFRESH BUTTON FIX -->
+            <!-- Date Picker & ROTATING REFRESH BUTTON -->
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl w-full sm:w-auto" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
@@ -426,11 +426,11 @@
               <h3 class="text-sm font-bold" style="color: var(--text-main);">
                 <span id="active-scope-title">Telangana State Live Headlines</span>
               </h3>
-              <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);">Syncing...</span>
+              <span id="news-status-badge" class="text-[11px]" style="color: var(--text-sub);" data-i18n="syncing">Syncing...</span>
             </div>
 
             <div id="news-feed-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              <div class="text-center py-10 text-xs" style="color: var(--text-sub);">Querying real-time RSS API...</div>
+              <div class="text-center py-10 text-xs" style="color: var(--text-sub);" data-i18n="queryingRss">Querying real-time RSS API...</div>
             </div>
           </div>
 
@@ -442,14 +442,14 @@
             
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-3">
-                <!-- LIVE PULSING DOT FIX -->
+                <!-- LIVE PULSING DOT -->
                 <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                <h3 id="current-channel-title" class="text-base font-bold text-blue-500">Networks</h3>
+                <h3 id="current-channel-title" class="text-base font-bold text-blue-500" data-i18n="networks">Networks</h3>
               </div>
 
               <!-- Channel Selector Bar -->
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
-                <button id="btn-video" onclick="setMode('video', this)">TV9 </button>
+                <button id="btn-video" onclick="setMode('video', this)">TV9</button>
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
                 <button id="btn-france24" onclick="setMode('france24', this)">France24</button>
@@ -470,7 +470,7 @@
             </div>
 
             <!-- Display Containers -->
-            <div id="text-view" class="p-6 rounded-xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);">
+            <div id="text-view" class="p-6 rounded-xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);" data-i18n="selectChannelPrompt">
               Select any live broadcast or media channel above to watch the continuous stream.
             </div>
 
@@ -496,7 +496,7 @@
             
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-base font-bold text-blue-500 flex items-center gap-2">
-                <i class="fa-solid fa-wind"></i> Weather Radar
+                <i class="fa-solid fa-wind"></i> <span data-i18n="weatherRadar">Weather Radar</span>
               </h2>
               <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">Live</span>
             </div>
@@ -513,26 +513,26 @@
 
             <div class="mb-4">
               <h3 class="text-xs font-bold uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-volcano"></i> USGS Earthquakes Tracker (24h)
+                <i class="fa-solid fa-volcano"></i> <span data-i18n="usgsTracker">USGS Earthquakes Tracker (24h)</span>
               </h3>
               <div id="osint-map" class="h-64 rounded-xl overflow-hidden" style="border: 1px solid var(--border-color);"></div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Altitude</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issAlt">ISS Altitude</p>
                 <p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Velocity</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issVel">ISS Velocity</p>
                 <p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">Space Crew Active</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="spaceCrew">Space Crew Active</p>
                 <p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">USGS M4.5+ Quakes</p>
+                <p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="usgsQuakesStat">USGS M4.5+ Quakes</p>
                 <p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p>
               </div>
             </div>
@@ -548,7 +548,7 @@
         <!-- Markets Card -->
         <div class="apple-card p-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-line"></i> Live Exchange Rates
+            <i class="fa-solid fa-chart-line"></i> <span data-i18n="liveExchange">Live Exchange Rates</span>
           </h3>
           <div class="space-y-2 text-xs">
             <div class="flex items-center justify-between p-2.5 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
@@ -565,7 +565,7 @@
         <!-- Fact Check Links -->
         <div class="apple-card p-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved"></i> Fact-Check Portal
+            <i class="fa-solid fa-shield-halved"></i> <span data-i18n="factCheck">Fact-Check Portal</span>
           </h3>
           <div class="flex flex-col gap-2 text-xs">
             <a href="https://factly.in" target="_blank" rel="noopener" 
@@ -575,7 +575,7 @@
             </a>
             <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" 
               class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <span>USGS Earthquakes Direct</span>
+              <span data-i18n="usgsDirect">USGS Earthquakes Direct</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
           </div>
@@ -584,10 +584,10 @@
         <!-- ISS Crew Manifest -->
         <div class="apple-card p-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-user-astronaut"></i> ISS Crew Manifest
+            <i class="fa-solid fa-user-astronaut"></i> <span data-i18n="issManifest">ISS Crew Manifest</span>
           </h3>
           <div id="iss-crew-list" class="space-y-1.5 text-xs max-h-48 overflow-y-auto" style="color: var(--text-sub);">
-            <div class="italic">Querying space manifest...</div>
+            <div class="italic" data-i18n="queryingManifest">Querying space manifest...</div>
           </div>
         </div>
 
@@ -599,8 +599,8 @@
   <!-- FOOTER -->
   <footer class="py-6 px-4 text-xs mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-center md:text-left">
-      <div><b>Tasty & Comfort • T&C News Hub</b> </div>
-      <div>© 2026 T&C From New Modern Mission <p> • Build & Developed by Murali Manohar •</p></div>
+      <div data-i18n="footerBrand"><b>Tasty & Comfort • T&C News Hub</b></div>
+      <div data-i18n="footerCopy">© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •</div>
     </div>
   </footer>
 
@@ -612,6 +612,106 @@
     const TODAY_DATE = '2026-10-26';
     let leafletMap = null;
     let issMarker = null;
+
+    // Multilingual Dictionary for UI labels across EN, TE, HI, KN, TA, ML
+    const i18n = {
+      en: {
+        newsHub: "NEWS HUB", headlines: "Headlines", tvMedia: "TV & Media", radar: "Radar",
+        usgsQuakes: "USGS Quakes", worldHighlights: "World Highlights", latest: "Latest",
+        connectingRss: "Connecting to live RSS feed...", telanganaScope: "Telangana",
+        indiaScope: "India", worldScope: "World", syncing: "Syncing...", queryingRss: "Querying real-time RSS API...",
+        networks: "Networks", selectChannelPrompt: "Select any live broadcast or media channel above to watch the continuous stream.",
+        weatherRadar: "Weather Radar", usgsTracker: "USGS Earthquakes Tracker (24h)", issAlt: "ISS Altitude",
+        issVel: "ISS Velocity", spaceCrew: "Space Crew Active", usgsQuakesStat: "USGS M4.5+ Quakes",
+        liveExchange: "Live Exchange Rates", factCheck: "Fact-Check Portal", usgsDirect: "USGS Earthquakes Direct",
+        issManifest: "ISS Crew Manifest", queryingManifest: "Querying space manifest...",
+        footerBrand: "Tasty & Comfort • T&C News Hub",
+        footerCopy: "© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •",
+        scopeLocalTitle: "Telangana State Live Headlines",
+        scopeNatTitle: "India National News Bulletins",
+        scopeWorldTitle: "Global Worldwide News Stream"
+      },
+      te: {
+        newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", tvMedia: "టీవీ & మీడియా", radar: "రాడార్",
+        usgsQuakes: "భూకంపాలు", worldHighlights: "ప్రపంచ ముఖ్యాంశాలు", latest: "తాజా",
+        connectingRss: "లైవ్ ఫీడ్‌కి కనెక్ట్ అవుతోంది...", telanganaScope: "తెలంగాణ",
+        indiaScope: "భారత్", worldScope: "ప్రపంచం", syncing: "సింక్ అవుతోంది...", queryingRss: "రియల్ టైమ్ వార్తలు లోడ్ అవుతున్నాయి...",
+        networks: "నెట్‌వర్క్స్", selectChannelPrompt: "ప్రత్యక్ష ప్రసారాన్ని వీక్షించడానికి పైన ఏదైనా ఛానెల్‌ని ఎంచుకోండి.",
+        weatherRadar: "వాతావరణ రాడార్", usgsTracker: "భూకంపాల ట్రాకర్ (24గం)", issAlt: "ISS ఎత్తు",
+        issVel: "ISS వేగం", spaceCrew: "వ్యోమగాములు", usgsQuakesStat: "భూకంప తీవ్రత",
+        liveExchange: "కరెన్సీ మార్పిడి రేట్లు", factCheck: "ఫాక్ట్-చెआप పోర్టల్", usgsDirect: "USGS భూకంపాలు",
+        issManifest: "ISS సిబ్బంది జాబితా", queryingManifest: "సమాచారం సేకరిస్తోంది...",
+        footerBrand: "టేస్టీ & కంఫర్ట్ • T&C న్యూస్ హబ్",
+        footerCopy: "© 2026 T&C న్యూ మోడరన్ మిషన్ • మురళి మనోహర్ చేత రూపకల్పన చేయబడింది •",
+        scopeLocalTitle: "తెలంగాణ రాష్ట్ర లైవ్ ముఖ్యాంశాలు",
+        scopeNatTitle: "భారత జాతీయ వార్తలు",
+        scopeWorldTitle: "అంతర్జాతీయ వార్తల ప్రవాహం"
+      },
+      hi: {
+        newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", tvMedia: "टीवी और मीडिया", radar: "रडार",
+        usgsQuakes: "भूकंप", worldHighlights: "विश्व मुख्य समाचार", latest: "नवीनतम",
+        connectingRss: "लाइव फ़ीड से कनेक्ट हो रहा है...", telanganaScope: "तेलंगाना",
+        indiaScope: "भारत", worldScope: "विश्व", syncing: "सिंक हो रहा है...", queryingRss: "रीयल-टाइम आरएसएस एपीआई लोड हो रहा है...",
+        networks: "नेटवर्क", selectChannelPrompt: "लाइव प्रसारण देखने के लिए ऊपर दिए गए किसी भी चैनल का चयन करें।",
+        weatherRadar: "मौसम रडार", usgsTracker: "भूकंप ट्रैकर (24घं)", issAlt: "आईएसएस ऊंचाई",
+        issVel: "आईएसएस वेग", spaceCrew: "सक्रिय अंतरिक्ष यात्री", usgsQuakesStat: "भूकंप तीव्रता",
+        liveExchange: "विनिमय दर", factCheck: "फैक्ट-चेक पोर्टल", usgsDirect: "यूएसजीएस भूकंप डायरेक्ट",
+        issManifest: "आईएसएस क्रू मेनिफेस्ट", queryingManifest: "अंतरिक्ष डेटा लोड हो रहा है...",
+        footerBrand: "टेस्टी एंड कम्फर्ट • T&C न्यूज़ हब",
+        footerCopy: "© 2026 T&C न्यू मॉडर्न मिशन • मुरली मनोहर द्वारा निर्मित •",
+        scopeLocalTitle: "तेलंगाना राज्य लाइव मुख्य समाचार",
+        scopeNatTitle: "भारत राष्ट्रीय समाचार बुलेटिन",
+        scopeWorldTitle: "वैश्विक समाचार स्ट्रीम"
+      },
+      kn: {
+        newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್",
+        usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ",
+        connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ",
+        indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
+        networks: "ನೆಟ್‌ವರ್ಕ್‌ಗಳು", selectChannelPrompt: "ಲೈವ್ ಪ್ರಸಾರ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಯಾವುದೇ ಚಾನೆಲ್ ಆಯ್ಕೆಮಾಡಿ.",
+        weatherRadar: "ಹವಾಮಾನ ರೇಡಾರ್", usgsTracker: "ಭೂಕಂಪ ಟ್ರ್ಯಾಕರ್ (24ಗಂಟೆ)", issAlt: "ISS ಎತ್ತರ",
+        issVel: "ISS ವೇಗ", spaceCrew: "ಗಗನಯಾತ್ರಿಗಳು", usgsQuakesStat: "ಭೂಕಂಪಗಳ ತೀವ್ರತೆ",
+        liveExchange: "ವಿನಿಮಯ ದರಗಳು", factCheck: "ಫ್ಯಾಕ್ಟ್-ಚೆಕ್ ಪೋರ್ಟಲ್", usgsDirect: "USGS ಭೂಕಂಪಗಳು",
+        issManifest: "ISS ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ", queryingManifest: "ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
+        footerBrand: "ಟೇಸ್ಟಿ & ಕಂಫರ್ಟ್ • T&C ನ್ಯೂಸ್ ಹಬ್",
+        footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮನೋಹರ್ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •",
+        scopeLocalTitle: "ತೆಲಂಗಾಣ ರಾಜ್ಯ ಲೈವ್ ಮುಖ್ಯಾಂಶಗಳು",
+        scopeNatTitle: "ಭಾರತ ರಾಷ್ಟ್ರೀಯ ಸುದ್ದಿ ಬುಲೆಟಿನ್‌ಗಳು",
+        scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್"
+      },
+      ta: {
+        newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்",
+        usgsQuakes: "நிலநடுக்கங்கள்", worldHighlights: "உலக முக்கியச் செய்திகள்", latest: "சமீபத்திய",
+        connectingRss: "நேலைலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா",
+        indiaScope: "இந்தியா", worldScope: "உலகம்", syncing: "ஒத்திசைக்கிறது...", queryingRss: "செய்திகள் ஏற்றப்படுகின்றன...",
+        networks: "வலைப்பின்னல்கள்", selectChannelPrompt: "நேரலை ஒளிபரப்பைக் காண மேலே உள்ள எந்தவொரு சேனலையும் தேர்ந்தெடுக்கவும்.",
+        weatherRadar: "வானிலை ரேடார்", usgsTracker: "நிலநடுக்க கண்காணிப்பு (24மணி)", issAlt: "ISS உயரம்",
+        issVel: "ISS வேகம்", spaceCrew: "விண்வெளி வீரர்கள்", usgsQuakesStat: "நிலநடுக்க அளவீடு",
+        liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்",
+        issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...",
+        footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்",
+        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
+        scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்",
+        scopeNatTitle: "இந்திய தேசிய செய்தி বুলেটின்கள்",
+        scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
+      },
+      ml: {
+        newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ",
+        usgsQuakes: "ഭൂകമ്പങ്ങൾ", worldHighlights: "ലോക വാർത്തകൾ", latest: "ഏറ്റവും പുതിയത്",
+        connectingRss: "ലൈവ് ഫീഡുമായി ബന്ധിപ്പിക്കുന്നു...", telanganaScope: "തെലങ്കാന",
+        indiaScope: "ഇന്ത്യ", worldScope: "ലോകം", syncing: "സിങ്ക് ചെയ്യുന്നു...", queryingRss: "വാർത്തകൾ ലഭ്യമാക്കുന്നു...",
+        networks: "നെറ്റ്‌വർക്കുകൾ", selectChannelPrompt: "തത്സമയ സംപ്രേക്ഷണം കാണാൻ മുകളിലുള്ള ഏതെങ്കിലും ചാനൽ തിരഞ്ഞെടുക്കുക.",
+        weatherRadar: "കാലാവസ്ഥാ റഡാർ", usgsTracker: "ഭൂകമ്പ ട്രാക്കർ (24മ)", issAlt: "ISS ഉയരം",
+        issVel: "ISS വേഗത", spaceCrew: "ബഹിരാകാശ സഞ്ചാരികൾ", usgsQuakesStat: "ഭൂകമ്പ തീവ്രത",
+        liveExchange: "നാണയ വിനിമയ നിരക്കുകൾ", factCheck: "ഫാക്റ്റ് ചെക്ക് പോർട്ടൽ", usgsDirect: "USGS ഭൂകമ്പങ്ങൾ",
+        issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...",
+        footerBrand: "ടേസ്റ്റി & കംഫർട്ട് • T&C ന്യൂസ് ഹബ്",
+        footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിഷൻ • മുരളി മനോഹർ നിർമ്മിച്ചത് •",
+        scopeLocalTitle: "തെലങ്കാന സംസ്ഥാന ലൈവ് വാർത്തകൾ",
+        scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ",
+        scopeWorldTitle: "ആഗോള വാർത്താ പ്രവാഹം"
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const dateInput = document.getElementById('news-date-picker');
@@ -643,11 +743,29 @@
       dropdown.classList.toggle('hidden');
     }
 
-    // Change Language Engine
+    // Change Language Engine & Apply Dynamic Translation
     function changeLanguage(langCode) {
       currentLanguage = langCode;
       document.getElementById('current-lang-code').textContent = langCode.toUpperCase();
       document.getElementById('lang-dropdown').classList.add('hidden');
+
+      // Update UI texts based on i18n dictionary
+      const dict = i18n[langCode] || i18n.en;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      // Update active scope title dynamically
+      const titleMap = {
+        'local': dict.scopeLocalTitle,
+        'national': dict.scopeNatTitle,
+        'world': dict.scopeWorldTitle
+      };
+      document.getElementById('active-scope-title').textContent = titleMap[currentScope];
+
       fetchPortalNews();
     }
 
@@ -733,10 +851,11 @@
         activeBtn.style.border = "none";
       }
 
+      const dict = i18n[currentLanguage] || i18n.en;
       const titleMap = {
-        'local': 'Telangana State Live Headlines',
-        'national': 'India National News Bulletins',
-        'world': 'Global Worldwide News Stream'
+        'local': dict.scopeLocalTitle,
+        'national': dict.scopeNatTitle,
+        'world': dict.scopeWorldTitle
       };
       document.getElementById('active-scope-title').textContent = titleMap[scope];
       fetchPortalNews();
