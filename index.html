@@ -97,7 +97,6 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    /* Hardware Acceleration for Smooth Playback & Animation */
     video, iframe, #active-video-container, #file-view {
       transform: translateZ(0);
       will-change: transform;
@@ -511,7 +510,7 @@
     const TODAY_DATE = '2026-10-26';
     let leafletMap = null;
     let issMarker = null;
-    const translationCache = {}; // Cache to make translation lightning fast
+    const translationCache = {};
 
     const i18n = {
       en: {
@@ -659,7 +658,6 @@
       fetchPortalNews();
     }
 
-    // Cached Translation function for blazing speed
     async function translateText(text, targetLang) {
       if (targetLang === 'en' || !text) return text;
       const cacheKey = `${targetLang}:${text}`;
@@ -773,33 +771,104 @@
 
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live stories...</div>';
+      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading stories...</div>';
 
       try {
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&date=${selectedDateStr}`);
         if (!res.ok) throw new Error("API error");
         
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        const items = Array.from(xml.querySelectorAll("item")).slice(0, 10); // Limit to 10 for lightning performance
+        let items = Array.from(xml.querySelectorAll("item"));
+
+        // Sort stories strictly from newest to oldest (latest first)
+        items.sort((a, b) => {
+          const dateA = new Date(a.querySelector("pubDate")?.textContent || 0);
+          const dateB = new Date(b.querySelector("pubDate")?.textContent || 0);
+          return dateB - dateA;
+        });
+
+        let filteredItems = items.filter(item => {
+          const pubDate = item.querySelector("pubDate")?.textContent;
+          if (!pubDate) return true;
+          const itemDateStr = new Date(pubDate).toISOString().split('T')[0];
+          return itemDateStr === selectedDateStr;
+        });
+
+        if (filteredItems.length === 0 && items.length > 0) {
+          filteredItems = items.slice(0, 10);
+        }
+
+        if (filteredItems.length === 0) {
+          const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
+          const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
+
+          feedContainer.innerHTML = `
+            <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
+              <div>
+                <h4 class="text-xs font-bold" style="color: var(--text-main);">No RSS Records Stored for ${selectedDateStr}</h4>
+                <p class="text-[11px] mt-1" style="color: var(--text-sub);">Standard live feeds track current breaking stories. Click below for archived news:</p>
+              </div>
+              <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
+                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Archive (${selectedDateStr})
+              </a>
+            </div>
+          `;
+          badge.textContent = "Archive Search Mode";
+          return;
+        }
 
         let html = '';
-        for (const item of items) {
+        const displayList = filteredItems.slice(0, 10);
+
+        for (const item of displayList) {
           const rawTitle = item.querySelector("title")?.textContent || "News Story";
           const link = item.querySelector("link")?.textContent || "#";
-          const pubDate = item.querySelector("pubDate")?.textContent || "";
-          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
+          const pubDateStr = item.querySelector("pubDate")?.textContent || "";
+          
+          // Formatted as requested: Published at 10:45 AM, 26th Oct 2026
+          let formattedDateTime = "Live Feed";
+          if (pubDateStr) {
+            const dateObj = new Date(pubDateStr);
+            const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const day = dateObj.getDate();
+            
+            // Add ordinal suffix (st, nd, rd, th)
+            const getOrdinal = (n) => {
+              if (n > 3 && n < 21) return 'th';
+              switch (n % 10) {
+                case 1:  return "st";
+                case 2:  return "nd";
+                case 3:  return "rd";
+                default: return "th";
+              }
+            };
+            
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const monthPart = monthNames[dateObj.getMonth()];
+            const yearPart = dateObj.getFullYear();
+
+            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthPart} ${yearPart}`;
+          }
 
           const title = await translateText(rawTitle, currentLanguage);
           let sourceName = "T&C Verified";
+          if (link.includes("tv9")) sourceName = "TV9 Telugu";
+          else if (link.includes("france24")) sourceName = "France24";
+          else if (link.includes("hindu")) sourceName = "The Hindu";
 
+          // Note: Headline is rendered as plain text (no <a> tag), ensuring clicking anywhere except the source badge does not open links.
           html += `
             <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
-                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold hover:text-blue-500 transition-colors line-clamp-2" style="color: var(--text-main);">${title}</a>
+                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
+                  ${title}
+                </h4>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
                   <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
-                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
                 </div>
               </div>
               <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
@@ -809,9 +878,9 @@
           `;
         }
         feedContainer.innerHTML = html;
-        badge.textContent = `Live (${items.length} Stories)`;
+        badge.textContent = `Live (${displayList.length} Stories)`;
       } catch (err) {
-        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Feed currently offline.</div>`;
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
         badge.textContent = "Error";
       } finally {
         if (refreshIcon) refreshIcon.classList.remove('fa-spin');
@@ -824,10 +893,13 @@
         const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=world`);
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
+        let items = Array.from(xml.querySelectorAll("item"));
+        
+        items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
+        const topItems = items.slice(0, 3);
 
         let html = '';
-        for (const item of items) {
+        for (const item of topItems) {
           const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           const title = await translateText(rawTitle, currentLanguage);
@@ -866,7 +938,7 @@
       textView.style.display = 'none';
       activeVideoContainer.style.display = 'none';
       fileView.style.display = 'none';
-      masterPlayer.src = "about:blank"; // Instant flush memory to prevent lag
+      masterPlayer.src = "about:blank"; 
       filePlayer.pause();
       filePlayer.src = "";
 
@@ -957,7 +1029,7 @@
         } catch(e) {}
       }
       updateISS();
-      setInterval(updateISS, 15000); // Optimized polling interval to save CPU
+      setInterval(updateISS, 15000);
     }
 
     async function initISSManifest() {
