@@ -193,23 +193,23 @@
 
         </section>
 
-        <!-- TAB 2: LIVE TV & MEDIA PLAYER (With Local Video Upload) -->
+        <!-- TAB 2: LIVE TV & MEDIA PLAYER (Restored All Channels + Optional Local Upload) -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
             
             <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
-                <i class="fa-solid fa-tv"></i> Live Broadcast TV & Local Media Player
+                <i class="fa-solid fa-tv"></i> Live Broadcast TV & Educational Streams
               </h2>
               
-              <!-- Local Video File Upload Input -->
-              <label class="px-3 py-1.5 bg-brand-amber text-slate-950 font-bold rounded-xl text-xs cursor-pointer hover:bg-amber-400 transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-file-video"></i> Upload Downloaded Video
+              <!-- Optional Local Video File Upload Input -->
+              <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-brand-blue border border-brand-border font-bold rounded-xl text-xs cursor-pointer transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-upload"></i> Upload Local Video (Optional)
                 <input type="file" id="local-video-input" accept="video/*" class="hidden" onchange="handleLocalVideoUpload(event)">
               </label>
             </div>
 
-            <!-- Stream Horizontal Selector Chips -->
+            <!-- Stream Horizontal Selector Chips (Restored All Channels) -->
             <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-thin">
               <button onclick="switchStream('II_m28Bm-iM', 'TV9 Live Broadcast', this)" 
                 class="stream-chip active px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-brand-blue text-slate-950 shadow-md">
@@ -231,18 +231,32 @@
                 class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
                 <i class="fa-solid fa-plane mr-1.5"></i>Airside Aviation
               </button>
+              <button onclick="switchStream('FFtPSPByBmk', 'Bhagavad Gita Educational', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Bhagavad Gita
+              </button>
+              <button onclick="switchStream('_1FpcN1U_KY', 'Quran Holy Recitation', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Quran Recitation
+              </button>
+              <button onclick="switchStream('dmgsOBr2lAA', 'Bible Audio Studies', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Bible Studies
+              </button>
+              <button onclick="switchStream('U71NrLiWWjI', 'Constitution & Law Lectures', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-scale-balanced mr-1.5"></i>Constitution & Law
+              </button>
             </div>
 
-            <!-- Dual Video Player Canvas (YouTube Embed vs HTML5 Local Video) -->
+            <!-- Dual Video Player Canvas -->
             <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl">
-              <!-- YouTube Embed -->
               <iframe id="stream-player-iframe" 
                 class="absolute top-0 left-0 w-full h-full border-0" 
                 src="https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
               </iframe>
-              <!-- Local HTML5 Video Tag -->
               <video id="local-video-player" controls class="hidden absolute top-0 left-0 w-full h-full bg-black">
                 Your browser does not support HTML5 video playback.
               </video>
@@ -267,7 +281,7 @@
               <span class="text-xs bg-brand-green/10 text-brand-green border border-brand-green/30 px-2.5 py-1 rounded-full font-bold">100% Watermark Free</span>
             </div>
 
-            <!-- Embedded Windy Live Satellite & Radar Map (No API Key Warning) -->
+            <!-- Embedded Windy Live Satellite & Radar Map -->
             <div class="w-full h-[420px] rounded-xl overflow-hidden border border-brand-border shadow-inner mb-4">
               <iframe 
                 width="100%" 
@@ -278,7 +292,7 @@
               </iframe>
             </div>
 
-            <!-- USGS Live Seismic Radar (Leaflet OpenStreetMap Tiles - Watermark Free) -->
+            <!-- USGS Live Seismic Radar -->
             <div class="mb-4">
               <h3 class="text-xs font-bold uppercase tracking-wider text-brand-red mb-2 flex items-center gap-2">
                 <i class="fa-solid fa-volcano"></i> Real-Time USGS Earthquakes Map (24h Live Stream)
@@ -486,7 +500,6 @@
       fetchPortalNews();
     }
 
-    // STRICT REAL-TIME NEWS FETCHING (STRICT DATE MATCHING - NO FAKE FALLBACKS)
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
@@ -503,7 +516,6 @@
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
         const items = Array.from(xml.querySelectorAll("item"));
 
-        // Filter strictly by the user's chosen published date
         const filteredItems = items.filter(item => {
           const pubDate = item.querySelector("pubDate")?.textContent;
           if (!pubDate) return true;
@@ -587,7 +599,6 @@
       }
     }
 
-    // REAL-TIME FOREX EXCHANGE API (NO HARDCODED NUMBERS)
     async function fetchRealTimeForex() {
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -604,7 +615,6 @@
       }
     }
 
-    // LOCAL VIDEO UPLOAD PLAYER CONTROLLER
     function handleLocalVideoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -616,14 +626,13 @@
 
       const fileUrl = URL.createObjectURL(file);
       
-      // Hide YouTube Iframe, Show HTML5 Video Player
       iframePlayer.classList.add('hidden');
       localPlayer.classList.remove('hidden');
       
       localPlayer.src = fileUrl;
       localPlayer.play();
 
-      streamTitle.textContent = `📁 File: ${file.name}`;
+      streamTitle.textContent = `📁 Uploaded File: ${file.name}`;
       statusBadge.textContent = `Local File Playback (${(file.size / (1024*1024)).toFixed(1)} MB)`;
     }
 
@@ -631,7 +640,6 @@
       const iframePlayer = document.getElementById('stream-player-iframe');
       const localPlayer = document.getElementById('local-video-player');
       
-      // Reset local player and show YouTube embed iframe
       localPlayer.pause();
       localPlayer.classList.add('hidden');
       iframePlayer.classList.remove('hidden');
@@ -657,11 +665,9 @@
       document.getElementById('audio-notice-toast').classList.add('hidden');
     }
 
-    // 100% WATERMARK-FREE OPENSTREETMAP TILE LAYER
     function initOSINTMap() {
       leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
       
-      // Clean OpenStreetMap tiles with NO API Key requirement or watermarks
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 18
@@ -775,4 +781,3 @@
   </script>
 </body>
 </html>
-
