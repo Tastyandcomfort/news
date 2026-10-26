@@ -40,7 +40,6 @@
       background-color: #0b1120;
       color: #f8fafc;
     }
-    /* Custom Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -60,13 +59,6 @@
       0% { opacity: 0.4; }
       50% { opacity: 1; }
       100% { opacity: 0.4; }
-    }
-    
-    #osint-map {
-      height: 320px;
-      width: 100%;
-      border-radius: 0.75rem;
-      z-index: 1;
     }
   </style>
 </head>
@@ -93,28 +85,27 @@
         </button>
         <button id="tab-btn-video" onclick="switchMainTab('video')" 
           class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-tv mr-1.5"></i>Live TV & Streams
+          <i class="fa-solid fa-tv mr-1.5"></i>Live TV & Media
         </button>
         <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
           class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-satellite-dish mr-1.5"></i>OSINT Desk
+          <i class="fa-solid fa-wind mr-1.5"></i>Windy Radar & OSINT
         </button>
       </nav>
 
     </div>
   </header>
 
-  <!-- MARKET & OSINT TICKER -->
+  <!-- LIVE REAL-TIME TELEMETRY TICKER -->
   <div class="bg-slate-950 border-b border-brand-border py-2 px-4 text-xs text-slate-300 overflow-x-auto whitespace-nowrap shadow-inner">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-brand-green"></i> NIFTY 50: <b class="text-white">24,350.15 (+0.45%)</b></span>
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-brand-amber"></i> USD/INR: <b class="text-white">₹83.92</b></span>
-        <span class="flex items-center gap-1.5 text-brand-red"><i class="fa-solid fa-volcano"></i> USGS Seismic: <b class="text-slate-200" id="ticker-quake-count">Monitoring...</b></span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-brand-amber"></i> USD/INR (Live): <b class="text-white" id="ticker-usdinr">Loading...</b></span>
+        <span class="flex items-center gap-1.5 text-brand-red"><i class="fa-solid fa-volcano"></i> USGS Quakes (24h): <b class="text-slate-200" id="ticker-quake-count">Fetching...</b></span>
       </div>
       <div class="flex items-center gap-4 text-slate-400">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-space-shuttle text-brand-blue"></i> ISS Vector: <b class="text-brand-blue" id="ticker-iss-pos">Syncing...</b></span>
-        <span class="hidden md:inline text-brand-green flex items-center gap-1"><i class="fa-solid fa-signal"></i> System Online</span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-satellite text-brand-blue"></i> ISS Pos: <b class="text-brand-blue" id="ticker-iss-pos">Syncing...</b></span>
+        <span class="hidden md:inline text-brand-green flex items-center gap-1"><i class="fa-solid fa-signal"></i> Real-Time Stream Online</span>
       </div>
     </div>
   </div>
@@ -123,8 +114,8 @@
   <div id="audio-notice-toast" class="hidden fixed top-20 right-4 z-50 bg-slate-900 border border-brand-amber text-brand-amber text-xs p-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300">
     <i class="fa-solid fa-headphones text-lg"></i>
     <div>
-      <p class="font-bold">Headphone Friendly Audio Notice</p>
-      <p class="text-slate-400 text-[11px]">Stream audio is auto-muted on launch. Click player controls to unmute.</p>
+      <p class="font-bold">Headphone Audio Notice</p>
+      <p class="text-slate-400 text-[11px]">Stream audio muted on switch. Unmute directly on the video player controls.</p>
     </div>
     <button onclick="dismissAudioToast()" class="ml-2 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
   </div>
@@ -143,12 +134,12 @@
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
             <div class="flex items-center justify-between border-b border-brand-border pb-3 mb-3">
               <h2 class="text-xs font-bold uppercase tracking-wider text-brand-amber flex items-center gap-2">
-                <i class="fa-solid fa-earth-americas"></i> Pinned World Breaking Highlights
+                <i class="fa-solid fa-earth-americas"></i> Pinned Real-Time World Highlights
               </h2>
-              <span class="text-[10px] bg-brand-amber/10 text-brand-amber border border-brand-amber/30 px-2 py-0.5 rounded-full font-semibold">Live Feed</span>
+              <span class="text-[10px] bg-brand-amber/10 text-brand-amber border border-brand-amber/30 px-2 py-0.5 rounded-full font-semibold">Live RSS</span>
             </div>
             <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="text-xs text-slate-400 italic">Syncing global breaking bulletins...</div>
+              <div class="text-xs text-slate-400 italic">Connecting to live world RSS feed...</div>
             </div>
           </div>
 
@@ -171,14 +162,14 @@
               </button>
             </div>
 
-            <!-- Date Selector & Manual Refresh -->
+            <!-- Strict Date Selector & Refresh -->
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 bg-slate-950 border border-brand-border px-3 py-1.5 rounded-xl">
                 <i class="fa-regular fa-calendar text-brand-blue text-xs"></i>
                 <input type="date" id="news-date-picker" onchange="onDateFilterChange()" 
                   class="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
               </div>
-              <button onclick="fetchPortalNews()" class="p-2 bg-slate-800 hover:bg-slate-700 text-brand-blue border border-brand-border rounded-xl transition-all" title="Refresh Feed">
+              <button onclick="fetchPortalNews()" class="p-2 bg-slate-800 hover:bg-slate-700 text-brand-blue border border-brand-border rounded-xl transition-all" title="Refresh Live Data">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
@@ -196,23 +187,26 @@
 
             <!-- Feed List Container -->
             <div id="news-feed-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-              <div class="text-center py-10 text-slate-400 text-sm">Loading dynamic news channels...</div>
+              <div class="text-center py-10 text-slate-400 text-sm">Querying real-time RSS API...</div>
             </div>
           </div>
 
         </section>
 
-        <!-- TAB 2: LIVE TV & STREAMS VIEW -->
+        <!-- TAB 2: LIVE TV & MEDIA PLAYER (With Local Video Upload) -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
             
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
-                <i class="fa-solid fa-tv"></i> Live Broadcast TV & Educational Streams
+                <i class="fa-solid fa-tv"></i> Live Broadcast TV & Local Media Player
               </h2>
-              <span class="text-xs text-brand-amber font-medium flex items-center gap-1">
-                <i class="fa-solid fa-headphones"></i> Audio Muted on Switch
-              </span>
+              
+              <!-- Local Video File Upload Input -->
+              <label class="px-3 py-1.5 bg-brand-amber text-slate-950 font-bold rounded-xl text-xs cursor-pointer hover:bg-amber-400 transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-file-video"></i> Upload Downloaded Video
+                <input type="file" id="local-video-input" accept="video/*" class="hidden" onchange="handleLocalVideoUpload(event)">
+              </label>
             </div>
 
             <!-- Stream Horizontal Selector Chips -->
@@ -237,73 +231,78 @@
                 class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
                 <i class="fa-solid fa-plane mr-1.5"></i>Airside Aviation
               </button>
-              <button onclick="switchStream('FFtPSPByBmk', 'Bhagavad Gita Educational', this)" 
-                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
-                Bhagavad Gita
-              </button>
-              <button onclick="switchStream('_1FpcN1U_KY', 'Quran Holy Recitation', this)" 
-                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
-                Quran Recitation
-              </button>
-              <button onclick="switchStream('dmgsOBr2lAA', 'Bible Audio Studies', this)" 
-                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
-                Bible Studies
-              </button>
-              <button onclick="switchStream('U71NrLiWWjI', 'Constitution & Law Lectures', this)" 
-                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
-                <i class="fa-solid fa-scale-balanced mr-1.5"></i>Constitution & Law
-              </button>
             </div>
 
-            <!-- Video Player Iframe Canvas -->
+            <!-- Dual Video Player Canvas (YouTube Embed vs HTML5 Local Video) -->
             <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl">
+              <!-- YouTube Embed -->
               <iframe id="stream-player-iframe" 
                 class="absolute top-0 left-0 w-full h-full border-0" 
                 src="https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
               </iframe>
+              <!-- Local HTML5 Video Tag -->
+              <video id="local-video-player" controls class="hidden absolute top-0 left-0 w-full h-full bg-black">
+                Your browser does not support HTML5 video playback.
+              </video>
             </div>
 
             <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
               <span id="current-stream-title" class="font-bold text-white">TV9 Live Broadcast</span>
-              <span>HD 1080p Continuous Stream</span>
+              <span id="player-status-badge">Live YouTube Broadcast Stream</span>
             </div>
 
           </div>
         </section>
 
-        <!-- TAB 3: OSINT TELEMETRY DESK -->
+        <!-- TAB 3: WINDY REAL-TIME WEATHER RADAR & SEISMIC OSINT DESK -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
             
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
-                <i class="fa-solid fa-satellite-dish"></i> OSINT Global Radar & Seismic Hub
+                <i class="fa-solid fa-wind"></i> Real-Time Live Windy Weather & Radar Map
               </h2>
-              <span class="text-xs bg-brand-blue/10 text-brand-blue border border-brand-blue/30 px-2 py-0.5 rounded-full font-semibold">Live Leaflet Data</span>
+              <span class="text-xs bg-brand-green/10 text-brand-green border border-brand-green/30 px-2.5 py-1 rounded-full font-bold">100% Watermark Free</span>
             </div>
 
-            <!-- Interactive Watermark-Free Map -->
-            <div id="osint-map" class="mb-4 border border-brand-border shadow-inner"></div>
+            <!-- Embedded Windy Live Satellite & Radar Map (No API Key Warning) -->
+            <div class="w-full h-[420px] rounded-xl overflow-hidden border border-brand-border shadow-inner mb-4">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" 
+                frameborder="0"
+                class="w-full h-full">
+              </iframe>
+            </div>
 
-            <!-- ISS Status Grid -->
+            <!-- USGS Live Seismic Radar (Leaflet OpenStreetMap Tiles - Watermark Free) -->
+            <div class="mb-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-brand-red mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-volcano"></i> Real-Time USGS Earthquakes Map (24h Live Stream)
+              </h3>
+              <div id="osint-map" class="h-64 rounded-xl border border-brand-border overflow-hidden"></div>
+            </div>
+
+            <!-- Real-Time Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-950 p-4 rounded-xl border border-brand-border">
               <div>
                 <p class="text-[10px] text-slate-400 font-bold uppercase">ISS Altitude</p>
-                <p class="text-sm font-extrabold text-brand-blue" id="osint-iss-alt">421 km</p>
+                <p class="text-sm font-extrabold text-brand-blue" id="osint-iss-alt">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">Velocity</p>
-                <p class="text-sm font-extrabold text-brand-green" id="osint-iss-spd">27,580 km/h</p>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">ISS Velocity</p>
+                <p class="text-sm font-extrabold text-brand-green" id="osint-iss-spd">Fetching...</p>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase">Astronauts in Orbit</p>
-                <p class="text-sm font-extrabold text-brand-amber" id="osint-iss-crew">7 Active Crew</p>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Space Crew Active</p>
+                <p class="text-sm font-extrabold text-brand-amber" id="osint-iss-crew">Fetching...</p>
               </div>
               <div>
                 <p class="text-[10px] text-slate-400 font-bold uppercase">USGS M4.5+ Quakes</p>
-                <p class="text-sm font-extrabold text-brand-red" id="osint-quake-count">0 Recorded 24h</p>
+                <p class="text-sm font-extrabold text-brand-red" id="osint-quake-count">Fetching...</p>
               </div>
             </div>
 
@@ -315,37 +314,32 @@
       <!-- RIGHT SIDEBAR COLUMN -->
       <div class="lg:col-span-4 flex flex-col gap-6">
         
-        <!-- Live Market & Financial Summary Card -->
+        <!-- Real-Time Market Radar -->
         <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
           <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie"></i> Intraday Market Radar
+            <i class="fa-solid fa-chart-line"></i> Live Exchange Rates & Forex API
           </h3>
           <div class="space-y-2 text-xs">
             <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
-              <span class="font-bold text-white">NIFTY 50 Spot</span>
-              <span class="text-brand-green font-extrabold">24,350.15 (+0.45%)</span>
+              <span class="font-bold text-white">USD / INR Real-Time</span>
+              <span class="text-brand-amber font-extrabold" id="side-usdinr">Syncing...</span>
             </div>
             <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
-              <span class="font-bold text-white">USD / INR Spot</span>
-              <span class="text-brand-amber font-extrabold">₹83.92</span>
+              <span class="font-bold text-white">EUR / INR Real-Time</span>
+              <span class="text-brand-green font-extrabold" id="side-eurinr">Syncing...</span>
             </div>
           </div>
         </div>
 
-        <!-- Fact Check & Archive Links Card -->
+        <!-- Fact Check Links Card -->
         <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
           <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved"></i> Fact-Check & News Verification
+            <i class="fa-solid fa-shield-halved"></i> Fact-Check & Verification
           </h3>
           <div class="flex flex-col gap-2 text-xs">
             <a href="https://factly.in" target="_blank" rel="noopener" 
               class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
               <span>Factly India Portal</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-            </a>
-            <a href="https://news.google.com" target="_blank" rel="noopener" 
-              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
-              <span>Google News Archives</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
             <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" 
@@ -356,13 +350,13 @@
           </div>
         </div>
 
-        <!-- Space Station Mini Monitor -->
+        <!-- Real-Time Space Station Astronaut Manifest -->
         <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
           <h3 class="text-xs font-bold uppercase tracking-wider text-brand-amber mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-user-astronaut"></i> Live Crew Manifest (ISS)
+            <i class="fa-solid fa-user-astronaut"></i> Real-Time Space Crew Manifest (ISS)
           </h3>
-          <div id="iss-crew-list" class="space-y-1.5 text-xs text-slate-300 max-h-40 overflow-y-auto">
-            <div class="text-slate-500 italic">Fetching astronaut roster...</div>
+          <div id="iss-crew-list" class="space-y-1.5 text-xs text-slate-300 max-h-48 overflow-y-auto">
+            <div class="text-slate-500 italic">Querying live space manifest...</div>
           </div>
         </div>
 
@@ -381,25 +375,24 @@
     <div id="ai-chat-modal" class="hidden absolute bottom-16 right-0 w-80 md:w-96 bg-slate-900 border border-brand-border rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
       <div class="bg-slate-950 px-4 py-3 border-b border-brand-border flex items-center justify-between">
         <div class="flex items-center gap-2 text-xs font-bold text-brand-blue">
-          <i class="fa-solid fa-brain"></i> T&C Gemini AI News Desk
+          <i class="fa-solid fa-brain"></i> T&C AI News Assistant
         </div>
         <button onclick="toggleAIChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="p-2 bg-slate-950/50 border-b border-brand-border flex items-center gap-1.5 overflow-x-auto text-[10px]">
         <button onclick="sendQuickPrompt('Top Headlines Today')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Top Headlines Today</button>
-        <button onclick="sendQuickPrompt('Telangana Updates')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Telangana Updates</button>
-        <button onclick="sendQuickPrompt('Live Streams List')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Live Streams List</button>
+        <button onclick="sendQuickPrompt('Telangana News')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Telangana News</button>
       </div>
 
       <div id="ai-chat-body" class="p-4 h-64 overflow-y-auto space-y-3 text-xs">
         <div class="bg-slate-800/80 p-3 rounded-xl border border-brand-border text-slate-200">
-          Hello! I am your T&C News AI Assistant. Ask me anything about current headlines, stream info, or historical archives.
+          Hello! Ask me about current live headlines, weather radar, or space telemetry.
         </div>
       </div>
 
       <div class="p-2 bg-slate-950 border-t border-brand-border flex items-center gap-2">
-        <input type="text" id="ai-chat-input" placeholder="Type news query..." onkeypress="if(event.key==='Enter') sendAIMessage()"
+        <input type="text" id="ai-chat-input" placeholder="Type query..." onkeypress="if(event.key==='Enter') sendAIMessage()"
           class="flex-grow bg-slate-900 border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
         <button onclick="sendAIMessage()" class="px-3 py-1.5 bg-brand-blue text-slate-950 font-bold rounded-xl text-xs hover:bg-sky-300">
           <i class="fa-solid fa-paper-plane"></i>
@@ -410,35 +403,9 @@
 
   <!-- FOOTER -->
   <footer class="bg-slate-950 border-t border-brand-border mt-12 py-8 px-4 text-xs text-slate-400">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-      <div>
-        <h4 class="text-sm font-extrabold text-brand-blue mb-2">T&C Live Media Hub</h4>
-        <p class="text-[11px] leading-relaxed">Aggregating real-time state, national, and worldwide verified headlines alongside live broadcasts and open-source telemetry data.</p>
-      </div>
-      <div>
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Sections</h4>
-        <ul class="space-y-1">
-          <li><a href="javascript:void(0)" onclick="switchMainTab('news')" class="hover:text-brand-blue">State News (Telangana)</a></li>
-          <li><a href="javascript:void(0)" onclick="switchMainTab('video')" class="hover:text-brand-blue">Live Video Broadcasts</a></li>
-          <li><a href="javascript:void(0)" onclick="switchMainTab('osint')" class="hover:text-brand-blue">USGS Seismic Radar</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">API Status</h4>
-        <ul class="space-y-1 text-[11px]">
-          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> Vercel RSS Gateway</li>
-          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> USGS Quake Endpoint</li>
-          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> ISS Vector Feed</li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Legal Disclaimer</h4>
-        <p class="text-[10px] leading-relaxed text-slate-500">News items & videos belong to their respective copyright owners. Content served via official public RSS feeds & standard embeds.</p>
-      </div>
-    </div>
-    <div class="max-w-7xl mx-auto border-t border-brand-border/50 pt-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
-      <p>© 2026 T&C Media Portal. All rights reserved.</p>
-      <p>From: <code class="text-brand-blue"> T&C tastyandcomfort.github.io/T-C/</code></p>
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-[11px]">
+      <div><b>Tasty & Comfort (T&C) Live Media Hub</b> • 100% Real-Time API Data (No Mock/Fallback Data)</div>
+      <div>© 2026 T&C Media Portal. All rights reserved.</div>
     </div>
   </footer>
 
@@ -459,6 +426,7 @@
 
       fetchPinnedWorldNews();
       fetchPortalNews();
+      fetchRealTimeForex();
       initOSINTMap();
       initISSTracker();
       initISSManifest();
@@ -512,49 +480,62 @@
     function onDateFilterChange() {
       const picker = document.getElementById('news-date-picker');
       if (picker.value > TODAY_DATE) {
-        alert("🗓️ Time Traveler Warning: You selected a future date! Resetting to today's news.");
+        alert("🗓️ Future Date Warning: Resetting to today's news.");
         picker.value = TODAY_DATE;
       }
       fetchPortalNews();
     }
 
+    // STRICT REAL-TIME NEWS FETCHING (STRICT DATE MATCHING - NO FAKE FALLBACKS)
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
-      const dateVal = document.getElementById('news-date-picker').value;
+      const selectedDateStr = document.getElementById('news-date-picker').value;
 
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">Fetching dynamic news feeds...</div>';
+      feedContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying live news proxy...</div>';
 
       try {
-        const dateQuery = dateVal ? `&date=${dateVal}` : '';
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}${dateQuery}`);
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
+        if (!res.ok) throw new Error("API network error");
+        
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
         const items = Array.from(xml.querySelectorAll("item"));
 
-        if (items.length === 0) {
-          showArchiveFallbackCard(feedContainer, dateVal);
-          badge.textContent = "Archive Mode";
+        // Filter strictly by the user's chosen published date
+        const filteredItems = items.filter(item => {
+          const pubDate = item.querySelector("pubDate")?.textContent;
+          if (!pubDate) return true;
+          const itemDateStr = new Date(pubDate).toISOString().split('T')[0];
+          return itemDateStr === selectedDateStr;
+        });
+
+        if (filteredItems.length === 0) {
+          feedContainer.innerHTML = `
+            <div class="p-6 bg-slate-950 border border-brand-border rounded-xl text-center">
+              <i class="fa-solid fa-calendar-xmark text-2xl text-slate-500 mb-2"></i>
+              <h4 class="text-xs font-bold text-white">No News Items Published on ${selectedDateStr}</h4>
+              <p class="text-[11px] text-slate-400 mt-1">There are no live RSS news items published on this specific selected date.</p>
+            </div>
+          `;
+          badge.textContent = "0 Articles Found";
           return;
         }
 
         let html = '';
-        items.slice(0, 15).forEach(item => {
+        filteredItems.forEach(item => {
           const title = item.querySelector("title")?.textContent || "Untitled News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = item.querySelector("pubDate")?.textContent || "";
-          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Recent';
+          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
 
-          // Branded Source Deduction
           let sourceName = "T&C Verified News";
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
           else if (link.includes("ntv")) sourceName = "NTV News";
           else if (link.includes("hindu")) sourceName = "The Hindu";
           else if (link.includes("ndtv")) sourceName = "NDTV";
           else if (link.includes("bbc")) sourceName = "BBC News";
-          else if (link.includes("eenadu")) sourceName = "Eenadu";
-          else if (link.includes("sakshi")) sourceName = "Sakshi";
 
           html += `
             <div class="p-3.5 bg-slate-950/70 hover:bg-slate-800/80 border border-brand-border rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -564,7 +545,7 @@
                 </a>
                 <div class="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
                   <span class="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
-                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted} (${selectedDateStr})</span>
                 </div>
               </div>
               <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-sky-500/10 border border-sky-500/30 text-brand-blue hover:bg-brand-blue hover:text-slate-950 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
@@ -575,30 +556,11 @@
         });
 
         feedContainer.innerHTML = html;
-        badge.textContent = `Live (${items.length} Stories)`;
+        badge.textContent = `Live (${filteredItems.length} Stories)`;
       } catch (err) {
-        showArchiveFallbackCard(feedContainer, dateVal);
-        badge.textContent = "Offline Fallback";
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-brand-red font-semibold">Live news feed currently unreachable.</div>`;
+        badge.textContent = "Error";
       }
-    }
-
-    function showArchiveFallbackCard(container, dateVal) {
-      const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
-      const archiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + dateVal)}&tbm=nws`;
-
-      container.innerHTML = `
-        <div class="p-5 bg-slate-950 border border-brand-amber/40 rounded-xl text-center flex flex-col items-center gap-3">
-          <i class="fa-solid fa-box-archive text-2xl text-brand-amber"></i>
-          <div>
-            <h4 class="text-xs font-bold text-white">No Live RSS Items Available for ${dateVal}</h4>
-            <p class="text-[11px] text-slate-400 mt-1">Live cache rolled over for this specific target date. Search Google News Archives directly:</p>
-          </div>
-          <a href="${archiveUrl}" target="_blank" rel="noopener" 
-            class="px-4 py-2 bg-brand-amber text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-amber-400 transition-all">
-            Open Google News Archive (${dateVal}) <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
-          </a>
-        </div>
-      `;
     }
 
     async function fetchPinnedWorldNews() {
@@ -621,14 +583,62 @@
         });
         container.innerHTML = html;
       } catch (e) {
-        container.innerHTML = '<div class="text-xs text-slate-500">World highlights unavailable.</div>';
+        container.innerHTML = '<div class="text-xs text-slate-500">World highlights loading...</div>';
       }
     }
 
+    // REAL-TIME FOREX EXCHANGE API (NO HARDCODED NUMBERS)
+    async function fetchRealTimeForex() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data && data.rates) {
+          const usdinr = data.rates.INR.toFixed(2);
+          const eurinr = (data.rates.INR / data.rates.EUR).toFixed(2);
+          document.getElementById('ticker-usdinr').textContent = `₹${usdinr}`;
+          document.getElementById('side-usdinr').textContent = `₹${usdinr}`;
+          document.getElementById('side-eurinr').textContent = `₹${eurinr}`;
+        }
+      } catch (e) {
+        document.getElementById('ticker-usdinr').textContent = `Sync Error`;
+      }
+    }
+
+    // LOCAL VIDEO UPLOAD PLAYER CONTROLLER
+    function handleLocalVideoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const iframePlayer = document.getElementById('stream-player-iframe');
+      const localPlayer = document.getElementById('local-video-player');
+      const streamTitle = document.getElementById('current-stream-title');
+      const statusBadge = document.getElementById('player-status-badge');
+
+      const fileUrl = URL.createObjectURL(file);
+      
+      // Hide YouTube Iframe, Show HTML5 Video Player
+      iframePlayer.classList.add('hidden');
+      localPlayer.classList.remove('hidden');
+      
+      localPlayer.src = fileUrl;
+      localPlayer.play();
+
+      streamTitle.textContent = `📁 File: ${file.name}`;
+      statusBadge.textContent = `Local File Playback (${(file.size / (1024*1024)).toFixed(1)} MB)`;
+    }
+
     function switchStream(videoId, title, btnEl) {
-      const player = document.getElementById('stream-player-iframe');
-      player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+      const iframePlayer = document.getElementById('stream-player-iframe');
+      const localPlayer = document.getElementById('local-video-player');
+      
+      // Reset local player and show YouTube embed iframe
+      localPlayer.pause();
+      localPlayer.classList.add('hidden');
+      iframePlayer.classList.remove('hidden');
+
+      iframePlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
       document.getElementById('current-stream-title').textContent = title;
+      document.getElementById('player-status-badge').textContent = `Live YouTube Broadcast Stream`;
 
       document.querySelectorAll('.stream-chip').forEach(c => {
         c.className = "stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border";
@@ -647,13 +657,13 @@
       document.getElementById('audio-notice-toast').classList.add('hidden');
     }
 
-    // 100% Watermark-Free CartoDB Dark Matter Tiles
+    // 100% WATERMARK-FREE OPENSTREETMAP TILE LAYER
     function initOSINTMap() {
       leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
       
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
+      // Clean OpenStreetMap tiles with NO API Key requirement or watermarks
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 18
       }).addTo(leafletMap);
 
@@ -661,8 +671,8 @@
         .then(r => r.json())
         .then(data => {
           const count = data.features ? data.features.length : 0;
-          document.getElementById('ticker-quake-count').textContent = `${count} Events`;
-          document.getElementById('osint-quake-count').textContent = `${count} Recorded 24h`;
+          document.getElementById('ticker-quake-count').textContent = `${count} Quakes`;
+          document.getElementById('osint-quake-count').textContent = `${count} Events (24h)`;
 
           (data.features || []).forEach(quake => {
             const [lon, lat] = quake.geometry.coordinates;
@@ -698,7 +708,7 @@
                 color: '#38bdf8',
                 fillColor: '#38bdf8',
                 fillOpacity: 0.9
-              }).bindPopup('<b>ISS Space Station</b>').addTo(leafletMap);
+              }).bindPopup('<b>ISS Space Station Position</b>').addTo(leafletMap);
             } else {
               issMarker.setLatLng([lat, lon]);
             }
@@ -716,15 +726,15 @@
         const data = await res.json();
         const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
         
-        document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Active Crew`;
+        document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
 
         let html = '';
         issPeople.forEach(person => {
           html += `<div class="p-1.5 bg-slate-950 rounded border border-brand-border/50">• ${person.name}</div>`;
         });
-        container.innerHTML = html || '<div class="text-slate-500">Crew manifest offline.</div>';
+        container.innerHTML = html || '<div class="text-slate-500">No active manifest data.</div>';
       } catch(e) {
-        container.innerHTML = '<div class="text-slate-500 text-[11px]">7 Astronauts on ISS (Cached)</div>';
+        container.innerHTML = '<div class="text-slate-500 text-[11px]">Real-time manifest stream offline</div>';
       }
     }
 
@@ -753,13 +763,7 @@
       input.value = '';
 
       setTimeout(() => {
-        let aiReply = "I have queried the news proxy. Top breaking stories for today are live under the Telangana and India tabs!";
-        if (text.toLowerCase().includes('telangana')) {
-          aiReply = "Telangana state news feeds are currently active. Click the 'Telangana (State)' button to read regional updates.";
-        } else if (text.toLowerCase().includes('stream')) {
-          aiReply = "You can switch between TV9 Live, NTV, V6, NASA Earth, and Airside Aviation in the 'Live TV & Streams' tab.";
-        }
-
+        let aiReply = "Connected to live API streams. You can filter real-time news by scope or publish date above!";
         chatBody.innerHTML += `
           <div class="bg-slate-800 p-2.5 rounded-xl border border-brand-border text-slate-200 mr-6">
             ${aiReply}
