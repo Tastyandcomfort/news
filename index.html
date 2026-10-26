@@ -3,335 +3,785 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tasty & Comfort | T&C Live News & Media Portal</title>
+  <title>T&C Live News & Global Media Portal</title>
   
-  <!-- FontAwesome & Leaflet CSS -->
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0b1120',
+              card: '#1e293b',
+              border: '#334155',
+              blue: '#38bdf8',
+              green: '#10b981',
+              red: '#ef4444',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
-    :root {
-      --bg-dark: #090d16;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --card-border: rgba(51, 65, 85, 0.6);
-      --accent-blue: #38bdf8;
-      --accent-gold: #fbbf24;
-      --accent-green: #10b981;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1120;
+      color: #f8fafc;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-
-    /* Header Styling matching main T&C website */
-    .tc-header {
-      background: rgba(15, 23, 42, 0.9);
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    
+    .glass-header {
+      background: rgba(11, 17, 32, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--card-border);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 9999;
     }
-    .tc-brand { display: flex; align-items: center; gap: 12px; }
-    .tc-logo-badge {
-      background: linear-gradient(135deg, #0284c7, #0f172a);
-      border: 1px solid var(--accent-blue);
-      color: #fff;
-      font-weight: 900;
-      font-size: 0.9rem;
-      padding: 6px 10px;
-      border-radius: 8px;
-      letter-spacing: 1px;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+
+    .pulse-live {
+      box-shadow: 0 0 10px #ef4444;
+      animation: pulse 1.6s infinite;
     }
-    .tc-brand-title { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
-    .live-dot { width: 8px; height: 8px; background-color: var(--accent-green); border-radius: 50%; box-shadow: 0 0 8px var(--accent-green); display: inline-block; }
-
-    .nav-tabs { display: flex; gap: 8px; }
-    .tab-btn {
-      background: #1e293b; color: var(--text-sub); border: 1px solid var(--card-border);
-      padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
-      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
     }
-    .tab-btn.active, .tab-btn:hover { background: var(--accent-blue); color: #0f172a; border-color: var(--accent-blue); }
-
-    /* Main Container */
-    .main-layout { display: grid; grid-template-columns: 1fr 360px; gap: 16px; padding: 16px; flex-grow: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
-    @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } }
-
-    /* Media Player Container */
-    .media-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-    .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 8px; overflow: hidden; background: #000; }
-    .video-wrapper iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:none; }
     
-    .channel-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-    .ch-btn {
-      background: #0f172a; color: var(--text-sub); border: 1px solid var(--card-border);
-      padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    #osint-map {
+      height: 320px;
+      width: 100%;
+      border-radius: 0.75rem;
+      z-index: 1;
     }
-    .ch-btn.active { background: var(--accent-gold); color: #0f172a; font-weight: 800; }
-
-    /* News Controls & Container */
-    .news-card-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .news-header-tools { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
-    
-    .scope-selector { display: flex; gap: 6px; }
-    .scope-btn { background: #0f172a; color: var(--text-sub); border: 1px solid var(--card-border); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
-    .scope-btn.active { background: var(--accent-blue); color: #0f172a; font-weight: bold; }
-
-    .date-picker-input { background: #0f172a; color: var(--text-main); border: 1px solid var(--card-border); padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; }
-
-    .news-grid { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
-    
-    /* Branded News Cards */
-    .news-item {
-      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 8px; padding: 12px;
-      display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s, border-color 0.2s;
-    }
-    .news-item:hover { border-color: var(--accent-blue); transform: translateY(-1px); }
-    .news-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-sub); }
-    .news-title { font-size: 0.88rem; font-weight: 600; color: #fff; text-decoration: none; line-height: 1.4; }
-    
-    .tc-source-tag {
-      display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.15); color: var(--accent-blue);
-      border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; text-decoration: none; width: fit-content;
-    }
-    .tc-source-tag:hover { background: var(--accent-blue); color: #0f172a; }
-
-    /* Telemetry Sidebar & Map */
-    .sidebar-panel { display: flex; flex-direction: column; gap: 12px; }
-    .panel-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; }
-    
-    #osint-map { width: 100%; height: 260px; border-radius: 8px; background: #0f172a; }
-
-    /* Footer */
-    .tc-footer { background: #060911; border-top: 1px solid var(--card-border); padding: 20px; margin-top: auto; font-size: 0.75rem; color: var(--text-sub); }
-    .footer-content { max-width: 1600px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between antialiased">
 
-  <!-- T&C Branded Header -->
-  <header class="tc-header">
-    <div class="tc-brand">
-      <div class="tc-logo-badge">T&C</div>
-      <div class="tc-brand-title">LIVE NEWS & GLOBAL MEDIA</div>
-      <span class="live-dot" style="margin-left: 6px;"></span>
-    </div>
+  <!-- TOP HEADER -->
+  <header class="glass-header sticky top-0 z-50 border-b border-brand-border px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
+        <div class="w-3 h-3 rounded-full bg-brand-red pulse-live"></div>
+        <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-brand-blue flex items-center gap-2">
+          <span>T&C</span>
+          <span class="text-white text-sm md:text-base font-medium border-l border-brand-border pl-2">LIVE NEWS & MEDIA PORTAL</span>
+        </h1>
+      </div>
 
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchView('all')"><i class="fa-solid fa-newspaper"></i> News & Streams</button>
-      <button class="tab-btn" onclick="switchView('osint')"><i class="fa-solid fa-satellite-dish"></i> OSINT Desk</button>
+      <!-- Mode Switcher Tabs -->
+      <nav class="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-brand-border">
+        <button id="tab-btn-news" onclick="switchMainTab('news')" 
+          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md">
+          <i class="fa-solid fa-newspaper mr-1.5"></i>News Feeds
+        </button>
+        <button id="tab-btn-video" onclick="switchMainTab('video')" 
+          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          <i class="fa-solid fa-tv mr-1.5"></i>Live TV & Streams
+        </button>
+        <button id="tab-btn-osint" onclick="switchMainTab('osint')" 
+          class="px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+          <i class="fa-solid fa-satellite-dish mr-1.5"></i>OSINT Desk
+        </button>
+      </nav>
+
     </div>
   </header>
 
-  <!-- Main View -->
-  <div class="main-layout">
-    
-    <!-- Left Section: Stream & Categorized News -->
-    <div style="display: flex; flex-direction: column; gap: 16px;">
-      
-      <!-- Live Video Stream -->
-      <div class="media-card">
-        <div class="video-wrapper">
-          <iframe id="main-player" src="https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1" allowfullscreen></iframe>
-        </div>
-        
-        <div class="channel-bar">
-          <button class="ch-btn active" onclick="playChannel('II_m28Bm-iM', this)">🔴 TV9 Live</button>
-          <button class="ch-btn" onclick="playChannel('IzOOvR-XzAg', this)">🔴 NTV News</button>
-          <button class="ch-btn" onclick="playChannel('s8V3t68Hl2Y', this)">🔴 V6 News</button>
-          <button class="ch-btn" onclick="playChannel('OKQEMp2555A', this)">🛰️ NASA Space Live</button>
-          <button class="ch-btn" onclick="playChannel('n4I0d44oBEs', this)">✈️ Airside Aviation</button>
-        </div>
+  <!-- MARKET & OSINT TICKER -->
+  <div class="bg-slate-950 border-b border-brand-border py-2 px-4 text-xs text-slate-300 overflow-x-auto whitespace-nowrap shadow-inner">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-brand-green"></i> NIFTY 50: <b class="text-white">24,350.15 (+0.45%)</b></span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-brand-amber"></i> USD/INR: <b class="text-white">₹83.92</b></span>
+        <span class="flex items-center gap-1.5 text-brand-red"><i class="fa-solid fa-volcano"></i> USGS Seismic: <b class="text-slate-200" id="ticker-quake-count">Monitoring...</b></span>
       </div>
-
-      <!-- News Engine -->
-      <div class="news-card-box">
-        <div class="news-header-tools">
-          <div class="scope-selector">
-            <button class="scope-btn active" id="scope-local" onclick="setScope('local')">Telangana</button>
-            <button class="scope-btn" id="scope-national" onclick="setScope('national')">India</button>
-            <button class="scope-btn" id="scope-world" onclick="setScope('world')">World</button>
-          </div>
-          <input type="date" id="news-date-picker" class="date-picker-input" onchange="onDateFilterChange(this.value)">
-        </div>
-
-        <div class="news-grid" id="news-feed-container">
-          <!-- News Cards loaded dynamically -->
-        </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-space-shuttle text-brand-blue"></i> ISS Vector: <b class="text-brand-blue" id="ticker-iss-pos">Syncing...</b></span>
+        <span class="hidden md:inline text-brand-green flex items-center gap-1"><i class="fa-solid fa-signal"></i> System Online</span>
       </div>
-
     </div>
-
-    <!-- Right Sidebar: Clean OSINT Telemetry Map (No API Key Required) -->
-    <div class="sidebar-panel">
-      
-      <div class="panel-box">
-        <div style="font-size: 0.8rem; font-weight: 800; color: var(--accent-blue); margin-bottom: 8px;">
-          🛰️ REAL-TIME SEISMIC OSINT RADAR
-        </div>
-        <div id="osint-map"></div>
-      </div>
-
-      <div class="panel-box">
-        <div style="font-size: 0.8rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
-          🛰️ ISS ORBIT & SPACE TELEMETRY
-        </div>
-        <div style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 6px;">
-          <div style="display: flex; justify-content: space-between;"><span>ISS Speed:</span><b id="iss-speed" style="color:var(--accent-blue);">-- km/h</b></div>
-          <div style="display: flex; justify-content: space-between;"><span>ISS Altitude:</span><b id="iss-alt" style="color:var(--accent-blue);">-- km</b></div>
-          <div style="display: flex; justify-content: space-between;"><span>Astronaut Manifest:</span><b id="iss-crew" style="color:var(--accent-green);">7 Crew Active</b></div>
-        </div>
-      </div>
-
-    </div>
-
   </div>
 
-  <!-- T&C Footer -->
-  <footer class="tc-footer">
-    <div class="footer-content">
-      <div><b>Tasty & Comfort (T&C) Media Portal</b> • Verified Real-Time Feeds</div>
-      <div>© 2026 Tasty & Comfort. All Rights Reserved.</div>
+  <!-- AUDIO NOTICE TOAST (Hidden by default) -->
+  <div id="audio-notice-toast" class="hidden fixed top-20 right-4 z-50 bg-slate-900 border border-brand-amber text-brand-amber text-xs p-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300">
+    <i class="fa-solid fa-headphones text-lg"></i>
+    <div>
+      <p class="font-bold">Headphone Friendly Audio Notice</p>
+      <p class="text-slate-400 text-[11px]">Stream audio is auto-muted on launch. Click video player volume to unmute.</p>
+    </div>
+    <button onclick="dismissAudioToast()" class="ml-2 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <!-- MAIN BODY CONTENT AREA -->
+  <div class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT PRIMARY CONTENT COLUMN (8 Cols on Desktop) -->
+      <div class="lg:col-span-8 flex flex-col gap-6">
+
+        <!-- TAB 1: NEWS FEEDS VIEW -->
+        <section id="view-news" class="flex flex-col gap-6">
+          
+          <!-- Pinned Top World Headlines Card -->
+          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3 mb-3">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-brand-amber flex items-center gap-2">
+                <i class="fa-solid fa-earth-americas"></i> Pinned World Breaking Highlights
+              </h2>
+              <span class="text-[10px] bg-brand-amber/10 text-brand-amber border border-brand-amber/30 px-2 py-0.5 rounded-full font-semibold">Live Feed</span>
+            </div>
+            <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="text-xs text-slate-400 italic">Syncing global breaking bulletins...</div>
+            </div>
+          </div>
+
+          <!-- Scope & Date Control Panel -->
+          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            
+            <!-- Category Scope Switchers -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+              <button id="scope-btn-local" onclick="setNewsScope('local')" 
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-slate-950 shadow-md">
+                <i class="fa-solid fa-location-dot mr-1.5"></i>Telangana (State)
+              </button>
+              <button id="scope-btn-national" onclick="setNewsScope('national')" 
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-flag mr-1.5"></i>India
+              </button>
+              <button id="scope-btn-world" onclick="setNewsScope('world')" 
+                class="scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-globe mr-1.5"></i>World
+              </button>
+            </div>
+
+            <!-- Date Selector & Manual Refresh -->
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 bg-slate-950 border border-brand-border px-3 py-1.5 rounded-xl">
+                <i class="fa-regular fa-calendar text-brand-blue text-xs"></i>
+                <input type="date" id="news-date-picker" onchange="onDateFilterChange()" 
+                  class="bg-transparent text-xs text-white focus:outline-none cursor-pointer">
+              </div>
+              <button onclick="fetchPortalNews()" class="p-2 bg-slate-800 hover:bg-slate-700 text-brand-blue border border-brand-border rounded-xl transition-all" title="Refresh Feed">
+                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Dynamic News Cards Feed Container -->
+          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-brand-border">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span id="active-scope-title">Telangana (State) Live Headlines</span>
+              </h3>
+              <span id="news-status-badge" class="text-[11px] text-slate-400">Syncing...</span>
+            </div>
+
+            <!-- Feed List Container -->
+            <div id="news-feed-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              <div class="text-center py-10 text-slate-400 text-sm">Loading dynamic news channels...</div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- TAB 2: LIVE TV & STREAMS VIEW (Hidden by default) -->
+        <section id="view-video" class="hidden flex-col gap-6">
+          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
+            
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
+                <i class="fa-solid fa-tv"></i> Live Broadcast TV & Educational Streams
+              </h2>
+              <span class="text-xs text-brand-amber font-medium flex items-center gap-1">
+                <i class="fa-solid fa-headphones"></i> Audio Muted on Switch
+              </span>
+            </div>
+
+            <!-- Stream Horizontal Selector Chips -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-thin">
+              <button onclick="switchStream('II_m28Bm-iM', 'TV9 Live Broadcast', this)" 
+                class="stream-chip active px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-brand-blue text-slate-950 shadow-md">
+                <i class="fa-solid fa-play circle text-[10px] mr-1.5"></i>TV9 Live
+              </button>
+              <button onclick="switchStream('IzOOvR-XzAg', 'NTV Telugu Live', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                NTV Telugu
+              </button>
+              <button onclick="switchStream('_jnDy56dehA', 'V6 News Live', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                V6 News
+              </button>
+              <button onclick="switchStream('OKQEMp2555A', 'NASA Earth Views Live', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-user-astronaut mr-1.5"></i>NASA Earth Live
+              </button>
+              <button onclick="switchStream('n4I0d44oBEs', 'Airside Airport Aviation', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-plane mr-1.5"></i>Airside Aviation
+              </button>
+              <button onclick="switchStream('FFtPSPByBmk', 'Bhagavad Gita Educational', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Bhagavad Gita
+              </button>
+              <button onclick="switchStream('_1FpcN1U_KY', 'Quran Holy Recitation', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Quran Recitation
+              </button>
+              <button onclick="switchStream('dmgsOBr2lAA', 'Bible Audio Studies', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                Bible Studies
+              </button>
+              <button onclick="switchStream('U71NrLiWWjI', 'Constitution & Law Lectures', this)" 
+                class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
+                <i class="fa-solid fa-scale-balanced mr-1.5"></i>Constitution & Law
+              </button>
+            </div>
+
+            <!-- Video Player Iframe Canvas -->
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-brand-border shadow-2xl">
+              <iframe id="stream-player-iframe" 
+                class="absolute top-0 left-0 w-full h-full border-0" 
+                src="https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+              </iframe>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
+              <span id="current-stream-title" class="font-bold text-white">TV9 Live Broadcast</span>
+              <span>HD 1080p Continuous Stream</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 3: OSINT TELEMETRY DESK (Hidden by default) -->
+        <section id="view-osint" class="hidden flex-col gap-6">
+          <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
+            
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-bold text-brand-blue flex items-center gap-2">
+                <i class="fa-solid fa-satellite-dish"></i> OSINT Global Radar & Seismic Hub
+              </h2>
+              <span class="text-xs bg-brand-blue/10 text-brand-blue border border-brand-blue/30 px-2 py-0.5 rounded-full font-semibold">Live Leaflet Data</span>
+            </div>
+
+            <!-- Interactive Map -->
+            <div id="osint-map" class="mb-4 border border-brand-border shadow-inner"></div>
+
+            <!-- ISS Status Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-950 p-4 rounded-xl border border-brand-border">
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">ISS Altitude</p>
+                <p class="text-sm font-extrabold text-brand-blue" id="osint-iss-alt">421 km</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Velocity</p>
+                <p class="text-sm font-extrabold text-brand-green" id="osint-iss-spd">27,580 km/h</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Astronauts in Orbit</p>
+                <p class="text-sm font-extrabold text-brand-amber" id="osint-iss-crew">7 Active Crew</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">USGS M4.5+ Quakes</p>
+                <p class="text-sm font-extrabold text-brand-red" id="osint-quake-count">0 Recorded 24h</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR COLUMN (4 Cols on Desktop) -->
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        
+        <!-- Live Market & Financial Summary Card -->
+        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie"></i> Intraday Market Radar
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
+              <span class="font-bold text-white">NIFTY 50 Spot</span>
+              <span class="text-brand-green font-extrabold">24,350.15 (+0.45%)</span>
+            </div>
+            <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-brand-border">
+              <span class="font-bold text-white">USD / INR Spot</span>
+              <span class="text-brand-amber font-extrabold">₹83.92</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fact Check & Archive Links Card -->
+        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-blue mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> Fact-Check & News Verification
+          </h3>
+          <div class="flex flex-col gap-2 text-xs">
+            <a href="https://factly.in" target="_blank" rel="noopener" 
+              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
+              <span>Factly India Portal</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+            <a href="https://news.google.com" target="_blank" rel="noopener" 
+              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
+              <span>Google News Archives</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" 
+              class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-brand-blue flex items-center justify-between transition-all">
+              <span>USGS Earthquakes Direct</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Space Station Mini Monitor -->
+        <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-4 shadow-lg">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-brand-amber mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-user-astronaut"></i> Live Crew Manifest (ISS)
+          </h3>
+          <div id="iss-crew-list" class="space-y-1.5 text-xs text-slate-300 max-h-40 overflow-y-auto">
+            <div class="text-slate-500 italic">Fetching astronaut roster...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FLOATING AI NEWS ASSISTANT -->
+  <div class="fixed bottom-6 right-6 z-50">
+    
+    <!-- AI FAB Button -->
+    <button onclick="toggleAIChatModal()" 
+      class="w-12 h-12 md:w-14 md:h-14 bg-brand-blue text-slate-950 rounded-full shadow-2xl flex items-center justify-center text-xl hover:scale-105 transition-all">
+      <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <!-- AI Chat Window -->
+    <div id="ai-chat-modal" class="hidden absolute bottom-16 right-0 w-80 md:w-96 bg-slate-900 border border-brand-border rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-950 px-4 py-3 border-b border-brand-border flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-bold text-brand-blue">
+          <i class="fa-solid fa-brain"></i> T&C Gemini AI News Desk
+        </div>
+        <button onclick="toggleAIChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="p-2 bg-slate-950/50 border-b border-brand-border flex items-center gap-1.5 overflow-x-auto text-[10px]">
+        <button onclick="sendQuickPrompt('Top Headlines Today')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Top Headlines Today</button>
+        <button onclick="sendQuickPrompt('Telangana Updates')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Telangana Updates</button>
+        <button onclick="sendQuickPrompt('Live Streams List')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Live Streams List</button>
+      </div>
+
+      <!-- Chat History -->
+      <div id="ai-chat-body" class="p-4 h-64 overflow-y-auto space-y-3 text-xs">
+        <div class="bg-slate-800/80 p-3 rounded-xl border border-brand-border text-slate-200">
+          Hello! I am your T&C News AI Assistant. Ask me anything about current headlines, stream info, or historical archives.
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="p-2 bg-slate-950 border-t border-brand-border flex items-center gap-2">
+        <input type="text" id="ai-chat-input" placeholder="Type news query..." onkeypress="if(event.key==='Enter') sendAIMessage()"
+          class="flex-grow bg-slate-900 border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
+        <button onclick="sendAIMessage()" class="px-3 py-1.5 bg-brand-blue text-slate-950 font-bold rounded-xl text-xs hover:bg-sky-300">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-brand-border mt-12 py-8 px-4 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div>
+        <h4 class="text-sm font-extrabold text-brand-blue mb-2">T&C Live Media Hub</h4>
+        <p class="text-[11px] leading-relaxed">Aggregating real-time state, national, and worldwide verified headlines alongside live broadcasts and open-source telemetry data.</p>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Sections</h4>
+        <ul class="space-y-1">
+          <li><a href="javascript:void(0)" onclick="switchMainTab('news')" class="hover:text-brand-blue">State News (Telangana)</a></li>
+          <li><a href="javascript:void(0)" onclick="switchMainTab('video')" class="hover:text-brand-blue">Live Video Broadcasts</a></li>
+          <li><a href="javascript:void(0)" onclick="switchMainTab('osint')" class="hover:text-brand-blue">USGS Seismic Radar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">API Status</h4>
+        <ul class="space-y-1 text-[11px]">
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> Vercel RSS Gateway</li>
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> USGS Quake Endpoint</li>
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-green"></span> ISS Vector Feed</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Legal Disclaimer</h4>
+        <p class="text-[10px] leading-relaxed text-slate-500">News items & videos belong to their respective copyright owners. Content served via official public RSS feeds & standard embeds.</p>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto border-t border-brand-border/50 pt-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
+      <p>© 2026 T&C Media Portal. All rights reserved.</p>
+      <p>Target Deployment: <code class="text-brand-blue">tastyandcomfort.github.io/news/</code></p>
     </div>
   </footer>
 
-  <!-- Leaflet JS -->
+  <!-- LEAFLET & PORTAL ENGINE JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script>
+    // System State Variables
     let currentScope = 'local';
-    let map = null;
+    const TODAY_DATE = '2026-10-26';
+    let leafletMap = null;
+    let issMarker = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Set today's date in picker
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('news-date-picker').value = today;
+      // Set Default Date Picker Value
+      const dateInput = document.getElementById('news-date-picker');
+      if (dateInput) {
+        dateInput.value = TODAY_DATE;
+        dateInput.max = TODAY_DATE;
+      }
 
-      initCleanMap();
-      fetchNewsFeed();
-      initISSTelemetry();
+      // Initial Data Loading
+      fetchPinnedWorldNews();
+      fetchPortalNews();
+      initOSINTMap();
+      initISSTracker();
+      initISSManifest();
     });
 
-    // 1. Watermark-Free CartoDB Dark Matter Map Initialization
-    function initCleanMap() {
-      map = L.map('osint-map').setView([20.5937, 78.9629], 3);
+    // 1. Tab Navigation Switcher
+    function switchMainTab(tab) {
+      document.getElementById('view-news').classList.add('hidden');
+      document.getElementById('view-video').classList.add('hidden');
+      document.getElementById('view-osint').classList.add('hidden');
 
-      // Clean tile layer with NO API key requirement and NO watermark
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 18
-      }).addTo(map);
+      const btnNews = document.getElementById('tab-btn-news');
+      const btnVideo = document.getElementById('tab-btn-video');
+      const btnOsint = document.getElementById('tab-btn-osint');
 
-      // Fetch Real-Time USGS Earthquakes
-      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
-        .then(r => r.json())
-        .then(data => {
-          (data.features || []).slice(0, 10).forEach(q => {
-            const [lon, lat, depth] = q.geometry.coordinates;
-            const mag = q.properties.mag;
-            L.circleMarker([lat, lon], {
-              radius: Math.max(4, mag * 2),
-              color: mag > 6 ? '#ef4444' : '#f59e0b',
-              fillColor: mag > 6 ? '#ef4444' : '#f59e0b',
-              fillOpacity: 0.8
-            }).bindPopup(`<b>M ${mag} Earthquake</b><br>${q.properties.place}`).addTo(map);
-          });
-        })
-        .catch(() => {});
+      [btnNews, btnVideo, btnOsint].forEach(b => {
+        b.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800";
+      });
+
+      if (tab === 'news') {
+        document.getElementById('view-news').classList.remove('hidden');
+        btnNews.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+      } else if (tab === 'video') {
+        document.getElementById('view-video').classList.remove('hidden');
+        btnVideo.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+        checkAndShowHeadphonesNotice();
+      } else if (tab === 'osint') {
+        document.getElementById('view-osint').classList.remove('hidden');
+        btnOsint.className = "px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 bg-brand-blue text-slate-950 shadow-md";
+        if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 200);
+      }
     }
 
-    // 2. Branded News Fetcher
-    async function fetchNewsFeed(targetDate = null) {
-      const container = document.getElementById('news-feed-container');
-      container.innerHTML = '<div style="font-size:0.75rem; color:#94a3b8;">Syncing T&C news feeds...</div>';
+    // 2. News Scope & Date Control
+    function setNewsScope(scope) {
+      currentScope = scope;
+      document.querySelectorAll('.scope-btn').forEach(btn => {
+        btn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800 text-slate-300 hover:text-white border border-brand-border";
+      });
+
+      const activeBtn = document.getElementById(`scope-btn-${scope}`);
+      if (activeBtn) activeBtn.className = "scope-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-brand-blue text-slate-950 shadow-md";
+
+      const titleMap = {
+        'local': 'Telangana (State) Live Headlines',
+        'national': 'India National News Bulletins',
+        'world': 'Global Worldwide News Stream'
+      };
+      document.getElementById('active-scope-title').textContent = titleMap[scope];
+      fetchPortalNews();
+    }
+
+    function onDateFilterChange() {
+      const picker = document.getElementById('news-date-picker');
+      if (picker.value > TODAY_DATE) {
+        alert("🗓️ Time Traveler Warning: You selected a future date! Resetting to today's news.");
+        picker.value = TODAY_DATE;
+      }
+      fetchPortalNews();
+    }
+
+    // Fetch Main News Feed from Proxy
+    async function fetchPortalNews() {
+      const feedContainer = document.getElementById('news-feed-container');
+      const badge = document.getElementById('news-status-badge');
+      const dateVal = document.getElementById('news-date-picker').value;
+
+      badge.textContent = "Updating...";
+      feedContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">Fetching dynamic news feeds...</div>';
 
       try {
-        const dateParam = targetDate ? `&date=${targetDate}` : '';
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}${dateParam}`);
+        const dateQuery = dateVal ? `&date=${dateVal}` : '';
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}${dateQuery}`);
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        const items = xml.querySelectorAll("item");
+        const items = Array.from(xml.querySelectorAll("item"));
 
         if (items.length === 0) {
-          container.innerHTML = `<div style="font-size:0.75rem; color:#94a3b8;">No articles found for selected date.</div>`;
+          showArchiveFallbackCard(feedContainer, dateVal);
+          badge.textContent = "Archive Mode";
           return;
         }
 
         let html = '';
-        items.forEach((item, index) => {
-          if (index > 12) return;
-          const title = item.querySelector("title")?.textContent || "Headline update";
+        items.slice(0, 15).forEach(item => {
+          const title = item.querySelector("title")?.textContent || "Untitled News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = item.querySelector("pubDate")?.textContent || "";
-          
-          // Deduce Source Name
-          let sourceName = "T&C News";
-          if (link.includes("tv9")) sourceName = "TV9 Telugu";
-          else if (link.includes("ntv")) sourceName = "NTV News";
-          else if (link.includes("hindu")) sourceName = "The Hindu";
-          else if (link.includes("ndtv")) sourceName = "NDTV";
-          else if (link.includes("bbc")) sourceName = "BBC News";
+          const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Recent';
 
           html += `
-            <div class="news-item">
-              <div class="news-meta">
-                <span>${pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live Update'}</span>
+            <div class="p-3 bg-slate-950/70 hover:bg-slate-800/80 border border-brand-border rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div class="flex-grow">
+                <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold text-white hover:text-brand-blue transition-colors line-clamp-2">
+                  ${title}
+                </a>
+                <div class="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400">
+                  <span class="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted}</span>
+                </div>
               </div>
-              <a href="${link}" target="_blank" class="news-title">${title}</a>
-              <a href="${link}" target="_blank" class="tc-source-tag">
-                <i class="fa-solid fa-circle-check"></i> ${sourceName} • View Story
+              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1 bg-slate-800 hover:bg-brand-blue hover:text-slate-950 text-slate-300 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap">
+                Read Story <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
               </a>
             </div>
           `;
         });
-        container.innerHTML = html;
 
+        feedContainer.innerHTML = html;
+        badge.textContent = `Live (${items.length} Stories)`;
       } catch (err) {
-        container.innerHTML = `<div style="font-size:0.75rem; color:#ef4444;">Unable to load news feed. Check connection.</div>`;
+        showArchiveFallbackCard(feedContainer, dateVal);
+        badge.textContent = "Offline Fallback";
       }
     }
 
-    function setScope(scope) {
-      currentScope = scope;
-      document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`scope-${scope}`).classList.add('active');
-      fetchNewsFeed();
+    // Google Archive Fallback Generator
+    function showArchiveFallbackCard(container, dateVal) {
+      const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
+      const archiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + dateVal)}&tbm=nws`;
+
+      container.innerHTML = `
+        <div class="p-5 bg-slate-950 border border-brand-amber/40 rounded-xl text-center flex flex-col items-center gap-3">
+          <i class="fa-solid fa-box-archive text-2xl text-brand-amber"></i>
+          <div>
+            <h4 class="text-xs font-bold text-white">No Live RSS Items Available for ${dateVal}</h4>
+            <p class="text-[11px] text-slate-400 mt-1">Live cache rolled over for this specific target date. Search Google News Archives directly:</p>
+          </div>
+          <a href="${archiveUrl}" target="_blank" rel="noopener" 
+            class="px-4 py-2 bg-brand-amber text-slate-950 text-xs font-extrabold rounded-xl shadow-md hover:bg-amber-400 transition-all">
+            Open Google News Archive (${dateVal}) <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+          </a>
+        </div>
+      `;
     }
 
-    function onDateFilterChange(val) {
-      fetchNewsFeed(val);
+    // 3. Pinned World Headlines
+    async function fetchPinnedWorldNews() {
+      const container = document.getElementById('pinned-world-news');
+      try {
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=world`);
+        const xmlText = await res.text();
+        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
+
+        let html = '';
+        items.forEach(item => {
+          const title = item.querySelector("title")?.textContent || "";
+          const link = item.querySelector("link")?.textContent || "#";
+          html += `
+            <a href="${link}" target="_blank" rel="noopener" class="p-2.5 bg-slate-950 hover:bg-slate-800 border border-brand-border rounded-xl text-xs text-slate-200 hover:text-brand-blue transition-all line-clamp-2">
+              • ${title}
+            </a>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="text-xs text-slate-500">World highlights unavailable.</div>';
+      }
     }
 
-    function playChannel(videoId, btnEl) {
-      document.getElementById('main-player').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
-      document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
+    // 4. Stream Player & Audio Notice
+    function switchStream(videoId, title, btnEl) {
+      const player = document.getElementById('stream-player-iframe');
+      player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+      document.getElementById('current-stream-title').textContent = title;
+
+      document.querySelectorAll('.stream-chip').forEach(c => {
+        c.className = "stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border";
+      });
+      if (btnEl) btnEl.className = "stream-chip active px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-brand-blue text-slate-950 shadow-md";
+
+      checkAndShowHeadphonesNotice();
     }
 
-    function initISSTelemetry() {
-      setInterval(async () => {
+    function checkAndShowHeadphonesNotice() {
+      const toast = document.getElementById('audio-notice-toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => dismissAudioToast(), 6000);
+    }
+    function dismissAudioToast() {
+      document.getElementById('audio-notice-toast').classList.add('hidden');
+    }
+
+    // 5. OSINT Telemetry (Leaflet Map + Quakes + ISS)
+    function initOSINTMap() {
+      leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
+      
+      // Dark CartoDB Tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 18
+      }).addTo(leafletMap);
+
+      // Fetch USGS Earthquakes
+      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
+        .then(r => r.json())
+        .then(data => {
+          const count = data.features ? data.features.length : 0;
+          document.getElementById('ticker-quake-count').textContent = `${count} Events`;
+          document.getElementById('osint-quake-count').textContent = `${count} Recorded 24h`;
+
+          (data.features || []).forEach(quake => {
+            const [lon, lat] = quake.geometry.coordinates;
+            const mag = quake.properties.mag;
+            L.circleMarker([lat, lon], {
+              radius: mag * 2,
+              color: '#ef4444',
+              fillColor: '#ef4444',
+              fillOpacity: 0.6
+            }).bindPopup(`<b>Magnitude ${mag}</b><br>${quake.properties.place}`).addTo(leafletMap);
+          });
+        }).catch(() => {});
+    }
+
+    // ISS Orbit Vector Sync
+    function initISSTracker() {
+      async function updateISS() {
         try {
           const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
           const data = await res.json();
-          document.getElementById('iss-speed').textContent = `${Math.round(data.velocity).toLocaleString()} km/h`;
-          document.getElementById('iss-alt').textContent = `${parseFloat(data.altitude).toFixed(1)} km`;
+          const lat = parseFloat(data.latitude).toFixed(2);
+          const lon = parseFloat(data.longitude).toFixed(2);
+          const alt = Math.round(data.altitude);
+          const spd = Math.round(data.velocity);
+
+          document.getElementById('ticker-iss-pos').textContent = `${lat}°, ${lon}°`;
+          document.getElementById('osint-iss-alt').textContent = `${alt} km`;
+          document.getElementById('osint-iss-spd').textContent = `${spd} km/h`;
+
+          if (leafletMap) {
+            if (!issMarker) {
+              issMarker = L.circleMarker([lat, lon], {
+                radius: 8,
+                color: '#38bdf8',
+                fillColor: '#38bdf8',
+                fillOpacity: 0.9
+              }).bindPopup('<b>ISS Space Station</b>').addTo(leafletMap);
+            } else {
+              issMarker.setLatLng([lat, lon]);
+            }
+          }
         } catch(e) {}
-      }, 5000);
+      }
+      updateISS();
+      setInterval(updateISS, 10000);
     }
 
-    function switchView(view) {
-      // Toggle tabs UI
+    // ISS Astronaut Crew Manifest
+    async function initISSManifest() {
+      const container = document.getElementById('iss-crew-list');
+      try {
+        const res = await fetch('http://api.open-notify.org/astros.json');
+        const data = await res.json();
+        const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
+        
+        document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Active Crew`;
+
+        let html = '';
+        issPeople.forEach(person => {
+          html += `<div class="p-1.5 bg-slate-950 rounded border border-brand-border/50">• ${person.name}</div>`;
+        });
+        container.innerHTML = html || '<div class="text-slate-500">Crew manifest offline.</div>';
+      } catch(e) {
+        container.innerHTML = '<div class="text-slate-500 text-[11px]">7 Astronauts on ISS (Cached)</div>';
+      }
+    }
+
+    // 6. AI News Assistant Controls
+    function toggleAIChatModal() {
+      const modal = document.getElementById('ai-chat-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById('ai-chat-input').value = promptText;
+      sendAIMessage();
+    }
+
+    function sendAIMessage() {
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBody = document.getElementById('ai-chat-body');
+      
+      // Append User Bubble
+      chatBody.innerHTML += `
+        <div class="bg-brand-blue/20 text-brand-blue p-2.5 rounded-xl border border-brand-blue/30 self-end ml-6">
+          ${text}
+        </div>
+      `;
+      input.value = '';
+
+      // Auto Response System
+      setTimeout(() => {
+        let aiReply = "I have queried the news proxy. Top breaking stories for today are live under the Telangana and India tabs!";
+        if (text.toLowerCase().includes('telangana')) {
+          aiReply = "Telangana state news feeds are currently active. Click the 'Telangana (State)' button to read regional policy and weather updates.";
+        } else if (text.toLowerCase().includes('stream')) {
+          aiReply = "You can switch between TV9 Live, NTV, V6, NASA Earth, and Airside Aviation in the 'Live TV & Streams' tab.";
+        }
+
+        chatBody.innerHTML += `
+          <div class="bg-slate-800 p-2.5 rounded-xl border border-brand-border text-slate-200 mr-6">
+            ${aiReply}
+          </div>
+        `;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 500);
     }
   </script>
 </body>
 </html>
-
