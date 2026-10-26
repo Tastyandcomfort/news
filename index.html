@@ -80,7 +80,7 @@
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
         <div class="w-3 h-3 rounded-full bg-brand-red pulse-live"></div>
         <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-brand-blue flex items-center gap-2">
-          <span>T&C</span>
+          <span class="bg-sky-500/10 border border-sky-500/30 px-2.5 py-1 rounded-lg text-brand-blue shadow-inner">T&C</span>
           <span class="text-white text-sm md:text-base font-medium border-l border-brand-border pl-2">LIVE NEWS & MEDIA PORTAL</span>
         </h1>
       </div>
@@ -119,12 +119,12 @@
     </div>
   </div>
 
-  <!-- AUDIO NOTICE TOAST (Hidden by default) -->
+  <!-- AUDIO NOTICE TOAST -->
   <div id="audio-notice-toast" class="hidden fixed top-20 right-4 z-50 bg-slate-900 border border-brand-amber text-brand-amber text-xs p-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300">
     <i class="fa-solid fa-headphones text-lg"></i>
     <div>
       <p class="font-bold">Headphone Friendly Audio Notice</p>
-      <p class="text-slate-400 text-[11px]">Stream audio is auto-muted on launch. Click video player volume to unmute.</p>
+      <p class="text-slate-400 text-[11px]">Stream audio is auto-muted on launch. Click player controls to unmute.</p>
     </div>
     <button onclick="dismissAudioToast()" class="ml-2 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
   </div>
@@ -133,7 +133,7 @@
   <div class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- LEFT PRIMARY CONTENT COLUMN (8 Cols on Desktop) -->
+      <!-- LEFT PRIMARY CONTENT COLUMN -->
       <div class="lg:col-span-8 flex flex-col gap-6">
 
         <!-- TAB 1: NEWS FEEDS VIEW -->
@@ -202,7 +202,7 @@
 
         </section>
 
-        <!-- TAB 2: LIVE TV & STREAMS VIEW (Hidden by default) -->
+        <!-- TAB 2: LIVE TV & STREAMS VIEW -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
             
@@ -219,7 +219,7 @@
             <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-thin">
               <button onclick="switchStream('II_m28Bm-iM', 'TV9 Live Broadcast', this)" 
                 class="stream-chip active px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-brand-blue text-slate-950 shadow-md">
-                <i class="fa-solid fa-play circle text-[10px] mr-1.5"></i>TV9 Live
+                <i class="fa-solid fa-play text-[10px] mr-1.5"></i>TV9 Live
               </button>
               <button onclick="switchStream('IzOOvR-XzAg', 'NTV Telugu Live', this)" 
                 class="stream-chip px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white border border-brand-border">
@@ -273,7 +273,7 @@
           </div>
         </section>
 
-        <!-- TAB 3: OSINT TELEMETRY DESK (Hidden by default) -->
+        <!-- TAB 3: OSINT TELEMETRY DESK -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="bg-slate-900/90 border border-brand-border rounded-2xl p-5 shadow-lg">
             
@@ -284,7 +284,7 @@
               <span class="text-xs bg-brand-blue/10 text-brand-blue border border-brand-blue/30 px-2 py-0.5 rounded-full font-semibold">Live Leaflet Data</span>
             </div>
 
-            <!-- Interactive Map -->
+            <!-- Interactive Watermark-Free Map -->
             <div id="osint-map" class="mb-4 border border-brand-border shadow-inner"></div>
 
             <!-- ISS Status Grid -->
@@ -312,7 +312,7 @@
 
       </div>
 
-      <!-- RIGHT SIDEBAR COLUMN (4 Cols on Desktop) -->
+      <!-- RIGHT SIDEBAR COLUMN -->
       <div class="lg:col-span-4 flex flex-col gap-6">
         
         <!-- Live Market & Financial Summary Card -->
@@ -373,17 +373,12 @@
 
   <!-- FLOATING AI NEWS ASSISTANT -->
   <div class="fixed bottom-6 right-6 z-50">
-    
-    <!-- AI FAB Button -->
     <button onclick="toggleAIChatModal()" 
       class="w-12 h-12 md:w-14 md:h-14 bg-brand-blue text-slate-950 rounded-full shadow-2xl flex items-center justify-center text-xl hover:scale-105 transition-all">
       <i class="fa-solid fa-robot"></i>
     </button>
 
-    <!-- AI Chat Window -->
     <div id="ai-chat-modal" class="hidden absolute bottom-16 right-0 w-80 md:w-96 bg-slate-900 border border-brand-border rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
-      
-      <!-- Modal Header -->
       <div class="bg-slate-950 px-4 py-3 border-b border-brand-border flex items-center justify-between">
         <div class="flex items-center gap-2 text-xs font-bold text-brand-blue">
           <i class="fa-solid fa-brain"></i> T&C Gemini AI News Desk
@@ -391,21 +386,18 @@
         <button onclick="toggleAIChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Quick Prompt Chips -->
       <div class="p-2 bg-slate-950/50 border-b border-brand-border flex items-center gap-1.5 overflow-x-auto text-[10px]">
         <button onclick="sendQuickPrompt('Top Headlines Today')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Top Headlines Today</button>
         <button onclick="sendQuickPrompt('Telangana Updates')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Telangana Updates</button>
         <button onclick="sendQuickPrompt('Live Streams List')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Live Streams List</button>
       </div>
 
-      <!-- Chat History -->
       <div id="ai-chat-body" class="p-4 h-64 overflow-y-auto space-y-3 text-xs">
         <div class="bg-slate-800/80 p-3 rounded-xl border border-brand-border text-slate-200">
           Hello! I am your T&C News AI Assistant. Ask me anything about current headlines, stream info, or historical archives.
         </div>
       </div>
 
-      <!-- Input Bar -->
       <div class="p-2 bg-slate-950 border-t border-brand-border flex items-center gap-2">
         <input type="text" id="ai-chat-input" placeholder="Type news query..." onkeypress="if(event.key==='Enter') sendAIMessage()"
           class="flex-grow bg-slate-900 border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-blue">
@@ -413,7 +405,6 @@
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
-
     </div>
   </div>
 
@@ -447,28 +438,25 @@
     </div>
     <div class="max-w-7xl mx-auto border-t border-brand-border/50 pt-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
       <p>© 2026 T&C Media Portal. All rights reserved.</p>
-      <p>Target Deployment: <code class="text-brand-blue">tastyandcomfort.github.io/news/</code></p>
+      <p>From: <code class="text-brand-blue"> T&C tastyandcomfort.github.io/T-C/</code></p>
     </div>
   </footer>
 
   <!-- LEAFLET & PORTAL ENGINE JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // System State Variables
     let currentScope = 'local';
     const TODAY_DATE = '2026-10-26';
     let leafletMap = null;
     let issMarker = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Set Default Date Picker Value
       const dateInput = document.getElementById('news-date-picker');
       if (dateInput) {
         dateInput.value = TODAY_DATE;
         dateInput.max = TODAY_DATE;
       }
 
-      // Initial Data Loading
       fetchPinnedWorldNews();
       fetchPortalNews();
       initOSINTMap();
@@ -476,7 +464,6 @@
       initISSManifest();
     });
 
-    // 1. Tab Navigation Switcher
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-video').classList.add('hidden');
@@ -504,7 +491,6 @@
       }
     }
 
-    // 2. News Scope & Date Control
     function setNewsScope(scope) {
       currentScope = scope;
       document.querySelectorAll('.scope-btn').forEach(btn => {
@@ -532,7 +518,6 @@
       fetchPortalNews();
     }
 
-    // Fetch Main News Feed from Proxy
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
@@ -561,19 +546,29 @@
           const pubDate = item.querySelector("pubDate")?.textContent || "";
           const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Recent';
 
+          // Branded Source Deduction
+          let sourceName = "T&C Verified News";
+          if (link.includes("tv9")) sourceName = "TV9 Telugu";
+          else if (link.includes("ntv")) sourceName = "NTV News";
+          else if (link.includes("hindu")) sourceName = "The Hindu";
+          else if (link.includes("ndtv")) sourceName = "NDTV";
+          else if (link.includes("bbc")) sourceName = "BBC News";
+          else if (link.includes("eenadu")) sourceName = "Eenadu";
+          else if (link.includes("sakshi")) sourceName = "Sakshi";
+
           html += `
-            <div class="p-3 bg-slate-950/70 hover:bg-slate-800/80 border border-brand-border rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div class="p-3.5 bg-slate-950/70 hover:bg-slate-800/80 border border-brand-border rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div class="flex-grow">
                 <a href="${link}" target="_blank" rel="noopener" class="text-xs md:text-sm font-semibold text-white hover:text-brand-blue transition-colors line-clamp-2">
                   ${title}
                 </a>
-                <div class="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400">
+                <div class="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
                   <span class="bg-brand-blue/10 text-brand-blue px-2 py-0.5 rounded font-bold uppercase">${currentScope}</span>
                   <span><i class="fa-regular fa-clock mr-1"></i>${timeFormatted}</span>
                 </div>
               </div>
-              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1 bg-slate-800 hover:bg-brand-blue hover:text-slate-950 text-slate-300 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap">
-                Read Story <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
+              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-sky-500/10 border border-sky-500/30 text-brand-blue hover:bg-brand-blue hover:text-slate-950 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
               </a>
             </div>
           `;
@@ -587,7 +582,6 @@
       }
     }
 
-    // Google Archive Fallback Generator
     function showArchiveFallbackCard(container, dateVal) {
       const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
       const archiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + dateVal)}&tbm=nws`;
@@ -607,7 +601,6 @@
       `;
     }
 
-    // 3. Pinned World Headlines
     async function fetchPinnedWorldNews() {
       const container = document.getElementById('pinned-world-news');
       try {
@@ -632,7 +625,6 @@
       }
     }
 
-    // 4. Stream Player & Audio Notice
     function switchStream(videoId, title, btnEl) {
       const player = document.getElementById('stream-player-iframe');
       player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
@@ -655,17 +647,16 @@
       document.getElementById('audio-notice-toast').classList.add('hidden');
     }
 
-    // 5. OSINT Telemetry (Leaflet Map + Quakes + ISS)
+    // 100% Watermark-Free CartoDB Dark Matter Tiles
     function initOSINTMap() {
       leafletMap = L.map('osint-map').setView([20.5937, 78.9629], 2);
       
-      // Dark CartoDB Tiles
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
         maxZoom: 18
       }).addTo(leafletMap);
 
-      // Fetch USGS Earthquakes
       fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
         .then(r => r.json())
         .then(data => {
@@ -686,7 +677,6 @@
         }).catch(() => {});
     }
 
-    // ISS Orbit Vector Sync
     function initISSTracker() {
       async function updateISS() {
         try {
@@ -719,7 +709,6 @@
       setInterval(updateISS, 10000);
     }
 
-    // ISS Astronaut Crew Manifest
     async function initISSManifest() {
       const container = document.getElementById('iss-crew-list');
       try {
@@ -739,7 +728,6 @@
       }
     }
 
-    // 6. AI News Assistant Controls
     function toggleAIChatModal() {
       const modal = document.getElementById('ai-chat-modal');
       modal.classList.toggle('hidden');
@@ -757,7 +745,6 @@
 
       const chatBody = document.getElementById('ai-chat-body');
       
-      // Append User Bubble
       chatBody.innerHTML += `
         <div class="bg-brand-blue/20 text-brand-blue p-2.5 rounded-xl border border-brand-blue/30 self-end ml-6">
           ${text}
@@ -765,11 +752,10 @@
       `;
       input.value = '';
 
-      // Auto Response System
       setTimeout(() => {
         let aiReply = "I have queried the news proxy. Top breaking stories for today are live under the Telangana and India tabs!";
         if (text.toLowerCase().includes('telangana')) {
-          aiReply = "Telangana state news feeds are currently active. Click the 'Telangana (State)' button to read regional policy and weather updates.";
+          aiReply = "Telangana state news feeds are currently active. Click the 'Telangana (State)' button to read regional updates.";
         } else if (text.toLowerCase().includes('stream')) {
           aiReply = "You can switch between TV9 Live, NTV, V6, NASA Earth, and Airside Aviation in the 'Live TV & Streams' tab.";
         }
@@ -785,3 +771,4 @@
   </script>
 </body>
 </html>
+
