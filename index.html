@@ -415,7 +415,7 @@
                 <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-indiatoday" onclick="setMode('indiatoday', this)">India Today</button>
                 <button id="btn-france24" onclick="setMode('france24', this)">France24</button>
-                <button id="btn-v6" onclick="setMode('v6', this)">T News</button>
+                <button id="btn-cnbc" onclick="setMode('cnbc', this)">CNBC Live</button>
                 <button id="btn-skynews" onclick="setMode('skynews', this)">Sky News</button>
                 <button id="btn-cnn" onclick="setMode('cnn', this)">CNN</button>
                 <button id="btn-wildlife" onclick="setMode('wildlife', this)">Wild</button>
@@ -428,7 +428,7 @@
                 <button id="btn-christian" onclick="setMode('christian', this)">Bible</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
                 <button id="btn-file" onclick="setMode('file', this)">Media</button>
-                <button id="btn-xrated" onclick="setMode('xrated', this)">Adults</button>
+               <!-- <button id="btn-xrated" onclick="setMode('xrated', this)">Adults</button> -->
               </div>
             </div>
 
@@ -438,7 +438,7 @@
             </div>
 
             <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
-              <div class="tc-subtle-watermark"> </div>
+              <div class="tc-subtle-watermark">T&C Hub</div>
               <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
@@ -563,7 +563,7 @@
   <footer class="py-6 px-4 text-xs mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-center md:text-left">
       <div><b>Tasty & Comfort • T&C News Hub</b> </div>
-      <div>© 2026 T&C From New Modern Mission</div>
+      <div>© 2026 T&C From New Modern Mission <p> • Build & Developed by Murali Manohar •</p></div>
     </div>
   </footer>
 
@@ -674,7 +674,7 @@
       }
 
       const titleMap = {
-        'local': 'Telangana (State) Live Headlines',
+        'local': 'Telangana State Live Headlines',
         'national': 'India National News Bulletins',
         'world': 'Global Worldwide News Stream'
       };
@@ -856,7 +856,7 @@
         if (dot) dot.style.display = "inline-block";
 
         let streamUrl = "";
-        let channelName = "Live Stream";
+        let channelName = "TV9 Live";
 
         switch(mode) {
           case 'video':
@@ -877,7 +877,7 @@
             break;
           case 'v6':
             streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1";
-            channelName = "V6 News Live";
+            channelName = "CNBC Live";
             break;
           case 'skynews':
             streamUrl = "https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1";
@@ -924,7 +924,7 @@
             channelName = "Constitution";
             break;
           case 'xrated':
-            streamUrl = "https://www.youtube.com/embed/zHVBsGodwHI?autoplay=1&mute=1";
+            streamUrl = "https://www.youtube.com/embed/********?autoplay=1&mute=1";
             channelName = "Adults";
             break;
         }
