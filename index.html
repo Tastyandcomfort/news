@@ -705,7 +705,7 @@
         issVel: "ISS വേഗത", spaceCrew: "ബഹിരാകാശ സഞ്ചാരികൾ", usgsQuakesStat: "ഭൂകമ്പ തീവ്രത",
         liveExchange: "നാണയ വിനിമയ നിരക്കുകൾ", factCheck: "ഫാക്റ്റ് ചെക്ക് പോർട്ടൽ", usgsDirect: "USGS ഭൂകമ്പങ്ങൾ",
         issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...",
-        footerBrand: "ടേസ്റ്റി & കംഫർട്ട് • T&C ന്യൂസ് ഹബ്",
+        footerBrand: "ടേസ്റ്റി & കംഫർಟ್ • T&C ന്യൂസ് ഹബ്",
         footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിഷൻ • മുരളി മനോഹർ നിർമ്മിച്ചത് •",
         scopeLocalTitle: "തെലങ്കാന സംസ്ഥാന ലൈവ് വാർത്തകൾ",
         scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ",
@@ -767,6 +767,22 @@
       document.getElementById('active-scope-title').textContent = titleMap[currentScope];
 
       fetchPortalNews();
+    }
+
+    // Helper function to translate text on the fly using Google's public translation endpoint
+    async function translateText(text, targetLang) {
+      if (targetLang === 'en' || !text) return text;
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data[0]) {
+          return data[0].map(segment => segment[0]).join('');
+        }
+      } catch (e) {
+        console.error("Translation error:", e);
+      }
+      return text;
     }
 
     // Theme Switcher Logic
@@ -870,21 +886,19 @@
       fetchPortalNews();
     }
 
-    // RSS Feed Fetcher & ROTATING REFRESH ANIMATION FIX
+    // RSS Feed Fetcher with Live Translation for News Stories
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
       const selectedDateStr = document.getElementById('news-date-picker').value;
       const refreshIcon = document.getElementById('refresh-icon');
 
-      // Trigger Rotation Animation on Icon
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
-
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying live news proxy...</div>';
+      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Querying & translating live news...</div>';
 
       try {
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&lang=${currentLanguage}`);
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}`);
         if (!res.ok) throw new Error("API network error");
         
         const xmlText = await res.text();
@@ -921,11 +935,14 @@
         }
 
         let html = '';
-        filteredItems.forEach(item => {
-          const title = item.querySelector("title")?.textContent || "Untitled News Story";
+        for (const item of filteredItems) {
+          const rawTitle = item.querySelector("title")?.textContent || "Untitled News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = item.querySelector("pubDate")?.textContent || "";
           const timeFormatted = pubDate ? new Date(pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
+
+          // Translate title into active selected language
+          const title = await translateText(rawTitle, currentLanguage);
 
           let sourceName = "Trusted by T&C";
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
@@ -948,7 +965,7 @@
               </a>
             </div>
           `;
-        });
+        }
 
         feedContainer.innerHTML = html;
         badge.textContent = `Live (${filteredItems.length} Stories)`;
@@ -969,15 +986,16 @@
         const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
 
         let html = '';
-        items.forEach(item => {
-          const title = item.querySelector("title")?.textContent || "";
+        for (const item of items) {
+          const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
+          const title = await translateText(rawTitle, currentLanguage);
           html += `
             <a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">
               • ${title}
             </a>
           `;
-        });
+        }
         container.innerHTML = html;
       } catch (e) {
         container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">World highlights loading...</div>';
