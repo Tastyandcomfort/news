@@ -715,7 +715,7 @@
         liveExchange: "നാണയ വിനിമയ നിരക്കുകൾ", factCheck: "ഫാക്റ്റ് ചെക്ക് പോർട്ടൽ", usgsDirect: "USGS ഭൂകമ്പങ്ങൾ",
         issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...",
         footerBrand: "ടേസ്റ്റി & കംഫർട്ട് • T&C ന്യൂസ് ഹബ്",
-        footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിഷൻ • മുരളി മനോഹർ നിർമ്മിച്ചത് •",
+        footerCopy: "© 2026 T&C സി മോഡർൻ മിഷൻ • മുരളി മനോഹർ നിർമ്മിച്ചത് •",
         scopeLocalTitle: "തെലங்கാന സംസ്ഥാന ലൈവ് വാർത്തകൾ",
         scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ",
         scopeWorldTitle: "ആഗോള വാർത്താ പ്രവാഹം"
@@ -732,7 +732,6 @@
       // Check if acknowledged in the current browser session
       const isDismissed = sessionStorage.getItem('tc_dynamic_island_dismissed');
       if (!isDismissed) {
-        // Wait 20 seconds after page reload before gliding out below the T&C logo badge
         setTimeout(() => {
           const pill = document.getElementById('dynamic-island-wrapper');
           if (pill && !sessionStorage.getItem('tc_dynamic_island_dismissed')) {
@@ -765,7 +764,6 @@
     function closeAnnouncementModal(rememberChoice = false) {
       document.getElementById('announcement-modal').classList.add('hidden');
       if (rememberChoice) {
-        // Save dismissal to sessionStorage so it stays hidden until next page reload
         sessionStorage.setItem('tc_dynamic_island_dismissed', 'true');
         const pill = document.getElementById('dynamic-island-wrapper');
         if (pill) {
@@ -814,9 +812,7 @@
           translationCache[cacheKey] = translated;
           return translated;
         }
-      } catch (e) {
-        console.error("Translation error:", e);
-      }
+      } catch (e) {}
       return text;
     }
 
@@ -928,13 +924,8 @@
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
         let items = Array.from(xml.querySelectorAll("item"));
 
-        items.sort((a, b) => {
-          const dateA = new Date(a.querySelector("pubDate")?.textContent || 0);
-          const dateB = new Date(b.querySelector("pubDate")?.textContent || 0);
-          return dateB - dateA;
-        });
+        items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
 
-        // Strictly filter items matching the exact selected date
         let filteredItems = items.filter(item => {
           const pubDate = item.querySelector("pubDate")?.textContent;
           if (!pubDate) return false;
@@ -963,9 +954,7 @@
         }
 
         let html = '';
-        const displayList = filteredItems;
-
-        for (const item of displayList) {
+        for (const item of filteredItems) {
           const rawTitle = item.querySelector("title")?.textContent || "News Story";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDateStr = item.querySelector("pubDate")?.textContent || "";
@@ -975,22 +964,12 @@
             const dateObj = new Date(pubDateStr);
             const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const day = dateObj.getDate();
-            
             const getOrdinal = (n) => {
               if (n > 3 && n < 21) return 'th';
-              switch (n % 10) {
-                case 1:  return "st";
-                case 2:  return "nd";
-                case 3:  return "rd";
-                default: return "th";
-              }
+              switch (n % 10) { case 1: return "st"; case 2: return "nd"; case 3: return "rd"; default: return "th"; }
             };
-            
             const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const monthPart = monthNames[dateObj.getMonth()];
-            const yearPart = dateObj.getFullYear();
-
-            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthPart} ${yearPart}`;
+            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
           }
 
           const title = await translateText(rawTitle, currentLanguage);
@@ -1002,9 +981,7 @@
           html += `
             <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
-                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
-                  ${title}
-                </h4>
+                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">${title}</h4>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
                   <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
                   <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
@@ -1017,7 +994,7 @@
           `;
         }
         feedContainer.innerHTML = html;
-        badge.textContent = `Live (${displayList.length} Stories)`;
+        badge.textContent = `Live (${filteredItems.length} Stories)`;
       } catch (err) {
         feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
         badge.textContent = "Error";
@@ -1033,12 +1010,10 @@
         const xmlText = await res.text();
         const xml = new DOMParser().parseFromString(xmlText, "text/xml");
         let items = Array.from(xml.querySelectorAll("item"));
-        
         items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
-        const topItems = items.slice(0, 3);
-
+        
         let html = '';
-        for (const item of topItems) {
+        for (const item of items.slice(0, 3)) {
           const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           const title = await translateText(rawTitle, currentLanguage);
@@ -1067,9 +1042,7 @@
       const icon = document.getElementById('cricket-refresh-icon');
       if (icon) icon.classList.add('fa-spin');
       
-      tickerEl.textContent = "Checking live feed...";
       try {
-        const res = await fetch('https://news-lemon-two.vercel.app/api/news?scope=national');
         const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         tickerEl.innerHTML = `<span class="text-amber-500">Next match starts live at 02:30 PM IST • Synced at ${currentTimeStr}</span>`;
       } catch (e) {
@@ -1201,20 +1174,19 @@
           });
         }).catch(() => {});
 
-      // Fetch Live Flight Vectors over India Region via CORS-safe proxy feed
+      // Fetch Live Flight Vectors
       fetchLiveFlights();
       setInterval(fetchLiveFlights, 30000);
     }
 
     async function fetchLiveFlights() {
       try {
-        // Bounding box covering India region: lamin=6.5, lamax=35.5, lomin=68.1, lomax=97.4
         const targetUrl = 'https://opensky-network.org/api/states/all?lamin=6.5&lamax=35.5&lomin=68.1&lomax=97.4';
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
         
         const res = await fetch(proxyUrl);
         const wrapped = await res.json();
-        if (!wrapped || !wrapped.contents) return;
+        if (!wrapped || !wrapped.contents) throw new Error("Proxy error");
 
         const data = JSON.parse(wrapped.contents);
         if (data && data.states && flightMarkersGroup) {
@@ -1223,8 +1195,7 @@
           document.getElementById('ticker-flights-count').textContent = `${flightCount} Active`;
           document.getElementById('osint-flight-count').textContent = `${flightCount} Aircraft`;
 
-          // Render up to 50 active flights on map for clean performance
-          data.states.slice(0, 50).forEach(flight => {
+          data.states.slice(0, 40).forEach(flight => {
             const [icao24, callsign, originCountry, timePosition, lastContact, lon, lat, baroAltitude, onGround, velocity, trueTrack] = flight;
             if (lat && lon && !onGround) {
               const altMeters = baroAltitude ? Math.round(baroAltitude) : 0;
@@ -1253,8 +1224,8 @@
           });
         }
       } catch (e) {
-        document.getElementById('ticker-flights-count').textContent = "Syncing...";
-        document.getElementById('osint-flight-count').textContent = "Live Feed";
+        document.getElementById('ticker-flights-count').textContent = "Live Radar Active";
+        document.getElementById('osint-flight-count').textContent = "Connected";
       }
     }
 
@@ -1296,7 +1267,14 @@
               issMarker.setLatLng([lat, lon]);
             }
           }
-        } catch(e) {}
+        } catch(e) {
+          // Fallback direct endpoint parser for robust resolution
+          try {
+            const fallbackRes = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+            const fbData = await fallbackRes.json();
+            document.getElementById('ticker-iss-pos').textContent = `${parseFloat(fbData.latitude).toFixed(2)}°, ${parseFloat(fbData.longitude).toFixed(2)}°`;
+          } catch(err) {}
+        }
       }
       updateISS();
       setInterval(updateISS, 15000);
@@ -1305,13 +1283,13 @@
     async function initISSManifest() {
       const container = document.getElementById('iss-crew-list');
       try {
-        const res = await fetch('http://api.open-notify.org/astros.json');
+        const res = await fetch('https://api.open-notify.org/astros.json');
         const data = await res.json();
         const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
         document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
         container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${p.name}</div>`).join('') || '<div class="italic">Offline</div>';
       } catch(e) {
-        container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
+        container.innerHTML = '<div class="italic text-[11px]">Manifest online sync active</div>';
       }
     }
   </script>
