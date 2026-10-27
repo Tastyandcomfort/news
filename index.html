@@ -1179,28 +1179,25 @@
       setInterval(fetchLiveFlights, 30000);
     }
 
-    async function fetchLiveFlights() {
+  async function fetchLiveFlights() {
       try {
-        const targetUrl = 'https://opensky-network.org/api/states/all?lamin=6.5&lamax=35.5&lomin=68.1&lomax=97.4';
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        
-        const res = await fetch(proxyUrl);
-        const wrapped = await res.json();
-        if (!wrapped || !wrapped.contents) throw new Error("Proxy error");
+        // Querying your dedicated live Vercel serverless backend endpoint
+        const res = await fetch('https://news-39tq.vercel.app/api/flights');
+        const data = await res.json();
 
-        const data = JSON.parse(wrapped.contents);
         if (data && data.states && flightMarkersGroup) {
           flightMarkersGroup.clearLayers();
           const flightCount = data.states.length;
           document.getElementById('ticker-flights-count').textContent = `${flightCount} Active`;
           document.getElementById('osint-flight-count').textContent = `${flightCount} Aircraft`;
 
+          // Render true live aircraft state vectors on the map
           data.states.slice(0, 40).forEach(flight => {
             const [icao24, callsign, originCountry, timePosition, lastContact, lon, lat, baroAltitude, onGround, velocity, trueTrack] = flight;
             if (lat && lon && !onGround) {
               const altMeters = baroAltitude ? Math.round(baroAltitude) : 0;
               const speedKmh = velocity ? Math.round(velocity * 3.6) : 0;
-              const cleanCallsign = callsign ? callsign.trim() : 'Unknown';
+              const cleanCallsign = callsign ? callsign.trim() : 'Live Flight';
 
               const planeMarker = L.circleMarker([lat, lon], {
                 radius: 5,
@@ -1216,19 +1213,22 @@
                   <b>Altitude:</b> ${altMeters} meters<br>
                   <b>Ground Speed:</b> ${speedKmh} km/h<br>
                   <b>Heading:</b> ${trueTrack || 0}°<br>
-                  <b>Position:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
+                  <b>Coordinates:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
                 </div>
               `);
               planeMarker.addTo(flightMarkersGroup);
             }
           });
+        } else {
+          document.getElementById('ticker-flights-count').textContent = "0 Active";
+          document.getElementById('osint-flight-count').textContent = "0 Aircraft";
         }
       } catch (e) {
-        document.getElementById('ticker-flights-count').textContent = "Live Radar Active";
-        document.getElementById('osint-flight-count').textContent = "Connected";
+        document.getElementById('ticker-flights-count').textContent = "Live Feed Error";
+        document.getElementById('osint-flight-count').textContent = "Offline";
       }
     }
-
+    
     function showLegendInfo(type) {
       if (type === 'flight') {
         alert("✈️ Live Flight Radar Info:\nTracking real-time commercial and civil aircraft state vectors via live ADS-B sensors over the regional airspace.");
