@@ -503,7 +503,6 @@
               <div class="view-selector desktop-scrollbar flex items-center gap-2 overflow-x-auto pb-2">
                 <button id="btn-v6" onclick="setMode('v6', this)">V6</button>
                 <button id="btn-tv9" onclick="setMode('tv9', this)">TV9</button>
-                <button id="btn-live" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-abcnews" onclick="setMode('abcnews', this)">ABC News</button>
                 <button id="btn-bloomberg" onclick="setMode('bloomberg', this)">Bloomberg</button>
                 <button id="btn-a1jazeera" onclick="setMode('a1jazeera', this)">A1 Jazeera</button>
@@ -512,15 +511,18 @@
                 <button id="btn-cnbc" onclick="setMode('cnbc', this)">CNBC Live</button>
                 <button id="btn-skynews" onclick="setMode('skynews', this)">Sky News</button>
                 <button id="btn-cnn" onclick="setMode('cnn', this)">CNN</button>
+                <button id="btn-nasa" onclick="setMode('nasa', this)">NASA</button>
+                <button id="btn-starbase" onclick="setMode('starbase', this)">Starbase</button>
+                <button id="btn-heathrowairside" onclick="setMode('heathrowairside', this)">Heathrow Airside</button>
+                <button id="btn-luxairside" onclick="setMode('luxairside', this)">LUX Airside</button>
                 <button id="btn-wildlife" onclick="setMode('wildlife', this)">Wild</button>
                 <button id="btn-sports" onclick="setMode('sports', this)">Sports</button>
                 <button id="btn-music" onclick="setMode('music', this)">Music</button>
-                <button id="btn-nasa" onclick="setMode('nasa', this)">NASA</button>
-                <button id="btn-airport" onclick="setMode('airport', this)">Airside</button>
                 <button id="btn-hindu" onclick="setMode('hindu', this)">Bhagavat Geetha</button>
                 <button id="btn-muslim" onclick="setMode('muslim', this)">Quran</button>
                 <button id="btn-christian" onclick="setMode('christian', this)">Bible</button>
                 <button id="btn-law" onclick="setMode('law', this)">Constitution</button>
+                <button id="btn-t&c" onclick="setMode('live', this)">T&C</button>
                 <button id="btn-file" onclick="setMode('file', this)">Media</button>
               </div>
             </div>
@@ -1150,7 +1152,6 @@
         switch(mode) {
           case 'v6': streamUrl = "https://www.youtube.com/embed/28IZl9iM-EE?autoplay=1&mute=1&playsinline=1"; channelName = "V6 Live News"; break;
           case 'tv9': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1"; channelName = "TV9 Live News"; break;
-          case 'live': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1"; channelName = "T&C Live"; break;
           case 'abcnews': streamUrl = "https://www.youtube.com/embed/KQhNZQ_Uag8?autoplay=1&mute=1&playsinline=1"; channelName = "ABC News Live"; break;
           case 'bloomberg': streamUrl = "https://www.youtube.com/embed/QB5BNdBFujE?autoplay=1&mute=1&playsinline=1"; channelName = "Bloomberg News Live"; break;
           case 'a1jazeera': streamUrl = "https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1&playsinline=1"; channelName = "Al Jazeera Live"; break;
@@ -1159,15 +1160,18 @@
           case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1"; channelName = "CNBC Live"; break;
           case 'skynews': streamUrl = "https://www.youtube.com/embed/umLWFz4izTM?autoplay=1&mute=1&playsinline=1"; channelName = "Sky News Live"; break;
           case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1"; channelName = "CNN International Live"; break;
+          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1"; channelName = "NASA Live"; break;
+          case 'starebase': streamUrl = "https://www.youtube.com/embed/mhJRzQsLZGg?autoplay=1&mute=1&playsinline=1"; channelName = "Starbase Live"; break;
+          case 'heathrowairside': streamUrl = "https://www.youtube.com/embed/uDBYuEV4zjI?autoplay=1&mute=1&playsinline=1"; channelName = "Heathrow Airside Live"; break;
+          case 'luxairside': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1"; channelName = "LUX Airside Live"; break;
           case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1"; channelName = "Wild Live"; break;
           case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1"; channelName = "Sports Live"; break;
           case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1"; channelName = "Music"; break;
-          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1"; channelName = "NASA Live"; break;
-          case 'airport': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1"; channelName = "Airside Live"; break;
           case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1"; channelName = "Bhagavat Geetha"; break;
           case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1"; channelName = "Quran"; break;
           case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1"; channelName = "Bible"; break;
           case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1"; channelName = "Constitution"; break;
+          case 't&c': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1"; channelName = "T&C Live"; break;
         }
 
         if (title) title.innerText = channelName;
