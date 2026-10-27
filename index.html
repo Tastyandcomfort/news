@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T&C News Hub</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#0071e3',
+              amber: '#f59e0b',
+              green: '#34c759',
+              red: '#ff3b30'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    :root {
+      --bg-main: #f5f5f7;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-sub: #e5e5ea;
+      --text-main: #1d1d1f;
+      --text-sub: #86868b;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --header-bg: rgba(255, 255, 255, 0.75);
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --solar-pill-bg: rgba(255, 255, 255, 0.65);
+      --solar-pill-border: rgba(0, 0, 0, 0.1);
+    }
+
+    .dark {
+      --bg-main: #000000;
+      --bg-card: rgba(28, 28, 30, 0.8);
+      --bg-sub: #1c1c1e;
+      --text-main: #f5f5f7;
+      --text-sub: #a1a1a6;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --header-bg: rgba(0, 0, 0, 0.75);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --solar-pill-bg: rgba(30, 30, 35, 0.65);
+      --solar-pill-border: rgba(255, 255, 255, 0.12);
+    }
+
+    body { background-color: var(--bg-main); color: var(--text-main); }
+
+    .apple-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .apple-header {
+      background-color: var(--header-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-anchored-pill {
+      background: rgba(0, 113, 227, 0.9);
+      color: #ffffff;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .apple-solar-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 14px;
+      background: var(--solar-pill-bg);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--solar-pill-border);
+      border-radius: 9999px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .solar-item { display: flex; align-items: center; gap: 6px; }
+    .sf-solar-icon { width: 17px; height: 17px; display: inline-block; flex-shrink: 0; }
+    .sf-sunrise { color: #ff9f0a; }
+    .sf-sunset { color: #ff453a; }
+    .solar-time { font-size: 0.73rem; font-weight: 600; color: var(--text-main); }
+    .solar-divider { width: 1px; height: 11px; background: var(--border-color); }
+
+    /* COLLAPSIBLE APPLE GLASSMORPHIC LEAFLET LEGEND */
+    .leaflet-apple-legend {
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      line-height: 1.4;
+      max-width: 200px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .legend-item:hover { background: var(--bg-sub); }
+
+    /* APPLE GLASSMORPHIC POPUP STYLING */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    }
+    .leaflet-popup-content {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif !important;
+      font-size: 12px !important;
+      line-height: 1.5 !important;
+      margin: 12px 16px !important;
+    }
+
+    .pulse-gold { background-color: #ffcc00; box-shadow: 0 0 10px rgba(255, 204, 0, 0.6); animation: pulseGold 2s infinite; }
+    @keyframes pulseGold { 0% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.5; transform: scale(0.95); } }
+
+    .live-dot { width: 8px; height: 8px; background-color: #34c759; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #34c759; animation: pulseGreen 1.5s infinite ease-in-out; }
+    @keyframes pulseGreen { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.25); } 100% { opacity: 0.4; transform: scale(0.9); } }
+
+    .desktop-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
+    .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
+
+    .tc-subtle-watermark {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased relative">
+
+  <!-- TOP APPLE HEADER -->
+  <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
+        <div class="w-3 h-3 rounded-full pulse-gold"></div>
+        <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
+          <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
+          <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+        </div>
+      </div>
+
+      <!-- SOLAR PILL -->
+      <div class="apple-solar-pill" id="apple-solar-pill">
+        <div class="solar-item">
+          <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/><path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2"/><path d="M2 18h20" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="solar-time" id="pill-sunrise">Syncing...</span>
+        </div>
+        <span class="solar-divider"></span>
+        <div class="solar-item">
+          <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/><path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2"/><path d="M2 18h20" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="solar-time" id="pill-sunset">Syncing...</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <nav class="flex items-center gap-1 p-1 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <button id="tab-btn-news" onclick="switchMainTab('news')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-md">Headlines</button>
+          <button id="tab-btn-video" onclick="switchMainTab('video')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold" style="color: var(--text-sub);">TV & Media</button>
+          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold" style="color: var(--text-sub);">Radar</button>
+        </nav>
+        <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TICKER -->
+  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <span>USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
+        <span class="text-red-500">USGS Quakes: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
+        <span class="text-green-500">Live Cricket: <b style="color: var(--text-main);" id="ticker-cricket">Active</b></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-blue-400">Live Skies: <b id="ticker-flights-count">Syncing...</b></span>
+        <span class="text-blue-400">ISS Cord: <b id="ticker-iss-pos">Syncing...</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT PRIMARY PANEL -->
+      <div class="lg:col-span-8 flex flex-col gap-6">
+        
+        <!-- TAB 1: NEWS -->
+        <section id="view-news" class="flex flex-col gap-6">
+          <div class="apple-card p-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3"><i class="fa-solid fa-earth-americas mr-1.5"></i> World Highlights</h2>
+            <div id="pinned-world-news" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="text-xs italic" style="color: var(--text-sub);">Connecting to live RSS feed...</div>
+            </div>
+          </div>
+          <div class="apple-card p-4 sm:p-5">
+            <h3 class="text-sm font-bold mb-4" style="color: var(--text-main);">Telangana State Live Headlines</h3>
+            <div id="news-feed-container" class="space-y-3">
+              <div class="text-center py-10 text-xs" style="color: var(--text-sub);">Querying real-time RSS API...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: TV & MEDIA -->
+        <section id="view-video" class="hidden flex-col gap-6">
+          <div class="apple-card p-4 sm:p-5">
+            <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="border: 1px solid var(--border-color);">
+              <div class="tc-subtle-watermark">T&C Hub</div>
+              <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: RADAR & OSINT MAP -->
+        <section id="view-osint" class="hidden flex-col gap-6">
+          <div class="apple-card p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-bold text-blue-500 flex items-center gap-2"><i class="fa-solid fa-wind"></i> Weather & Flight Radar</h2>
+              <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2.5 py-1 rounded-full font-bold">Live ADS-B</span>
+            </div>
+
+            <!-- LEAFLET MAP WITH ZOOM BUTTONS & FLIGHT TRAJECTORY VECTORS -->
+            <div class="mb-4">
+              <div id="osint-map" class="h-[450px] rounded-xl overflow-hidden relative" style="border: 1px solid var(--border-color);">
+                <div class="tc-subtle-watermark">T&C OSINT RADAR</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">Space Crew</p><p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">Live Aircraft Tracked</p><p class="text-sm font-extrabold text-blue-500" id="osint-flight-count">Fetching...</p></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        <div class="apple-card p-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3"><i class="fa-solid fa-chart-line mr-1.5"></i> Live Exchange Rates</h3>
+          <div class="flex items-center justify-between p-2.5 rounded-xl text-xs" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span class="font-bold">USD / INR</span><span class="text-amber-500 font-extrabold" id="side-usdinr">Syncing...</span></div>
+        </div>
+        <div class="apple-card p-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-3"><i class="fa-solid fa-user-astronaut mr-1.5"></i> ISS Crew Manifest</h3>
+          <div id="iss-crew-list" class="space-y-1.5 text-xs max-h-48 overflow-y-auto" style="color: var(--text-sub);">Querying manifest...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-6 px-4 text-xs mt-12 text-center" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
+    <b>Tasty & Comfort • T&C News Hub</b> © 2026 • Built & Developed by Murali Manohar
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let leafletMap = null;
+    let issMarker = null;
+    let flightLayersGroup = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchSolarSchedule();
+      fetchPinnedWorldNews();
+      fetchPortalNews();
+      fetchRealTimeForex();
+      initOSINTMap();
+      initISSTracker();
+      initISSManifest();
+    });
+
+    function toggleAppleTheme() {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.className = "fa-solid fa-moon text-xs text-blue-500";
+      } else {
+        htmlEl.classList.add('dark');
+        themeIcon.className = "fa-solid fa-sun text-xs text-amber-500";
+      }
+    }
+
+    function switchMainTab(tab) {
+      document.getElementById('view-news').classList.add('hidden');
+      document.getElementById('view-video').classList.add('hidden');
+      document.getElementById('view-osint').classList.add('hidden');
+
+      ['news', 'video', 'osint'].forEach(t => {
+        document.getElementById(`tab-btn-${t}`).className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold";
+        document.getElementById(`tab-btn-${t}`).style.color = "var(--text-sub)";
+        document.getElementById(`tab-btn-${t}`).style.backgroundColor = "transparent";
+      });
+
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      activeBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-md";
+      activeBtn.style.color = "#ffffff";
+
+      if (tab === 'osint' && leafletMap) {
+        setTimeout(() => leafletMap.invalidateSize(), 100);
+      }
+    }
+
+    async function fetchSolarSchedule() {
+      try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&start_date=${todayStr}&end_date=${todayStr}&timezone=auto`);
+        const data = await res.json();
+        if (data && data.daily) {
+          const formatTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('pill-sunrise').textContent = formatTime(data.daily.sunrise[0]);
+          document.getElementById('pill-sunset').textContent = formatTime(data.daily.sunset[0]);
+        }
+      } catch (err) {}
+    }
+
+    async function fetchPortalNews() {
+      const feed = document.getElementById('news-feed-container');
+      try {
+        const res = await fetch(`https://news-39tq.vercel.app/api/news?scope=local&date=${new Date().toISOString().split('T')[0]}`);
+        const xmlText = await res.text();
+        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item")).slice(0, 5);
+        feed.innerHTML = items.map(i => `
+          <div class="p-3.5 rounded-xl flex items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+            <span class="text-xs font-semibold" style="color: var(--text-main);">${i.querySelector("title")?.textContent}</span>
+            <a href="${i.querySelector("link")?.textContent}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold whitespace-nowrap">Read</a>
+          </div>
+        `).join('');
+      } catch (e) {
+        feed.innerHTML = '<div class="text-xs text-red-500">News loading error.</div>';
+      }
+    }
+
+    async function fetchPinnedWorldNews() {
+      try {
+        const res = await fetch(`https://news-39tq.vercel.app/api/news?scope=world`);
+        const xmlText = await res.text();
+        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
+        document.getElementById('pinned-world-news').innerHTML = items.map(i => `
+          <a href="${i.querySelector("link")?.textContent}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${i.querySelector("title")?.textContent}</a>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function fetchRealTimeForex() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data && data.rates) {
+          document.getElementById('ticker-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+          document.getElementById('side-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+        }
+      } catch(e) {}
+    }
+
+    function initOSINTMap() {
+      // ZOOM CONTROL ENABLED BY DEFAULT (No zoomControl: false)
+      leafletMap = L.map('osint-map').setView([22.5, 82.9], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
+
+      flightLayersGroup = L.layerGroup().addTo(leafletMap);
+
+      // COLLAPSIBLE APPLE GLASSMORPHIC LEGEND
+      const legend = L.control({ position: 'bottomright' });
+      legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'leaflet-apple-legend');
+        div.innerHTML = `
+          <div onclick="toggleLegendContent()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 11px;">
+            <span>Map Legend 🗺️</span>
+            <i id="legend-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
+          </div>
+          <div id="legend-body" style="display: none; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #0071e3; border-radius: 50%;"></span><span style="font-size:11px;">Live Flight + Vector</span></div>
+            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #34c759; border-radius: 50%;"></span><span style="font-size:11px;">ISS Satellite</span></div>
+            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #ff3b30; border-radius: 50%;"></span><span style="font-size:11px;">USGS Quake M4.5+</span></div>
+          </div>
+        `;
+        L.DomEvent.disableClickPropagation(div);
+        return div;
+      };
+      legend.addTo(leafletMap);
+
+      // Fetch USGS Earthquakes
+      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('ticker-quake-count').textContent = `${data.features ? data.features.length : 0} Quakes`;
+          (data.features || []).forEach(quake => {
+            const [lon, lat] = quake.geometry.coordinates;
+            const mag = quake.properties.mag;
+            const marker = L.circleMarker([lat, lon], { radius: mag * 1.5, color: '#ff3b30', fillColor: '#ff3b30', fillOpacity: 0.7 });
+            marker.bindPopup(`
+              <div style="font-size: 12px;">
+                <b style="color: #ff3b30;">🔴 USGS Earthquake Event</b><br>
+                <b>Magnitude:</b> ${mag}<br>
+                <b>Location:</b> ${quake.properties.place}<br>
+                <b>Time:</b> ${new Date(quake.properties.time).toLocaleString()}<br>
+                <b>Coordinates:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
+              </div>
+            `);
+            marker.addTo(leafletMap);
+          });
+        }).catch(() => {});
+
+      fetchLiveFlights();
+      setInterval(fetchLiveFlights, 30000);
+    }
+
+    function toggleLegendContent() {
+      const body = document.getElementById('legend-body');
+      const icon = document.getElementById('legend-icon');
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.className = "fa-solid fa-chevron-up text-[10px]";
+      } else {
+        body.style.display = 'none';
+        icon.className = "fa-solid fa-chevron-down text-[10px]";
+      }
+    }
+
+    async function fetchLiveFlights() {
+      try {
+        const res = await fetch('https://news-39tq.vercel.app/api/flights');
+        const data = await res.json();
+
+        if (data && data.states && flightLayersGroup) {
+          flightLayersGroup.clearLayers();
+          const count = data.states.length;
+          document.getElementById('ticker-flights-count').textContent = `${count} Active`;
+          document.getElementById('osint-flight-count').textContent = `${count} Aircraft`;
+
+          data.states.slice(0, 50).forEach(flight => {
+            const [icao24, callsign, origin, posTime, contact, lon, lat, altitudeMeters, onGround, speedMs, trackDeg] = flight;
+            if (lat && lon && !onGround) {
+              const speedKmh = Math.round(speedMs * 3.6);
+              const altFeet = Math.round(altitudeMeters * 3.28084);
+              const cleanCall = callsign ? callsign.trim() : 'Unknown';
+
+              // DRAW FLIGHT HEADING TRAJECTORY VECTOR LINE (Real-time flight path direction)
+              if (trackDeg !== null && speedKmh > 30) {
+                const rad = (trackDeg - 90) * (Math.PI / 180);
+                const destLat = lat + (0.3 * Math.sin(rad));
+                const destLon = lon + (0.3 * Math.cos(rad));
+                L.polyline([[lat, lon], [destLat, destLon]], {
+                  color: '#0071e3',
+                  weight: 2,
+                  opacity: 0.7
+                }).addTo(flightLayersGroup);
+              }
+
+              // AIRCRAFT MARKER WITH RICH APPLE GLASSMORPHIC POPUP
+              const marker = L.circleMarker([lat, lon], { radius: 5, color: '#0071e3', fillColor: '#0071e3', fillOpacity: 0.9 });
+              marker.bindPopup(`
+                <div style="font-size: 12px; min-width: 160px;">
+                  <b style="color: #0071e3; font-size: 13px;">✈️ Flight: ${cleanCall}</b><br>
+                  <hr style="border:0; border-top:1px solid var(--border-color); margin: 4px 0;">
+                  <b>ICAO Hex:</b> ${icao24}<br>
+                  <b>Altitude:</b> ${Math.round(altitudeMeters)} m (${altFeet} ft)<br>
+                  <b>Ground Speed:</b> ${speedKmh} km/h<br>
+                  <b>Heading:</b> ${trackDeg || 0}°<br>
+                  <b>Position:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
+                </div>
+              `);
+              marker.addTo(flightLayersGroup);
+            }
+          });
+        }
+      } catch (e) {
+        document.getElementById('ticker-flights-count').textContent = "Live Radar Active";
+      }
+    }
+
+    async function initISSTracker() {
+      async function updateISS() {
+        try {
+          const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+          const data = await res.json();
+          const lat = parseFloat(data.latitude).toFixed(2);
+          const lon = parseFloat(data.longitude).toFixed(2);
+          document.getElementById('ticker-iss-pos').textContent = `${lat}°, ${lon}°`;
+          document.getElementById('osint-iss-alt').textContent = `${Math.round(data.altitude)} km`;
+          document.getElementById('osint-iss-spd').textContent = `${Math.round(data.velocity)} km/h`;
+
+          if (leafletMap) {
+            if (!issMarker) {
+              issMarker = L.circleMarker([lat, lon], { radius: 8, color: '#34c759', fillColor: '#34c759', fillOpacity: 0.9 });
+              issMarker.bindPopup(`
+                <div style="font-size: 12px;">
+                  <b style="color: #34c759;">🛰️ International Space Station (ISS)</b><br>
+                  <b>Latitude:</b> ${lat}° | <b>Longitude:</b> ${lon}°<br>
+                  <b>Altitude:</b> ${Math.round(data.altitude)} km<br>
+                  <b>Velocity:</b> ${Math.round(data.velocity)} km/h
+                </div>
+              `);
+              issMarker.addTo(leafletMap);
+            } else {
+              issMarker.setLatLng([lat, lon]);
+            }
+          }
+        } catch(e) {}
+      }
+      updateISS();
+      setInterval(updateISS, 15000);
+    }
+
+    async function initISSManifest() {
+      try {
+        const res = await fetch('https://api.open-notify.org/astros.json');
+        const data = await res.json();
+        const crew = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
+        document.getElementById('osint-iss-crew').textContent = `${crew.length} Crew`;
+        document.getElementById('iss-crew-list').innerHTML = crew.map(c => `<div class="p-1.5 rounded mb-1" style="background-color: var(--bg-sub);">• ${c.name}</div>`).join('');
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>
