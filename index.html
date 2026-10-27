@@ -13,6 +13,37 @@
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+
+
+
+<!-- PWA Settings -->
+<link rel="manifest" href="/news/manifest.json">
+<meta name="theme-color" content="#111827">
+
+<!-- iOS Specific Support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="News">
+<link rel="apple-touch-icon" href="/news/icon-192.png">
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/news/sw.js')
+        .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+        .catch((err) => console.error('Service Worker registration failed:', err));
+    });
+  }
+</script>
+
+
+  
+  
+
+
+
+  
   <script>
     tailwind.config = {
       darkMode: 'class',
