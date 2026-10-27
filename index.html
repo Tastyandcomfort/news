@@ -294,8 +294,8 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Starts hidden, appears after 20s) -->
-  <div id="dynamic-island-wrapper" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-[100] cursor-pointer" onclick="openAnnouncementModal()">
+  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Appears 20s after page load) -->
+  <div id="dynamic-island-wrapper" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-[100] cursor-pointer transition-all duration-300" onclick="openAnnouncementModal()">
     <div class="dynamic-announcement-pill px-3 sm:px-4 py-1.5 rounded-full flex items-center gap-2 transition-all hover:scale-105">
       <span class="live-dot bg-amber-500 shadow-amber-500 flex-shrink-0"></span>
       <span class="text-[11px] sm:text-xs font-bold text-blue-500 tracking-wide flex items-center gap-1.5 whitespace-nowrap">
@@ -307,7 +307,7 @@
     </div>
   </div>
 
-  <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY (Opens strictly on tap/click) -->
+  <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
   <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
@@ -612,7 +612,7 @@
     let currentScope = 'local';
     let currentLanguage = 'en';
     
-    // Dynamic real-time date setup (Zero hardcoding)
+    // Dynamic real-time date setup
     const todayObj = new Date();
     const REAL_TODAY_DATE = todayObj.toISOString().split('T')[0];
 
@@ -680,7 +680,7 @@
         liveExchange: "ವಿನಿಮಯ ದರಗಳು", factCheck: "ಫ್ಯಾಕ್ಟ್-ಚೆಕ್ ಪೋರ್ಟಲ್", usgsDirect: "USGS ಭೂಕಂಪಗಳು",
         issManifest: "ISS ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ", queryingManifest: "ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
         footerBrand: "ಟೇಸ್ಟಿ & ಕಂಫರ್ಟ್ • T&C ನ್ಯೂಸ್ ಹಬ್",
-        footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮುರಳಿ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •",
+        footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮನೋಹರ್ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •",
         scopeLocalTitle: "ತೆಲಂಗಾಣ ರಾಜ್ಯ ಲೈವ್ ಮುಖ್ಯಾಂಶಗಳು",
         scopeNatTitle: "ಭಾರತ ರಾಷ್ಟ್ರೀಯ ಸುದ್ದಿ ಬುಲೆಟಿನ್‌ಗಳು",
         scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್"
@@ -723,15 +723,18 @@
       const dateInput = document.getElementById('news-date-picker');
       if (dateInput) {
         dateInput.value = REAL_TODAY_DATE;
-        dateInput.max = REAL_TODAY_DATE; // Dynamic max date blocking future selection
+        dateInput.max = REAL_TODAY_DATE;
       }
 
-      // Smooth 20-second delay before displaying the Dynamic Island top pill
-      const acknowledged = localStorage.getItem('tc_announcement_acknowledged_date');
-      if (acknowledged !== REAL_TODAY_DATE) {
+      // Check if acknowledged in the current browser session
+      const isDismissed = sessionStorage.getItem('tc_dynamic_island_dismissed');
+      if (!isDismissed) {
+        // Wait 20 seconds after page load/reload before displaying top pill
         setTimeout(() => {
           const pill = document.getElementById('dynamic-island-wrapper');
-          if (pill) pill.classList.remove('hidden');
+          if (pill && !sessionStorage.getItem('tc_dynamic_island_dismissed')) {
+            pill.classList.remove('hidden');
+          }
         }, 20000);
       }
 
@@ -752,7 +755,6 @@
       });
     });
 
-    // Dynamic Island Modal Toggle
     function openAnnouncementModal() {
       document.getElementById('announcement-modal').classList.remove('hidden');
     }
@@ -760,9 +762,14 @@
     function closeAnnouncementModal(rememberChoice = false) {
       document.getElementById('announcement-modal').classList.add('hidden');
       if (rememberChoice) {
-        localStorage.setItem('tc_announcement_acknowledged_date', REAL_TODAY_DATE);
+        // Save dismissal to sessionStorage so it stays hidden until next page reload
+        sessionStorage.setItem('tc_dynamic_island_dismissed', 'true');
         const pill = document.getElementById('dynamic-island-wrapper');
-        if (pill) pill.classList.add('hidden');
+        if (pill) {
+          pill.style.opacity = '0';
+          pill.style.transform = 'translate(-50%, -20px)';
+          setTimeout(() => pill.classList.add('hidden'), 300);
+        }
       }
     }
 
@@ -1052,7 +1059,6 @@
       } catch (e) {}
     }
 
-    // Real-Time Ticker Cricket Score & Schedule Poller with icon animation
     async function fetchLiveCricketTicker() {
       const tickerEl = document.getElementById('ticker-cricket');
       const icon = document.getElementById('cricket-refresh-icon');
@@ -1135,7 +1141,6 @@
       leafletMap = L.map('osint-map', { zoomControl: false }).setView([20.5937, 78.9629], 2);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
 
-      // Add interactive glassmorphic legend with full info triggers
       const legend = L.control({ position: 'bottomright' });
       legend.onAdd = function (map) {
         const div = L.DomUtil.create('div', 'leaflet-apple-legend');
@@ -1188,7 +1193,6 @@
         }).catch(() => {});
     }
 
-    // Legend Click Interactive Intelligence handler
     function showLegendInfo(type) {
       if (type === 'iss') {
         alert("🛰️ ISS Live Tracker Info:\nTracking the International Space Station in real-time orbit. Altitude: ~400 km, Speed: ~27,600 km/h.");
