@@ -103,13 +103,14 @@
       backface-visibility: hidden;
     }
 
-    /* MODEL 1: APPLE DYNAMIC ISLAND FLOATING PILL */
+    /* DYNAMIC ISLAND NOTIFICATION PILL */
     .dynamic-announcement-pill {
-      background: rgba(0, 113, 227, 0.15);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 113, 227, 0.3);
-      box-shadow: 0 4px 20px rgba(0, 113, 227, 0.2);
+      background: rgba(0, 113, 227, 0.18);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(0, 113, 227, 0.35);
+      box-shadow: 0 8px 25px rgba(0, 113, 227, 0.25);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* APPLE DYNAMIC ISLAND SOLAR PILL */
@@ -291,21 +292,22 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between antialiased">
+<body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-  <!-- MODEL 1: APPLE DYNAMIC ISLAND ANNOUNCEMENT FLOATING PILL -->
-  <div class="fixed top-3 left-1/2 -translate-x-1/2 z-[100] cursor-pointer" onclick="openAnnouncementModal()">
-    <div class="dynamic-announcement-pill px-4 py-1.5 rounded-full flex items-center gap-2.5 transition-all hover:scale-105">
-      <span class="live-dot bg-amber-500 shadow-amber-500"></span>
-      <span class="text-xs font-bold text-blue-500 tracking-wide flex items-center gap-1.5">
-        <i class="fa-solid fa-bullhorn text-[11px]"></i>
-        <span>Developer Briefing</span>
+  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Starts hidden, appears after 20s) -->
+  <div id="dynamic-island-wrapper" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-[100] cursor-pointer" onclick="openAnnouncementModal()">
+    <div class="dynamic-announcement-pill px-3 sm:px-4 py-1.5 rounded-full flex items-center gap-2 transition-all hover:scale-105">
+      <span class="live-dot bg-amber-500 shadow-amber-500 flex-shrink-0"></span>
+      <span class="text-[11px] sm:text-xs font-bold text-blue-500 tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+        <i class="fa-solid fa-bullhorn text-[10px]"></i>
+        <span class="hidden md:inline">Notice from Developer</span>
+        <span class="inline md:hidden">Notice</span>
       </span>
-      <span class="text-[10px] opacity-70 border-l border-blue-500/30 pl-2" style="color: var(--text-main);">Tap to view</span>
+      <span class="text-[9px] sm:text-[10px] bg-blue-500 text-white font-black px-1.5 py-0.5 rounded-full flex-shrink-0">1</span>
     </div>
   </div>
 
-  <!-- MODEL 1: APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
+  <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY (Opens strictly on tap/click) -->
   <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
@@ -678,7 +680,7 @@
         liveExchange: "ವಿನಿಮಯ ದರಗಳು", factCheck: "ಫ್ಯಾಕ್ಟ್-ಚೆಕ್ ಪೋರ್ಟಲ್", usgsDirect: "USGS ಭೂಕಂಪಗಳು",
         issManifest: "ISS ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ", queryingManifest: "ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
         footerBrand: "ಟೇಸ್ಟಿ & ಕಂಫರ್ಟ್ • T&C ನ್ಯೂಸ್ ಹಬ್",
-        footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮನೋಹರ್ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •",
+        footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮುರಳಿ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •",
         scopeLocalTitle: "ತೆಲಂಗಾಣ ರಾಜ್ಯ ಲೈವ್ ಮುಖ್ಯಾಂಶಗಳು",
         scopeNatTitle: "ಭಾರತ ರಾಷ್ಟ್ರೀಯ ಸುದ್ದಿ ಬುಲೆಟಿನ್‌ಗಳು",
         scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್"
@@ -694,7 +696,7 @@
         liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்",
         issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...",
         footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்",
-        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முరளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
+        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
         scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்",
         scopeNatTitle: "இந்திய தேசிய செய்தி বুলেটின்கள்",
         scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
@@ -724,10 +726,13 @@
         dateInput.max = REAL_TODAY_DATE; // Dynamic max date blocking future selection
       }
 
-      // Check if user has already acknowledged the announcement today
+      // Smooth 20-second delay before displaying the Dynamic Island top pill
       const acknowledged = localStorage.getItem('tc_announcement_acknowledged_date');
       if (acknowledged !== REAL_TODAY_DATE) {
-        setTimeout(() => openAnnouncementModal(), 1200);
+        setTimeout(() => {
+          const pill = document.getElementById('dynamic-island-wrapper');
+          if (pill) pill.classList.remove('hidden');
+        }, 20000);
       }
 
       fetchSolarSchedule();
@@ -747,7 +752,7 @@
       });
     });
 
-    // Model 1 Announcement Drawer Controls
+    // Dynamic Island Modal Toggle
     function openAnnouncementModal() {
       document.getElementById('announcement-modal').classList.remove('hidden');
     }
@@ -756,6 +761,8 @@
       document.getElementById('announcement-modal').classList.add('hidden');
       if (rememberChoice) {
         localStorage.setItem('tc_announcement_acknowledged_date', REAL_TODAY_DATE);
+        const pill = document.getElementById('dynamic-island-wrapper');
+        if (pill) pill.classList.add('hidden');
       }
     }
 
