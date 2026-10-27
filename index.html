@@ -103,14 +103,14 @@
       backface-visibility: hidden;
     }
 
-    /* DYNAMIC ISLAND NOTIFICATION PILL - Positioned safely clear of solar/brand headers */
-    .dynamic-announcement-pill {
-      background: rgba(0, 113, 227, 0.88);
+    /* SUGGESTION 2: LOGO-ANCHORED DYNAMIC ISLAND PILL */
+    .logo-anchored-pill {
+      background: rgba(0, 113, 227, 0.9);
       color: #ffffff;
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 10px 30px rgba(0, 113, 227, 0.35);
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -295,19 +295,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Appears 20s after reload; positioned below header so sunrise/sunset & logo are unblocked) -->
-  <div id="dynamic-island-wrapper" class="hidden fixed top-[100px] md:top-16 left-1/2 -translate-x-1/2 z-[100] cursor-pointer transition-all duration-300" onclick="openAnnouncementModal()">
-    <div class="dynamic-announcement-pill px-3.5 sm:px-4 py-1.5 rounded-full flex items-center gap-2 transition-all hover:scale-105">
-      <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
-      <span class="text-[11px] sm:text-xs font-bold text-white tracking-wide flex items-center gap-1.5 whitespace-nowrap">
-        <i class="fa-solid fa-bullhorn text-[10px]"></i>
-        <span class="hidden md:inline">Notice from Developer</span>
-        <span class="inline md:hidden">Notice</span>
-      </span>
-      <span class="text-[9px] sm:text-[10px] bg-white text-blue-600 font-black px-1.5 py-0.5 rounded-full flex-shrink-0">1</span>
-    </div>
-  </div>
-
   <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
   <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
@@ -354,14 +341,27 @@
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Brand Logo Badge -->
-      <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
-        <div class="relative flex items-center justify-center">
-          <div class="w-3 h-3 rounded-full pulse-gold"></div>
+      <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
+      <div class="relative flex flex-col items-center md:items-start gap-1">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
+          <div class="relative flex items-center justify-center">
+            <div class="w-3 h-3 rounded-full pulse-gold"></div>
+          </div>
+          <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
+            <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
+            <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+          </div>
         </div>
-        <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
-          <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
-          <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+
+        <!-- SUGGESTION 2: DYNAMIC ISLAND DROPS DOWN DIRECTLY FROM BEHIND LOGO BADGE AFTER 20s -->
+        <div id="dynamic-island-wrapper" class="hidden absolute top-10 left-0 z-40 cursor-pointer transition-all duration-300 transform" onclick="openAnnouncementModal()">
+          <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2 hover:scale-105">
+            <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
+            <span class="text-[10px] font-bold tracking-wide flex items-center gap-1 whitespace-nowrap">
+              <i class="fa-solid fa-bullhorn text-[9px]"></i> Maintenance Notice
+            </span>
+            <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full flex-shrink-0">1</span>
+          </div>
         </div>
       </div>
 
@@ -697,7 +697,7 @@
         liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்",
         issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...",
         footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்",
-        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
+        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முరளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
         scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்",
         scopeNatTitle: "இந்திய தேசிய செய்தி বুলেটின்கள்",
         scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
@@ -730,7 +730,7 @@
       // Check if acknowledged in the current browser session
       const isDismissed = sessionStorage.getItem('tc_dynamic_island_dismissed');
       if (!isDismissed) {
-        // Wait 20 seconds after page load/reload before displaying top pill
+        // Wait 20 seconds after page load/reload before gliding out below the T&C badge
         setTimeout(() => {
           const pill = document.getElementById('dynamic-island-wrapper');
           if (pill && !sessionStorage.getItem('tc_dynamic_island_dismissed')) {
@@ -768,7 +768,7 @@
         const pill = document.getElementById('dynamic-island-wrapper');
         if (pill) {
           pill.style.opacity = '0';
-          pill.style.transform = 'translate(-50%, -20px)';
+          pill.style.transform = 'translateY(-10px)';
           setTimeout(() => pill.classList.add('hidden'), 300);
         }
       }
