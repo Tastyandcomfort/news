@@ -103,13 +103,14 @@
       backface-visibility: hidden;
     }
 
-    /* DYNAMIC ISLAND NOTIFICATION PILL */
+    /* DYNAMIC ISLAND NOTIFICATION PILL - Positioned safely clear of solar/brand headers */
     .dynamic-announcement-pill {
-      background: rgba(0, 113, 227, 0.18);
+      background: rgba(0, 113, 227, 0.88);
+      color: #ffffff;
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(0, 113, 227, 0.35);
-      box-shadow: 0 8px 25px rgba(0, 113, 227, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 113, 227, 0.35);
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -294,22 +295,19 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Appears 20s after page load) -->
-  <div id="dynamic-island-wrapper" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-[100] cursor-pointer transition-all duration-300" onclick="openAnnouncementModal()">
-    <div class="dynamic-announcement-pill px-3 sm:px-4 py-1.5 rounded-full flex items-center gap-2 transition-all hover:scale-105">
-      <span class="live-dot bg-amber-500 shadow-amber-500 flex-shrink-0"></span>
-      <span class="text-[11px] sm:text-xs font-bold text-blue-500 tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+  <!-- DYNAMIC ISLAND TOP FLOATING NOTIFICATION (Appears 20s after reload; positioned below header so sunrise/sunset & logo are unblocked) -->
+  <div id="dynamic-island-wrapper" class="hidden fixed top-[100px] md:top-16 left-1/2 -translate-x-1/2 z-[100] cursor-pointer transition-all duration-300" onclick="openAnnouncementModal()">
+    <div class="dynamic-announcement-pill px-3.5 sm:px-4 py-1.5 rounded-full flex items-center gap-2 transition-all hover:scale-105">
+      <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
+      <span class="text-[11px] sm:text-xs font-bold text-white tracking-wide flex items-center gap-1.5 whitespace-nowrap">
         <i class="fa-solid fa-bullhorn text-[10px]"></i>
-        <span class="hidden md:inline">From Developer</span>
+        <span class="hidden md:inline">Notice from Developer</span>
         <span class="inline md:hidden">Notice</span>
       </span>
-      <span class="text-[9px] sm:text-[10px] bg-blue-500 text-white font-black px-1.5 py-0.5 rounded-full flex-shrink-0">1</span>
+      <span class="text-[9px] sm:text-[10px] bg-white text-blue-600 font-black px-1.5 py-0.5 rounded-full flex-shrink-0">1</span>
     </div>
   </div>
 
-
-
-  
   <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
   <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
@@ -319,8 +317,8 @@
             <i class="fa-solid fa-crown"></i>
           </div>
           <div>
-            <h3 class="text-sm font-extrabold text-blue-500">Announcement</h3>
-            <p class="text-[10px]" style="color: var(--text-sub);">Note from T&C Hub</p>
+            <h3 class="text-sm font-extrabold text-blue-500">Platform Announcement</h3>
+            <p class="text-[10px]" style="color: var(--text-sub);">Direct notice from T&C Hub Operations</p>
           </div>
         </div>
         <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
@@ -330,14 +328,14 @@
 
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
         <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> Scheduled Maintenance Note
+          <i class="fa-solid fa-clock-rotate-left"></i> Scheduled Maintenance Notice
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> server infrastructure is scheduled for a system update and database optimization
+          Dear User, the <b>T&C News Hub</b> server infrastructure is scheduled for a system update and database optimization:
         </p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span> Maintenance Starts:</span> <b>06:00 PM (28th Oct)</b></div>
-          <div class="flex justify-between"><span> Service Resumes:</span> <b>06:10 PM (28th Oct)</b></div>
+          <div class="flex justify-between"><span>🛠️ Maintenance Starts:</span> <b>06:00 PM (28th Oct)</b></div>
+          <div class="flex justify-between"><span>🟢 Service Resumes:</span> <b>06:10 PM (28th Oct)</b></div>
         </div>
         <p class="text-[11px] italic" style="color: var(--text-sub);">
           Real-time news feeds and sports tickers will refresh automatically once maintenance completes. Thank you for your patience!
@@ -356,9 +354,6 @@
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
-      
-
-      
       <!-- Brand Logo Badge -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
         <div class="relative flex items-center justify-center">
@@ -370,9 +365,6 @@
         </div>
       </div>
 
-      
-      
-      
       <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
       <div class="apple-solar-pill" id="apple-solar-pill">
         <div class="solar-item" title="Sunrise">
@@ -396,10 +388,6 @@
         </div>
       </div>
 
-
-
-      
-      
       <!-- Navigation & Controls -->
       <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
         
