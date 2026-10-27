@@ -306,8 +306,8 @@
             <i class="fa-solid fa-crown"></i>
           </div>
           <div>
-            <h3 class="text-sm font-extrabold text-blue-500">Platform Announcement</h3>
-            <p class="text-[10px]" style="color: var(--text-sub);">Direct notice from T&C Hub Operations</p>
+            <h3 class="text-sm font-extrabold text-blue-500">Announcement</h3>
+            <p class="text-[10px]" style="color: var(--text-sub);">Note from T&C NEWS HUB</p>
           </div>
         </div>
         <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
@@ -317,17 +317,17 @@
 
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
         <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> Scheduled Maintenance Notice
+          <i class="fa-solid fa-clock-rotate-left"></i> Update
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> server infrastructure is scheduled for a system update and database optimization:
+          Dear User, the <b>T&C News Hub</b> is now able to track the Live International Space Station (ISS), India Air-Space (Civilian Aircraft) and worldwide earthquake tracking information.
         </p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span>🛠️ Maintenance Starts:</span> <b>06:00 PM (28th Oct)</b></div>
-          <div class="flex justify-between"><span>🟢 Service Resumes:</span> <b>06:10 PM (28th Oct)</b></div>
+          <div class="flex justify-between"><span> Update Relased:</span> <b>04:30 PM (28th Oct)</b></div>
+          <div class="flex justify-between"><span> Status:</span> <b>Live</b></div>
         </div>
         <p class="text-[11px] italic" style="color: var(--text-sub);">
-          Real-time news feeds and sports tickers will refresh automatically once maintenance completes. Thank you for your patience!
+          T&C is currently providing real-time live information related to news, weather, ISS & Civilian aircraft. Upcoming update may relate to live sports stream. Thank you for your patience!
         </p>
       </div>
 
@@ -556,7 +556,7 @@
 
             <!-- LEAFLET OSINT MAP WITH ZOOM CONTROLS & LIVE FLIGHTS/ISS -->
             <div class="mb-4">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-2 flex items-center gap-2"><i class="fa-solid fa-plane"></i> Live Flight & ISS Orbital Routing Radar</h3>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-2 flex items-center gap-2"><i class="fa-solid fa-plane"></i> Live Flight & ISS Orbital Tracking Radar</h3>
               <div id="osint-map" class="h-80 sm:h-96 rounded-xl overflow-hidden relative" style="border: 1px solid var(--border-color);">
                 <div class="tc-subtle-watermark">T&C OSINT RADAR</div>
               </div>
@@ -1181,13 +1181,13 @@
         const div = L.DomUtil.create('div', 'leaflet-apple-legend');
         div.innerHTML = `
           <div onclick="toggleLegendContent()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 11px;">
-            <span>Map Legend 🗺️</span>
+            <span>Map Legend</span>
             <i id="legend-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
           </div>
           <div id="legend-body" style="display: none; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 5px;">
-            <div class="legend-item"><i class="fa-solid fa-satellite text-green-400 text-xs"></i><span style="font-size:11px;">ISS Orbit</span></div>
-            <div class="legend-item"><i class="fa-solid fa-plane text-blue-500 text-xs"></i><span style="font-size:11px;">Flight Routing</span></div>
-            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #ff3b30; border-radius: 50%;"></span><span style="font-size:11px;">USGS Quake</span></div>
+            <div class="legend-item"><i class="fa-solid fa-satellite text-green-400 text-xs"></i><span style="font-size:11px;">ISS </span></div>
+            <div class="legend-item"><i class="fa-solid fa-plane text-blue-500 text-xs"></i><span style="font-size:11px;">Flight </span></div>
+            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #ff3b30; border-radius: 50%;"></span><span style="font-size:11px;">Earthquake</span></div>
           </div>
         `;
         L.DomEvent.disableClickPropagation(div);
