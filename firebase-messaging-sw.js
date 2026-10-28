@@ -13,12 +13,56 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/news/android-chrome-192x192.png',
-    data: { url: '/news/' }
+// Force immediate activation
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+
+// Basic offline support
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
+});
+
+// Guaranteed Native Push Handler (Displays the popup banner)
+self.addEventListener('push', (event) => {
+  let title = "T&C NEWS";
+  let body = "New update available!";
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      title = data.notification?.title || data.data?.title || title;
+      body = data.notification?.body || data.data?.body || body;
+    } catch (e) {
+      body = event.data.text() || body;
+    }
+  }
+
+  const options = {
+    body: body,
+    icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    vibrate: [200, 100, 200],
+    data: { url: 'https://tastyandcomfort.github.io/news/' }
   };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// When user taps the notification, open the app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url.includes('/news/') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('https://tastyandcomfort.github.io/news/');
+      }
+    })
+  );
 });
