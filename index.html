@@ -1442,35 +1442,97 @@
   });
 </script>
 
-<!-- The Install Button -->
-  <button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #0071e3; color: white; padding: 12px 20px; border-radius: 25px; border: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
-    📲 Install App
+<!-- Apple-Style Install Button -->
+  <button id="installBtn" class="apple-btn" style="display: none;">
+    <!-- Apple SF-style Download Icon -->
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    <span>Install App</span>
   </button>
 
+  <!-- Apple Styling -->
+  <style>
+    .apple-btn {
+      position: fixed;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      right: 20px;
+      z-index: 99999;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      
+      /* Apple Frosted Glass / Translucent Material */
+      background: rgba(255, 255, 255, 0.82);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      
+      /* Apple San Francisco Typography */
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: #000000;
+      
+      /* Apple Micro-border and Soft Shadow */
+      border: 0.5px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+      
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  box-shadow 0.2s ease, 
+                  background 0.2s ease;
+    }
+
+    /* Spring-like Tap Animation */
+    .apple-btn:active {
+      transform: scale(0.93);
+      background: rgba(235, 235, 235, 0.9);
+    }
+
+    /* Automatic Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      .apple-btn {
+        background: rgba(30, 30, 32, 0.82);
+        color: #ffffff;
+        border: 0.5px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      }
+      .apple-btn:active {
+        background: rgba(50, 50, 54, 0.9);
+      }
+    }
+  </style>
+
+  <!-- Script for Android & iPhone Handling -->
   <script>
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
-    // Detect if user is on iPhone / iPad
     const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
 
-    // 1. Android / Chrome Behavior
+    // 1. Android / Chrome trigger
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'block';
+      installBtn.style.display = 'inline-flex';
     });
 
-    // 2. iOS Safari Behavior: show button if not already installed
+    // 2. iOS trigger (if not installed yet)
     if (isIos && !isInStandaloneMode) {
-      installBtn.style.display = 'block';
+      installBtn.style.display = 'inline-flex';
     }
 
-    // 3. When Button is Clicked
+    // 3. Click handler
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
-        // Android: Show native install prompt
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
@@ -1478,7 +1540,6 @@
         }
         deferredPrompt = null;
       } else if (isIos) {
-        // iPhone: Guide the user
         alert("To install on your iPhone:\n\n1. Tap the Share button (square with arrow ⬆) at the bottom.\n2. Scroll down and tap 'Add to Home Screen' (+).");
       }
     });
