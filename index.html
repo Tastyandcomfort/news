@@ -1553,8 +1553,8 @@
 
     // In-app alert if notification arrives while website is currently open
     messaging.onMessage((payload) => {
-      alert(`${payload.notification.title}\n${payload.notification.body}`);
-    });
+  console.log('Message received while app is open:', payload);
+});
   </script>  
 
 
