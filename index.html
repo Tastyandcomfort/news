@@ -1556,6 +1556,63 @@
       alert(`${payload.notification.title}\n${payload.notification.body}`);
     });
   </script>  
+
+
+
+
+<!-- Friendly Notification Prompt Banner -->
+<div id="notifyBanner" style="display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); color: #ffffff; padding: 14px 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+    <div style="font-size: 13.5px; line-height: 1.4;">
+      <strong>Hey! This is Murali, Stay Updated!</strong><br>
+      Get daily news and weather alerts.
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button onclick="requestNotification()" style="background: #0071e3; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 12.5px; cursor: pointer;">
+        Allow
+      </button>
+      <button onclick="dismissBanner()" style="background: rgba(255,255,255,0.15); color: #ccc; border: none; padding: 8px 10px; border-radius: 20px; font-size: 12.5px; cursor: pointer;">
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Check if we need to show the banner
+  window.addEventListener('load', () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      // Show the banner only if user hasn't decided yet
+      document.getElementById('notifyBanner').style.display = 'block';
+    }
+  });
+
+  async function requestNotification() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        document.getElementById('notifyBanner').style.display = 'none';
+        
+        // Register token with Firestore
+        await enableNotifications();
+
+        // Safely reload ONCE so the service worker activates freshly
+        window.location.reload();
+      } else {
+        document.getElementById('notifyBanner').style.display = 'none';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function dismissBanner() {
+    document.getElementById('notifyBanner').style.display = 'none';
+  }
+</script>
+
+  
+  
   
 </body>
 </html>
