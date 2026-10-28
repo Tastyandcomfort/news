@@ -41,18 +41,22 @@ async function sendDailyAlert() {
 
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
-    notification: { title, body },
-    data: { title, body },
+    // Only send data payload to prevent double display
+    data: {
+      title: title,
+      body: body
+    },
     webpush: {
       headers: {
-        Urgency: "high"
+        Urgency: "high", // Wakes up sleeping Android phones immediately
+        TTL: "86400"
       },
       notification: {
         title: title,
         body: body,
         icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        requireInteraction: true
+        tag: 'tc-daily-news', // Merges duplicates into ONE single notification
+        renotify: true
       },
       fcmOptions: {
         link: 'https://tastyandcomfort.github.io/news/'
