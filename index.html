@@ -1388,59 +1388,6 @@
     }
   </script>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-
-<script>
-  // 1. PASTE YOUR EXACT firebaseConfig HERE
-  const firebaseConfig = {
-    apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
-    authDomain: "news-61e62.firebaseapp.com",
-    projectId: "news-61e62",
-    storageBucket: "news-61e62.firebasestorage.app",
-    messagingSenderId: "1054060055660",
-    appId: "1:1054060055660:web:e192c256c82facb9af1c49"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
-
-  async function enableNotifications() {
-    try {
-      // Ask user for permission
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('Notification permission granted.');
-
-        // Register the background service worker
-        const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
-
-        // 2. PASTE YOUR VAPID KEY HERE
-        const token = await messaging.getToken({
-          vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
-          serviceWorkerRegistration: reg
-        });
-
-        if (token) {
-          console.log('Your Device FCM Token:', token);
-        }
-      }
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-    }
-  }
-
-  // Request permission automatically on launch
-  window.addEventListener('load', () => {
-    enableNotifications();
-  });
-
-  // Handle messages when app is currently open
-  messaging.onMessage((payload) => {
-    alert(`${payload.notification.title}\n${payload.notification.body}`);
-  });
-</script>
 
 <!-- Apple-Style Install Button -->
   <button id="installBtn" class="apple-btn" style="display: none;">
