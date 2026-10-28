@@ -1442,6 +1442,38 @@
   });
 </script>
 
-  
+  <!-- 1. The Install Button -->
+  <button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #0071e3; color: white; padding: 12px 20px; border-radius: 25px; border: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
+    📲 Install App
+  </button>
+
+  <!-- 2. The Script to make it work -->
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block'; // Shows button only if not installed
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('App installed');
+        }
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installBtn.style.display = 'none';
+    });
+  </script>
+
 </body>
 </html>
