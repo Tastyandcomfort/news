@@ -13,7 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Force immediate activation
+// Force immediate activation of this service worker
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
@@ -24,7 +24,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Guaranteed Native Push Handler (Displays the popup banner)
+// Guaranteed Native Push Handler (Prevents double notifications)
 self.addEventListener('push', (event) => {
   let title = "T&C NEWS";
   let body = "New update available!";
@@ -44,6 +44,8 @@ self.addEventListener('push', (event) => {
     icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
     badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
     vibrate: [200, 100, 200],
+    tag: 'tc-daily-news',      // Merges duplicate banners into ONE single alert
+    renotify: true,            // Alerts user with sound/vibration even if an older alert is in the tray
     data: { url: 'https://tastyandcomfort.github.io/news/' }
   };
 
@@ -66,3 +68,4 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
