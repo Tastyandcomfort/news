@@ -1442,31 +1442,44 @@
   });
 </script>
 
-  <!-- 1. The Install Button -->
+<!-- The Install Button -->
   <button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #0071e3; color: white; padding: 12px 20px; border-radius: 25px; border: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
     📲 Install App
   </button>
 
-  <!-- 2. The Script to make it work -->
   <script>
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
+    // Detect if user is on iPhone / iPad
+    const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    // 1. Android / Chrome Behavior
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'block'; // Shows button only if not installed
+      installBtn.style.display = 'block';
     });
 
+    // 2. iOS Safari Behavior: show button if not already installed
+    if (isIos && !isInStandaloneMode) {
+      installBtn.style.display = 'block';
+    }
+
+    // 3. When Button is Clicked
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
+        // Android: Show native install prompt
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          console.log('App installed');
+          installBtn.style.display = 'none';
         }
         deferredPrompt = null;
-        installBtn.style.display = 'none';
+      } else if (isIos) {
+        // iPhone: Guide the user
+        alert("To install on your iPhone:\n\n1. Tap the Share button (square with arrow ⬆) at the bottom.\n2. Scroll down and tap 'Add to Home Screen' (+).");
       }
     });
 
@@ -1474,6 +1487,5 @@
       installBtn.style.display = 'none';
     });
   </script>
-
 </body>
 </html>
