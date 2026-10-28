@@ -1,0 +1,30 @@
+name: Daily Scheduled News Notifications
+
+on:
+  schedule:
+    # Runs 4 times a day in IST (UTC + 5:30)
+    - cron: '30 2 * * *'   # 8:00 AM IST
+    - cron: '30 6 * * *'   # 12:00 PM IST
+    - cron: '30 10 * * *'  # 4:00 PM IST
+    - cron: '30 15 * * *'  # 9:00 PM IST
+  workflow_dispatch:      # Enables the manual test button
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Send Notification
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node send-notification.js
