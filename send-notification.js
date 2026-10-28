@@ -41,21 +41,24 @@ async function sendDailyAlert() {
 
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
-    // Only send data payload to prevent double display
-    data: {
+    notification: {
       title: title,
       body: body
     },
+    // 🔥 FORCES ANDROID TO WAKE UP IMMEDIATELY (NO 10-MINUTE DELAY)
+    android: {
+      priority: 'high'
+    },
     webpush: {
       headers: {
-        Urgency: "high", // Wakes up sleeping Android phones immediately
-        TTL: "86400"
+        Urgency: 'high',
+        TTL: '86400'
       },
       notification: {
         title: title,
         body: body,
         icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        tag: 'tc-daily-news', // Merges duplicates into ONE single notification
+        tag: 'tc-daily-news',
         renotify: true
       },
       fcmOptions: {
@@ -63,7 +66,6 @@ async function sendDailyAlert() {
       }
     }
   });
-
   console.log(`Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
 
   response.responses.forEach((resp, idx) => {
