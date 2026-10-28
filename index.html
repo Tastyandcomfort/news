@@ -1559,7 +1559,6 @@
 
 
 
-
 <!-- Friendly Notification Prompt Banner -->
 <div id="notifyBanner" style="display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); color: #ffffff; padding: 14px 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
   <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
@@ -1579,10 +1578,9 @@
 </div>
 
 <script>
-  // Check if we need to show the banner
+  // Show the banner only if user hasn't made a choice yet
   window.addEventListener('load', () => {
     if ('Notification' in window && Notification.permission === 'default') {
-      // Show the banner only if user hasn't decided yet
       document.getElementById('notifyBanner').style.display = 'block';
     }
   });
@@ -1590,14 +1588,30 @@
   async function requestNotification() {
     try {
       const permission = await Notification.requestPermission();
+
       if (permission === 'granted') {
         document.getElementById('notifyBanner').style.display = 'none';
         
         // Register token with Firestore
-        await enableNotifications();
+        if (typeof enableNotifications === 'function') {
+          await enableNotifications();
+        }
 
-        // Safely reload ONCE so the service worker activates freshly
+        // Clean single reload so the service worker activates immediately
         window.location.reload();
+
+      } else if (permission === 'denied') {
+        document.getElementById('notifyBanner').style.display = 'none';
+
+        // 📊 Log the denial directly into your Firestore database
+        if (typeof db !== 'undefined') {
+          await db.collection('denied_stats').add({
+            status: 'denied',
+            date: new Date(),
+            device: navigator.userAgent
+          });
+          console.log('Denial logged to database.');
+        }
       } else {
         document.getElementById('notifyBanner').style.display = 'none';
       }
@@ -1610,9 +1624,5 @@
     document.getElementById('notifyBanner').style.display = 'none';
   }
 </script>
-
-  
-  
-  
 </body>
 </html>
