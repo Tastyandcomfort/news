@@ -1589,35 +1589,35 @@ Residents are advised to conserve water and follow official updates.
     const messaging = firebase.messaging();
     const db = firebase.firestore();
 
-    async function enableNotifications() {
+async function enableNotifications() {
       try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          console.log('Notification permission granted.');
+        const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
+        const token = await messaging.getToken({
+          vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
+          serviceWorkerRegistration: reg
+        });
 
-          const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
+        if (token) {
+          // 1. Get or create a permanent unique ID for this device
+          let deviceId = localStorage.getItem('tc_device_id');
+          if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+            localStorage.setItem('tc_device_id', deviceId);
+          }
 
-          const token = await messaging.getToken({
-            vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
-            serviceWorkerRegistration: reg
+          // 2. Overwrites the single document for this device (NEVER duplicates!)
+          await db.collection('fcm_tokens').doc(deviceId).set({
+            token: token,
+            device: navigator.userAgent,
+            updatedAt: new Date()
           });
 
-          if (token) {
-            console.log('Device Token:', token);
-            
-            // Save to Firestore Database
-            await db.collection('fcm_tokens').doc(token).set({
-              createdAt: new Date(),
-              device: navigator.userAgent
-            });
-            console.log('Device saved to database successfully!');
-          }
+          console.log('Single device token saved successfully:', deviceId);
         }
       } catch (error) {
         console.error('Error enabling notifications:', error);
       }
     }
-
     
     // In-app alert if notification arrives while website is currently open
     messaging.onMessage((payload) => {
