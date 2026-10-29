@@ -8,7 +8,7 @@ admin.initializeApp({
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-// Helper function to fetch the latest breaking news headline and short snippet cleanly
+// Helper function to fetch the latest breaking news headline and clean snippet
 async function fetchLatestNewsItem() {
   try {
     const response = await fetch('https://news-lemon-two.vercel.app/api/news?scope=local');
@@ -16,6 +16,7 @@ async function fetchLatestNewsItem() {
     
     const xmlText = await response.text();
     
+    // Extract first item block <item>...</item>
     const itemMatch = xmlText.match(/<item>([\s\S]*?)<\/item>/i);
     if (itemMatch && itemMatch[1]) {
       const itemXml = itemMatch[1];
@@ -32,7 +33,7 @@ async function fetchLatestNewsItem() {
                    .replace(/&nbsp;/g, ' ')
                    .trim();
       
-      // Remove publisher suffix (e.g. " - The Hindu")
+      // Clean up common source suffixes if present (e.g., " - The Hindu")
       title = title.split(' - ')[0].trim();
 
       // 2. Extract & clean Description
@@ -47,11 +48,11 @@ async function fetchLatestNewsItem() {
                                .replace(/&amp;/g, '&')
                                .replace(/&quot;/g, '"')
                                .replace(/&#39;/g, "'")
-                               .replace(/&nbsp;/gi, ' ') // Strip &nbsp;
+                               .replace(/&nbsp;/gi, ' ')
                                .replace(/\s+/g, ' ')
                                .trim();
       
-      // 3. Remove Title duplication from Description
+      // 3. Remove Title duplication from Description if it starts with it
       if (description.startsWith(title)) {
         description = description.substring(title.length).trim();
       }
@@ -64,7 +65,7 @@ async function fetchLatestNewsItem() {
         description = "Tap to read the full coverage on T&C News Hub.";
       }
 
-      // Limit description length to ~100 chars
+      // Limit description length to a clean snippet length
       if (description.length > 100) {
         description = description.substring(0, 97) + '...';
       }
@@ -94,9 +95,7 @@ async function sendDailyAlert() {
   // Fetch the clean title and short snippet
   const newsItem = await fetchLatestNewsItem();
 
-  // Requirements applied:
-  // Title: T&C News
-  // Body: Headline + 1-2 lines text snippet
+  // Configured as requested: Title "T&C News" + clean headline and text
   const notificationTitle = "T&C News";
   const notificationBody = `${newsItem.title}\n${newsItem.description}`;
 
@@ -127,6 +126,7 @@ async function sendDailyAlert() {
       notification: {
         title: notificationTitle,
         body: notificationBody,
+        badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
         icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
         tag: 'tc-daily-news',
         renotify: true
@@ -149,5 +149,4 @@ async function sendDailyAlert() {
 }
 
 sendDailyAlert().catch(console.error);
-
 
