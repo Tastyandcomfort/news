@@ -16,12 +16,11 @@ async function fetchLatestNewsItem() {
     
     const xmlText = await response.text();
     
-    // Extract first item block <item>...</item>
     const itemMatch = xmlText.match(/<item>([\s\S]*?)<\/item>/i);
     if (itemMatch && itemMatch[1]) {
       const itemXml = itemMatch[1];
       
-      // Extract title
+      // 1. Extract & clean Title
       const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
       let title = titleMatch ? titleMatch[1] : "Latest Updates";
       title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
@@ -30,29 +29,44 @@ async function fetchLatestNewsItem() {
                    .replace(/&amp;/g, '&')
                    .replace(/&quot;/g, '"')
                    .replace(/&#39;/g, "'")
+                   .replace(/&nbsp;/g, ' ')
                    .trim();
       
-      // Clean up common source suffixes if present
+      // Remove publisher suffix (e.g. " - The Hindu")
       title = title.split(' - ')[0].trim();
 
-      // Extract description and completely strip HTML tags & links
+      // 2. Extract & clean Description
       const descMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
-      let description = descMatch ? descMatch[1] : "Checkout today's top stories and updates from T&C News Hub.";
+      let description = descMatch ? descMatch[1] : "";
       
       description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-                               .replace(/&lt;a[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, '$1') // remove HTML anchor links
-                               .replace(/&lt;[\s\S]*?&gt;/g, '') // remove encoded tags like &lt;a href...&gt;
-                               .replace(/<[^>]*>/g, '') // remove standard HTML tags
-                               .replace(/https?:\/\/[^\s]+/g, '') // strip any raw http links
+                               .replace(/&lt;a[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, '$1')
+                               .replace(/&lt;[\s\S]*?&gt;/g, '')
+                               .replace(/<[^>]*>/g, '')
+                               .replace(/https?:\/\/[^\s]+/g, '')
                                .replace(/&amp;/g, '&')
                                .replace(/&quot;/g, '"')
                                .replace(/&#39;/g, "'")
+                               .replace(/&nbsp;/gi, ' ') // Strip &nbsp;
                                .replace(/\s+/g, ' ')
                                .trim();
       
-      // Limit description to a crisp 1-2 lines (approx 110 characters)
-      if (description.length > 110) {
-        description = description.substring(0, 107) + '...';
+      // 3. Remove Title duplication from Description
+      if (description.startsWith(title)) {
+        description = description.substring(title.length).trim();
+      }
+
+      // Clean up leading punctuation left over after title stripping
+      description = description.replace(/^[\s:\-–—\.;]+/, '').trim();
+
+      // Fallback if description becomes empty after cleaning
+      if (!description || description.length < 5) {
+        description = "Tap to read the full coverage on T&C News Hub.";
+      }
+
+      // Limit description length to ~100 chars
+      if (description.length > 100) {
+        description = description.substring(0, 97) + '...';
       }
 
       return { title, description };
@@ -62,7 +76,7 @@ async function fetchLatestNewsItem() {
   }
   return { 
     title: "Breaking News Update", 
-    description: "Stay updated with live regional headlines from T&C News Hub." 
+    description: "Tap to read the full story on T&C News Hub." 
   };
 }
 
