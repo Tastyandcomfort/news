@@ -8,28 +8,46 @@ admin.initializeApp({
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-// Helper function to fetch the latest breaking news headline live
-async function fetchLatestNewsHeadline() {
+// Helper function to fetch the latest breaking news headline and short snippet cleanly
+async function fetchLatestNewsItem() {
   try {
-    // Fetching from your live news API endpoint (national/world scope)
-    const response = await fetch('https://news-lemon-two.vercel.app/api/news?scope=national');
+    const response = await fetch('https://news-lemon-two.vercel.app/api/news?scope=local');
     if (!response.ok) throw new Error('Failed to fetch RSS feed');
     
     const xmlText = await response.text();
     
-    // Simple regex parser to extract the first <title>...</title> from the XML RSS feed
-    const match = xmlText.match(/<title>(.*?)<\/title>/i);
-    if (match && match[1]) {
-      // Clean up any CDATA tags if present
-      let headline = match[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim();
-      // Decode common HTML entities
-      headline = headline.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-      return headline;
+    // Extract first item block <item>...</item>
+    const itemMatch = xmlText.match(/<item>([\s\S]*?)<\/item>/i);
+    if (itemMatch && itemMatch[1]) {
+      const itemXml = itemMatch[1];
+      
+      // Extract title
+      const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
+      let title = titleMatch ? titleMatch[1] : "Latest Updates";
+      title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+      
+      // Clean up common source suffixes if present (e.g., " - Telangana Hyderabad Google News")
+      title = title.split(' - ')[0].trim();
+
+      // Extract description or content for 1-2 lines body snippet
+      const descMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
+      let description = descMatch ? descMatch[1] : "Checkout today's top stories and updates.";
+      description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+      
+      // Limit description to roughly 1 or 2 lines (approx 120-140 characters)
+      if (description.length > 130) {
+        description = description.substring(0, 127) + '...';
+      }
+
+      return { title, description };
     }
   } catch (error) {
     console.error("Error fetching live news for notification:", error);
   }
-  return "Checkout today's top updates and breaking stories!";
+  return { 
+    title: "Breaking News Update", 
+    description: "Checkout today's top updates and live headlines from T&C News Hub." 
+  };
 }
 
 async function sendDailyAlert() {
@@ -37,28 +55,20 @@ async function sendDailyAlert() {
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const hour = istTime.getUTCHours();
 
-  let title = "T&C NEWS HUB";
-
-  // 5 Daily IST Time Windows with appropriate titles
-  if (hour >= 6 && hour < 9) {
-    title = "T&C NEWS - Good Morning 🌅";
-  } else if (hour >= 9 && hour < 13) {
-    title = "T&C NEWS - Mid-Morning Briefing 📰";
-  } else if (hour >= 13 && hour < 16) {
-    title = "T&C NEWS - Afternoon Edition ☀️";
-  } else if (hour >= 16 && hour < 20) {
-    title = "T&C NEWS - Evening Highlights 🌆";
-  } else if (hour >= 20 && hour <= 23) {
-    title = "T&C NEWS - Night Bulletin 🌙";
-  } else {
-    // Midnight to 6 AM (Quiet hours)
+  // Time Window Check (Quiet hours check)
+  if (hour < 6 || hour > 23) {
     console.log("Night time (quiet hours). Skipping notification.");
     return;
   }
 
-  // Fetch the live breaking headline dynamically
-  const latestHeadline = await fetchLatestNewsHeadline();
-  const body = latestHeadline;
+  // Fetch the clean title and short snippet
+  const newsItem = await fetchLatestNewsItem();
+
+  // Requirements applied:
+  // Title: T&C News
+  // Body: Headline + 1-2 lines text snippet
+  const notificationTitle = "T&C News";
+  const notificationBody = `${newsItem.title}\n${newsItem.description}`;
 
   const snapshot = await db.collection('fcm_tokens').get();
   if (snapshot.empty) {
@@ -67,13 +77,13 @@ async function sendDailyAlert() {
   }
 
   const tokens = snapshot.docs.map(doc => doc.id);
-  console.log(`Sending "${title}" to ${tokens.length} device(s) with headline: "${body}"`);
+  console.log(`Sending notification to ${tokens.length} device(s) with headline: "${newsItem.title}"`);
 
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
     notification: {
-      title: title,
-      body: body
+      title: notificationTitle,
+      body: notificationBody
     },
     // 🔥 FORCES ANDROID TO WAKE UP IMMEDIATELY (NO 10-MINUTE DELAY)
     android: {
@@ -85,8 +95,8 @@ async function sendDailyAlert() {
         TTL: '86400'
       },
       notification: {
-        title: title,
-        body: body,
+        title: notificationTitle,
+        body: notificationBody,
         icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
         tag: 'tc-daily-news',
         renotify: true
@@ -109,3 +119,5 @@ async function sendDailyAlert() {
 }
 
 sendDailyAlert().catch(console.error);
+
+
