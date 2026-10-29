@@ -1,3 +1,5 @@
+
+
 const admin = require('firebase-admin');
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -111,34 +113,23 @@ async function sendDailyAlert() {
   const tokens = snapshot.docs.map(doc => doc.id);
   console.log(`Sending notification to ${tokens.length} device(s) with headline: "${newsItem.title}"`);
 
-  const response = await messaging.sendEachForMulticast({
+const response = await messaging.sendEachForMulticast({
     tokens: tokens,
     notification: {
-      title: notificationTitle,
-      body: notificationBody
-    },
-    // 🔥 FORCES ANDROID TO WAKE UP IMMEDIATELY (NO 10-MINUTE DELAY)
-    android: {
-      priority: 'high'
+      title: title,
+      body: body
     },
     webpush: {
       headers: {
-        Urgency: 'high',
-        TTL: '86400'
-      },
-      notification: {
-        title: notificationTitle,
-        body: notificationBody,
-        badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        tag: 'tc-daily-news',
-        renotify: true
+        Urgency: "high",
+        TTL: "86400"
       },
       fcmOptions: {
         link: 'https://tastyandcomfort.github.io/news/'
       }
     }
   });
+  
   console.log(`Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
 
   response.responses.forEach((resp, idx) => {
