@@ -1,3 +1,7 @@
+
+
+
+
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -24,7 +28,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Guaranteed Native Push Handler
+// Native Push Event for Android Phones & Laptops
 self.addEventListener('push', (event) => {
   let title = "T&C NEWS";
   let body = "New update available!";
@@ -33,10 +37,10 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
-      const data = payload.data || payload.notification || payload;
+      const data = payload.notification || payload.data || payload;
       title = data.title || title;
       body = data.body || body;
-      targetUrl = data.url || targetUrl;
+      targetUrl = data.url || payload.fcmOptions?.link || targetUrl;
     } catch (e) {
       body = event.data.text() || body;
     }
