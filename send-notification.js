@@ -8,40 +8,58 @@ admin.initializeApp({
 const db = admin.firestore();
 const messaging = admin.messaging();
 
+// Helper function to fetch the latest breaking news headline live
+async function fetchLatestNewsHeadline() {
+  try {
+    // Fetching from your live news API endpoint (national/world scope)
+    const response = await fetch('https://news-lemon-two.vercel.app/api/news?scope=national');
+    if (!response.ok) throw new Error('Failed to fetch RSS feed');
+    
+    const xmlText = await response.text();
+    
+    // Simple regex parser to extract the first <title>...</title> from the XML RSS feed
+    const match = xmlText.match(/<title>(.*?)<\/title>/i);
+    if (match && match[1]) {
+      // Clean up any CDATA tags if present
+      let headline = match[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim();
+      // Decode common HTML entities
+      headline = headline.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      return headline;
+    }
+  } catch (error) {
+    console.error("Error fetching live news for notification:", error);
+  }
+  return "Checkout today's top updates and breaking stories!";
+}
+
 async function sendDailyAlert() {
   const now = new Date();
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const hour = istTime.getUTCHours();
 
-  let title = "T&C NEWS";
-  let body = "Checkout today's updates!";
+  let title = "T&C NEWS HUB";
 
-  // 5 Daily IST Time Windows
+  // 5 Daily IST Time Windows with appropriate titles
   if (hour >= 6 && hour < 9) {
-    // 7:00 AM IST
     title = "T&C NEWS - Good Morning 🌅";
-    body = "Here are your morning headlines!";
   } else if (hour >= 9 && hour < 13) {
-    // 10:30 AM IST
     title = "T&C NEWS - Mid-Morning Briefing 📰";
-    body = "Rain Gone Away! Checkout today's updates";
   } else if (hour >= 13 && hour < 16) {
-    // 2:00 PM IST
     title = "T&C NEWS - Afternoon Edition ☀️";
-    body = "Mid-day trending news and weather.";
   } else if (hour >= 16 && hour < 20) {
-    // 5:30 PM IST
     title = "T&C NEWS - Evening Highlights 🌆";
-    body = "Checkout the top trending stories.";
   } else if (hour >= 20 && hour <= 23) {
-    // 9:00 PM IST
-    title = "T&C NEWS - About to bed! 😴";
-    body = "Checkout tomorrows weather";
+    title = "T&C NEWS - Night Bulletin 🌙";
   } else {
     // Midnight to 6 AM (Quiet hours)
     console.log("Night time (quiet hours). Skipping notification.");
     return;
   }
+
+  // Fetch the live breaking headline dynamically
+  const latestHeadline = await fetchLatestNewsHeadline();
+  const body = latestHeadline;
+
   const snapshot = await db.collection('fcm_tokens').get();
   if (snapshot.empty) {
     console.log('No subscribed devices found yet.');
@@ -49,7 +67,7 @@ async function sendDailyAlert() {
   }
 
   const tokens = snapshot.docs.map(doc => doc.id);
-  console.log(`Sending "${title}" to ${tokens.length} device(s)...`);
+  console.log(`Sending "${title}" to ${tokens.length} device(s) with headline: "${body}"`);
 
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
