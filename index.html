@@ -635,7 +635,7 @@ Residents are advised to conserve water and follow official updates.
 
             <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&C Hub</div>
-              <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
             </div>
 
             <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
@@ -1252,30 +1252,30 @@ Residents are advised to conserve water and follow official updates.
         let channelName = "TV9 Live";
 
         switch(mode) {
-          case 'v6': streamUrl = "https://www.youtube.com/embed/28IZl9iM-EE?autoplay=1&mute=1&playsinline=1"; channelName = "V6 Live News"; break;
-          case 'tv9': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1"; channelName = "TV9 Live News"; break;
-          case 'abcnews': streamUrl = "https://www.youtube.com/embed/KQhNZQ_Uag8?autoplay=1&mute=1&playsinline=1"; channelName = "ABC News Live"; break;
-          case 'bloomberg': streamUrl = "https://www.youtube.com/embed/QB5BNdBFujE?autoplay=1&mute=1&playsinline=1"; channelName = "Bloomberg News Live"; break;
-          case 'aljazeera': streamUrl = "https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1&playsinline=1"; channelName = "Al Jazeera Live"; break;
-          case 'foxnews': streamUrl = "https://www.youtube.com/embed/C96oohpWBGw?autoplay=1&mute=1&playsinline=1"; channelName = "FOX News Live"; break;
-          case 'france24': streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1&playsinline=1"; channelName = "France24 Live"; break;
-          case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1"; channelName = "CNBC Live"; break;
-          case 'skynews': streamUrl = "https://www.youtube.com/embed/umLWFz4izTM?autoplay=1&mute=1&playsinline=1"; channelName = "Sky News Live"; break;
-          case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1"; channelName = "CNN Live"; break;
-          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1"; channelName = "NASA Live"; break;
-          case 'starbase': streamUrl = "https://www.youtube.com/embed/mhJRzQsLZGg?autoplay=1&mute=1&playsinline=1"; channelName = "Starbase Live"; break;
-          case 'lasvegasairside': streamUrl = "https://www.youtube.com/embed/V7_orOtu-oo?autoplay=1&mute=1&playsinline=1"; channelName = "Lasvegas Airside Live"; break;          
-          case 'heathrowairside': streamUrl = "https://www.youtube.com/embed/uDBYuEV4zjI?autoplay=1&mute=1&playsinline=1"; channelName = "Heathrow Airside Live"; break;
-          case 'laxairside': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1"; channelName = "LAX Airside Live"; break;
-          case 'lga-newyorkairside': streamUrl = "https://www.youtube.com/embed/T_QsY01tIK0?autoplay=1&mute=1&playsinline=1"; channelName = "LGA-New York Airside Live"; break;
-          case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1"; channelName = "Wild Live"; break;
-          case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1"; channelName = "Sports Live"; break;
-          case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1"; channelName = "Music"; break;
-          case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1"; channelName = "Bhagavat Geetha"; break;
-          case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1"; channelName = "Quran"; break;
-          case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1"; channelName = "Bible"; break;
-          case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1"; channelName = "Constitution"; break;
-          case 't&c': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1"; channelName = "T&C"; break;
+          case 'v6': streamUrl = "https://www.youtube.com/embed/28IZl9iM-EE?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "V6 Live News"; break;
+          case 'tv9': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "TV9 Live News"; break;
+          case 'abcnews': streamUrl = "https://www.youtube.com/embed/KQhNZQ_Uag8?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "ABC News Live"; break;
+          case 'bloomberg': streamUrl = "https://www.youtube.com/embed/QB5BNdBFujE?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bloomberg News Live"; break;
+          case 'aljazeera': streamUrl = "https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Al Jazeera Live"; break;
+          case 'foxnews': streamUrl = "https://www.youtube.com/embed/C96oohpWBGw?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "FOX News Live"; break;
+          case 'france24': streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "France24 Live"; break;
+          case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "CNBC Live"; break;
+          case 'skynews': streamUrl = "https://www.youtube.com/embed/umLWFz4izTM?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Sky News Live"; break;
+          case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "CNN Live"; break;
+          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "NASA Live"; break;
+          case 'starbase': streamUrl = "https://www.youtube.com/embed/mhJRzQsLZGg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Starbase Live"; break;
+          case 'lasvegasairside': streamUrl = "https://www.youtube.com/embed/V7_orOtu-oo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Lasvegas Airside Live"; break;          
+          case 'heathrowairside': streamUrl = "https://www.youtube.com/embed/uDBYuEV4zjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Heathrow Airside Live"; break;
+          case 'laxairside': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "LAX Airside Live"; break;
+          case 'lga-newyorkairside': streamUrl = "https://www.youtube.com/embed/T_QsY01tIK0?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "LGA-New York Airside Live"; break;
+          case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Wild Live"; break;
+          case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Sports Live"; break;
+          case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Music"; break;
+          case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bhagavat Geetha"; break;
+          case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Quran"; break;
+          case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bible"; break;
+          case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Constitution"; break;
+          case 't&c': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "T&C"; break;
         }
 
         if (title) title.innerText = channelName;
