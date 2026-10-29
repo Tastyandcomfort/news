@@ -13,6 +13,27 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// 🔥 CRITICAL: Explicitly handle background pushes so Android displays them when app is closed
+messaging.onBackgroundMessage((payload) => {
+  console.log('[firebase-messaging-sw.js] Background message received:', payload);
+
+  const title = payload.notification?.title || "T&C News";
+  const body = payload.notification?.body || "Tap to read the latest updates.";
+
+  const options = {
+    body: body,
+    icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    tag: 'tc-news-daily',
+    renotify: true,
+    data: {
+      url: payload.fcmOptions?.link || 'https://tastyandcomfort.github.io/news/'
+    }
+  };
+
+  self.registration.showNotification(title, options);
+});
+
 // Force immediate activation
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
@@ -27,7 +48,7 @@ self.addEventListener('fetch', (event) => {
 // Click action: Opens the website when tapped
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = 'https://tastyandcomfort.github.io/news/';
+  const targetUrl = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
