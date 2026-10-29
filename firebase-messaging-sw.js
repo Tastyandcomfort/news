@@ -1,4 +1,3 @@
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -14,48 +13,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// Force immediate activation
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
+// Offline caching
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
 
-// Single Unified Push Handler
-self.addEventListener('push', (event) => {
-  let title = "T&C NEWS";
-  let body = "New update available!";
-  let targetUrl = "https://tastyandcomfort.github.io/news/";
-
-  if (event.data) {
-    try {
-      const payload = event.data.json();
-      const data = payload.data || payload.notification || payload;
-      title = data.title || title;
-      body = data.body || body;
-      targetUrl = data.url || targetUrl;
-    } catch (e) {
-      body = event.data.text() || body;
-    }
-  }
-
-  const options = {
-    body: body,
-    icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-    badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-    tag: 'tc-daily-news',
-    renotify: true,
-    data: { url: targetUrl }
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
+// Click action: Opens the website when tapped
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const urlToOpen = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
+  const targetUrl = 'https://tastyandcomfort.github.io/news/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
@@ -65,7 +37,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+        return clients.openWindow(targetUrl);
       }
     })
   );
