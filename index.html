@@ -1653,6 +1653,7 @@ Residents are advised to conserve water and follow official updates.
     }
   });
 
+  
   async function requestNotification() {
     try {
       const permission = await Notification.requestPermission();
@@ -1666,7 +1667,7 @@ Residents are advised to conserve water and follow official updates.
         }
 
         // Clean single reload so the service worker activates immediately
-        window.location.reload();
+       // window.location.reload();
 
       } else if (permission === 'denied') {
         document.getElementById('notifyBanner').style.display = 'none';
