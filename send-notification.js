@@ -16,20 +16,28 @@ async function sendDailyAlert() {
   let title = "T&C NEWS";
   let body = "Checkout today's updates!";
 
-  if (hour >= 6 && hour < 10) {
+  // Precise IST Hour Check (0 to 23)
+  if (hour >= 6 && hour < 11) {
+    // 6:00 AM to 11:00 AM
     title = "T&C NEWS - Good Morning🌞";
     body = "Checkout today's news it's updated";
-  } else if (hour >= 10 && hour < 14) {
+  } else if (hour >= 11 && hour < 15) {
+    // 11:00 AM to 3:00 PM
     title = "T&C NEWS - It's chilling❄";
     body = "Checkout today's live weather";
-  } else if (hour >= 14 && hour < 18) {
+  } else if (hour >= 15 && hour < 20) {
+    // 3:00 PM to 8:00 PM
     title = "T&C NEWS - Happy Evening";
     body = "Checkout the top trending news";
-  } else {
+  } else if (hour >= 20 && hour <= 23) {
+    // 8:00 PM to 11:59 PM
     title = "T&C NEWS - About to bed! 😴";
     body = "Checkout tomorrows weather";
+  } else {
+    // Midnight to 6 AM (Silent hours - DO NOT SEND)
+    console.log("Night time (quiet hours). Skipping notification.");
+    return;
   }
-
   const snapshot = await db.collection('fcm_tokens').get();
   if (snapshot.empty) {
     console.log('No subscribed devices found yet.');
