@@ -1,3 +1,5 @@
+
+
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -13,46 +15,34 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Force immediate activation of this service worker
+// Force immediate activation
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
-// Basic offline support
+// Basic offline caching
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
 
-// Guaranteed Native Push Handler (Prevents double notifications)
-self.addEventListener('push', (event) => {
-  let title = "T&C NEWS";
-  let body = "New update available!";
-
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      title = data.notification?.title || data.data?.title || title;
-      body = data.notification?.body || data.data?.body || body;
-    } catch (e) {
-      body = event.data.text() || body;
-    }
-  }
-
-  const options = {
-    body: body,
+// Official Google Firebase Background Handler (No crashes, No duplicates)
+messaging.onBackgroundMessage((payload) => {
+  const notificationTitle = payload.notification?.title || payload.data?.title || "T&C NEWS";
+  const notificationOptions = {
+    body: payload.notification?.body || payload.data?.body || "New update available!",
     icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
     badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-    vibrate: [200, 100, 200],
-    tag: 'tc-daily-news',      // Merges duplicate banners into ONE single alert
-    renotify: true,            // Alerts user with sound/vibration even if an older alert is in the tray
-    data: { url: 'https://tastyandcomfort.github.io/news/' }
+    tag: 'tc-daily-news',
+    data: {
+      url: 'https://tastyandcomfort.github.io/news/'
+    }
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// When user taps the notification, open the app
+// When user taps notification, open the app
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
@@ -68,4 +58,5 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
 
