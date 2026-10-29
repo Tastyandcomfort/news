@@ -1618,11 +1618,7 @@ Residents are advised to conserve water and follow official updates.
       }
     }
 
-    // Trigger registration on page load
-    window.addEventListener('load', () => {
-      enableNotifications();
-    });
-
+    
     // In-app alert if notification arrives while website is currently open
     messaging.onMessage((payload) => {
   console.log('Message received while app is open:', payload);
