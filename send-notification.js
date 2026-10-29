@@ -20,7 +20,6 @@ async function fetchTopLiveHeadline() {
       const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
                          itemContent.match(/<title>(.*?)<\/title>/i);
       if (titleMatch && titleMatch[1]) {
-        // Cleans up [163], &amp;, &quot;
         return titleMatch[1]
           .replace(/^\[\d+\]\s*/, '')
           .replace(/&amp;/g, '&')
@@ -40,23 +39,23 @@ async function sendDailyAlert() {
   const hour = istTime.getUTCHours();
 
   if (hour < 6) {
-    console.log("Quiet hours. Skipping.");
+    console.log("Night time (quiet hours). Skipping notification.");
     return;
   }
 
   const latestHeadline = await fetchTopLiveHeadline();
 
-  let title = "T&C NEWS • Live Update";
+  let title = "T&C NEWS • Live Update 🔴";
   let body = latestHeadline || "Check out today's top trending headlines!";
 
   if (hour >= 6 && hour < 9) {
-    title = "T&C NEWS Morning Bulletin";
+    title = "T&C NEWS 🌅 Morning Bulletin";
   } else if (hour >= 9 && hour < 13) {
-    title = "T&C NEWS Mid-Day Top Story";
+    title = "T&C NEWS 📰 Mid-Day Top Story";
   } else if (hour >= 13 && hour < 16) {
     title = "T&C NEWS ☀️ Afternoon Briefing";
   } else if (hour >= 16 && hour < 20) {
-    title = "T&C NEWS Evening Digest";
+    title = "T&C NEWS 🌆 Evening Digest";
   } else if (hour >= 20 && hour <= 23) {
     title = "T&C NEWS 🌙 Tonight's Top Story";
   }
@@ -68,20 +67,30 @@ async function sendDailyAlert() {
   }
 
   const tokens = snapshot.docs.map(doc => doc.id);
-  console.log(`Broadcasting to ${tokens.length} devices...`);
+  console.log(`Sending live alert to ${tokens.length} devices...`);
 
-  // PURE DATA PAYLOAD: Guarantees EXACTLY ONE notification on both Mobile and Laptop
+  // 🔥 webpush.notification FORCES ANDROID TO DRAW THE BANNER ON PHONES:
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
-    data: {
+    notification: {
       title: title,
-      body: body,
-      url: 'https://tastyandcomfort.github.io/news/'
+      body: body
     },
     webpush: {
       headers: {
         Urgency: "high",
         TTL: "86400"
+      },
+      notification: {
+        title: title,
+        body: body,
+        icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+        badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+        tag: 'tc-daily-news',
+        renotify: true
+      },
+      fcmOptions: {
+        link: 'https://tastyandcomfort.github.io/news/'
       }
     }
   });
@@ -107,5 +116,3 @@ sendDailyAlert().catch((err) => {
 
 
 
-
-      
