@@ -1,5 +1,3 @@
-
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -26,25 +24,41 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Official Google Firebase Background Handler (No crashes, No duplicates)
-messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification?.title || payload.data?.title || "T&C NEWS";
-  const notificationOptions = {
-    body: payload.notification?.body || payload.data?.body || "New update available!",
+// Guaranteed Native Push Handler
+self.addEventListener('push', (event) => {
+  let title = "T&C NEWS";
+  let body = "New update available!";
+  let targetUrl = "https://tastyandcomfort.github.io/news/";
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      const data = payload.data || payload.notification || payload;
+      title = data.title || title;
+      body = data.body || body;
+      targetUrl = data.url || targetUrl;
+    } catch (e) {
+      body = event.data.text() || body;
+    }
+  }
+
+  const options = {
+    body: body,
     icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
     badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
     tag: 'tc-daily-news',
-    data: {
-      url: 'https://tastyandcomfort.github.io/news/'
-    }
+    renotify: true,
+    data: { url: targetUrl }
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// When user taps notification, open the app
+// Click action
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const urlToOpen = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (let client of windowClients) {
@@ -53,10 +67,11 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow('https://tastyandcomfort.github.io/news/');
+        return clients.openWindow(urlToOpen);
       }
     })
   );
 });
+
 
 
