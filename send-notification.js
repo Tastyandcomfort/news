@@ -1,7 +1,9 @@
 
 
+
 const admin = require('firebase-admin');
 
+// 1. Initialize Firebase
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -10,80 +12,26 @@ admin.initializeApp({
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-// Helper function to fetch the latest breaking news headline and clean snippet
-async function fetchLatestNewsItem() {
+// 2. Fetch live headline from your Vercel proxy
+async function fetchTopLiveHeadline() {
   try {
-    const response = await fetch('https://news-lemon-two.vercel.app/api/news?scope=local');
-    if (!response.ok) throw new Error('Failed to fetch RSS feed');
-    
-    const xmlText = await response.text();
-    
-    // Extract first item block <item>...</item>
-    const itemMatch = xmlText.match(/<item>([\s\S]*?)<\/item>/i);
-    if (itemMatch && itemMatch[1]) {
-      const itemXml = itemMatch[1];
-      
-      // 1. Extract & clean Title
-      const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
-      let title = titleMatch ? titleMatch[1] : "Latest Updates";
-      title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-                   .replace(/^\[\d+\]\s*/, '') // Remove bracketed codes like [163]
-                   .replace(/&lt;[\s\S]*?&gt;/g, '')
-                   .replace(/<[^>]*>/g, '')
-                   .replace(/---/g, '•') // Replace raw --- with a clean dot
-                   .replace(/&amp;/g, '&')
-                   .replace(/&quot;/g, '"')
-                   .replace(/&#39;/g, "'")
-                   .replace(/&nbsp;/g, ' ')
-                   .trim();
-      
-      // Clean up common source suffixes if present (e.g., " - The Hindu")
-      title = title.split(' - ')[0].trim();
+    const res = await fetch('https://news-lemon-two.vercel.app/api/news?scope=national');
+    if (!res.ok) throw new Error('Failed to fetch RSS');
+    const xml = await res.text();
 
-      // 2. Extract & clean Description
-      const descMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
-      let description = descMatch ? descMatch[1] : "";
-      
-      description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-                               .replace(/&lt;a[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, '$1')
-                               .replace(/&lt;[\s\S]*?&gt;/g, '')
-                               .replace(/<[^>]*>/g, '')
-                               .replace(/https?:\/\/[^\s]+/g, '')
-                               .replace(/---/g, ' ')
-                               .replace(/&amp;/g, '&')
-                               .replace(/&quot;/g, '"')
-                               .replace(/&#39;/g, "'")
-                               .replace(/&nbsp;/gi, ' ')
-                               .replace(/\s+/g, ' ')
-                               .trim();
-      
-      // 3. Remove Title duplication from Description if it starts with it
-      if (description.startsWith(title)) {
-        description = description.substring(title.length).trim();
+    const itemMatch = xml.match(/<item>([\s\S]*?)<\/item>/i);
+    if (itemMatch) {
+      const itemContent = itemMatch[1];
+      const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
+                         itemContent.match(/<title>(.*?)<\/title>/i);
+      if (titleMatch && titleMatch[1]) {
+        return titleMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
       }
-
-      // Clean up leading punctuation left over after title stripping
-      description = description.replace(/^[\s:\-–—\.;]+/, '').trim();
-
-      // Fallback if description becomes empty after cleaning
-      if (!description || description.length < 5) {
-        description = "Tap to read full details on T&C News Hub.";
-      }
-
-      // Limit description length to a clean snippet length
-      if (description.length > 95) {
-        description = description.substring(0, 92) + '...';
-      }
-
-      return { title, description };
     }
   } catch (error) {
-    console.error("Error fetching live news for notification:", error);
+    console.error("Could not fetch live news feed:", error.message);
   }
-  return { 
-    title: "Breaking News Update", 
-    description: "Tap to read the full story on T&C News Hub." 
-  };
+  return null;
 }
 
 async function sendDailyAlert() {
@@ -91,19 +39,33 @@ async function sendDailyAlert() {
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const hour = istTime.getUTCHours();
 
-  // Time Window Check (Quiet hours check)
-  if (hour < 6 || hour > 23) {
+  // Quiet hours check (Midnight to 6 AM)
+  if (hour < 6) {
     console.log("Night time (quiet hours). Skipping notification.");
     return;
   }
 
-  // Fetch the clean title and short snippet
-  const newsItem = await fetchLatestNewsItem();
+  // 3. Fetch real live headline
+  const latestHeadline = await fetchTopLiveHeadline();
 
-  // Configured as requested: Title "T&C News" + clean headline and text
-  const notificationTitle = "T&C News";
-  const notificationBody = `${newsItem.title}\n${newsItem.description}`;
+  // Declare title & body at function scope so they are ALWAYS defined
+  let title = "T&C NEWS • Live Update";
+  let body = latestHeadline || "Check out today's top trending headlines!";
 
+  // Set title based on time of day
+  if (hour >= 6 && hour < 9) {
+    title = "T&C NEWS Morning Bulletin";
+  } else if (hour >= 9 && hour < 13) {
+    title = "T&C NEWS Mid-Day Top Story";
+  } else if (hour >= 13 && hour < 16) {
+    title = "T&C NEWS ☀️ Afternoon Briefing";
+  } else if (hour >= 16 && hour < 20) {
+    title = "T&C NEWS Evening Digest";
+  } else if (hour >= 20 && hour <= 23) {
+    title = "T&C NEWS 🌙 Tonight's Top Story";
+  }
+
+  // 4. Fetch tokens from Firestore
   const snapshot = await db.collection('fcm_tokens').get();
   if (snapshot.empty) {
     console.log('No subscribed devices found yet.');
@@ -111,9 +73,10 @@ async function sendDailyAlert() {
   }
 
   const tokens = snapshot.docs.map(doc => doc.id);
-  console.log(`Sending notification to ${tokens.length} device(s) with headline: "${newsItem.title}"`);
+  console.log(`Sending to ${tokens.length} devices | Title: "${title}" | Headline: "${body}"`);
 
-const response = await messaging.sendEachForMulticast({
+  // 5. Send message to all devices
+  const response = await messaging.sendEachForMulticast({
     tokens: tokens,
     notification: {
       title: title,
@@ -129,9 +92,10 @@ const response = await messaging.sendEachForMulticast({
       }
     }
   });
-  
+
   console.log(`Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
 
+  // Remove dead tokens
   response.responses.forEach((resp, idx) => {
     if (!resp.success) {
       const err = resp.error?.code;
@@ -142,6 +106,10 @@ const response = await messaging.sendEachForMulticast({
   });
 }
 
-sendDailyAlert().catch(console.error);
+sendDailyAlert().catch((err) => {
+  console.error("FATAL ERROR:", err);
+  process.exit(1);
+});
+
 
 
