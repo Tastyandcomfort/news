@@ -1,1 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.tastyandcomfort.newshub",
+        "sha256_cert_fingerprints": ["27:78:A9:C7:5E:67:5B:F6:11:2C:3C:FA:F9:18:A7:34:44:1D:15:A1:CA:3E:6B:11:45:13:4B:AE:E6:10:E7:12"]
+      }
+    }]
 
