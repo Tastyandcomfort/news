@@ -1,7 +1,4 @@
 
-
-
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -17,18 +14,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Force immediate activation
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
-// Basic offline caching
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
 
-// Native Push Event for Android Phones & Laptops
+// Single Unified Push Handler
 self.addEventListener('push', (event) => {
   let title = "T&C NEWS";
   let body = "New update available!";
@@ -37,10 +32,10 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
-      const data = payload.notification || payload.data || payload;
+      const data = payload.data || payload.notification || payload;
       title = data.title || title;
       body = data.body || body;
-      targetUrl = data.url || payload.fcmOptions?.link || targetUrl;
+      targetUrl = data.url || targetUrl;
     } catch (e) {
       body = event.data.text() || body;
     }
@@ -58,7 +53,6 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Click action
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const urlToOpen = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
@@ -76,6 +70,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-
-
-
