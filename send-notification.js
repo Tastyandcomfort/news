@@ -16,25 +16,29 @@ async function sendDailyAlert() {
   let title = "T&C NEWS";
   let body = "Checkout today's updates!";
 
-  // Precise IST Hour Check (0 to 23)
-  if (hour >= 6 && hour < 11) {
-    // 10:00 AM Test
-    title = "T&C NEWS - Weather Update 🌞";
-    body = "Checkout today's news, Rain Gone Away!";
-  } else if (hour >= 11 && hour < 15) {
-    // 11:00 AM to 3:00 PM
-    title = "T&C NEWS - It's chilling❄";
-    body = "Checkout today's live weather";
-  } else if (hour >= 15 && hour < 20) {
-    // 3:00 PM to 8:00 PM
-    title = "T&C NEWS - Happy Evening";
-    body = "Checkout the top trending news";
+  // 5 Daily IST Time Windows
+  if (hour >= 6 && hour < 9) {
+    // 7:00 AM IST
+    title = "T&C NEWS - Good Morning 🌅";
+    body = "Here are your morning headlines!";
+  } else if (hour >= 9 && hour < 13) {
+    // 10:30 AM IST
+    title = "T&C NEWS - Mid-Morning Briefing 📰";
+    body = "Rain Gone Away! Checkout today's updates";
+  } else if (hour >= 13 && hour < 16) {
+    // 2:00 PM IST
+    title = "T&C NEWS - Afternoon Edition ☀️";
+    body = "Mid-day trending news and weather.";
+  } else if (hour >= 16 && hour < 20) {
+    // 5:30 PM IST
+    title = "T&C NEWS - Evening Highlights 🌆";
+    body = "Checkout the top trending stories.";
   } else if (hour >= 20 && hour <= 23) {
-    // 8:00 PM to 11:59 PM
+    // 9:00 PM IST
     title = "T&C NEWS - About to bed! 😴";
     body = "Checkout tomorrows weather";
   } else {
-    // Midnight to 6 AM (Silent hours - DO NOT SEND)
+    // Midnight to 6 AM (Quiet hours)
     console.log("Night time (quiet hours). Skipping notification.");
     return;
   }
