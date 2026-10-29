@@ -25,8 +25,10 @@ async function fetchLatestNewsItem() {
       const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
       let title = titleMatch ? titleMatch[1] : "Latest Updates";
       title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+                   .replace(/^\[\d+\]\s*/, '') // Remove bracketed codes like [163]
                    .replace(/&lt;[\s\S]*?&gt;/g, '')
                    .replace(/<[^>]*>/g, '')
+                   .replace(/---/g, '•') // Replace raw --- with a clean dot
                    .replace(/&amp;/g, '&')
                    .replace(/&quot;/g, '"')
                    .replace(/&#39;/g, "'")
@@ -45,6 +47,7 @@ async function fetchLatestNewsItem() {
                                .replace(/&lt;[\s\S]*?&gt;/g, '')
                                .replace(/<[^>]*>/g, '')
                                .replace(/https?:\/\/[^\s]+/g, '')
+                               .replace(/---/g, ' ')
                                .replace(/&amp;/g, '&')
                                .replace(/&quot;/g, '"')
                                .replace(/&#39;/g, "'")
@@ -62,12 +65,12 @@ async function fetchLatestNewsItem() {
 
       // Fallback if description becomes empty after cleaning
       if (!description || description.length < 5) {
-        description = "Tap to read the full coverage on T&C News Hub.";
+        description = "Tap to read full details on T&C News Hub.";
       }
 
       // Limit description length to a clean snippet length
-      if (description.length > 100) {
-        description = description.substring(0, 97) + '...';
+      if (description.length > 95) {
+        description = description.substring(0, 92) + '...';
       }
 
       return { title, description };
@@ -149,4 +152,5 @@ async function sendDailyAlert() {
 }
 
 sendDailyAlert().catch(console.error);
+
 
