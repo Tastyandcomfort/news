@@ -54,31 +54,34 @@ async function sendDailyAlert() {
   const bodyText = liveHeadline || "Check out today's top trending headlines.";
 
   // Clean Apple-style heading based on time of day
-  let titleText = "T&C News • Live Briefing 🔴";
+  let titleText = "T&C News • Live Briefing";
   if (hour >= 6 && hour < 9) {
-    titleText = "T&C News • Morning Edition 🌅";
+    titleText = "T&C News • Morning Edition";
   } else if (hour >= 9 && hour < 13) {
-    titleText = "T&C News • Midday Update 📰";
+    titleText = "T&C News • Midday Update";
   } else if (hour >= 13 && hour < 16) {
-    titleText = "T&C News • Afternoon Briefing ☀️";
+    titleText = "T&C News • Afternoon Briefing";
   } else if (hour >= 16 && hour < 20) {
-    titleText = "T&C News • Evening Digest 🌆";
+    titleText = "T&C News • Evening Digest";
   } else if (hour >= 20 && hour <= 23) {
     titleText = "T&C News • Night Wrap-Up 🌙";
   }
 
-  // Fetch registered devices
+  // 4. Fetch registered devices from Firestore
   const snapshot = await db.collection('fcm_tokens').get();
   if (snapshot.empty) {
     console.log('No devices found in database.');
     return;
   }
 
-  const tokens = snapshot.docs.map(doc => doc.id);
-  console.log(`Sending to ${tokens.length} device(s)...`);
+  // Extract tokens and eliminate any duplicates
+  const rawTokens = snapshot.docs.map(doc => doc.data().token || doc.id).filter(Boolean);
+  const tokens = [...new Set(rawTokens)];
+
+  console.log(`Sending to ${tokens.length} unique device(s)...`);
   console.log(`Title: "${titleText}"`);
   console.log(`Body:  "${bodyText}"`);
-
+  
   // Send single standard WebPush notification payload
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
