@@ -69,18 +69,22 @@ async function sendDailyAlert() {
   const tokens = snapshot.docs.map(doc => doc.id);
   console.log(`Sending live alert to ${tokens.length} devices...`);
 
-  // 🔥 webpush.notification FORCES ANDROID TO DRAW THE BANNER ON PHONES:
+  // DATA-ONLY payload: Completely eliminates the double notification bug!
   const response = await messaging.sendEachForMulticast({
     tokens: tokens,
-    notification: {
+    data: {
       title: title,
-      body: body
+      body: body,
+      url: 'https://tastyandcomfort.github.io/news/'
     },
     webpush: {
       headers: {
         Urgency: "high",
         TTL: "86400"
-      },
+      }
+    }
+  });
+  
       notification: {
         title: title,
         body: body,
