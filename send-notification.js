@@ -1,181 +1,72 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
-// 1. Initialize Firebase Admin
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// Initialize Firebase Admin SDK if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
+    }),
+  });
+}
 
 const db = admin.firestore();
-const messaging = admin.messaging();
 
-// 2. Fetch and clean real-time live news headline and description
-async function fetchLiveNews() {
+export default async function handler(req, res) {
   try {
-    const res = await fetch('https://news-lemon-two.vercel.app/api/news?scope=local');
-    if (!res.ok) throw new Error('Failed to fetch feed');
-    const xml = await res.text();
+    // 1. Dynamically fetch the latest news article from your live API
+    const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
+    let latestArticle = {
+      title: "Check out the latest breaking news and live updates!",
+      url: "https://tastyandcomfort.github.io/news/"
+    };
 
-    const itemMatch = xml.match(/<item>([\s\S]*?)<\/item>/i);
-    if (itemMatch && itemMatch[1]) {
-      const itemContent = itemMatch[1];
-      
-      // Extract Title
-      const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
-                         itemContent.match(/<title>(.*?)<\/title>/i);
-      
-      let title = titleMatch && titleMatch[1] ? titleMatch[1] : "";
-      title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-                   .replace(/^\[\d+\]\s*/, '') // Removes [163]
-                   .replace(/&lt;[\s\S]*?&gt;/g, '')
-                   .replace(/<[^>]*>/g, '')
-                   .replace(/---/g, '•')
-                   .replace(/&amp;/g, '&')
-                   .replace(/&quot;/g, '"')
-                   .replace(/&#39;/g, "'")
-                   .replace(/&nbsp;/g, ' ')
-                   .trim();
-                   
-      // Strip source publisher suffix if present
-      title = title.split(' - ')[0].trim();
-
-      // Extract Description
-      const descMatch = itemContent.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/i) || 
-                        itemContent.match(/<description>(.*?)<\/description>/i);
-                        
-      let description = descMatch && descMatch[1] ? descMatch[1] : "";
-      description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-                               .replace(/&lt;a[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, '$1')
-                               .replace(/&lt;[\s\S]*?&gt;/g, '')
-                               .replace(/<[^>]*>/g, '')
-                               .replace(/https?:\/\/[^\s]+/g, '')
-                               .replace(/---/g, ' ')
-                               .replace(/&amp;/g, '&')
-                               .replace(/&quot;/g, '"')
-                               .replace(/&#39;/g, "'")
-                               .replace(/&nbsp;/gi, ' ')
-                               .replace(/\s+/g, ' ')
-                               .trim();
-
-      // Remove title duplication if description repeats headline
-      if (description.startsWith(title)) {
-        description = description.substring(title.length).trim();
+    if (newsResponse.ok) {
+      const articles = await newsResponse.json();
+      if (Array.isArray(articles) && articles.length > 0) {
+        latestArticle = articles[0]; // Gets the newest article headline dynamically
       }
-      description = description.replace(/^[\s:\-–—\.;]+/, '').trim();
-
-      if (!description || description.length < 5) {
-        description = "Tap to read full details on T&C News Hub.";
-      }
-
-      if (description.length > 95) {
-        description = description.substring(0, 92) + '...';
-      }
-
-      return { title, description };
     }
-  } catch (err) {
-    console.error('Error fetching live feed:', err.message);
+
+    // 2. Fetch active FCM tokens from Firestore
+    const tokensSnapshot = await db.collection('fcm_tokens').get();
+    if (tokensSnapshot.empty) {
+      return res.status(200).json({ success: true, message: 'No registered tokens found.' });
+    }
+
+    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+
+    // 3. Send DATA-ONLY payload (prevents duplicate browser auto-popups)
+    const sendPromises = tokens.map(token => {
+      const message = {
+        token: token,
+        data: {
+          title: "T&C News • Night Wrap-Up 🌙",
+          body: latestArticle.title, // Dynamic headline
+          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+          url: latestArticle.url || "https://tastyandcomfort.github.io/news/"
+        },
+        android: {
+          priority: "high"
+        }
+      };
+
+      return admin.messaging().send(message);
+    });
+
+    const results = await Promise.allSettled(sendPromises);
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+
+    return res.status(200).json({
+      success: true,
+      summary: `Delivered: ${successful}, Failed: ${failed}`,
+      articleSent: latestArticle.title
+    });
+
+  } catch (error) {
+    console.error('Error sending push notifications:', error);
+    return res.status(500).json({ error: error.message });
   }
-  return null;
 }
-
-async function sendDailyAlert() {
-  // Convert current time to IST
-  const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffset);
-  const hour = istTime.getHours();
-
-  // Quiet hours (Midnight to 6 AM)
-  if (hour < 6) {
-    console.log('Quiet hours (midnight - 6 AM). Skipping notification.');
-    return;
-  }
-
-  // Fetch live real-time headline and description
-  const liveNews = await fetchLiveNews();
-  
-  const headlineText = liveNews?.title || "Latest Breaking Updates";
-  const snippetText = liveNews?.description || "Check out today's top trending stories on T&C News Hub.";
-  const bodyText = `${headlineText}\n${snippetText}`;
-
-  // Clean Apple-style heading based on time of day
-  let titleText = "T&C News";
-  if (hour >= 6 && hour < 9) {
-    titleText = "T&C News • Morning Edition 🌅";
-  } else if (hour >= 9 && hour < 13) {
-    titleText = "T&C News • Midday Update 📰";
-  } else if (hour >= 13 && hour < 16) {
-    titleText = "T&C News • Afternoon Briefing ☀️";
-  } else if (hour >= 16 && hour < 20) {
-    titleText = "T&C News • Evening Digest 🌆";
-  } else if (hour >= 20 && hour <= 23) {
-    titleText = "T&C News • Night Wrap-Up 🌙";
-  }
-
-  // Fetch registered tokens from Firestore
-  const snapshot = await db.collection('fcm_tokens').get();
-  if (snapshot.empty) {
-    console.log('No devices found in database.');
-    return;
-  }
-
-  // Extract tokens and eliminate duplicates
-  const rawTokens = snapshot.docs.map(doc => doc.data().token || doc.id).filter(Boolean);
-  const tokens = [...new Set(rawTokens)];
-
-  console.log(`Sending to ${tokens.length} unique device(s)...`);
-  console.log(`Title: "${titleText}"`);
-  console.log(`Body:\n"${bodyText}"`);
-
-  // Send multicast push payload across devices
-  const response = await messaging.sendEachForMulticast({
-    tokens: tokens,
-    // Top-level notification object forces system wake-up on mobile
-    notification: {
-      title: titleText,
-      body: bodyText
-    },
-    // High priority ensures mobile OS delivers push immediately
-    android: {
-      priority: 'high'
-    },
-    webpush: {
-      headers: {
-        Urgency: 'high',
-        TTL: '86400'
-      },
-      notification: {
-        title: titleText,
-        body: bodyText,
-        icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-        tag: 'tc-news-daily',
-        renotify: true
-      },
-      fcmOptions: {
-        link: 'https://tastyandcomfort.github.io/news/'
-      }
-    }
-  });
-
-  console.log(`Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
-
-  // Automatically clean up expired tokens
-  response.responses.forEach((resp, idx) => {
-    if (!resp.success) {
-      const code = resp.error?.code;
-      if (
-        code === 'messaging/registration-token-not-registered' ||
-        code === 'messaging/invalid-registration-token'
-      ) {
-        db.collection('fcm_tokens').doc(tokens[idx]).delete();
-      }
-    }
-  });
-}
-
-sendDailyAlert().catch((err) => {
-  console.error('Fatal Error:', err);
-  process.exit(1);
-});
