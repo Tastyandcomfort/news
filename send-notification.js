@@ -18,9 +18,9 @@ async function sendDailyAlert() {
 
   // Precise IST Hour Check (0 to 23)
   if (hour >= 6 && hour < 11) {
-    // 6:00 AM to 11:00 AM
-    title = "T&C NEWS - Good Morning🌞";
-    body = "Checkout today's news it's updated";
+    // 10:00 AM Test
+    title = "T&C NEWS - Weather Update 🌞";
+    body = "Checkout today's news, Rain Gone Away!";
   } else if (hour >= 11 && hour < 15) {
     // 11:00 AM to 3:00 PM
     title = "T&C NEWS - It's chilling❄";
