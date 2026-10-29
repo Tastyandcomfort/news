@@ -24,19 +24,35 @@ async function fetchLatestNewsItem() {
       // Extract title
       const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
       let title = titleMatch ? titleMatch[1] : "Latest Updates";
-      title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+      title = title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+                   .replace(/&lt;[\s\S]*?&gt;/g, '')
+                   .replace(/<[^>]*>/g, '')
+                   .replace(/&amp;/g, '&')
+                   .replace(/&quot;/g, '"')
+                   .replace(/&#39;/g, "'")
+                   .trim();
       
-      // Clean up common source suffixes if present (e.g., " - Telangana Hyderabad Google News")
+      // Clean up common source suffixes if present
       title = title.split(' - ')[0].trim();
 
-      // Extract description or content for 1-2 lines body snippet
+      // Extract description and completely strip HTML tags & links
       const descMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
-      let description = descMatch ? descMatch[1] : "Checkout today's top stories and updates.";
-      description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+      let description = descMatch ? descMatch[1] : "Checkout today's top stories and updates from T&C News Hub.";
       
-      // Limit description to roughly 1 or 2 lines (approx 120-140 characters)
-      if (description.length > 130) {
-        description = description.substring(0, 127) + '...';
+      description = description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+                               .replace(/&lt;a[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, '$1') // remove HTML anchor links
+                               .replace(/&lt;[\s\S]*?&gt;/g, '') // remove encoded tags like &lt;a href...&gt;
+                               .replace(/<[^>]*>/g, '') // remove standard HTML tags
+                               .replace(/https?:\/\/[^\s]+/g, '') // strip any raw http links
+                               .replace(/&amp;/g, '&')
+                               .replace(/&quot;/g, '"')
+                               .replace(/&#39;/g, "'")
+                               .replace(/\s+/g, ' ')
+                               .trim();
+      
+      // Limit description to a crisp 1-2 lines (approx 110 characters)
+      if (description.length > 110) {
+        description = description.substring(0, 107) + '...';
       }
 
       return { title, description };
@@ -46,7 +62,7 @@ async function fetchLatestNewsItem() {
   }
   return { 
     title: "Breaking News Update", 
-    description: "Checkout today's top updates and live headlines from T&C News Hub." 
+    description: "Stay updated with live regional headlines from T&C News Hub." 
   };
 }
 
