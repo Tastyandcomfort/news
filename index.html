@@ -1568,146 +1568,75 @@ Residents are advised to conserve water and follow official updates.
     });
   </script>
 
-<!-- 1. Firebase Core, Messaging, and Firestore SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase Core, Messaging, and Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-<!-- 2. Firebase Initialization & Auto-Registration -->
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
-    authDomain: "news-61e62.firebaseapp.com",
-    projectId: "news-61e62",
-    storageBucket: "news-61e62.firebasestorage.app",
-    messagingSenderId: "1054060055660",
-    appId: "1:1054060055660:web:e192c256c82facb9af1c49"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
+      authDomain: "news-61e62.firebaseapp.com",
+      projectId: "news-61e62",
+      storageBucket: "news-61e62.firebasestorage.app",
+      messagingSenderId: "1054060055660",
+      appId: "1:1054060055660:web:e192c256c82facb9af1c49"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
-  const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+    const db = firebase.firestore();
 
-  async function enableNotifications() {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        console.log('Notification permission was not granted.');
-        return;
-      }
+    async function initPushRegistration() {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
-      const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
-      const token = await messaging.getToken({
-        vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
-        serviceWorkerRegistration: reg
-      });
-
-      if (token) {
-        let deviceId = localStorage.getItem('tc_device_id');
-        if (!deviceId) {
-          deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
-          localStorage.setItem('tc_device_id', deviceId);
+      try {
+        // 1. Triggers standard native browser prompt if not decided yet
+        let permission = Notification.permission;
+        if (permission === 'default') {
+          permission = await Notification.requestPermission();
         }
 
-        await db.collection('fcm_tokens').doc(deviceId).set({
-          token: token,
-          device: navigator.userAgent,
-          updatedAt: new Date()
-        });
+        // 2. If granted, register Service Worker and sync token
+        if (permission === 'granted') {
+          const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
+          
+          const token = await messaging.getToken({
+            vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
+            serviceWorkerRegistration: reg
+          });
 
-        console.log('Single device token saved successfully:', deviceId);
-      }
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-    }
-  }
+          if (token) {
+            let deviceId = localStorage.getItem('tc_device_id');
+            if (!deviceId) {
+              deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+              localStorage.setItem('tc_device_id', deviceId);
+            }
 
-  messaging.onMessage((payload) => {
-    console.log('Message received while app is open:', payload);
-  });
+            // Save or update the single persistent record for this device
+            await db.collection('fcm_tokens').doc(deviceId).set({
+              token: token,
+              device: navigator.userAgent,
+              updatedAt: new Date()
+            }, { merge: true });
 
-  window.addEventListener('load', () => {
-    if ('serviceWorker' in navigator && 'Notification' in window) {
-      enableNotifications();
-    }
-  });
-</script>
-  
-
-<!-- Friendly Notification Prompt Banner -->
-<div id="notifyBanner" style="display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); color: #ffffff; padding: 14px 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-    <div style="font-size: 13.5px; line-height: 1.4;">
-      <strong>Hey! This is Murali, Stay Updated!</strong><br>
-      Get daily news and weather alerts.
-    </div>
-    <div style="display: flex; gap: 8px;">
-      <button onclick="requestNotification()" style="background: #0071e3; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; font-size: 12.5px; cursor: pointer;">
-        Allow
-      </button>
-      <button onclick="dismissBanner()" style="background: rgba(255,255,255,0.15); color: #ccc; border: none; padding: 8px 10px; border-radius: 20px; font-size: 12.5px; cursor: pointer;">
-        ✕
-      </button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // If already granted, ensure token is refreshed in Firestore; if default, show banner
-  window.addEventListener('load', () => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        // Automatically ensure the phone's token is in the database!
-        if (typeof enableNotifications === 'function') {
-          enableNotifications();
-        }
-      } else if (Notification.permission === 'default') {
-        // Show banner for new visitors
-        document.getElementById('notifyBanner').style.display = 'block';
-      }
-    }
-  });
-  
-  
-  
-  async function requestNotification() {
-    try {
-      const permission = await Notification.requestPermission();
-
-      if (permission === 'granted') {
-        document.getElementById('notifyBanner').style.display = 'none';
-        
-        // Register token with Firestore
-        if (typeof enableNotifications === 'function') {
-          await enableNotifications();
-        }
-
-        // Clean single reload so the service worker activates immediately
-       // window.location.reload();
-
-      } else if (permission === 'denied') {
-        document.getElementById('notifyBanner').style.display = 'none';
-
-        // 📊 Log the denial directly into your Firestore database
-        if (typeof db !== 'undefined') {
+            console.log('Push device token synced successfully:', deviceId);
+          }
+        } else if (permission === 'denied') {
+          // Log denial quietly to Firestore
           await db.collection('denied_stats').add({
             status: 'denied',
             date: new Date(),
             device: navigator.userAgent
           });
-          console.log('Denial logged to database.');
         }
-      } else {
-        document.getElementById('notifyBanner').style.display = 'none';
+      } catch (err) {
+        console.warn('Push registration error:', err);
       }
-    } catch (e) {
-      console.error(e);
     }
-  }
 
-  function dismissBanner() {
-    document.getElementById('notifyBanner').style.display = 'none';
-  }
-</script>
+    // Runs once when the page/app finishes loading
+    window.addEventListener('load', initPushRegistration);
+  </script>
 </body>
 </html>
