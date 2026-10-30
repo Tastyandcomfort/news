@@ -1568,7 +1568,6 @@ Residents are advised to conserve water and follow official updates.
     });
   </script>
 
-
 <!-- 1. Firebase Core, Messaging, and Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
@@ -1589,8 +1588,15 @@ Residents are advised to conserve water and follow official updates.
     const messaging = firebase.messaging();
     const db = firebase.firestore();
 
-async function enableNotifications() {
+    async function enableNotifications() {
       try {
+        // Request browser permission explicitly
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          console.log('Notification permission was not granted.');
+          return;
+        }
+
         const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
         const token = await messaging.getToken({
           vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
@@ -1605,7 +1611,7 @@ async function enableNotifications() {
             localStorage.setItem('tc_device_id', deviceId);
           }
 
-          // 2. Overwrites the single document for this device (NEVER duplicates!)
+          // 2. Overwrite the single document for this device
           await db.collection('fcm_tokens').doc(deviceId).set({
             token: token,
             device: navigator.userAgent,
@@ -1618,13 +1624,19 @@ async function enableNotifications() {
         console.error('Error enabling notifications:', error);
       }
     }
-    
+
     // In-app alert if notification arrives while website is currently open
     messaging.onMessage((payload) => {
-  console.log('Message received while app is open:', payload);
-});
-  </script>  
+      console.log('Message received while app is open:', payload);
+    });
 
+    // Auto-trigger on page load
+    window.addEventListener('load', () => {
+      if ('serviceWorker' in navigator && 'Notification' in window) {
+        enableNotifications();
+      }
+    });
+  </script>
 
 
 <!-- Friendly Notification Prompt Banner -->
