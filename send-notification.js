@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-// 1. Initialize Firebase Admin SDK using the single FIREBASE_SERVICE_ACCOUNT JSON secret
+// 1. Initialize Firebase Admin SDK using the FIREBASE_SERVICE_ACCOUNT JSON secret
 if (!admin.apps.length) {
   const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
   
@@ -9,11 +9,15 @@ if (!admin.apps.length) {
     process.exit(1);
   }
 
-  const serviceAccount = JSON.parse(serviceAccountRaw);
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  try {
+    const serviceAccount = JSON.parse(serviceAccountRaw);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } catch (err) {
+    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT JSON secret:', err);
+    process.exit(1);
+  }
 }
 
 const db = admin.firestore();
@@ -29,7 +33,7 @@ function getDynamicTitle() {
   } else if (hours >= 12 && hours < 17) {
     return "T&C News • Afternoon Express ⚡";
   } else if (hours >= 17 && hours < 22) {
-    return "T&C News • Evening Digest 🌆";
+    return "T&C News • Evening Digest ";
   } else {
     return "T&C News • Night Wrap-Up 🌙";
   }
@@ -38,22 +42,30 @@ function getDynamicTitle() {
 // 3. Main notification delivery function
 async function runNotificationTask() {
   try {
-    const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
     let latestArticle = {
       title: "Check out the latest breaking news and live updates!",
       url: "https://tastyandcomfort.github.io/news/"
     };
 
-    if (newsResponse.ok) {
-      const articles = await newsResponse.json();
-      if (Array.isArray(articles) && articles.length > 0) {
-        latestArticle = articles[0];
+    // Safely attempt to fetch latest news without crashing if endpoint returns non-JSON
+    try {
+      const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
+      if (newsResponse.ok) {
+        const contentType = newsResponse.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const articles = await newsResponse.json();
+          if (Array.isArray(articles) && articles.length > 0) {
+            latestArticle = articles[0];
+          }
+        }
       }
+    } catch (fetchErr) {
+      console.warn('Could not fetch live news API, using default headline:', fetchErr.message);
     }
 
     const tokensSnapshot = await db.collection('fcm_tokens').get();
     if (tokensSnapshot.empty) {
-      console.log('No registered tokens found.');
+      console.log('No registered tokens found in Firestore.');
       return;
     }
 
