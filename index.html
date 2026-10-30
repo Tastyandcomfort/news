@@ -1653,13 +1653,22 @@ Residents are advised to conserve water and follow official updates.
 </div>
 
 <script>
-  // Show the banner only if user hasn't made a choice yet
+  // If already granted, ensure token is refreshed in Firestore; if default, show banner
   window.addEventListener('load', () => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      document.getElementById('notifyBanner').style.display = 'block';
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        // Automatically ensure the phone's token is in the database!
+        if (typeof enableNotifications === 'function') {
+          enableNotifications();
+        }
+      } else if (Notification.permission === 'default') {
+        // Show banner for new visitors
+        document.getElementById('notifyBanner').style.display = 'block';
+      }
     }
   });
-
+  
+  
   
   async function requestNotification() {
     try {
