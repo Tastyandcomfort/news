@@ -13,61 +13,40 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Immediate activation
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
-// Offline caching support
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
 
-// 🔥 THE FIX: Explicitly handles the push event and tells Chrome it is handled
-self.addEventListener('push', (event) => {
-  let title = "T&C NEWS";
-  let body = "New update available!";
-  let targetUrl = "https://tastyandcomfort.github.io/news/";
-
-  if (event.data) {
-    try {
-      const payload = event.data.json();
-      const data = payload.notification || payload.data || payload;
-      title = data.title || title;
-      body = data.body || body;
-      targetUrl = data.url || payload.fcmOptions?.link || targetUrl;
-    } catch (e) {
-      body = event.data.text() || body;
+// Single unified background handler
+messaging.onBackgroundMessage((payload) => {
+  const notificationTitle = payload.notification?.title || payload.data?.title || "T&C News";
+  const notificationOptions = {
+    body: payload.notification?.body || payload.data?.body || "New breaking story available.",
+    icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+    badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+    tag: "tc-daily-news",
+    data: {
+      url: payload.data?.url || "https://tastyandcomfort.github.io/news/"
     }
-  }
-
-  const options = {
-    body: body,
-    icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-    badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
-    tag: 'tc-daily-news',
-    renotify: true,
-    data: { url: targetUrl }
   };
 
-  // Satisfies Chrome's strict requirement: NO MORE fallback warning!
-  event.waitUntil(self.registration.showNotification(title, options));
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Your exact tap / click handler (preserved completely)
+// Launch or focus installed standalone app on tap
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   const targetUrl = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (let client of windowClients) {
         if (client.url.includes('/news/') && 'focus' in client) {
-          if ('navigate' in client && client.url !== targetUrl) {
-            client.navigate(targetUrl);
-          }
           return client.focus();
         }
       }
