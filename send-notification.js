@@ -22,20 +22,30 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// 2. Dynamic Title based on Indian Standard Time (IST)
+// 2. Dynamic Title matching your exact 6 IST time brackets
 function getDynamicTitle() {
   const now = new Date();
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const hours = istTime.getUTCHours();
 
-  if (hours >= 5 && hours < 12) {
+  if (hours >= 0 && hours < 5) {
+    // 12:00 AM to 5:00 AM
+    return "T&C News • Early Morning 🌌";
+  } else if (hours >= 5 && hours < 11) {
+    // 5:00 AM to 11:00 AM
     return "T&C News • Morning Briefing ☀️";
-  } else if (hours >= 12 && hours < 17) {
+  } else if (hours >= 11 && hours < 15) {
+    // 11:00 AM to 3:00 PM
     return "T&C News • Afternoon Express ⚡";
-  } else if (hours >= 17 && hours < 22) {
+  } else if (hours >= 15 && hours < 18) {
+    // 3:00 PM to 6:00 PM
     return "T&C News • Evening Digest 🌆";
+  } else if (hours >= 18 && hours < 21) {
+    // 6:00 PM to 9:00 PM
+    return "T&C News • Night Bulletin 🌙";
   } else {
-    return "T&C News • Night Wrap-Up 🌙";
+    // 9:00 PM to 11:59 PM
+    return "T&C News • Midnight Wrap-Up 🌠";
   }
 }
 
