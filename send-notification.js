@@ -1,6 +1,6 @@
-import admin from 'firebase-admin';
+const admin = require('firebase-admin');
 
-// Initialize Firebase Admin SDK securely using environment variables
+// 1. Initialize Firebase Admin SDK securely using environment variables
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -13,9 +13,28 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-export default async function handler(req, res) {
+// 2. Helper function to generate dynamic titles based on Indian Standard Time (IST)
+function getDynamicTitle() {
+  const now = new Date();
+  // Convert UTC time to IST (UTC + 5 hours 30 minutes)
+  const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const hours = istTime.getUTCHours();
+
+  if (hours >= 5 && hours < 12) {
+    return "T&C News • Morning Briefing ☀️";
+  } else if (hours >= 12 && hours < 17) {
+    return "T&C News • Afternoon Express ⚡";
+  } else if (hours >= 17 && hours < 22) {
+    return "T&C News • Evening Digest ";
+  } else {
+    return "T&C News • Night Wrap-Up 🌙";
+  }
+}
+
+// 3. Main notification delivery function
+async function runNotificationTask() {
   try {
-    // 1. Dynamically fetch the latest news article from your live endpoint
+    // Fetch the latest news article from your live endpoint
     const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
     let latestArticle = {
       title: "Check out the latest breaking news and live updates!",
@@ -25,25 +44,27 @@ export default async function handler(req, res) {
     if (newsResponse.ok) {
       const articles = await newsResponse.json();
       if (Array.isArray(articles) && articles.length > 0) {
-        latestArticle = articles[0]; // Pulls the real, newest headline
+        latestArticle = articles[0]; // Pulls the newest headline
       }
     }
 
-    // 2. Fetch active user FCM tokens from Firestore
+    // Fetch active user FCM tokens from Firestore
     const tokensSnapshot = await db.collection('fcm_tokens').get();
     if (tokensSnapshot.empty) {
-      return res.status(200).json({ success: true, message: 'No registered tokens found.' });
+      console.log('No registered tokens found.');
+      return;
     }
 
     const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+    const notificationTitle = getDynamicTitle();
 
-    // 3. Send DATA-ONLY payload to prevent browser auto-popups and double notifications
+    // Send DATA-ONLY payload to prevent browser auto-popups and double notifications
     const sendPromises = tokens.map(token => {
       const message = {
         token: token,
         data: {
-          title: "T&C News • Night Wrap-Up 🌙",
-          body: latestArticle.title, // Uses dynamic live headline text
+          title: notificationTitle,
+          body: latestArticle.title, // Dynamic live headline
           icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
           url: latestArticle.url || "https://tastyandcomfort.github.io/news/"
         },
@@ -59,14 +80,12 @@ export default async function handler(req, res) {
     const successful = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.filter(r => r.status === 'rejected').length;
 
-    return res.status(200).json({
-      success: true,
-      summary: `Delivered: ${successful}, Failed: ${failed}`,
-      articleSent: latestArticle.title
-    });
+    console.log(`[${notificationTitle}] Delivered: ${successful}, Failed: ${failed}`);
 
   } catch (error) {
     console.error('Error sending push notifications:', error);
-    return res.status(500).json({ error: error.message });
+    process.exit(1);
   }
 }
+
+runNotificationTask();
