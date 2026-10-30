@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-// Handle background push messages
+// Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message:', payload);
 
@@ -26,7 +26,7 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.data?.body || 'New article update available!',
     icon: iconUrl,
     badge: iconUrl,
-    tag: payload.data?.tag || 'tnc-news-notification', // Replaces old card cleanly
+    tag: payload.data?.tag || 'tnc-news-notification',
     renotify: true,
     data: {
       url: targetUrl
@@ -36,7 +36,7 @@ messaging.onBackgroundMessage((payload) => {
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification tap / click events
+// Handle notification tap / click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -44,7 +44,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 1. Check if the app tab is already open and bring it to focus
       for (let client of windowClients) {
         if (client.url.includes('/news/') && 'focus' in client) {
           if ('navigate' in client && client.url !== targetUrl) {
@@ -53,7 +52,6 @@ self.addEventListener('notificationclick', (event) => {
           return client.focus();
         }
       }
-      // 2. Otherwise open a new window/tab to the target news item
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
