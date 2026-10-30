@@ -13,18 +13,56 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Force immediate activation
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+const CACHE_NAME = 'tc-news-cache-v2';
 
-// Basic offline caching
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+// Pre-cache core shell for instant launch
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll([
+        '/news/',
+        '/news/index.html',
+        '/news/manifest.json',
+        '/news/android-chrome-192x192.png'
+      ]);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => clients.claim())
   );
 });
 
-// Single unified background handler (With Sound & Vibration Enabled)
+// Stale-While-Revalidate: Instant offline/cache load + silent background refresh
+self.addEventListener('fetch', (event) => {
+  // Always fetch real-time news API freshly from network
+  if (event.request.url.includes('news-lemon-two.vercel.app') || event.request.url.includes('firestore')) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request).then((response) => {
+        if (response && response.status === 200 && event.request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => cached);
+
+      return cached || networkFetch;
+    })
+  );
+});
+
+// Background Push Alert
 messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || payload.data?.title || "T&C News";
   
@@ -33,7 +71,6 @@ messaging.onBackgroundMessage((payload) => {
     icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
     badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
     tag: "tc-daily-news",
-    // 🔥 FORCES SOUND, VIBRATION, AND RE-ALERTING:
     renotify: true,
     requireInteraction: true,
     silent: false,
@@ -46,21 +83,20 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Launch or focus installed standalone app on tap
+// 🚀 HIGH-SPEED INSTANT APP LAUNCH ON TAP
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url || 'https://tastyandcomfort.github.io/news/';
+  const targetUrl = 'https://tastyandcomfort.github.io/news/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // 1. If app is already open in background, focus it instantly (NO cold reload delay)
       for (let client of windowClients) {
         if (client.url.includes('/news/') && 'focus' in client) {
-          if ('navigate' in client && client.url !== targetUrl) {
-            client.navigate(targetUrl);
-          }
           return client.focus();
         }
       }
+      // 2. Cold launch: Opens the standalone app immediately
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
