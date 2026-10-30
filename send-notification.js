@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-// 1. Initialize Firebase Admin SDK using the FIREBASE_SERVICE_ACCOUNT JSON secret
+// 1. Initialize Firebase Admin SDK using FIREBASE_SERVICE_ACCOUNT secret
 if (!admin.apps.length) {
   const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
   
@@ -33,13 +33,13 @@ function getDynamicTitle() {
   } else if (hours >= 12 && hours < 17) {
     return "T&C News • Afternoon Express ⚡";
   } else if (hours >= 17 && hours < 22) {
-    return "T&C News • Evening Digest ";
+    return "T&C News • Evening Digest 🌆";
   } else {
     return "T&C News • Night Wrap-Up 🌙";
   }
 }
 
-// 3. Main notification delivery function
+// 3. Main notification task
 async function runNotificationTask() {
   try {
     let latestArticle = {
@@ -47,7 +47,7 @@ async function runNotificationTask() {
       url: "https://tastyandcomfort.github.io/news/"
     };
 
-    // Safely attempt to fetch latest news without crashing if endpoint returns non-JSON
+    // Safely attempt to fetch latest news without crashing on static endpoint errors
     try {
       const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
       if (newsResponse.ok) {
