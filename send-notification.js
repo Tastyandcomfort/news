@@ -30,22 +30,27 @@ function getDynamicTitle() {
 
   if (hours >= 0 && hours < 5) {
     // 12:00 AM to 5:00 AM
-    return "T&C News • Early Morning 🌌";
+    return "T&C News • Early Morning ";
+    
   } else if (hours >= 5 && hours < 11) {
     // 5:00 AM to 11:00 AM
     return "T&C News • Morning Briefing ☀️";
+    
   } else if (hours >= 11 && hours < 15) {
     // 11:00 AM to 3:00 PM
     return "T&C News • Afternoon Express ⚡";
-  } else if (hours >= 15 && hours < 18) {
+    
+  } else if (hours >= 15 && hours < 19) {
     // 3:00 PM to 6:00 PM
-    return "T&C News • Evening Digest 🌆";
-  } else if (hours >= 18 && hours < 21) {
+    return "T&C News • Evening Digest ";
+    
+  } else if (hours >= 19 && hours < 21) {
     // 6:00 PM to 9:00 PM
     return "T&C News • Night Bulletin 🌙";
+    
   } else {
     // 9:00 PM to 11:59 PM
-    return "T&C News • Midnight Wrap-Up 🌠";
+    return "T&C News • Wrap-Up ";
   }
 }
 
