@@ -4,7 +4,7 @@
   "description": "Real-time national and regional news, live updates, and curated feeds.",
   "start_url": "/news/",
   "scope": "/news/",
-  "id": "/news/",
+  "id": "com.tastyandcomfort.newshub",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
