@@ -1569,75 +1569,70 @@ Residents are advised to conserve water and follow official updates.
   </script>
 
 <!-- 1. Firebase Core, Messaging, and Firestore SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  <!-- 2. Firebase Initialization & Auto-Registration -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
-      authDomain: "news-61e62.firebaseapp.com",
-      projectId: "news-61e62",
-      storageBucket: "news-61e62.firebasestorage.app",
-      messagingSenderId: "1054060055660",
-      appId: "1:1054060055660:web:e192c256c82facb9af1c49"
-    };
+<!-- 2. Firebase Initialization & Auto-Registration -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
+    authDomain: "news-61e62.firebaseapp.com",
+    projectId: "news-61e62",
+    storageBucket: "news-61e62.firebasestorage.app",
+    messagingSenderId: "1054060055660",
+    appId: "1:1054060055660:web:e192c256c82facb9af1c49"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+  const db = firebase.firestore();
 
-    async function enableNotifications() {
-      try {
-        // Request browser permission explicitly
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          console.log('Notification permission was not granted.');
-          return;
+  async function enableNotifications() {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('Notification permission was not granted.');
+        return;
+      }
+
+      const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
+      const token = await messaging.getToken({
+        vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
+        serviceWorkerRegistration: reg
+      });
+
+      if (token) {
+        let deviceId = localStorage.getItem('tc_device_id');
+        if (!deviceId) {
+          deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+          localStorage.setItem('tc_device_id', deviceId);
         }
 
-        const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
-        const token = await messaging.getToken({
-          vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
-          serviceWorkerRegistration: reg
+        await db.collection('fcm_tokens').doc(deviceId).set({
+          token: token,
+          device: navigator.userAgent,
+          updatedAt: new Date()
         });
 
-        if (token) {
-          // 1. Get or create a permanent unique ID for this device
-          let deviceId = localStorage.getItem('tc_device_id');
-          if (!deviceId) {
-            deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
-            localStorage.setItem('tc_device_id', deviceId);
-          }
-
-          // 2. Overwrite the single document for this device
-          await db.collection('fcm_tokens').doc(deviceId).set({
-            token: token,
-            device: navigator.userAgent,
-            updatedAt: new Date()
-          });
-
-          console.log('Single device token saved successfully:', deviceId);
-        }
-      } catch (error) {
-        console.error('Error enabling notifications:', error);
+        console.log('Single device token saved successfully:', deviceId);
       }
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
     }
+  }
 
-    // In-app alert if notification arrives while website is currently open
-    messaging.onMessage((payload) => {
-      console.log('Message received while app is open:', payload);
-    });
+  messaging.onMessage((payload) => {
+    console.log('Message received while app is open:', payload);
+  });
 
-    // Auto-trigger on page load
-    window.addEventListener('load', () => {
-      if ('serviceWorker' in navigator && 'Notification' in window) {
-        enableNotifications();
-      }
-    });
-  </script>
-
+  window.addEventListener('load', () => {
+    if ('serviceWorker' in navigator && 'Notification' in window) {
+      enableNotifications();
+    }
+  });
+</script>
+  
 
 <!-- Friendly Notification Prompt Banner -->
 <div id="notifyBanner" style="display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); color: #ffffff; padding: 14px 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
