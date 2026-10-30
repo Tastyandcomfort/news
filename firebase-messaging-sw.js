@@ -13,7 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-const CACHE_NAME = 'tc-news-cache-v2';
+const CACHE_NAME = 'tc-news-cache-v3';
 
 // Pre-cache core shell for instant launch
 self.addEventListener('install', (event) => {
