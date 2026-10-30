@@ -33,33 +33,33 @@ function getDynamicTitle() {
   } else if (hours >= 12 && hours < 17) {
     return "T&C News • Afternoon Express ⚡";
   } else if (hours >= 17 && hours < 22) {
-    return "T&C News • Evening Digest 🌆";
+    return "T&C News • Evening Digest";
   } else {
     return "T&C News • Night Wrap-Up 🌙";
   }
 }
 
-// 3. Robust Live RSS Headline Extractor (Uses your active Vercel proxy)
+// 3. Multi-Feed Aggregator & Smart De-duplication (Telangana, India, World)
 async function fetchTopLiveHeadline() {
-  const endpoints = [
-    'https://news-lemon-two.vercel.app/api/news?scope=national',
-    'https://news-lemon-two.vercel.app/api/news?scope=local',
-    'https://news-lemon-two.vercel.app/api/news?scope=world'
-  ];
+  const scopes = ['local', 'national', 'world'];
+  const allArticles = [];
 
-  for (const url of endpoints) {
+  // Fetch all 3 scopes in parallel
+  const fetchTasks = scopes.map(async (scope) => {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-      if (!res.ok) continue;
+      const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${scope}`, {
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!res.ok) return;
       const xml = await res.text();
 
-      const itemMatch = xml.match(/<item>([\s\S]*?)<\/item>/i);
-      if (itemMatch) {
-        const itemContent = itemMatch[1];
-        const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
-                           itemContent.match(/<title>(.*?)<\/title>/i);
+      const items = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+      for (const item of items) {
+        const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || item.match(/<title>(.*?)<\/title>/i);
+        const dateMatch = item.match(/<pubDate>(.*?)<\/pubDate>/i);
+
         if (titleMatch && titleMatch[1]) {
-          return titleMatch[1]
+          const cleanTitle = titleMatch[1]
             .replace(/^\[\d+\]\s*/, '')
             .replace(/&amp;/g, '&')
             .replace(/&quot;/g, '"')
@@ -67,13 +67,80 @@ async function fetchTopLiveHeadline() {
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .trim();
+
+          let pubTime = 0;
+          if (dateMatch && dateMatch[1]) {
+            const parsed = new Date(dateMatch[1]).getTime();
+            if (!isNaN(parsed)) pubTime = parsed;
+          }
+
+          if (cleanTitle.length > 10) {
+            allArticles.push({
+              title: cleanTitle,
+              time: pubTime,
+              scope: scope
+            });
+          }
         }
       }
     } catch (e) {
-      console.warn(`Feed attempt failed for ${url}:`, e.message);
+      console.warn(`Feed attempt failed for scope=${scope}:`, e.message);
     }
+  });
+
+  await Promise.allSettled(fetchTasks);
+
+  if (allArticles.length === 0) {
+    return "Check out the latest breaking news and live updates!";
   }
-  return "Check out the latest breaking news and live updates!";
+
+  // Sort by pubDate descending (newest across all regions first)
+  allArticles.sort((a, b) => b.time - a.time);
+
+  // Retrieve notification history from Firestore to prevent repeats
+  let sentHistory = [];
+  try {
+    const historyDoc = await db.collection('system_state').doc('history').get();
+    if (historyDoc.exists) {
+      sentHistory = historyDoc.data().recentTitles || [];
+    }
+  } catch (err) {
+    console.warn('Could not read notification history:', err.message);
+  }
+
+  function isAlreadySent(candidateTitle) {
+    const normCandidate = candidateTitle.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return sentHistory.some(prev => {
+      const normPrev = prev.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return (
+        normCandidate === normPrev ||
+        (normCandidate.length > 20 && normPrev.includes(normCandidate)) ||
+        (normPrev.length > 20 && normCandidate.includes(normPrev))
+      );
+    });
+  }
+
+  // Pick the freshest article that has NOT been sent yet
+  let chosen = allArticles.find(art => !isAlreadySent(art.title));
+
+  // Fallback: If all available feed items were previously sent, pick the newest one
+  if (!chosen) {
+    chosen = allArticles[0];
+  }
+
+  // Save chosen headline to history (keeps the last 25 sent headlines)
+  try {
+    const updatedHistory = [chosen.title, ...sentHistory.filter(t => t !== chosen.title)].slice(0, 25);
+    await db.collection('system_state').doc('history').set({
+      recentTitles: updatedHistory,
+      lastSentAt: new Date(),
+      lastScope: chosen.scope
+    });
+  } catch (err) {
+    console.warn('Could not update history doc:', err.message);
+  }
+
+  return chosen.title;
 }
 
 // 4. Main Notification Task
@@ -82,7 +149,7 @@ async function runNotificationTask() {
     const dynamicTitle = getDynamicTitle();
     const liveHeadline = await fetchTopLiveHeadline();
 
-    // Retrieve tokens with compatibility fallback (doc.data().token OR doc.id)
+    // Retrieve active device tokens from Firestore
     const tokensSnapshot = await db.collection('fcm_tokens').get();
     if (tokensSnapshot.empty) {
       console.log('No registered tokens found in Firestore.');
@@ -107,30 +174,13 @@ async function runNotificationTask() {
     console.log(`[${dynamicTitle}] Broadcasting to ${uniqueTokens.length} device(s)...`);
     console.log(`Headline: "${liveHeadline}"`);
 
-    // Complete Multicast payload satisfying Android TWA, PWA, and Web Push
+    // Complete WebPush payload with instant priority
     const response = await admin.messaging().sendEachForMulticast({
       tokens: uniqueTokens,
-      notification: {
-        title: dynamicTitle,
-        body: liveHeadline
-      },
       data: {
         title: dynamicTitle,
         body: liveHeadline,
         url: "https://tastyandcomfort.github.io/news/"
-      },
-      android: {
-        priority: "high",
-        notification: {
-          title: dynamicTitle,
-          body: liveHeadline,
-          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
-          channelId: "tc_news_alerts",
-          priority: "high",
-          defaultSound: true,
-          defaultVibrateTimings: true,
-          visibility: "public"
-        }
       },
       webpush: {
         headers: {
@@ -143,7 +193,8 @@ async function runNotificationTask() {
           icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
           badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
           tag: "tc-daily-news",
-          renotify: true
+          renotify: true,
+          requireInteraction: true
         },
         fcmOptions: {
           link: "https://tastyandcomfort.github.io/news/"
@@ -153,7 +204,7 @@ async function runNotificationTask() {
 
     console.log(`[${dynamicTitle}] Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
 
-    // Auto-prune dead/unregistered tokens from Firestore
+    // Prune invalid or dead tokens automatically
     const deadDocDeletions = [];
     response.responses.forEach((resp, idx) => {
       if (!resp.success) {
