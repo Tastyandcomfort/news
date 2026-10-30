@@ -23,7 +23,7 @@ self.addEventListener('install', (event) => {
         '/news/',
         '/news/index.html',
         '/news/manifest.json',
-        '/news/android-chrome-192x192.png'
+        '/news/android-chrome.v1-192x192.png'
       ]);
     })
   );
@@ -68,8 +68,8 @@ messaging.onBackgroundMessage((payload) => {
   
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || "New breaking story available.",
-    icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
-    badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+    icon: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
+    badge: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
     tag: "tc-daily-news",
     renotify: true,
     requireInteraction: true,
