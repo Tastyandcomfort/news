@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
@@ -11,32 +11,51 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const messaging = firebase.messaging();
 
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message:', payload);
+// Immediate activation
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
-  const notificationTitle = payload.data?.title || 'T&C News Hub';
-  const targetUrl = payload.data?.url || 'https://tastyandcomfort.github.io/news/';
-  const iconUrl = payload.data?.icon || 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png';
-
-  const notificationOptions = {
-    body: payload.data?.body || 'New article update available!',
-    icon: iconUrl,
-    badge: iconUrl,
-    tag: payload.data?.tag || 'tnc-news-notification',
-    renotify: true,
-    data: {
-      url: targetUrl
-    }
-  };
-
-  return self.registration.showNotification(notificationTitle, notificationOptions);
+// Offline caching support
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
 
-// Handle notification tap / click
+// 🔥 THE FIX: Explicitly handles the push event and tells Chrome it is handled
+self.addEventListener('push', (event) => {
+  let title = "T&C NEWS";
+  let body = "New update available!";
+  let targetUrl = "https://tastyandcomfort.github.io/news/";
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      const data = payload.notification || payload.data || payload;
+      title = data.title || title;
+      body = data.body || body;
+      targetUrl = data.url || payload.fcmOptions?.link || targetUrl;
+    } catch (e) {
+      body = event.data.text() || body;
+    }
+  }
+
+  const options = {
+    body: body,
+    icon: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    badge: 'https://tastyandcomfort.github.io/news/android-chrome-192x192.png',
+    tag: 'tc-daily-news',
+    renotify: true,
+    data: { url: targetUrl }
+  };
+
+  // Satisfies Chrome's strict requirement: NO MORE fallback warning!
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Your exact tap / click handler (preserved completely)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
