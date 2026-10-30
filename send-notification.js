@@ -198,8 +198,8 @@ async function runNotificationTask() {
         notification: {
           title: dynamicTitle,
           body: liveHeadline,
-          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
-          badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+          icon: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
+          badge: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
           tag: "tc-daily-news",
           renotify: true,
           requireInteraction: true,
