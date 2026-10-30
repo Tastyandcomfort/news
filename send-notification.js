@@ -169,7 +169,7 @@ async function runNotificationTask() {
     console.log(`[${dynamicTitle}] Broadcasting to ${uniqueTokens.length} device(s)...`);
     console.log(`Headline: "${liveHeadline}"`);
 
-    // Dual High-Priority Broadcast (Android + WebPush)
+// Dual High-Priority Broadcast with Sound & Vibration Enabled
     const response = await admin.messaging().sendEachForMulticast({
       tokens: uniqueTokens,
       data: {
@@ -192,14 +192,17 @@ async function runNotificationTask() {
           badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
           tag: "tc-daily-news",
           renotify: true,
-          requireInteraction: true
+          requireInteraction: true,
+          // 🔥 ENABLES SOUND & VIBRATION ON ANDROID:
+          silent: false,
+          vibrate: [300, 150, 300]
         },
         fcmOptions: {
           link: "https://tastyandcomfort.github.io/news/"
         }
       }
     });
-
+    
     console.log(`[${dynamicTitle}] Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
 
     // Auto-prune dead/expired tokens
