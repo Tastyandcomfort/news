@@ -1,11 +1,11 @@
 const admin = require('firebase-admin');
 
-// 1. Initialize Firebase Admin SDK using FIREBASE_SERVICE_ACCOUNT secret
+// 1. Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
   
   if (!serviceAccountRaw) {
-    console.error('Missing FIREBASE_SERVICE_ACCOUNT secret in GitHub environment.');
+    console.error('Missing FIREBASE_SERVICE_ACCOUNT secret in environment.');
     process.exit(1);
   }
 
@@ -22,7 +22,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// 2. Helper function to generate dynamic titles based on Indian Standard Time (IST)
+// 2. Dynamic Title based on Indian Standard Time (IST)
 function getDynamicTitle() {
   const now = new Date();
   const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
@@ -39,64 +39,145 @@ function getDynamicTitle() {
   }
 }
 
-// 3. Main notification task
-async function runNotificationTask() {
-  try {
-    let latestArticle = {
-      title: "Check out the latest breaking news and live updates!",
-      url: "https://tastyandcomfort.github.io/news/"
-    };
+// 3. Robust Live RSS Headline Extractor (Uses your active Vercel proxy)
+async function fetchTopLiveHeadline() {
+  const endpoints = [
+    'https://news-lemon-two.vercel.app/api/news?scope=national',
+    'https://news-lemon-two.vercel.app/api/news?scope=local',
+    'https://news-lemon-two.vercel.app/api/news?scope=world'
+  ];
 
-    // Safely attempt to fetch latest news without crashing on static endpoint errors
+  for (const url of endpoints) {
     try {
-      const newsResponse = await fetch('https://tastyandcomfort.github.io/news/api/news.js');
-      if (newsResponse.ok) {
-        const contentType = newsResponse.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const articles = await newsResponse.json();
-          if (Array.isArray(articles) && articles.length > 0) {
-            latestArticle = articles[0];
-          }
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const xml = await res.text();
+
+      const itemMatch = xml.match(/<item>([\s\S]*?)<\/item>/i);
+      if (itemMatch) {
+        const itemContent = itemMatch[1];
+        const titleMatch = itemContent.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/i) || 
+                           itemContent.match(/<title>(.*?)<\/title>/i);
+        if (titleMatch && titleMatch[1]) {
+          return titleMatch[1]
+            .replace(/^\[\d+\]\s*/, '')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .trim();
         }
       }
-    } catch (fetchErr) {
-      console.warn('Could not fetch live news API, using default headline:', fetchErr.message);
+    } catch (e) {
+      console.warn(`Feed attempt failed for ${url}:`, e.message);
     }
+  }
+  return "Check out the latest breaking news and live updates!";
+}
 
+// 4. Main Notification Task
+async function runNotificationTask() {
+  try {
+    const dynamicTitle = getDynamicTitle();
+    const liveHeadline = await fetchTopLiveHeadline();
+
+    // Retrieve tokens with compatibility fallback (doc.data().token OR doc.id)
     const tokensSnapshot = await db.collection('fcm_tokens').get();
     if (tokensSnapshot.empty) {
       console.log('No registered tokens found in Firestore.');
       return;
     }
 
-    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
-    const dynamicTitle = getDynamicTitle();
-
-    const sendPromises = tokens.map(token => {
-      const message = {
-        token: token,
-        data: {
-          title: dynamicTitle,
-          body: latestArticle.title,
-          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
-          url: latestArticle.url || "https://tastyandcomfort.github.io/news/"
-        },
-        android: {
-          priority: "high"
-        }
-      };
-
-      return admin.messaging().send(message);
+    const tokenMap = new Map();
+    tokensSnapshot.docs.forEach(doc => {
+      const data = doc.data() || {};
+      const actualToken = data.token || doc.id;
+      if (actualToken && typeof actualToken === 'string' && actualToken.length > 20) {
+        tokenMap.set(actualToken, doc.id);
+      }
     });
 
-    const results = await Promise.allSettled(sendPromises);
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const uniqueTokens = Array.from(tokenMap.keys());
+    if (uniqueTokens.length === 0) {
+      console.log('No valid token strings resolved.');
+      return;
+    }
 
-    console.log(`[${dynamicTitle}] Delivered: ${successful}, Failed: ${failed}`);
+    console.log(`[${dynamicTitle}] Broadcasting to ${uniqueTokens.length} device(s)...`);
+    console.log(`Headline: "${liveHeadline}"`);
+
+    // Complete Multicast payload satisfying Android TWA, PWA, and Web Push
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens: uniqueTokens,
+      notification: {
+        title: dynamicTitle,
+        body: liveHeadline
+      },
+      data: {
+        title: dynamicTitle,
+        body: liveHeadline,
+        url: "https://tastyandcomfort.github.io/news/"
+      },
+      android: {
+        priority: "high",
+        notification: {
+          title: dynamicTitle,
+          body: liveHeadline,
+          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+          channelId: "tc_news_alerts",
+          priority: "high",
+          defaultSound: true,
+          defaultVibrateTimings: true,
+          visibility: "public"
+        }
+      },
+      webpush: {
+        headers: {
+          Urgency: "high",
+          TTL: "86400"
+        },
+        notification: {
+          title: dynamicTitle,
+          body: liveHeadline,
+          icon: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+          badge: "https://tastyandcomfort.github.io/news/android-chrome-192x192.png",
+          tag: "tc-daily-news",
+          renotify: true
+        },
+        fcmOptions: {
+          link: "https://tastyandcomfort.github.io/news/"
+        }
+      }
+    });
+
+    console.log(`[${dynamicTitle}] Delivered: ${response.successCount}, Failed: ${response.failureCount}`);
+
+    // Auto-prune dead/unregistered tokens from Firestore
+    const deadDocDeletions = [];
+    response.responses.forEach((resp, idx) => {
+      if (!resp.success) {
+        const errCode = resp.error?.code;
+        if (
+          errCode === 'messaging/registration-token-not-registered' ||
+          errCode === 'messaging/invalid-registration-token'
+        ) {
+          const deadToken = uniqueTokens[idx];
+          const docId = tokenMap.get(deadToken);
+          if (docId) {
+            deadDocDeletions.push(db.collection('fcm_tokens').doc(docId).delete());
+          }
+        }
+      }
+    });
+
+    if (deadDocDeletions.length > 0) {
+      await Promise.allSettled(deadDocDeletions);
+      console.log(`Pruned ${deadDocDeletions.length} expired device token(s) from Firestore.`);
+    }
 
   } catch (error) {
-    console.error('Error sending push notifications:', error);
+    console.error('Fatal error executing push notifications:', error);
     process.exit(1);
   }
 }
