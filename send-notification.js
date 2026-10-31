@@ -30,27 +30,22 @@ function getDynamicTitle() {
 
   if (hours >= 0 && hours < 5) {
     // 12:00 AM to 5:00 AM
-    return "T&C News • Early Morning ";
-    
+    return "T&C News • Early Morning 🌌";
   } else if (hours >= 5 && hours < 11) {
     // 5:00 AM to 11:00 AM
     return "T&C News • Morning Briefing ☀️";
-    
   } else if (hours >= 11 && hours < 15) {
     // 11:00 AM to 3:00 PM
     return "T&C News • Afternoon Express ⚡";
-    
-  } else if (hours >= 15 && hours < 19) {
+  } else if (hours >= 15 && hours < 18) {
     // 3:00 PM to 6:00 PM
-    return "T&C News • Evening Digest ";
-    
-  } else if (hours >= 19 && hours < 21) {
+    return "T&C News • Evening Digest 🌆";
+  } else if (hours >= 18 && hours < 21) {
     // 6:00 PM to 9:00 PM
     return "T&C News • Night Bulletin 🌙";
-    
   } else {
     // 9:00 PM to 11:59 PM
-    return "T&C News • Wrap-Up ";
+    return "T&C News • Midnight Wrap-Up 🌠";
   }
 }
 
@@ -170,21 +165,25 @@ async function runNotificationTask() {
     tokensSnapshot.docs.forEach(doc => {
       const data = doc.data() || {};
       const actualToken = data.token || doc.id;
-      if (actualToken && typeof actualToken === 'string' && actualToken.length > 20) {
+
+      // 🎯 TOPIC FILTER: Check if user wants news (defaults to true for legacy devices)
+      const wantsNews = data.topics ? data.topics.news !== false : true;
+
+      if (wantsNews && actualToken && typeof actualToken === 'string' && actualToken.length > 20) {
         tokenMap.set(actualToken, doc.id);
       }
     });
 
     const uniqueTokens = Array.from(tokenMap.keys());
     if (uniqueTokens.length === 0) {
-      console.log('No valid tokens.');
+      console.log('No devices currently subscribed to the News topic.');
       return;
     }
 
-    console.log(`[${dynamicTitle}] Broadcasting to ${uniqueTokens.length} device(s)...`);
+    console.log(`[${dynamicTitle}] Broadcasting to ${uniqueTokens.length} device(s) subscribed to News...`);
     console.log(`Headline: "${liveHeadline}"`);
 
-// Dual High-Priority Broadcast with Sound & Vibration Enabled
+    // Dual High-Priority Broadcast with Sound & Vibration Enabled
     const response = await admin.messaging().sendEachForMulticast({
       tokens: uniqueTokens,
       data: {
@@ -203,12 +202,11 @@ async function runNotificationTask() {
         notification: {
           title: dynamicTitle,
           body: liveHeadline,
-          icon: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
-          badge: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
+          icon: "https://tastyandcomfort.github.io/news/icon-v2-192.png",
+          badge: "https://tastyandcomfort.github.io/news/icon-v2-192.png",
           tag: "tc-daily-news",
           renotify: true,
           requireInteraction: true,
-          // 🔥 ENABLES SOUND & VIBRATION ON ANDROID:
           silent: false,
           vibrate: [300, 150, 300]
         },
