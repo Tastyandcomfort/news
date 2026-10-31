@@ -1,0 +1,30 @@
+
+name: 💼 Sync Job Openings & Alerts
+
+on:
+  schedule:
+    - cron: '0 3 * * *'    # 8:30 AM IST (03:00 UTC)
+    - cron: '0 13 * * *'   # 6:30 PM IST (13:00 UTC)
+  workflow_dispatch:       # Manual test button
+
+jobs:
+  sync-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Run Job Sync & Alert
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node sync-jobs.js
+
+        
