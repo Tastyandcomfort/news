@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1900,9 +1901,31 @@
       const countBadge = document.getElementById('job-count-badge');
       if (!container) return;
 
-      let filtered = sampleVerifiedJobs;
+      container.innerHTML = '<div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div>';
+
+      let jobsList = [];
+
+      // 1. Try to fetch from live Firestore database
+      try {
+        if (typeof db !== 'undefined') {
+          const snapshot = await db.collection('live_jobs').where('status', '==', 'active').get();
+          if (!snapshot.empty) {
+            jobsList = snapshot.docs.map(doc => doc.data());
+          }
+        }
+      } catch (e) {
+        console.warn('Firestore jobs fetch fallback:', e);
+      }
+
+      // 2. Fallback to sample verified jobs if database is empty or offline
+      if (jobsList.length === 0) {
+        jobsList = sampleVerifiedJobs;
+      }
+
+      // Filter by selected sector
+      let filtered = jobsList;
       if (currentJobSector !== 'all') {
-        filtered = sampleVerifiedJobs.filter(j => j.sector === currentJobSector);
+        filtered = jobsList.filter(j => j.sector === currentJobSector);
       }
 
       countBadge.textContent = `${filtered.length} Openings Active`;
@@ -1916,9 +1939,9 @@
           'govt': '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Govt / Public</span>'
         };
 
-        const contactBtn = job.contact.startsWith('+') ? 
+        const contactBtn = job.contact && job.contact.startsWith('+') ? 
           `<a href="tel:${job.contact}" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[11px] shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-phone text-[9px]"></i> Call: ${job.contact}</a>` :
-          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${job.contact}</span>`;
+          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${job.contact || 'Portal Verified'}</span>`;
 
         html += `
           <div class="p-4 rounded-2xl border transition-all hover:border-blue-500/30" style="background-color: var(--bg-sub); border-color: var(--border-color);">
@@ -1927,7 +1950,7 @@
                 <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
                 ${sectorBadges[job.sector] || ''}
               </div>
-              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date}</span>
+              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date || 'Active'}</span>
             </div>
 
             <div class="text-[11px] space-y-1 mb-3" style="color: var(--text-sub);">
@@ -1949,7 +1972,7 @@
 
       container.innerHTML = html;
     }
-
+    
     function filterJobs(sector, btnEl) {
       currentJobSector = sector;
       document.querySelectorAll('#view-jobs .choice-pill').forEach(b => b.classList.remove('selected'));
