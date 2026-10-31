@@ -13,7 +13,7 @@ const messaging = admin.messaging();
 
 async function broadcastDeveloperUpdate() {
   // Read custom title & message passed from GitHub Action input
-  const title = process.env.BROADCAST_TITLE || "T&C Platform • Developer Update 🚀";
+  const title = process.env.BROADCAST_TITLE || "T&C Platform • Developer Update ";
   const body = process.env.BROADCAST_MESSAGE || "New update released: Optimized app speed & added new features!";
 
   console.log(`Preparing Developer Broadcast:`);
