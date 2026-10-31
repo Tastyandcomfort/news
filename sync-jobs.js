@@ -159,7 +159,7 @@ async function notifyJobSubscribers(job) {
   const uniqueTokens = [...new Set(targetTokens)];
   if (uniqueTokens.length === 0) return;
 
-  const title = "T&C Jobs • New Opening Alert 💼";
+  const title = "T&C Jobs • New Opening Alert ";
   const body = `${job.title} at ${job.company} (${job.location}) • ${job.eligibility}`;
 
   await messaging.sendEachForMulticast({
