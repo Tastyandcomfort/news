@@ -1220,14 +1220,25 @@
       const titleEl = document.getElementById('radar-main-title');
       const iconEl = document.getElementById('radar-title-icon');
 
+      if (!btnWeather || !btnFlight) return;
+
+      // 1. Clear highlight on both buttons
+      [btnWeather, btnFlight].forEach(b => {
+        b.classList.remove('active-tab');
+        b.style.backgroundColor = 'transparent';
+        b.style.color = 'var(--text-sub)';
+        b.style.boxShadow = 'none';
+      });
+
+      // 2. Apply solid Apple Blue highlight to the clicked button
       if (mode === 'weather') {
         frameWeather.style.display = 'block';
         frameFlight.style.display = 'none';
 
         btnWeather.classList.add('active-tab');
+        btnWeather.style.backgroundColor = '#0071e3';
         btnWeather.style.color = '#ffffff';
-        btnFlight.classList.remove('active-tab');
-        btnFlight.style.color = 'var(--text-sub)';
+        btnWeather.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
 
         titleEl.textContent = 'Live Weather Radar';
         iconEl.className = 'fa-solid fa-cloud-sun-rain text-blue-500 text-lg';
@@ -1236,20 +1247,20 @@
         frameFlight.style.display = 'block';
 
         btnFlight.classList.add('active-tab');
+        btnFlight.style.backgroundColor = '#0071e3';
         btnFlight.style.color = '#ffffff';
-        btnWeather.classList.remove('active-tab');
-        btnWeather.style.color = 'var(--text-sub)';
+        btnFlight.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
 
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-lg';
 
-        // Critical: Invalidate Leaflet map size so tiles render cleanly
+        // Refresh Leaflet so maps render without grey tiles
         setTimeout(() => {
           if (leafletMap) leafletMap.invalidateSize();
         }, 150);
       }
     }
-
+    
     /* ==================== REAL-TIME CRICKET ENGINE & MODAL ==================== */
     let currentLiveMatchData = null;
 
