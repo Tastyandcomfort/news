@@ -13,7 +13,7 @@
 
   <!-- PWA Settings -->
   <link rel="manifest" href="/news/manifest.json">
-  <link rel="apple-touch-icon" href="/news/android-chrome.v1-192x192.png">
+  <link rel="apple-touch-icon" href="/news/icon-v2-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <!-- Service Worker Registration -->
@@ -25,14 +25,12 @@
     }
   </script>
 
-<!-- Fast Network Preconnects -->
+  <!-- Fast Network Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-
-  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -66,7 +64,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 🚀 Smooth scrolling & layout stability */
+    /* Smooth scrolling & layout stability */
     html {
       scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
@@ -78,7 +76,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 🚀 Hardware-accelerated touch momentum scrolling */
+    /* Hardware-accelerated touch momentum scrolling */
     html, body {
       margin: 0;
       padding: 0;
@@ -149,7 +147,6 @@
       backface-visibility: hidden;
     }
 
-    /* SUGGESTION 2: LOGO-ANCHORED DYNAMIC ISLAND PILL */
     .logo-anchored-pill {
       background: rgba(0, 113, 227, 0.9);
       color: #ffffff;
@@ -160,7 +157,6 @@
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* APPLE DYNAMIC ISLAND SOLAR PILL */
     .apple-solar-pill {
       display: inline-flex;
       align-items: center;
@@ -212,7 +208,6 @@
       background: var(--border-color);
     }
 
-    /* COLLAPSIBLE APPLE GLASSMORPHIC LEAFLET LEGEND */
     .leaflet-apple-legend {
       background: var(--bg-card) !important;
       color: var(--text-main) !important;
@@ -342,10 +337,8 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-
-  
   <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
-<!--  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
+  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
@@ -364,77 +357,17 @@
 
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
         <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> App Released for Android/IOS
+          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> is now able to track the Live International Space Station (ISS), Indian Air-Space (Civilian Aircraft) and Worldwide earthquake information.
+          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
         </p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span> Update Relased:</span> <b>04:30 PM (28th Oct)</b></div>
-          <div class="flex justify-between"><span> Status:</span> <b>Live</b></div>
-        </div>
-        <p class="text-[11px] italic" style="color: var(--text-sub);">
-          T&C is currently providing real-time live information related to news, weather, ISS & Civilian aircraft. Upcoming update may relate to live sports stream. Thank you for your patience!
-        </p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check-circle text-xs"></i> Acknowledge & Dismiss
-        </button>
-      </div>
-    </div>
-  </div>
-
-🚨 Hyderabad Water Crisis Alert
-
-Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed.
-
-Residents are advised to conserve water and follow official updates.
-
-— T&C News | Tasty & Comfort
-
-
-  
--->
-
-
-
-<!--Custom Message in same model -->
-<!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
-  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
-  <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
-  <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
-  <div class="flex items-center gap-2">
-  <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs font-bold">
-  <i class="fa-solid fa-crown"></i>
-  </div>
-  <div>
-   <h3 class="text-sm font-extrabold text-blue-500">Announcement</h3>
-   <p class="text-[10px]" style="color: var(--text-sub);">From T&C NEWS HUB</p>
-   </div>
-   </div>
-   <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
-   <i class="fa-solid fa-xmark"></i>
-   </button>
-   </div>
-
-      <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
-      <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-      <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
-        </div>
-        <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed.
-          Residents are advised to conserve water and follow official updates.
-
-        </p>
-        <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span> Hyderabad:</span> <b> 0-Day estimated 15th December onwards</b></div>
+          <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
           <div class="flex justify-between"><span> Water Levels:</span> <b>VERY LOW</b></div>
         </div>
         <p class="text-[11px] italic" style="color: var(--text-sub);">
-          Public Advisory: Residents are advised to conserve water, avoid unnecessary wastage, and follow official updates from the Hyderabad Metropolitan Water Supply and Sewerage Board (HMWSSB).
-          Stay informed. Save water. Stay prepared.
+          Public Advisory: Residents are advised to conserve water, avoid unnecessary wastage, and follow official updates from the Hyderabad Metropolitan Water Supply and Sewerage Board (HMWSSB). Stay informed. Save water. Stay prepared.
         </p>
       </div>
 
@@ -446,21 +379,11 @@ Residents are advised to conserve water and follow official updates.
     </div>
   </div>
 
-
-
-
-
-
-
-
-
-
-  
-  <!-- TOP APPLE HEADER -->
+  <!-- TOP APPLE HEADER (MODEL 1: UNIFIED TOP-RIGHT UTILITY CLUSTER) -->
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
+      <!-- Left: Brand Logo Badge & Anchored Dynamic Island Pill -->
       <div class="relative flex flex-col items-center md:items-start gap-1">
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
           <div class="relative flex items-center justify-center">
@@ -483,60 +406,70 @@ Residents are advised to conserve water and follow official updates.
         </div>
       </div>
 
-      <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
-      <div class="apple-solar-pill" id="apple-solar-pill">
-        <div class="solar-item" title="Sunrise">
-          <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 10l-2.5 2.5M12 10l2.5 2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="solar-time" id="pill-sunrise">Syncing...</span>
-        </div>
-        <span class="solar-divider"></span>
-        <div class="solar-item" title="Sunset">
-          <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
-            <path d="M12 14l-2.5-2.5M12 14l2.5-2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="solar-time" id="pill-sunset">Syncing...</span>
-        </div>
-      </div>
-
-      <!-- Navigation & Controls -->
-      <div class="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-        
-        <!-- Apple Language Switcher -->
-        <div class="relative inline-block text-left" id="lang-menu-wrapper">
-          <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); color: var(--text-main);">
-            <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
-            <span id="current-lang-code">EN</span>
-            <i class="fa-solid fa-chevron-down text-[10px]" style="color: var(--text-sub);"></i>
-          </button>
-          <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
-            <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
-            <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
-            <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
-            <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
-            <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
-            <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+      <!-- Center: Solar Pill & Right: Unified Utility Cluster -->
+      <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
+        <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
+        <div class="apple-solar-pill" id="apple-solar-pill">
+          <div class="solar-item" title="Sunrise">
+            <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 10l-2.5 2.5M12 10l2.5 2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="solar-time" id="pill-sunrise">Syncing...</span>
+          </div>
+          <span class="solar-divider"></span>
+          <div class="solar-item" title="Sunset">
+            <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+              <path d="M12 14l-2.5-2.5M12 14l2.5-2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="solar-time" id="pill-sunset">Syncing...</span>
           </div>
         </div>
 
-        <nav class="flex items-center gap-1 p-1 rounded-xl w-full md:w-auto justify-center" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span></button>
-          <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV & Media</span></button>
-          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 md:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span></button>
-        </nav>
+        <!-- 🚀 MODEL 1 UNIFIED UTILITY CLUSTER (Language + Theme Paired) -->
+        <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <!-- Language Selector -->
+          <div class="relative" id="lang-menu-wrapper">
+            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
+              <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
+              <span id="current-lang-code">EN</span>
+              <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
+            </button>
+            <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
+              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
+              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
+              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
+              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
+              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
+              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+            </div>
+          </div>
 
-        <button onclick="toggleAppleTheme()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);" title="Toggle Theme">
-          <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
-        </button>
+          <!-- Divider -->
+          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
+          <!-- Theme Button -->
+          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
+            <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
+          </button>
+        </div>
+
       </div>
 
+    </div>
+
+    <!-- 🚀 CENTERED NAVIGATION ROW (Spacious & Clean) -->
+    <div class="max-w-md mx-auto mt-2.5 px-2">
+      <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span></button>
+        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span></button>
+      </nav>
     </div>
   </header>
 
@@ -729,8 +662,8 @@ Residents are advised to conserve water and follow official updates.
   <!-- FOOTER -->
   <footer class="py-6 px-4 text-xs mt-12" style="background-color: var(--bg-sub); border-top: 1px solid var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-center md:text-left">
-      <div data-i18n="footerBrand"><b>Tasty & Comfort • T&C News Hub</b></div>
-      <div data-i18n="footerCopy">© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •</div>
+      <div data-i18n="footerBrand"><b>Tasty &amp; Comfort • T&amp;C News Hub</b></div>
+      <div data-i18n="footerCopy">© 2026 T&amp;C From New Modern Mission • Build &amp; Developed by Murali Manohar •</div>
     </div>
   </footer>
 
@@ -778,7 +711,7 @@ Residents are advised to conserve water and follow official updates.
         networks: "నెట్‌వర్క్స్", selectChannelPrompt: "ప్రత్యక్ష ప్రసారాన్ని వీక్షించడానికి పైన ఏదైనా ఛానెల్‌ని ఎంచుకోండి.",
         weatherRadar: "వాతావరణ రాడార్", usgsTracker: "భూకంపాల ట్రాకర్ (24గం)", issAlt: "ISS ఎత్తు",
         issVel: "ISS వేగం", spaceCrew: "వ్యోమగాములు", usgsQuakesStat: "భూకంప తీవ్రత",
-        liveExchange: "కరెన్సీ మార్పిడి రేట్లు", factCheck: "ఫాక్ట్-చెआप పోర్టల్", usgsDirect: "USGS భూకంపాలు",
+        liveExchange: "కరెన్సీ మార్పిడి రేట్లు", factCheck: "ఫాక్ట్-చెప్ పోర్టల్", usgsDirect: "USGS భూకంపాలు",
         issManifest: "ISS సిబ్బంది జాబితా", queryingManifest: "సమాచారం సేకరిస్తోంది...",
         footerBrand: "టేస్టీ & కంఫర్ట్ • T&C న్యూస్ హబ్",
         footerCopy: "© 2026 T&C న్యూ మోడరన్ మిషన్ • మురళి మనోహర్ చేత రూపకల్పన చేయబడింది •",
@@ -829,9 +762,9 @@ Residents are advised to conserve water and follow official updates.
         liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்",
         issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...",
         footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்",
-        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முరளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
+        footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •",
         scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்",
-        scopeNatTitle: "இந்திய தேசிய செய்தி বুলেটின்கள்",
+        scopeNatTitle: "இந்திய தேசிய செய்தி புல்லட்டின்கள்",
         scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
       },
       ml: {
@@ -1302,7 +1235,6 @@ Residents are advised to conserve water and follow official updates.
 
     /* MAP INITIALIZATION WITH ZOOM CONTROL & COLLAPSIBLE LEGEND */
     function initOSINTMap() {
-      // Zoom controls explicitly enabled here
       leafletMap = L.map('osint-map', { zoomControl: true }).setView([20.5937, 78.9629], 3);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
 
@@ -1477,10 +1409,8 @@ Residents are advised to conserve water and follow official updates.
     }
   </script>
 
-
-<!-- Apple-Style Install Button -->
+  <!-- Apple-Style Install Button -->
   <button id="installBtn" class="apple-btn" style="display: none;">
-    <!-- Apple SF-style Download Icon -->
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
       <polyline points="7 10 12 15 17 10"></polyline>
@@ -1501,23 +1431,16 @@ Residents are advised to conserve water and follow official updates.
       gap: 7px;
       padding: 10px 18px;
       border-radius: 9999px;
-      
-      /* Apple Frosted Glass / Translucent Material */
       background: rgba(255, 255, 255, 0.82);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       backdrop-filter: blur(20px) saturate(180%);
-      
-      /* Apple San Francisco Typography */
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.2px;
       color: #000000;
-      
-      /* Apple Micro-border and Soft Shadow */
       border: 0.5px solid rgba(0, 0, 0, 0.12);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
-      
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -1526,13 +1449,11 @@ Residents are advised to conserve water and follow official updates.
                   background 0.2s ease;
     }
 
-    /* Spring-like Tap Animation */
     .apple-btn:active {
       transform: scale(0.93);
       background: rgba(235, 235, 235, 0.9);
     }
 
-    /* Automatic Dark Mode Support */
     @media (prefers-color-scheme: dark) {
       .apple-btn {
         background: rgba(30, 30, 32, 0.82);
@@ -1554,19 +1475,16 @@ Residents are advised to conserve water and follow official updates.
     const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
 
-    // 1. Android / Chrome trigger
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       installBtn.style.display = 'inline-flex';
     });
 
-    // 2. iOS trigger (if not installed yet)
     if (isIos && !isInStandaloneMode) {
       installBtn.style.display = 'inline-flex';
     }
 
-    // 3. Click handler
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -1585,7 +1503,7 @@ Residents are advised to conserve water and follow official updates.
     });
   </script>
 
-<!-- Firebase Core, Messaging, and Firestore SDKs -->
+  <!-- Firebase Core, Messaging, and Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -1608,13 +1526,11 @@ Residents are advised to conserve water and follow official updates.
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
       try {
-        // 1. Triggers standard native browser prompt if not decided yet
         let permission = Notification.permission;
         if (permission === 'default') {
           permission = await Notification.requestPermission();
         }
 
-        // 2. If granted, register Service Worker and sync token
         if (permission === 'granted') {
           const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
           
@@ -1630,7 +1546,7 @@ Residents are advised to conserve water and follow official updates.
               localStorage.setItem('tc_device_id', deviceId);
             }
 
-            // Save or update the single persistent record for this device
+            // Persist the single token record per device in Firestore
             await db.collection('fcm_tokens').doc(deviceId).set({
               token: token,
               device: navigator.userAgent,
@@ -1640,19 +1556,24 @@ Residents are advised to conserve water and follow official updates.
             console.log('Push device token synced successfully:', deviceId);
           }
         } else if (permission === 'denied') {
-          // Log denial quietly to Firestore
-          await db.collection('denied_stats').add({
+          // De-duplicate denial records using persistent deviceId
+          let deviceId = localStorage.getItem('tc_device_id');
+          if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+            localStorage.setItem('tc_device_id', deviceId);
+          }
+
+          await db.collection('denied_stats').doc(deviceId).set({
             status: 'denied',
-            date: new Date(),
-            device: navigator.userAgent
-          });
+            device: navigator.userAgent,
+            lastSeen: new Date()
+          }, { merge: true });
         }
       } catch (err) {
         console.warn('Push registration error:', err);
       }
     }
 
-    // Runs once when the page/app finishes loading
     window.addEventListener('load', initPushRegistration);
   </script>
 </body>
