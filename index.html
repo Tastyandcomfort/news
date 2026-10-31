@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,7 @@
   <!-- Single Viewport with notch support -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
-  <!-- Single Theme Color matching your light background -->
+  <!-- Single Theme Color matching light background -->
   <meta name="theme-color" content="#ffffff">
 
   <!-- PWA Settings -->
@@ -317,27 +316,241 @@
       box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
     }
 
+    /* Watermark positioned to top-left */
     .tc-subtle-watermark {
       position: absolute;
       top: 14px;
       left: 14px;
       z-index: 30;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(6px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       padding: 4px 10px;
       border-radius: 8px;
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(255, 255, 255, 0.9);
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.5px;
       pointer-events: none;
     }
+
+    /* Apple-Style iOS Toggle Switches */
+    .apple-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .apple-switch input { opacity: 0; width: 0; height: 0; }
+    .apple-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background-color: rgba(120, 120, 128, 0.3);
+      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 9999px;
+    }
+    .apple-slider:before {
+      position: absolute; content: ""; height: 20px; width: 20px;
+      left: 3px; bottom: 3px; background-color: #ffffff;
+      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    }
+    input:checked + .apple-slider { background-color: #34c759; }
+    input:checked + .apple-slider:before { transform: translateX(18px); }
+    input:disabled + .apple-slider { opacity: 0.65; cursor: not-allowed; }
+
+    /* Interactive Sub-Question Pills */
+    .choice-pill {
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-sub);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .choice-pill.selected {
+      background: #0071e3 !important;
+      color: #ffffff !important;
+      border-color: #0071e3 !important;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
-  <!-- APPLE GLASSMORPHIC ANNOUNCEMENT MODAL OVERLAY -->
+  <!-- ==================== APPLE NOTIFICATION PREFERENCES MODAL ==================== -->
+  <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-md transition-all overflow-y-auto">
+    <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm font-bold shadow-sm">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold" style="color: var(--text-main);">Notification Preferences</h3>
+            <p class="text-[10px]" style="color: var(--text-sub);">Customize real-time push alerts to your phone</p>
+          </div>
+        </div>
+        <button onclick="closeNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Master Select All Switch -->
+      <div class="flex items-center justify-between p-3 rounded-2xl mb-3 border shadow-sm" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-layer-group text-blue-500 text-sm"></i>
+          <div>
+            <h4 class="text-xs font-bold" style="color: var(--text-main);">Select All Channels</h4>
+            <p class="text-[10px]" style="color: var(--text-sub);">Enable News, Weather, Jobs &amp; Space simultaneously</p>
+          </div>
+        </div>
+        <label class="apple-switch">
+          <input type="checkbox" id="pref-select-all" onchange="toggleSelectAllTopics(this.checked)">
+          <span class="apple-slider"></span>
+        </label>
+      </div>
+
+      <!-- Topics Grouped Inset List -->
+      <div class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
+
+        <!-- 1. NEWS CHANNEL -->
+        <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-newspaper"></i></div>
+              <div>
+                <h5 class="text-xs font-bold" style="color: var(--text-main);">Live News Bulletins</h5>
+                <p class="text-[10px]" style="color: var(--text-sub);">Morning, afternoon &amp; night real-time breaking headlines</p>
+              </div>
+            </div>
+            <label class="apple-switch">
+              <input type="checkbox" id="topic-news" checked onchange="checkMasterToggleState()">
+              <span class="apple-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. WEATHER CHANNEL + INTERACTIVE QUESTION -->
+        <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div>
+                <h5 class="text-xs font-bold" style="color: var(--text-main);">Weather Outlook &amp; Rain Alerts</h5>
+                <p class="text-[10px]" style="color: var(--text-sub);">Google Weather-style morning/evening outlooks &amp; rain radar</p>
+              </div>
+            </div>
+            <label class="apple-switch">
+              <input type="checkbox" id="topic-weather" checked onchange="onTopicToggle('weather')">
+              <span class="apple-slider"></span>
+            </label>
+          </div>
+          <!-- Unfolded Question: City Selection -->
+          <div id="sub-q-weather" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
+            <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Your Weather Alert City:</p>
+            <div class="flex flex-wrap gap-1.5" id="weather-city-pills">
+              <button type="button" onclick="selectChoicePill('weather-city', 'Hyderabad', this)" class="choice-pill selected">Hyderabad</button>
+              <button type="button" onclick="selectChoicePill('weather-city', 'Warangal', this)" class="choice-pill">Warangal</button>
+              <button type="button" onclick="selectChoicePill('weather-city', 'Nizamabad', this)" class="choice-pill">Nizamabad</button>
+              <button type="button" onclick="selectChoicePill('weather-city', 'Bengaluru', this)" class="choice-pill">Bengaluru</button>
+              <button type="button" onclick="detectGPSCity(this)" class="choice-pill"><i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. JOBS CHANNEL + INTERACTIVE QUESTION -->
+        <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-briefcase"></i></div>
+              <div>
+                <h5 class="text-xs font-bold" style="color: var(--text-main);">Career &amp; Job Vacancies</h5>
+                <p class="text-[10px]" style="color: var(--text-sub);">Verified openings with qualifications, salary &amp; direct contacts</p>
+              </div>
+            </div>
+            <label class="apple-switch">
+              <input type="checkbox" id="topic-jobs" checked onchange="onTopicToggle('jobs')">
+              <span class="apple-slider"></span>
+            </label>
+          </div>
+          <!-- Unfolded Question: Job Preferences -->
+          <div id="sub-q-jobs" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
+            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Your Qualification &amp; Sector:</p>
+            <div class="flex flex-wrap gap-1.5" id="job-sector-pills">
+              <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected">🎓 Freshers / Any Degree</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill">💻 IT &amp; Tech</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'Govt & Banking Exams', this)" class="choice-pill">🏛️ Govt &amp; Banking</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'Healthcare & Medical', this)" class="choice-pill">🏥 Healthcare</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ISS & SPACE TRACKING CHANNEL -->
+        <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-satellite"></i></div>
+              <div>
+                <h5 class="text-xs font-bold" style="color: var(--text-main);">ISS &amp; Space Events</h5>
+                <p class="text-[10px]" style="color: var(--text-sub);">Visible orbital flyovers &amp; astronaut mission milestones</p>
+              </div>
+            </div>
+            <label class="apple-switch">
+              <input type="checkbox" id="topic-iss" onchange="onTopicToggle('iss')">
+              <span class="apple-slider"></span>
+            </label>
+          </div>
+          <!-- Unfolded Question: Space Alert Frequency -->
+          <div id="sub-q-iss" class="hidden mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
+            <p class="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5"><i class="fa-solid fa-telescope"></i> Sighting Preference:</p>
+            <div class="flex flex-wrap gap-1.5" id="iss-pref-pills">
+              <button type="button" onclick="selectChoicePill('iss-pref', 'Night Passes Only', this)" class="choice-pill selected">🌌 Naked-Eye Night Passes</button>
+              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">🚀 All Rocket &amp; Space Events</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. T&C PLATFORM UPDATES (PERMANENTLY LOCKED ON) -->
+        <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color); opacity: 0.95;">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h5 class="text-xs font-bold" style="color: var(--text-main);">T&amp;C Platform Updates</h5>
+                  <span class="text-[9px] bg-blue-500/20 text-blue-500 font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i class="fa-solid fa-lock text-[8px]"></i> REQUIRED</span>
+                </div>
+                <p class="text-[10px]" style="color: var(--text-sub);">Developer release notes, performance upgrades &amp; new feature broadcasts</p>
+              </div>
+            </div>
+            <label class="apple-switch" title="T&C Platform system updates are always active">
+              <input type="checkbox" id="topic-platform" checked disabled>
+              <span class="apple-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <div class="mt-4 pt-3 border-t border-black/5 dark:border-white/5">
+        <button onclick="saveNotificationPreferences()" id="btn-save-prefs" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check text-xs"></i> Save Preferences
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENT MODAL -->
   <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
     <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
@@ -379,11 +592,11 @@
     </div>
   </div>
 
-  <!-- TOP APPLE HEADER (MODEL 1: UNIFIED TOP-RIGHT UTILITY CLUSTER) -->
+  <!-- TOP APPLE HEADER (MODEL 1 + PERSISTENT NOTIFICATION BELL) -->
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Left: Brand Logo Badge & Anchored Dynamic Island Pill -->
+      <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
       <div class="relative flex flex-col items-center md:items-start gap-1">
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
           <div class="relative flex items-center justify-center">
@@ -406,7 +619,7 @@
         </div>
       </div>
 
-      <!-- Center: Solar Pill & Right: Unified Utility Cluster -->
+      <!-- Center: Solar Pill & Right: Utility Cluster (Lang + Persistent Bell + Theme) -->
       <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
         <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
         <div class="apple-solar-pill" id="apple-solar-pill">
@@ -431,11 +644,11 @@
           </div>
         </div>
 
-        <!-- 🚀 MODEL 1 UNIFIED UTILITY CLUSTER (Language + Theme Paired) -->
+        <!-- 🚀 UNIFIED UTILITY CLUSTER (Language + Persistent Bell + Theme) -->
         <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <!-- Language Selector -->
           <div class="relative" id="lang-menu-wrapper">
-            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
+            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
               <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
               <span id="current-lang-code">EN</span>
               <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
@@ -450,7 +663,13 @@
             </div>
           </div>
 
-          <!-- Divider -->
+          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
+          <!-- 🔔 PERSISTENT NOTIFICATION SETTINGS BELL BUTTON -->
+          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
+            <i class="fa-solid fa-bell text-xs text-amber-500"></i>
+          </button>
+
           <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
 
           <!-- Theme Button -->
@@ -463,21 +682,21 @@
 
     </div>
 
-    <!-- 🚀 CENTERED NAVIGATION ROW (Spacious & Clean) -->
-    <div class="max-w-md mx-auto mt-2.5 px-2">
+    <!-- 🚀 4-TAB NAVIGATION BAR (Headlines • TV & Media • Radar • Find Jobs) -->
+    <div class="max-w-xl mx-auto mt-2.5 px-2">
       <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1.5"></i><span data-i18n="headlines">Headlines</span></button>
-        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1.5"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
-        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1.5"></i><span data-i18n="radar">Radar</span></button>
+        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
+        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
       </nav>
     </div>
   </header>
 
-<!-- APPLE GLASSMORPHIC LIVE CRICKET SCORE & COMMENTARY MODAL -->
+  <!-- LIVE CRICKET SCORE & COMMENTARY MODAL -->
   <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all">
     <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30 animate-in fade-in zoom-in duration-200">
       
-      <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold">
@@ -493,7 +712,6 @@
         </button>
       </div>
 
-      <!-- Live Scoreboard Card -->
       <div class="p-4 rounded-2xl mb-4 border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
         <div class="flex items-center justify-between mb-3 pb-2 border-b border-black/5 dark:border-white/5">
           <span id="modal-match-title" class="text-xs font-bold" style="color: var(--text-main);">Match Details</span>
@@ -512,7 +730,6 @@
         </div>
       </div>
 
-      <!-- Live Commentary & Situation Status -->
       <div class="p-3.5 rounded-2xl border mb-5 space-y-1.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
         <div class="flex items-center gap-1.5 text-xs font-bold text-green-500">
           <i class="fa-solid fa-microphone-lines"></i>
@@ -531,7 +748,7 @@
     </div>
   </div>
 
-  <!-- LIVE REAL-TIME TICKER WITH CRICKET & FLIGHTS -->
+  <!-- LIVE REAL-TIME TICKER -->
   <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
@@ -550,7 +767,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- MAIN CONTENT CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -660,42 +877,37 @@
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
-            <!-- Header with Title and Mode Switcher -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b" style="border-color: var(--border-color);">
               <div class="flex items-center gap-2">
                 <i id="radar-title-icon" class="fa-solid fa-cloud-sun-rain text-blue-500 text-lg"></i>
                 <div>
                   <h2 id="radar-main-title" class="text-base font-bold" style="color: var(--text-main);">Live Weather Radar</h2>
-                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time meteorological &amp; global orbital tracking</p>
+                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time meteorological &amp; orbital tracking</p>
                 </div>
                 <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2 py-0.5 rounded-full font-bold ml-2 flex items-center gap-1">
                   <span class="live-dot" style="width:6px;height:6px;"></span> Live
                 </span>
               </div>
 
-              <!-- Apple-Style Radar Map Switcher Segmented Pill -->
               <div class="flex items-center p-1 rounded-xl backdrop-blur-md self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <button id="btn-radar-weather" onclick="switchRadarMap('weather')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active-tab" style="background-color: #0071e3; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);">
                   <i class="fa-solid fa-cloud-sun-rain"></i>
                   <span>Weather</span>
                 </button>
-                <button id="btn-radar-flight" onclick="switchRadarMap('flight')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5" style="color: var(--text-sub);">
+                <button id="btn-radar-flight" onclick="switchRadarMap('flight')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5" style="background-color: transparent; color: var(--text-sub);">
                   <i class="fa-solid fa-plane-departure"></i>
                   <span>Flights &amp; ISS</span>
                 </button>
               </div>
             </div>
 
-            <!-- Single Unified Map Display Frame -->
             <div class="relative w-full h-[400px] sm:h-[460px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub);">
               
-              <!-- 1. Windy Weather Radar Frame -->
               <div id="radar-frame-weather" class="w-full h-full relative">
                 <div class="tc-subtle-watermark">T&amp;C METEO RADAR</div>
                 <iframe width="100%" height="100%" src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0" class="w-full h-full"></iframe>
               </div>
 
-              <!-- 2. Leaflet Flight & ISS OSINT Map Frame -->
               <div id="radar-frame-flight" class="w-full h-full relative" style="display: none;">
                 <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
                 <div id="osint-map" class="w-full h-full"></div>
@@ -703,7 +915,6 @@
 
             </div>
 
-            <!-- Telemetry Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issAlt">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
               <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issVel">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
@@ -712,7 +923,43 @@
             </div>
           </div>
         </section>
-        
+
+        <!-- 🚀 TAB 4: FIND JOBS (NEW CAREER & VACANCY ENGINE) -->
+        <section id="view-jobs" class="hidden flex-col gap-6">
+          <div class="apple-card p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold shadow-sm">
+                  <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold" style="color: var(--text-main);">Career &amp; Job Vacancies</h2>
+                  <p class="text-[10px]" style="color: var(--text-sub);">Verified opportunities across Telangana &amp; India</p>
+                </div>
+              </div>
+              <span id="job-count-badge" class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-3 py-1 rounded-full font-bold self-start sm:self-auto">
+                Live Feed
+              </span>
+            </div>
+
+            <!-- Job Sector Filter Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-4">
+              <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
+              <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
+              <button onclick="filterJobs('it', this)" class="choice-pill">💻 IT &amp; Tech</button>
+              <button onclick="filterJobs('govt', this)" class="choice-pill">🏛️ Govt &amp; Banking</button>
+              <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
+            </div>
+
+            <!-- Live Job Postings Container -->
+            <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1">
+              <div class="text-center py-10 text-xs" style="color: var(--text-sub);">
+                <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
 
       <!-- RIGHT SIDEBAR PANEL -->
@@ -756,8 +1003,8 @@
   <script>
     let currentScope = 'local';
     let currentLanguage = 'en';
+    let currentJobSector = 'all';
     
-    // Dynamic real-time date setup
     const todayObj = new Date();
     const REAL_TODAY_DATE = todayObj.toISOString().split('T')[0];
 
@@ -772,7 +1019,7 @@
 
     const i18n = {
       en: {
-        newsHub: "NEWS HUB", headlines: "Headlines", tvMedia: "TV & Media", radar: "Radar",
+        newsHub: "NEWS HUB", headlines: "Headlines", tvMedia: "TV & Media", radar: "Radar", findJobs: "Find Jobs",
         usgsQuakes: "USGS Quakes", worldHighlights: "World Highlights", latest: "Latest",
         connectingRss: "Connecting to live RSS feed...", telanganaScope: "Telangana",
         indiaScope: "India", worldScope: "World", syncing: "Syncing...", queryingRss: "Querying real-time RSS API...",
@@ -788,7 +1035,7 @@
         scopeWorldTitle: "Global Worldwide News Stream"
       },
       te: {
-        newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", tvMedia: "టీవీ & మీడియా", radar: "రాడార్",
+        newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", tvMedia: "టీవీ & మీడియా", radar: "రాడార్", findJobs: "ఉద్యోగాలు",
         usgsQuakes: "భూకంపాలు", worldHighlights: "ప్రపంచ ముఖ్యాంశాలు", latest: "తాజా",
         connectingRss: "లైవ్ ఫీడ్‌కి కనెక్ట్ అవుతోంది...", telanganaScope: "తెలంగాణ",
         indiaScope: "భారత్", worldScope: "ప్రపంచం", syncing: "సింక్ అవుతోంది...", queryingRss: "రియల్ టైమ్ వార్తలు లోడ్ అవుతున్నాయి...",
@@ -804,7 +1051,7 @@
         scopeWorldTitle: "అంతర్జాతీయ వార్తల ప్రవాహం"
       },
       hi: {
-        newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", tvMedia: "टीवी और मीडिया", radar: "रडार",
+        newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", tvMedia: "टीवी और मीडिया", radar: "रडार", findJobs: "नौकरियां",
         usgsQuakes: "भूकंप", worldHighlights: "विश्व मुख्य समाचार", latest: "नवीनतम",
         connectingRss: "लाइव फ़ीड से कनेक्ट हो रहा है...", telanganaScope: "तेलंगाना",
         indiaScope: "भारत", worldScope: "विश्व", syncing: "सिंक हो रहा है...", queryingRss: "रीयल-टाइम आरएसएस एपीआई लोड हो रहा है...",
@@ -820,7 +1067,7 @@
         scopeWorldTitle: "वैश्विक समाचार स्ट्रीम"
       },
       kn: {
-        newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್",
+        newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್", findJobs: "ಉದ್ಯೋಗಗಳು",
         usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ",
         connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ",
         indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
@@ -836,7 +1083,7 @@
         scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್"
       },
       ta: {
-        newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்",
+        newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்", findJobs: "வேலைவாய்ப்பு",
         usgsQuakes: "நிலநடுக்கங்கள்", worldHighlights: "உலக முக்கியச் செய்திகள்", latest: "சமீபத்திய",
         connectingRss: "நேலைலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா",
         indiaScope: "இந்தியா", worldScope: "உலகம்", syncing: "ஒத்திசைக்கிறது...", queryingRss: "செய்திகள் ஏற்றப்படுகின்றன...",
@@ -852,7 +1099,7 @@
         scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
       },
       ml: {
-        newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ",
+        newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ", findJobs: "ജോലികൾ",
         usgsQuakes: "ഭൂകമ്പങ്ങൾ", worldHighlights: "ലോക വാർത്തകൾ", latest: "ഏറ്റവും പുതിയത്",
         connectingRss: "ലൈവ് ഫീഡുമായി ബന്ധിപ്പിക്കുന്നു...", telanganaScope: "തെലങ്കാന",
         indiaScope: "ഇന്ത്യ", worldScope: "ലോകം", syncing: "സിങ്ക് ചെയ്യുന്നു...", queryingRss: "വാർത്തകൾ ലഭ്യമാക്കുന്നു...",
@@ -876,7 +1123,6 @@
         dateInput.max = REAL_TODAY_DATE;
       }
 
-      // Check if acknowledged in the current browser session
       const isDismissed = sessionStorage.getItem('tc_dynamic_island_dismissed');
       if (!isDismissed) {
         setTimeout(() => {
@@ -896,8 +1142,8 @@
       initISSTracker();
       initISSManifest();
       fetchLiveAirTraffic();
+      fetchLiveJobs();
 
-      // Polling intervals for real-time live data
       setInterval(fetchLiveAirTraffic, 20000);
       setInterval(fetchLiveCricketTicker, 25000);
 
@@ -907,6 +1153,8 @@
           document.getElementById('lang-dropdown').classList.add('hidden');
         }
       });
+
+      loadSavedPreferencesUI();
     });
 
     function openAnnouncementModal() {
@@ -998,31 +1246,45 @@
       }
     }
 
+    /* ==================== 4-TAB NAVIGATION SWITCHER ==================== */
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-video').classList.add('hidden');
       document.getElementById('view-osint').classList.add('hidden');
+      document.getElementById('view-jobs').classList.add('hidden');
 
       const btnNews = document.getElementById('tab-btn-news');
       const btnVideo = document.getElementById('tab-btn-video');
       const btnOsint = document.getElementById('tab-btn-osint');
+      const btnJobs = document.getElementById('tab-btn-jobs');
 
-      [btnNews, btnVideo, btnOsint].forEach(b => {
+      [btnNews, btnVideo, btnOsint, btnJobs].forEach(b => {
         b.classList.remove('active-tab');
-        b.style.color = "var(--text-sub)";
+        b.style.backgroundColor = 'transparent';
+        b.style.color = 'var(--text-sub)';
+        b.style.boxShadow = 'none';
       });
 
+      let activeBtn = btnNews;
       if (tab === 'news') {
         document.getElementById('view-news').classList.remove('hidden');
-        btnNews.classList.add('active-tab');
+        activeBtn = btnNews;
       } else if (tab === 'video') {
         document.getElementById('view-video').classList.remove('hidden');
-        btnVideo.classList.add('active-tab');
+        activeBtn = btnVideo;
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
-        btnOsint.classList.add('active-tab');
+        activeBtn = btnOsint;
         if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 150);
+      } else if (tab === 'jobs') {
+        document.getElementById('view-jobs').classList.remove('hidden');
+        activeBtn = btnJobs;
       }
+
+      activeBtn.classList.add('active-tab');
+      activeBtn.style.backgroundColor = '#0071e3';
+      activeBtn.style.color = '#ffffff';
+      activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
     }
 
     function setNewsScope(scope) {
@@ -1211,7 +1473,7 @@
       } catch (e) {}
     }
 
-/* ==================== UNIFIED RADAR MAP SWITCHER ==================== */
+    /* ==================== UNIFIED RADAR MAP SWITCHER ==================== */
     function switchRadarMap(mode) {
       const btnWeather = document.getElementById('btn-radar-weather');
       const btnFlight = document.getElementById('btn-radar-flight');
@@ -1222,7 +1484,6 @@
 
       if (!btnWeather || !btnFlight) return;
 
-      // 1. Clear highlight on both buttons
       [btnWeather, btnFlight].forEach(b => {
         b.classList.remove('active-tab');
         b.style.backgroundColor = 'transparent';
@@ -1230,7 +1491,6 @@
         b.style.boxShadow = 'none';
       });
 
-      // 2. Apply solid Apple Blue highlight to the clicked button
       if (mode === 'weather') {
         frameWeather.style.display = 'block';
         frameFlight.style.display = 'none';
@@ -1254,7 +1514,6 @@
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-lg';
 
-        // Refresh Leaflet so maps render without grey tiles
         setTimeout(() => {
           if (leafletMap) leafletMap.invalidateSize();
         }, 150);
@@ -1579,6 +1838,254 @@
         container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
       }
     }
+
+    /* ==================== 💼 LIVE JOB VACANCIES ENGINE ==================== */
+    const sampleVerifiedJobs = [
+      {
+        id: 'tc-job-1',
+        title: 'Junior Software Associate / Web Analyst',
+        company: 'Telangana Tech Hub • T&C Partner',
+        location: 'Hyderabad, Telangana (Hybrid)',
+        sector: 'it',
+        type: 'Full-time',
+        eligibility: 'B.Tech / BCA / Any Graduate',
+        salary: '₹3.6 - ₹5.2 LPA',
+        contact: '+91 91212-34567',
+        applyUrl: 'https://www.ncs.gov.in',
+        date: 'Active Today'
+      },
+      {
+        id: 'tc-job-2',
+        title: 'Graduate Trainee / Field Executive',
+        company: 'Southern Logistics & Operations',
+        location: 'Secunderabad & Warangal',
+        sector: 'freshers',
+        type: 'Full-time',
+        eligibility: 'Any Degree / Freshers 2024-2026',
+        salary: '₹2.8 - ₹3.4 LPA + Incentives',
+        contact: '+91 98480-12345',
+        applyUrl: 'https://www.ncs.gov.in',
+        date: 'Actively Hiring'
+      },
+      {
+        id: 'tc-job-3',
+        title: 'Medical Lab Technician & Duty Nurse',
+        company: 'Apollo & Care Allied Network',
+        location: 'Banjara Hills & Hitec City, Hyderabad',
+        sector: 'healthcare',
+        type: 'Shift-based',
+        eligibility: 'B.Sc Nursing / DMLT / Allied Health',
+        salary: '₹3.2 - ₹4.8 LPA',
+        contact: '+91 40-2345-6789',
+        applyUrl: 'https://www.ncs.gov.in',
+        date: 'Urgent Requirement'
+      },
+      {
+        id: 'tc-job-4',
+        title: 'Central Banking & Clerk Recruitment 2026',
+        company: 'National Banking Services Selection',
+        location: 'Telangana & All India',
+        sector: 'govt',
+        type: 'Government Sector',
+        eligibility: 'Degree in Any Discipline',
+        salary: 'Level-4 Pay Scale (Govt)',
+        contact: 'Official Recruitment Portal',
+        applyUrl: 'https://www.ncs.gov.in',
+        date: 'Online Registration Open'
+      }
+    ];
+
+    async function fetchLiveJobs() {
+      const container = document.getElementById('job-listings-container');
+      const countBadge = document.getElementById('job-count-badge');
+      if (!container) return;
+
+      let filtered = sampleVerifiedJobs;
+      if (currentJobSector !== 'all') {
+        filtered = sampleVerifiedJobs.filter(j => j.sector === currentJobSector);
+      }
+
+      countBadge.textContent = `${filtered.length} Openings Active`;
+
+      let html = '';
+      filtered.forEach(job => {
+        const sectorBadges = {
+          'it': '<span class="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-0.5 rounded text-[10px] font-bold">IT &amp; Tech</span>',
+          'freshers': '<span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Freshers</span>',
+          'healthcare': '<span class="bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Healthcare</span>',
+          'govt': '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Govt / Public</span>'
+        };
+
+        const contactBtn = job.contact.startsWith('+') ? 
+          `<a href="tel:${job.contact}" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[11px] shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-phone text-[9px]"></i> Call: ${job.contact}</a>` :
+          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${job.contact}</span>`;
+
+        html += `
+          <div class="p-4 rounded-2xl border transition-all hover:border-blue-500/30" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
+                ${sectorBadges[job.sector] || ''}
+              </div>
+              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date}</span>
+            </div>
+
+            <div class="text-[11px] space-y-1 mb-3" style="color: var(--text-sub);">
+              <p><i class="fa-regular fa-building mr-1.5 text-blue-500"></i><b>${job.company}</b> • <i class="fa-solid fa-location-dot mx-1 text-red-500"></i>${job.location}</p>
+              <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${job.eligibility} | <b>Salary:</b> ${job.salary}</p>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-black/5 dark:border-white/5 flex-wrap">
+              <div class="flex items-center gap-2">
+                ${contactBtn}
+              </div>
+              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-md flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Official Apply Portal
+              </a>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function filterJobs(sector, btnEl) {
+      currentJobSector = sector;
+      document.querySelectorAll('#view-jobs .choice-pill').forEach(b => b.classList.remove('selected'));
+      if (btnEl) btnEl.classList.add('selected');
+      fetchLiveJobs();
+    }
+
+    /* ==================== 🔔 NOTIFICATION PREFERENCES MODAL LOGIC ==================== */
+    function openNotificationPreferences() {
+      document.getElementById('notification-prefs-modal').classList.remove('hidden');
+      loadSavedPreferencesUI();
+    }
+
+    function closeNotificationPreferences() {
+      document.getElementById('notification-prefs-modal').classList.add('hidden');
+    }
+
+    function onTopicToggle(topic) {
+      const isChecked = document.getElementById(`topic-${topic}`).checked;
+      const subContainer = document.getElementById(`sub-q-${topic}`);
+      if (subContainer) {
+        if (isChecked) {
+          subContainer.classList.remove('hidden');
+        } else {
+          subContainer.classList.add('hidden');
+        }
+      }
+      checkMasterToggleState();
+    }
+
+    function checkMasterToggleState() {
+      const news = document.getElementById('topic-news').checked;
+      const weather = document.getElementById('topic-weather').checked;
+      const jobs = document.getElementById('topic-jobs').checked;
+      const iss = document.getElementById('topic-iss').checked;
+      document.getElementById('pref-select-all').checked = (news && weather && jobs && iss);
+    }
+
+    function toggleSelectAllTopics(masterChecked) {
+      const topics = ['news', 'weather', 'jobs', 'iss'];
+      topics.forEach(t => {
+        const checkbox = document.getElementById(`topic-${t}`);
+        if (checkbox) {
+          checkbox.checked = masterChecked;
+          onTopicToggle(t);
+        }
+      });
+    }
+
+    function selectChoicePill(groupKey, value, btnEl) {
+      const parent = btnEl.parentElement;
+      parent.querySelectorAll('.choice-pill').forEach(b => b.classList.remove('selected'));
+      btnEl.classList.add('selected');
+      localStorage.setItem(`tc_pref_${groupKey}`, value);
+    }
+
+    function detectGPSCity(btnEl) {
+      if ('geolocation' in navigator) {
+        btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            btnEl.innerHTML = '📍 GPS Locked';
+            selectChoicePill('weather-city', 'GPS_Auto', btnEl);
+          },
+          (err) => {
+            btnEl.innerHTML = '📍 GPS Unavailable';
+            setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000);
+          }
+        );
+      }
+    }
+
+    function loadSavedPreferencesUI() {
+      const savedTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
+      
+      ['news', 'weather', 'jobs', 'iss'].forEach(t => {
+        const el = document.getElementById(`topic-${t}`);
+        if (el) {
+          el.checked = savedTopics[t] !== undefined ? savedTopics[t] : true;
+          onTopicToggle(t);
+        }
+      });
+
+      checkMasterToggleState();
+
+      const savedCity = localStorage.getItem('tc_pref_weather-city') || 'Hyderabad';
+      document.querySelectorAll('#weather-city-pills .choice-pill').forEach(b => {
+        if (b.textContent.includes(savedCity)) b.classList.add('selected');
+      });
+
+      const savedSector = localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree';
+      document.querySelectorAll('#job-sector-pills .choice-pill').forEach(b => {
+        if (b.textContent.includes(savedSector)) b.classList.add('selected');
+      });
+    }
+
+    async function saveNotificationPreferences() {
+      const saveBtn = document.getElementById('btn-save-prefs');
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Saving...';
+
+      const topics = {
+        news: document.getElementById('topic-news').checked,
+        weather: document.getElementById('topic-weather').checked,
+        jobs: document.getElementById('topic-jobs').checked,
+        iss: document.getElementById('topic-iss').checked,
+        platform: true // Permanently locked to true
+      };
+
+      const preferences = {
+        weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
+        jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
+        issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
+      };
+
+      localStorage.setItem('tc_user_topics', JSON.stringify(topics));
+
+      // Synchronize with Firestore device document
+      try {
+        let deviceId = localStorage.getItem('tc_device_id');
+        if (deviceId && typeof db !== 'undefined') {
+          await db.collection('fcm_tokens').doc(deviceId).set({
+            topics: topics,
+            preferences: preferences,
+            updatedAt: new Date()
+          }, { merge: true });
+        }
+      } catch (err) {
+        console.warn('Firestore topic sync warning:', err);
+      }
+
+      saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs mr-1"></i> Saved Successfully!';
+      setTimeout(() => {
+        saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Save Preferences';
+        closeNotificationPreferences();
+      }, 700);
+    }
   </script>
 
   <!-- Apple-Style Install Button -->
@@ -1620,12 +2127,10 @@
                   box-shadow 0.2s ease, 
                   background 0.2s ease;
     }
-
     .apple-btn:active {
       transform: scale(0.93);
       background: rgba(235, 235, 235, 0.9);
     }
-
     @media (prefers-color-scheme: dark) {
       .apple-btn {
         background: rgba(30, 30, 32, 0.82);
@@ -1718,17 +2223,24 @@
               localStorage.setItem('tc_device_id', deviceId);
             }
 
-            // Persist the single token record per device in Firestore
+            const initialTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
+            const initialPrefs = {
+              weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
+              jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
+              issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
+            };
+
             await db.collection('fcm_tokens').doc(deviceId).set({
               token: token,
               device: navigator.userAgent,
+              topics: initialTopics,
+              preferences: initialPrefs,
               updatedAt: new Date()
             }, { merge: true });
 
-            console.log('Push device token synced successfully:', deviceId);
+            console.log('Push device token synced with preferences:', deviceId);
           }
         } else if (permission === 'denied') {
-          // De-duplicate denial records using persistent deviceId
           let deviceId = localStorage.getItem('tc_device_id');
           if (!deviceId) {
             deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
