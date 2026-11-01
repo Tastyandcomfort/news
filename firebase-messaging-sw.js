@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
       const networkFetch = fetch(event.request).then((response) => {
         if (response && response.status === 200 && event.request.method === 'GET') {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));  
         }
         return response;
       }).catch(() => cached);
@@ -70,7 +70,8 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.notification?.body || payload.data?.body || "New breaking story available.",
     icon: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
     badge: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
-    tag: "tc-daily-news",
+    // 🎯 DYNAMIC TAG: Merges alerts into EXACTLY ONE banner matching the server tag!
+    tag: payload.notification?.tag || payload.data?.tag || "tc-alert",
     renotify: true,
     requireInteraction: true,
     silent: false,
