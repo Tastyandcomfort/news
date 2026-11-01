@@ -31,6 +31,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
+<!-- 🚀 3D WEBGL GLOBE & SATELLITE PHYSICS LIBRARIES -->
+  <script src="https://unpkg.com/globe.gl"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
+
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -1610,17 +1615,23 @@
 
     function init3DUniverseEngine() {
       const container = document.getElementById('globe-3d-container');
-      if (!container) return;
+      if (typeof Globe === 'undefined') {
+        console.error("Globe.gl library still loading...");
+        return;
+      }
+
+      const w = container.clientWidth || 800;
+      const h = container.clientHeight || 550;
 
       myGlobe = Globe()
         (container)
-        .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
-        .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+        .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
+        .backgroundImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/night-sky.png')
         .atmosphereColor('#38bdf8')
-        .atmosphereAltitude(0.2)
-        .width(container.clientWidth)
-        .height(container.clientHeight);
-
+        .atmosphereAltitude(0.22)
+        .width(w)
+        .height(h);
+      
       // Default perspective looking down at India and the Middle East
       myGlobe.pointOfView({ lat: 20.5937, lng: 78.9629, altitude: 2.2 }, 1000);
 
