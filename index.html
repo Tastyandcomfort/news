@@ -2003,21 +2003,26 @@
       localStorage.setItem(`tc_pref_${groupKey}`, value);
     }
 
-    function detectGPSCity(btnEl) {
+  function detectGPSCity(btnEl) {
       if ('geolocation' in navigator) {
         btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             btnEl.innerHTML = '📍 GPS Locked';
+            // Save physical coordinates to local storage
+            localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4));
+            localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4));
             selectChoicePill('weather-city', 'GPS_Auto', btnEl);
           },
           (err) => {
             btnEl.innerHTML = '📍 GPS Unavailable';
             setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000);
-          }
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
         );
       }
     }
+    
 
     function loadSavedPreferencesUI() {
       const savedTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
@@ -2043,7 +2048,7 @@
       });
     }
 
-    async function saveNotificationPreferences() {
+ async function saveNotificationPreferences() {
       const saveBtn = document.getElementById('btn-save-prefs');
       saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Saving...';
 
@@ -2052,26 +2057,40 @@
         weather: document.getElementById('topic-weather').checked,
         jobs: document.getElementById('topic-jobs').checked,
         iss: document.getElementById('topic-iss').checked,
-        platform: true // Permanently locked to true
+        platform: true
       };
 
+      // 🛰️ PURE REAL GPS EXTRACTION:
+      const realLat = localStorage.getItem('tc_gps_lat');
+      const realLon = localStorage.getItem('tc_gps_lon');
+      
       const preferences = {
         weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
+        // Saves real coordinates ONLY if the phone physically locked onto GPS:
+        gpsCoords: (realLat && realLon) ? {
+          lat: parseFloat(realLat),
+          lon: parseFloat(realLon)
+        } : null,
         jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
         issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
       };
 
       localStorage.setItem('tc_user_topics', JSON.stringify(topics));
 
-      // Synchronize with Firestore device document
       try {
         let deviceId = localStorage.getItem('tc_device_id');
-        if (deviceId && typeof db !== 'undefined') {
+        if (!deviceId) {
+          deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+          localStorage.setItem('tc_device_id', deviceId);
+        }
+
+        if (typeof db !== 'undefined') {
           await db.collection('fcm_tokens').doc(deviceId).set({
             topics: topics,
             preferences: preferences,
             updatedAt: new Date()
           }, { merge: true });
+          console.log('Real GPS preferences synced to Firestore for:', deviceId);
         }
       } catch (err) {
         console.warn('Firestore topic sync warning:', err);
@@ -2083,6 +2102,7 @@
         closeNotificationPreferences();
       }, 700);
     }
+
   </script>
 
   <!-- Apple-Style Install Button -->
