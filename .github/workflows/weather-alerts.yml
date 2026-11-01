@@ -1,0 +1,28 @@
+name: ⛅ T&C Weather - Daily Alerts
+
+on:
+  schedule:
+    - cron: '30 1 * * *'   # 7:00 AM IST (Morning Outlook)
+    - cron: '0 14 * * *'   # 7:30 PM IST (Evening / Tomorrow Forecast)
+  workflow_dispatch:      # Manual 1-click test button
+
+jobs:
+  weather-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Broadcast Weather Alert
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node send-weather.js
+        
