@@ -1,3 +1,4 @@
+
 const admin = require('firebase-admin');
 
 // 1. Initialize Firebase Admin SDK
@@ -131,6 +132,7 @@ async function runWeatherNotificationTask() {
         data: {
           title: weatherReport.title,
           body: weatherReport.body,
+          tag: "tc-weather-alert",
           url: "https://tastyandcomfort.github.io/news/"
         },
         android: {
