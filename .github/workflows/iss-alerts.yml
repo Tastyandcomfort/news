@@ -1,0 +1,29 @@
+
+name: 🛰️ T&C Space - ISS Flyover Alerts
+
+on:
+  schedule:
+    - cron: '15 13 * * *'   # 6:45 PM IST (13:15 UTC daily)
+  workflow_dispatch:        # Manual 1-click test button
+
+jobs:
+  iss-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Broadcast ISS Alert
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node send-iss.js
+
+        
