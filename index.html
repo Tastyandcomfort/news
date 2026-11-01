@@ -1543,17 +1543,15 @@
       } catch (e) {}
     }
 
-/* ==================== 🌍 3D UNIVERSE ORBITAL ENGINE (REAL-TIME DATA ONLY) ==================== */
+/* ==================== 🌍 3D UNIVERSE ORBITAL ENGINE (HIGH-VISIBILITY 3D MARKERS) ==================== */
     let myGlobe = null;
     let globeActiveLayer = 'all';
 
-    // In-memory real-time telemetry stores
     let liveGlobeFlights = [];
     let liveGlobeStations = [];
     let liveGlobeSatellites = [];
     let liveGlobeAsteroids = [];
-    let liveGlobeQuakes = [];
-    let liveGlobeVolcanoes = [];
+    let liveGlobeHazards = [];
 
     function switchRadarMap(mode) {
       const btnWeather = document.getElementById('btn-radar-weather');
@@ -1598,7 +1596,6 @@
         if (subtitleEl) subtitleEl.textContent = 'Real-time flights, space stations, satellites, asteroids & seismic events';
         iconEl.className = 'fa-solid fa-globe text-cyan-400 text-lg';
 
-        // Initialize 3D Globe WebGL on first open
         if (!myGlobe) {
           init3DUniverseEngine();
         } else {
@@ -1615,37 +1612,41 @@
 
     function init3DUniverseEngine() {
       const container = document.getElementById('globe-3d-container');
-      if (typeof Globe === 'undefined') {
-        console.error("Globe.gl library still loading...");
-        return;
-      }
+      if (!container || typeof Globe === 'undefined') return;
 
       const w = container.clientWidth || 800;
       const h = container.clientHeight || 550;
 
-      myGlobe = Globe()
-        (container)
+      // 1. Initialize WebGL Globe with fast jsDelivr CDN textures
+      myGlobe = Globe()(container)
         .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
         .backgroundImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/night-sky.png')
         .atmosphereColor('#38bdf8')
         .atmosphereAltitude(0.22)
         .width(w)
         .height(h);
-      
-      // Default perspective looking down at India and the Middle East
-      myGlobe.pointOfView({ lat: 20.5937, lng: 78.9629, altitude: 2.2 }, 1000);
 
-      // Touch & Click handler for points
-      myGlobe.onPointClick((point) => {
-        if (!point) return;
-        focusAndDisplayHUD(point);
-      });
+      // 2. Configure High-Visibility 3D HTML Markers (Always bright & clickable on night/day side)
+      myGlobe
+        .htmlElementsData([])
+        .htmlLat(d => d.lat)
+        .htmlLng(d => d.lng)
+        .htmlAltitude(d => d.altitude)
+        .htmlElement(d => {
+          const el = document.createElement('div');
+          el.innerHTML = d.markerHtml;
+          el.style.cursor = 'pointer';
+          el.style.pointerEvents = 'auto';
+          el.title = d.name || d.callsign || 'Target';
+          el.onclick = (e) => {
+            e.stopPropagation();
+            focusAndDisplayHUD(d);
+          };
+          return el;
+        });
 
-      // Touch & Click handler for seismic rings
-      myGlobe.onRingClick((ring) => {
-        if (!ring) return;
-        focusAndDisplayHUD(ring);
-      });
+      // Camera view centered over India & Indian Ocean
+      myGlobe.pointOfView({ lat: 18.5, lng: 78.5, altitude: 2.1 }, 1200);
 
       window.addEventListener('resize', () => {
         if (myGlobe && container) {
@@ -1654,10 +1655,8 @@
         }
       });
 
-      // Initial parallel fetch of all real-time feeds
+      // 3. Fetch all real-time feeds
       refreshAllRealTimeFeeds();
-
-      // Poll real-time feeds
       setInterval(refreshAllRealTimeFeeds, 25000);
     }
 
@@ -1665,39 +1664,47 @@
       await Promise.allSettled([
         fetchRealTimeFlights3D(),
         fetchRealTimeStations3D(),
-        fetchRealTimeSatellites3D(),
         fetchRealTimeAsteroids3D(),
-        fetchRealTimeQuakes3D(),
-        fetchRealTimeVolcanoes3D()
+        fetchRealTimeHazards3D()
       ]);
       renderActive3DLayers();
     }
 
-    // 1. Live Flights (OpenSky Network via your active Vercel Proxy)
+    // 1. Live Flights (OpenSky Network)
     async function fetchRealTimeFlights3D() {
       try {
         const res = await fetch('https://news-39tq.vercel.app/api/flights', { signal: AbortSignal.timeout(6000) });
         if (!res.ok) return;
         const data = await res.json();
 
-        if (data && data.states) {
+        if (data && data.states && Array.isArray(data.states)) {
+          const flightBadge = document.getElementById('ticker-flights-count');
+          if (flightBadge) flightBadge.textContent = `${data.states.length} Active`;
+
           liveGlobeFlights = data.states
-            .filter(f => f[5] && f[6] && !f[8]) // lon, lat, not on ground
-            .slice(0, 45) // Keep snappy 60fps on mobile
-            .map(f => ({
-              type: 'flight',
-              id: f[0],
-              callsign: (f[1] || 'Civil Flight').trim(),
-              origin: f[2] || 'International',
-              lng: parseFloat(f[5]),
-              lat: parseFloat(f[6]),
-              altMeters: Math.round(f[7] || 10000),
-              speedKmh: Math.round((f[9] || 220) * 3.6),
-              trackDeg: Math.round(f[10] || 0),
-              altitude: 0.02, // 3D elevation above surface
-              color: '#38bdf8',
-              radius: 0.35
-            }));
+            .filter(f => f[5] && f[6] && !f[8])
+            .slice(0, 50)
+            .map(f => {
+              const callsign = (f[1] || 'Flight').trim();
+              const heading = Math.round(f[10] || 0);
+              return {
+                type: 'flight',
+                id: f[0],
+                callsign: callsign,
+                origin: f[2] || 'International Airspace',
+                lng: parseFloat(f[5]),
+                lat: parseFloat(f[6]),
+                altMeters: Math.round(f[7] || 10500),
+                speedKmh: Math.round((f[9] || 230) * 3.6),
+                trackDeg: heading,
+                altitude: 0.025,
+                markerHtml: `
+                  <div style="transform: rotate(${heading - 45}deg); filter: drop-shadow(0 0 6px #38bdf8); transition: transform 0.3s;">
+                    <i class="fa-solid fa-plane text-[11px] text-cyan-400"></i>
+                  </div>
+                `
+              };
+            });
         }
       } catch (e) {
         console.warn('Flight feed sync:', e.message);
@@ -1713,56 +1720,69 @@
         const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544', { signal: AbortSignal.timeout(5000) });
         if (res.ok) {
           const d = await res.json();
+          const lat = parseFloat(d.latitude);
+          const lon = parseFloat(d.longitude);
+          const altKm = Math.round(d.altitude);
+          const speedKmh = Math.round(d.velocity);
+
           stations.push({
             type: 'station',
             id: '25544',
             name: 'International Space Station (ISS)',
             agency: 'NASA / ESA / International',
-            lat: parseFloat(d.latitude),
-            lng: parseFloat(d.longitude),
-            altKm: Math.round(d.altitude),
-            speedKmh: Math.round(d.velocity),
+            lat: lat,
+            lng: lon,
+            altKm: altKm,
+            speedKmh: speedKmh,
             altitude: 0.16,
-            color: '#fbbf24',
-            radius: 0.8
+            markerHtml: `
+              <div style="text-align: center; filter: drop-shadow(0 0 10px #fbbf24); animation: pulse 2s infinite;">
+                <i class="fa-solid fa-satellite text-base text-amber-400"></i>
+                <span style="display: block; font-size: 8px; font-weight: 900; color: #fbbf24; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 4px; border: 1px solid #fbbf24;">ISS</span>
+              </div>
+            `
           });
 
-          // Sync with telemetry card in DOM
+          // Sync DOM telemetry cards & ticker
           const altEl = document.getElementById('osint-iss-alt');
           const spdEl = document.getElementById('osint-iss-spd');
-          if (altEl) altEl.textContent = `${Math.round(d.altitude)} km`;
-          if (spdEl) spdEl.textContent = `${Math.round(d.velocity)} km/h`;
+          const posEl = document.getElementById('ticker-iss-pos');
+          if (altEl) altEl.textContent = `${altKm} km`;
+          if (spdEl) spdEl.textContent = `${speedKmh} km/h`;
+          if (posEl) posEl.textContent = `${lat.toFixed(1)}°, ${lon.toFixed(1)}°`;
         }
       } catch (e) {}
 
-      // B. China Space Station (Tiangong / CSS - Tianhe, NORAD 48274) via CelesTrak
+      // B. China Space Station (Tiangong / CSS - Tianhe, NORAD ID 48274)
       try {
-        const res = await fetch('https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json', { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-          const list = await res.json();
-          const cssRec = list.find(s => s.NORAD_CAT_ID === 48274 || (s.OBJECT_NAME && s.OBJECT_NAME.includes('CSS')));
-          if (cssRec && typeof satellite !== 'undefined') {
-            const satrec = satellite.jsonToSatrec ? satellite.jsonToSatrec(cssRec) : null;
+        const cssRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json'), { signal: AbortSignal.timeout(6000) });
+        if (cssRes.ok) {
+          const stationsList = await cssRes.json();
+          const cssItem = stationsList.find(s => s.NORAD_CAT_ID === 48274 || (s.OBJECT_NAME && s.OBJECT_NAME.includes('CSS')));
+          if (cssItem && typeof satellite !== 'undefined') {
+            const satrec = satellite.jsonToSatrec ? satellite.jsonToSatrec(cssItem) : null;
             if (satrec) {
               const now = new Date();
-              const posAndVel = satellite.propagate(satrec, now);
-              if (posAndVel.position) {
+              const pos = satellite.propagate(satrec, now);
+              if (pos.position) {
                 const gmst = satellite.gstime(now);
-                const geo = satellite.eciToGeodetic(posAndVel.position, gmst);
-                const latDeg = satellite.degreesLat(geo.latitude);
-                const lonDeg = satellite.degreesLong(geo.longitude);
+                const geo = satellite.eciToGeodetic(pos.position, gmst);
                 stations.push({
                   type: 'station',
                   id: '48274',
                   name: 'Tiangong Space Station (CSS - Tianhe)',
                   agency: 'CNSA (China National Space Administration)',
-                  lat: latDeg,
-                  lng: lonDeg,
+                  lat: satellite.degreesLat(geo.latitude),
+                  lng: satellite.degreesLong(geo.longitude),
                   altKm: Math.round(geo.height),
                   speedKmh: 27580,
                   altitude: 0.15,
-                  color: '#ef4444',
-                  radius: 0.8
+                  markerHtml: `
+                    <div style="text-align: center; filter: drop-shadow(0 0 10px #ef4444);">
+                      <i class="fa-solid fa-satellite text-base text-red-500"></i>
+                      <span style="display: block; font-size: 8px; font-weight: 900; color: #ef4444; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 4px; border: 1px solid #ef4444;">CSS</span>
+                    </div>
+                  `
                 });
               }
             }
@@ -1773,59 +1793,20 @@
       liveGlobeStations = stations;
     }
 
-    // 3. Bright Visible Satellites (Hubble, Starlink, NOAA) via CelesTrak
-    async function fetchRealTimeSatellites3D() {
-      try {
-        const res = await fetch('https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=json', { signal: AbortSignal.timeout(6000) });
-        if (!res.ok) return;
-        const list = await res.json();
-
-        if (Array.isArray(list) && typeof satellite !== 'undefined') {
-          const topSats = list.slice(0, 30); // Top 30 brightest operational orbiters
-          const now = new Date();
-          const gmst = satellite.gstime(now);
-
-          liveGlobeSatellites = topSats.map(s => {
-            try {
-              const satrec = satellite.jsonToSatrec ? satellite.jsonToSatrec(s) : null;
-              if (!satrec) return null;
-              const pos = satellite.propagate(satrec, now);
-              if (!pos.position) return null;
-              const geo = satellite.eciToGeodetic(pos.position, gmst);
-              return {
-                type: 'satellite',
-                id: String(s.NORAD_CAT_ID),
-                name: s.OBJECT_NAME || 'Satellite',
-                lat: satellite.degreesLat(geo.latitude),
-                lng: satellite.degreesLong(geo.longitude),
-                altKm: Math.round(geo.height),
-                speedKmh: 26800,
-                altitude: Math.min(Math.max(geo.height / 6371, 0.08), 0.35),
-                color: '#c084fc',
-                radius: 0.4
-              };
-            } catch (err) { return null; }
-          }).filter(Boolean);
-        }
-      } catch (e) {
-        console.warn('Satellite orbit sync:', e.message);
-      }
-    }
-
-    // 4. Live Asteroids & Near-Earth Objects (NASA JPL CAD API)
+    // 3. Live Asteroids & Near-Earth Objects (NASA JPL CAD API)
     async function fetchRealTimeAsteroids3D() {
       try {
-        const res = await fetch('https://ssd-api.jpl.nasa.gov/cad.api?dist-max=10LD&date-min=now&date-max=+15d&sort=dist', { signal: AbortSignal.timeout(6000) });
+        const res = await fetch('https://ssd-api.jpl.nasa.gov/cad.api?dist-max=10LD&date-min=now&date-max=+30d&sort=dist', { signal: AbortSignal.timeout(6000) });
         if (!res.ok) return;
         const data = await res.json();
 
         if (data && data.data && data.fields) {
           const desIdx = data.fields.indexOf('des');
           const cdIdx = data.fields.indexOf('cd');
-          const distIdx = data.fields.indexOf('dist'); // in AU
-          const distLdIdx = data.fields.indexOf('dist_ld'); // in Lunar Distances
-          const vrelIdx = data.fields.indexOf('v_rel'); // in km/s
-          const hIdx = data.fields.indexOf('h'); // absolute magnitude (size)
+          const distIdx = data.fields.indexOf('dist');
+          const distLdIdx = data.fields.indexOf('dist_ld');
+          const vrelIdx = data.fields.indexOf('v_rel');
+          const hIdx = data.fields.indexOf('h');
 
           liveGlobeAsteroids = data.data.slice(0, 15).map((row, idx) => {
             const desName = row[desIdx] || 'NEO Asteroid';
@@ -1835,9 +1816,8 @@
             const magH = parseFloat(row[hIdx] || 22);
             const estDiameterM = Math.round(1329 / Math.sqrt(0.15) * Math.pow(10, -0.2 * magH));
 
-            // Position distributed in near-Earth orbital field
             const angle = (idx / 15) * Math.PI * 2;
-            const lat = Math.sin(angle) * 55;
+            const lat = Math.sin(angle) * 50;
             const lng = (angle * 180 / Math.PI) - 180;
 
             return {
@@ -1851,9 +1831,13 @@
               speedKmh: vRelKmh,
               diameterM: estDiameterM,
               flybyDate: row[cdIdx] || 'Approaching',
-              altitude: 0.45 + (idx * 0.03), // Floating in space outside atmosphere
-              color: '#34d399',
-              radius: 0.55
+              altitude: 0.35 + (idx * 0.02),
+              markerHtml: `
+                <div style="text-align: center; filter: drop-shadow(0 0 8px #34d399);">
+                  <i class="fa-solid fa-meteor text-xs text-emerald-400"></i>
+                  <span style="display: block; font-size: 7px; font-weight: 800; color: #34d399; background: rgba(0,0,0,0.6); padding: 0 3px; border-radius: 3px;">${desName}</span>
+                </div>
+              `
             };
           });
         }
@@ -1862,120 +1846,100 @@
       }
     }
 
-    // 5. Live Earthquakes (USGS M4.5+ Real-Time Feed)
-    async function fetchRealTimeQuakes3D() {
+    // 4. Live Earthquakes & Volcanoes (USGS Real-Time Feeds)
+    async function fetchRealTimeHazards3D() {
+      const hazards = [];
+
+      // A. Earthquakes
       try {
         const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson', { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) return;
-        const data = await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.features) {
+            const countEl = document.getElementById('ticker-quake-count');
+            const osintCountEl = document.getElementById('osint-quake-count');
+            if (countEl) countEl.textContent = `${data.features.length} Quakes`;
+            if (osintCountEl) osintCountEl.textContent = `${data.features.length} Events (24h)`;
 
-        if (data && data.features) {
-          const quakeBadge = document.getElementById('osint-quake-count');
-          if (quakeBadge) quakeBadge.textContent = `${data.features.length} Events (24h)`;
-
-          liveGlobeQuakes = data.features.slice(0, 30).map(q => {
-            const [lng, lat, depth] = q.geometry.coordinates;
-            const mag = q.properties.mag;
-            return {
-              type: 'earthquake',
-              id: q.id,
-              name: `M${mag} Earthquake`,
-              place: q.properties.place,
-              mag: mag,
-              depthKm: Math.round(depth),
-              timeStr: new Date(q.properties.time).toLocaleString(),
-              lat: lat,
-              lng: lng,
-              altitude: 0.005,
-              color: '#ef4444',
-              radius: mag * 0.35,
-              // Surface shockwave ring animation parameters
-              ringColor: () => '#ef4444',
-              ringMaxRadius: mag * 2.5,
-              ringPropagationSpeed: 2,
-              ringRepeatPeriod: 1200
-            };
-          });
+            data.features.slice(0, 25).forEach(q => {
+              const [lng, lat, depth] = q.geometry.coordinates;
+              const mag = q.properties.mag;
+              hazards.push({
+                type: 'earthquake',
+                id: q.id,
+                name: `M${mag} Earthquake`,
+                place: q.properties.place,
+                mag: mag,
+                depthKm: Math.round(depth),
+                timeStr: new Date(q.properties.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                lat: lat,
+                lng: lng,
+                altitude: 0.005,
+                markerHtml: `
+                  <div style="filter: drop-shadow(0 0 8px #ef4444); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;">
+                    <i class="fa-solid fa-circle-dot text-[10px] text-red-500"></i>
+                  </div>
+                `
+              });
+            });
+          }
         }
       } catch (e) {}
-    }
 
-    // 6. Live Active Volcanoes (USGS Active Volcano API)
-    async function fetchRealTimeVolcanoes3D() {
+      // B. Volcanoes
       try {
-        const res = await fetch('https://volcanoes.usgs.gov/vsc/api/volcanoApi/geojson', { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if (data && data.features) {
-          liveGlobeVolcanoes = data.features
-            .filter(v => v.geometry && v.geometry.coordinates)
-            .slice(0, 25)
-            .map(v => {
+        const vRes = await fetch('https://volcanoes.usgs.gov/vsc/api/volcanoApi/geojson', { signal: AbortSignal.timeout(5000) });
+        if (vRes.ok) {
+          const vData = await vRes.json();
+          if (vData && vData.features) {
+            vData.features.slice(0, 20).forEach(v => {
               const [lng, lat] = v.geometry.coordinates;
               const props = v.properties || {};
-              return {
+              hazards.push({
                 type: 'volcano',
-                id: String(props.vnum || props.volcanoCd || Math.random()),
-                name: `${props.vName || 'Active Volcano'}`,
+                id: String(props.vnum || Math.random()),
+                name: props.vName || 'Active Volcano',
                 subregion: props.subregion || props.country || 'Global Arc',
-                elevMeters: props.elevation_m || 2500,
-                status: props.obsAbbr ? `Monitored (${props.obsAbbr})` : 'Active / Unrest',
+                elevMeters: props.elevation_m || 2400,
+                status: 'Volcanic Alert / Eruption',
                 lat: lat,
                 lng: lng,
                 altitude: 0.006,
-                color: '#f97316',
-                radius: 0.45,
-                ringColor: () => '#f97316',
-                ringMaxRadius: 5,
-                ringPropagationSpeed: 1.5,
-                ringRepeatPeriod: 1600
-              };
+                markerHtml: `
+                  <div style="filter: drop-shadow(0 0 6px #f97316);">
+                    <i class="fa-solid fa-fire text-[11px] text-orange-500"></i>
+                  </div>
+                `
+              });
             });
+          }
         }
       } catch (e) {}
+
+      liveGlobeHazards = hazards;
     }
 
-    // Renders active layers into the Three.js WebGL canvas
+    // Renders active layers into the 3D Canvas
     function renderActive3DLayers() {
       if (!myGlobe) return;
 
-      let pointsToRender = [];
-      let ringsToRender = [];
+      let objectsToRender = [];
 
       if (globeActiveLayer === 'all' || globeActiveLayer === 'flights') {
-        pointsToRender.push(...liveGlobeFlights);
+        objectsToRender.push(...liveGlobeFlights);
       }
       if (globeActiveLayer === 'all' || globeActiveLayer === 'stations') {
-        pointsToRender.push(...liveGlobeStations);
-      }
-      if (globeActiveLayer === 'all' || globeActiveLayer === 'satellites') {
-        pointsToRender.push(...liveGlobeSatellites);
+        objectsToRender.push(...liveGlobeStations);
       }
       if (globeActiveLayer === 'all' || globeActiveLayer === 'asteroids') {
-        pointsToRender.push(...liveGlobeAsteroids);
+        objectsToRender.push(...liveGlobeAsteroids);
       }
       if (globeActiveLayer === 'all' || globeActiveLayer === 'hazards') {
-        pointsToRender.push(...liveGlobeQuakes);
-        pointsToRender.push(...liveGlobeVolcanoes);
-        ringsToRender.push(...liveGlobeQuakes, ...liveGlobeVolcanoes);
+        objectsToRender.push(...liveGlobeHazards);
       }
 
-      // Feed into 3D WebGL engine
-      myGlobe
-        .pointsData(pointsToRender)
-        .pointLat(d => d.lat)
-        .pointLng(d => d.lng)
-        .pointAltitude(d => d.altitude)
-        .pointColor(d => d.color)
-        .pointRadius(d => d.radius)
-        .ringsData(ringsToRender)
-        .ringLat(d => d.lat)
-        .ringLng(d => d.lng)
-        .ringColor(d => d.ringColor)
-        .ringMaxRadius(d => d.ringMaxRadius)
-        .ringPropagationSpeed(d => d.ringPropagationSpeed)
-        .ringRepeatPeriod(d => d.ringRepeatPeriod);
+      // Feed into Globe.gl HTML layer
+      myGlobe.htmlElementsData(objectsToRender);
     }
 
     function setGlobeLayer(layer, btnEl) {
@@ -1989,13 +1953,12 @@
       renderActive3DLayers();
     }
 
-    // 🚀 SUGGESTION B: FOCUS CAMERA & POPULATE APPLE AEROSPACE HUD
+    // Focus Camera & Display Apple Aerospace HUD on Tap
     function focusAndDisplayHUD(d) {
       if (!d || !myGlobe) return;
 
-      // 1. Smooth 3D camera pan & zoom
-      const zoomAltitude = d.type === 'flight' ? 0.8 : (d.type === 'asteroid' ? 1.8 : 1.2);
-      myGlobe.pointOfView({ lat: d.lat, lng: d.lng, altitude: zoomAltitude }, 1100);
+      const zoomAlt = d.type === 'flight' ? 0.9 : (d.type === 'asteroid' ? 1.6 : 1.2);
+      myGlobe.pointOfView({ lat: d.lat, lng: d.lng, altitude: zoomAlt }, 1100);
 
       const hud = document.getElementById('aerospace-hud');
       const iconBox = document.getElementById('hud-icon-box');
@@ -2015,47 +1978,33 @@
         iconBox.className = "w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold shadow-sm";
         icon.className = "fa-solid fa-plane";
         title.textContent = `${d.callsign} (${d.id.toUpperCase()})`;
-        badge.textContent = `Civilian Air Traffic • ${d.origin}`;
+        badge.textContent = `Civil Aviation • ${d.origin}`;
         badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-cyan-500/20 text-cyan-400";
 
         m1Label.textContent = "Altitude";
         m1Val.textContent = `${d.altMeters} m`;
-        m2Label.textContent = "Ground Speed";
+        m2Label.textContent = "Speed";
         m2Val.textContent = `${d.speedKmh} km/h`;
         m3Label.textContent = "Heading";
         m3Val.textContent = `${d.trackDeg}°`;
 
-        desc.innerHTML = `Live civilian flight tracking via OpenSky Network. Currently navigating at coordinates <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
+        desc.innerHTML = `Live civilian flight tracking via OpenSky Network. Currently flying at coordinates <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
       } else if (d.type === 'station') {
-        iconBox.className = "w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold shadow-sm";
+        const isCSS = d.id === '48274';
+        iconBox.className = `w-8 h-8 rounded-xl ${isCSS ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'} flex items-center justify-center text-sm font-bold shadow-sm`;
         icon.className = "fa-solid fa-satellite";
         title.textContent = d.name;
         badge.textContent = d.agency;
-        badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-amber-500/20 text-amber-400";
+        badge.className = `text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${isCSS ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`;
 
         m1Label.textContent = "Orbital Alt";
         m1Val.textContent = `${d.altKm} km`;
         m2Label.textContent = "Velocity";
         m2Val.textContent = `${d.speedKmh} km/h`;
-        m3Label.textContent = "Orbit Mode";
+        m3Label.textContent = "Orbit";
         m3Val.textContent = "LEO (~92m)";
 
-        desc.innerHTML = `Real-time orbital tracking. Currently crossing Earth at <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>. Altitude: <b>${d.altKm} km</b>.`;
-      } else if (d.type === 'satellite') {
-        iconBox.className = "w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold shadow-sm";
-        icon.className = "fa-solid fa-tower-broadcast";
-        title.textContent = d.name;
-        badge.textContent = `NORAD ID: ${d.id}`;
-        badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-purple-500/20 text-purple-400";
-
-        m1Label.textContent = "Altitude";
-        m1Val.textContent = `${d.altKm} km`;
-        m2Label.textContent = "Speed";
-        m2Val.textContent = `${d.speedKmh} km/h`;
-        m3Label.textContent = "Track Status";
-        m3Val.textContent = "CelesTrak Active";
-
-        desc.innerHTML = `Orbital telemetry propagated in real-time from CelesTrak. Current position: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
+        desc.innerHTML = `Real-time space station orbital tracking. Current position: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>. Altitude: <b>${d.altKm} km</b>.`;
       } else if (d.type === 'asteroid') {
         iconBox.className = "w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shadow-sm";
         icon.className = "fa-solid fa-meteor";
@@ -2065,7 +2014,7 @@
 
         m1Label.textContent = "Miss Distance";
         m1Val.textContent = `${d.distLd} LD`;
-        m2Label.textContent = "Rel Speed";
+        m2Label.textContent = "Speed";
         m2Val.textContent = `${d.speedKmh} km/h`;
         m3Label.textContent = "Est Diameter";
         m3Val.textContent = `~${d.diameterM} m`;
@@ -2073,7 +2022,7 @@
         desc.innerHTML = `NASA Jet Propulsion Laboratory Close Approach Data. Passing Earth at <b>${d.distKm.toLocaleString()} km</b> (${d.distLd} Lunar Distances).`;
       } else if (d.type === 'earthquake') {
         iconBox.className = "w-8 h-8 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-sm font-bold shadow-sm";
-        icon.className = "fa-solid fa-volcano";
+        icon.className = "fa-solid fa-circle-dot";
         title.textContent = d.name;
         badge.textContent = "USGS Real-Time Seismic Event";
         badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-red-500/20 text-red-400";
@@ -2083,9 +2032,9 @@
         m2Label.textContent = "Depth";
         m2Val.textContent = `${d.depthKm} km`;
         m3Label.textContent = "Recorded";
-        m3Val.textContent = "Past 24h";
+        m3Val.textContent = d.timeStr;
 
-        desc.innerHTML = `Location: <b>${d.place}</b>.<br>Occurred at: ${d.timeStr}. Coordinates: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
+        desc.innerHTML = `Location: <b>${d.place}</b>. Coordinates: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
       } else if (d.type === 'volcano') {
         iconBox.className = "w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold shadow-sm";
         icon.className = "fa-solid fa-fire";
@@ -2096,11 +2045,11 @@
         m1Label.textContent = "Elevation";
         m1Val.textContent = `${d.elevMeters} m`;
         m2Label.textContent = "Status";
-        m2Val.textContent = "Unrest / Active";
+        m2Val.textContent = "Active Alert";
         m3Label.textContent = "Region";
         m3Val.textContent = d.subregion.slice(0, 10);
 
-        desc.innerHTML = `Smithsonian / USGS Volcanic Hazards Program. Region: <b>${d.subregion}</b>. Coordinates: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
+        desc.innerHTML = `Smithsonian / USGS Volcanic Hazards Program. Location: <b>${d.subregion}</b>. Coordinates: <b>${d.lat.toFixed(2)}°, ${d.lng.toFixed(2)}°</b>.`;
       }
 
       hud.classList.remove('hidden');
@@ -2110,7 +2059,7 @@
       const hud = document.getElementById('aerospace-hud');
       if (hud) hud.classList.add('hidden');
     }
-  
+    
     /* ==================== REAL-TIME CRICKET ENGINE & MODAL ==================== */
     let currentLiveMatchData = null;
 
