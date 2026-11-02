@@ -44,6 +44,7 @@ async function broadcastDeveloperUpdate() {
     data: {
       title: title,
       body: body,
+      tag: "tc-developer-broadcast",
       url: "https://tastyandcomfort.github.io/news/"
     },
     android: {
