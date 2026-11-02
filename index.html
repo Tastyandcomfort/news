@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <title>T&C News Hub</title>
   
+  <!-- Single Viewport with notch support -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
+  <!-- Single Theme Color matching light background -->
   <meta name="theme-color" content="#ffffff">
 
   <!-- PWA Settings -->
@@ -21,14 +24,12 @@
     }
   </script>
 
-  <!-- High-Speed Preconnects -->
+  <!-- Fast Network Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://img.youtube.com" crossorigin>
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
-  <link rel="dns-prefetch" href="https://embed.windy.com">
-  <link rel="dns-prefetch" href="https://earthquake.usgs.gov">
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- Tailwind CSS -->
@@ -64,6 +65,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* Smooth scrolling & layout stability */
     html {
       scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
@@ -71,8 +73,12 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hardware-accelerated touch momentum scrolling */
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -83,21 +89,22 @@
       overscroll-behavior-y: contain;
     }
     
-    /* Apple Theme Variables */
+    /* Apple Light Theme (DEFAULT) */
     :root {
       --bg-main: #f5f5f7;
       --bg-card: rgba(255, 255, 255, 0.94);
-      --bg-sub: #e8e8ed;
+      --bg-sub: #e5e5ea;
       --bg-pill-active: #ffffff;
       --text-main: #1d1d1f;
       --text-sub: #86868b;
-      --border-color: rgba(0, 0, 0, 0.08);
+      --border-color: rgba(0, 0, 0, 0.1);
       --header-bg: rgba(255, 255, 255, 0.94);
-      --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      --solar-pill-bg: rgba(255, 255, 255, 0.9);
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --solar-pill-bg: rgba(255, 255, 255, 0.65);
       --solar-pill-border: rgba(0, 0, 0, 0.1);
     }
 
+    /* Apple Dark Theme */
     .dark {
       --bg-main: #000000;
       --bg-card: rgba(28, 28, 30, 0.94);
@@ -106,10 +113,10 @@
       --text-main: #f5f5f7;
       --text-sub: #a1a1a6;
       --border-color: rgba(255, 255, 255, 0.12);
-      --header-bg: rgba(18, 18, 20, 0.94);
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      --solar-pill-bg: rgba(30, 30, 35, 0.9);
-      --solar-pill-border: rgba(255, 255, 255, 0.14);
+      --header-bg: rgba(0, 0, 0, 0.94);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --solar-pill-bg: rgba(30, 30, 35, 0.65);
+      --solar-pill-border: rgba(255, 255, 255, 0.12);
     }
 
     body {
@@ -122,6 +129,7 @@
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
+      contain: layout paint;
     }
 
     .apple-header {
@@ -130,11 +138,11 @@
     }
 
     .logo-anchored-pill {
-      background: rgba(0, 113, 227, 0.95);
+      background: rgba(0, 113, 227, 0.9);
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3);
-      transition: transform 0.25s ease;
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .apple-solar-pill {
@@ -145,7 +153,8 @@
       background: var(--solar-pill-bg);
       border: 1px solid var(--solar-pill-border);
       border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
     }
 
     .solar-item {
@@ -161,10 +170,18 @@
       flex-shrink: 0;
     }
 
-    .sf-sunrise { color: #ff9f0a; }
-    .sf-sunset { color: #ff453a; }
+    .sf-sunrise {
+      color: #ff9f0a;
+      filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5));
+    }
+
+    .sf-sunset {
+      color: #ff453a;
+      filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5));
+    }
 
     .solar-time {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
       font-size: 0.73rem;
       font-weight: 600;
       color: var(--text-main);
@@ -183,7 +200,7 @@
       border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 10px 14px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
       line-height: 1.4;
       max-width: 190px;
       pointer-events: auto;
@@ -196,6 +213,7 @@
       cursor: pointer;
       padding: 3px 6px;
       border-radius: 8px;
+      transition: background 0.2s;
     }
     .legend-item:hover {
       background: var(--bg-sub);
@@ -207,13 +225,13 @@
     
     .pulse-gold {
       background-color: #ffcc00;
-      border-radius: 50%;
-      animation: pulseGold 2s infinite ease-in-out;
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+      animation: pulseGold 2s infinite;
     }
     @keyframes pulseGold {
-      0% { opacity: 0.5; transform: scale(0.92); }
-      50% { opacity: 1; transform: scale(1.08); }
-      100% { opacity: 0.5; transform: scale(0.92); }
+      0% { opacity: 0.5; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.5; transform: scale(0.95); }
     }
 
     .live-dot {
@@ -222,28 +240,66 @@
       background-color: #34c759;
       border-radius: 50%;
       display: inline-block;
-      animation: pulseGreen 1.8s infinite ease-in-out;
+      box-shadow: 0 0 8px #34c759;
+      animation: pulseGreen 1.5s infinite ease-in-out;
     }
     @keyframes pulseGreen {
-      0% { opacity: 0.45; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.15); }
-      100% { opacity: 0.45; transform: scale(0.9); }
+      0% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
+      50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 12px #34c759; }
+      100% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
     }
 
-    .desktop-scrollbar::-webkit-scrollbar { height: 6px; display: block; }
-    .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
-    .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
+    .desktop-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      display: block;
+    }
+    .desktop-scrollbar::-webkit-scrollbar-track {
+      background: var(--bg-sub);
+      border-radius: 10px;
+    }
+    .desktop-scrollbar::-webkit-scrollbar-thumb {
+      background: #0071e3;
+      border-radius: 10px;
+    }
+    .desktop-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #005bb5;
+    }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    .scope-btn.active-scope, .tab-btn.active-tab {
+    .scope-btn.active-scope {
       background: #0071e3 !important;
       color: #ffffff !important;
       font-weight: 700;
-      box-shadow: 0 3px 10px rgba(0, 113, 227, 0.3);
+      border-color: #0071e3 !important;
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35);
     }
 
+    .tab-btn.active-tab {
+      background-color: #0071e3 !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+    }
+
+    .tc-subtle-watermark {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+
+    /* Apple-Style iOS Toggle Switches */
     .apple-switch {
       position: relative;
       display: inline-block;
@@ -255,13 +311,13 @@
     .apple-slider {
       position: absolute; cursor: pointer; inset: 0;
       background-color: rgba(120, 120, 128, 0.3);
-      transition: .2s ease;
+      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 9999px;
     }
     .apple-slider:before {
       position: absolute; content: ""; height: 20px; width: 20px;
       left: 3px; bottom: 3px; background-color: #ffffff;
-      transition: .2s ease;
+      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 50%;
       box-shadow: 0 2px 5px rgba(0,0,0,0.25);
     }
@@ -269,6 +325,7 @@
     input:checked + .apple-slider:before { transform: translateX(18px); }
     input:disabled + .apple-slider { opacity: 0.65; cursor: not-allowed; }
 
+    /* Interactive Sub-Question Pills */
     .choice-pill {
       padding: 5px 12px;
       border-radius: 9999px;
@@ -278,16 +335,16 @@
       background: var(--bg-sub);
       color: var(--text-main);
       cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
-      white-space: nowrap;
+      transition: all 0.2s;
     }
     .choice-pill.selected {
       background: #0071e3 !important;
       color: #ffffff !important;
       border-color: #0071e3 !important;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
     }
 
-    /* Apple-Style Sliding Carousel */
+    /* ==================== APPLE-YOUTUBE SLIDING THUMBNAIL SYSTEM ==================== */
     .channel-carousel-wrap {
       position: relative;
       width: 100%;
@@ -401,20 +458,19 @@
       .carousel-nav-btn { display: none; }
     }
 
-    /* ==================== RESIZABLE & ANY-POINT DRAGGABLE FLOATING PIP PLAYER ==================== */
-    #persistent-player-hub {
-      width: 100%;
+    /* ==================== ZERO-RELOAD DRAGGABLE & RESIZABLE PIP PLAYER ==================== */
+    #pip-player-wrapper {
       position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
       background: #000000;
       border-radius: 16px;
       overflow: hidden;
       border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-      transition: border-radius 0.2s ease;
     }
 
-    /* Floating Picture-in-Picture State */
-    #persistent-player-hub.tc-floating-pip {
+    /* Picture-in-Picture Floating Mode */
+    #pip-player-wrapper.tc-floating-pip {
       position: fixed !important;
       z-index: 99999 !important;
       min-width: 150px !important;
@@ -423,13 +479,13 @@
       max-height: 520px !important;
       border-radius: 14px !important;
       border: 2px solid #0071e3 !important;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7) !important;
       touch-action: none;
       user-select: none;
     }
 
-    /* Transparent drag layer that catches touches and clicks from ANY point of the player */
-    .pip-gesture-layer {
+    /* Drag Touch Layer over entire floating player */
+    .pip-touch-layer {
       position: absolute;
       inset: 0;
       z-index: 30;
@@ -438,11 +494,11 @@
       display: none;
     }
 
-    #persistent-player-hub.tc-floating-pip .pip-gesture-layer {
+    #pip-player-wrapper.tc-floating-pip .pip-touch-layer {
       display: block;
     }
 
-    .pip-gesture-layer:active {
+    .pip-touch-layer:active {
       cursor: grabbing;
     }
 
@@ -462,8 +518,8 @@
       pointer-events: auto;
     }
 
-    /* Corner Resize Grip for Laptops */
-    .pip-resize-handle {
+    /* Corner Resize Grip for Laptop Mouse */
+    .pip-resize-grip {
       position: absolute;
       bottom: 0;
       right: 0;
@@ -475,20 +531,35 @@
       touch-action: none;
     }
 
-    #persistent-player-hub.tc-floating-pip .pip-resize-handle {
+    #pip-player-wrapper.tc-floating-pip .pip-resize-grip {
       display: block;
     }
 
-    .pip-resize-handle::after {
+    .pip-resize-grip::after {
       content: '';
       position: absolute;
       right: 4px;
       bottom: 4px;
       width: 8px;
       height: 8px;
-      border-right: 2.5px solid rgba(255, 255, 255, 0.85);
-      border-bottom: 2.5px solid rgba(255, 255, 255, 0.85);
+      border-right: 2.5px solid rgba(255, 255, 255, 0.9);
+      border-bottom: 2.5px solid rgba(255, 255, 255, 0.9);
       border-radius: 1px;
+    }
+
+    /* When PiP is floating, keep TV&Media card invisible without display:none so iframe never reloads */
+    #tv-media-parent-card.pip-floating-state {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      height: 0 !important;
+      pointer-events: none !important;
+    }
+
+    #tv-media-parent-card.pip-floating-state .hide-on-pip {
+      display: none !important;
     }
   </style>
 </head>
@@ -496,7 +567,7 @@
 
   <!-- ==================== APPLE NOTIFICATION PREFERENCES MODAL ==================== -->
   <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-md transition-all overflow-y-auto">
-    <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto">
+    <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto animate-in fade-in zoom-in duration-200">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
@@ -564,6 +635,7 @@
               <span class="apple-slider"></span>
             </label>
           </div>
+          <!-- Unfolded Question: City Selection -->
           <div id="sub-q-weather" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
             <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Your Weather Alert City:</p>
             <div class="flex flex-wrap gap-1.5" id="weather-city-pills">
@@ -591,13 +663,14 @@
               <span class="apple-slider"></span>
             </label>
           </div>
+          <!-- Unfolded Question: Job Preferences -->
           <div id="sub-q-jobs" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
             <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Your Preference or Sector:</p>
             <div class="flex flex-wrap gap-1.5" id="job-sector-pills">
-              <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected">Freshers / Any Degree</button>
-              <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill">IT &amp; Tech</button>
-              <button type="button" onclick="selectChoicePill('job-sector', 'Govt & Banking Exams', this)" class="choice-pill">Govt &amp; Banking</button>
-              <button type="button" onclick="selectChoicePill('job-sector', 'Healthcare & Medical', this)" class="choice-pill">Healthcare</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected"> Freshers / Any Degree</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill"> IT &amp; Tech</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'Govt & Banking Exams', this)" class="choice-pill"> Govt &amp; Banking</button>
+              <button type="button" onclick="selectChoicePill('job-sector', 'Healthcare & Medical', this)" class="choice-pill"> Healthcare</button>
             </div>
           </div>
         </div>
@@ -617,11 +690,12 @@
               <span class="apple-slider"></span>
             </label>
           </div>
+          <!-- Unfolded Question: Space Alert Frequency -->
           <div id="sub-q-iss" class="hidden mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
             <p class="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5"><i class="fa-solid fa-telescope"></i> Sighting Preference:</p>
             <div class="flex flex-wrap gap-1.5" id="iss-pref-pills">
-              <button type="button" onclick="selectChoicePill('iss-pref', 'Night Passes Only', this)" class="choice-pill selected">Naked-Eye Night Passes</button>
-              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">All Rocket &amp; Space Events</button>
+              <button type="button" onclick="selectChoicePill('iss-pref', 'Night Passes Only', this)" class="choice-pill selected"> Naked-Eye Night Passes</button>
+              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill"> All Rocket &amp; Space Events</button>
             </div>
           </div>
         </div>
@@ -700,14 +774,15 @@
     </div>
   </div>
 
-  <!-- TOP APPLE HEADER -->
+  <!-- TOP APPLE HEADER (MODEL 1 + PERSISTENT NOTIFICATION BELL) -->
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
+      <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
       <div class="relative flex flex-col items-center md:items-start gap-1">
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
           <div class="relative flex items-center justify-center">
-            <div class="w-3 h-3 pulse-gold"></div>
+            <div class="w-3 h-3 rounded-full pulse-gold"></div>
           </div>
           <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
             <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
@@ -717,16 +792,18 @@
 
         <div id="dynamic-island-wrapper" class="hidden absolute top-10 left-0 z-40 cursor-pointer transition-all duration-300 transform" onclick="openAnnouncementModal()">
           <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2 hover:scale-105">
-            <span class="live-dot bg-amber-400"></span>
+            <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
             <span class="text-[10px] font-bold tracking-wide flex items-center gap-1 whitespace-nowrap">
               <i class="fa-solid fa-bullhorn text-[9px]"></i> T&C Update
             </span>
-            <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full">1</span>
+            <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full flex-shrink-0">1</span>
           </div>
         </div>
       </div>
 
+      <!-- Center: Solar Pill & Right: Utility Cluster (Lang + Persistent Bell + Theme) -->
       <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
+        <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
         <div class="apple-solar-pill" id="apple-solar-pill">
           <div class="solar-item" title="Sunrise">
             <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -749,32 +826,36 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5 p-1 rounded-full shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+        <!-- 🚀 UNIFIED UTILITY CLUSTER (Language + Persistent Bell + Theme) -->
+        <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <!-- Language Selector -->
           <div class="relative" id="lang-menu-wrapper">
-            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="color: var(--text-main);">
+            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
               <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
               <span id="current-lang-code">EN</span>
               <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
             </button>
             <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
-              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
-              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
-              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
-              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
-              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
-              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
+              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
+              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
+              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
+              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
+              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
             </div>
           </div>
 
-          <div class="h-3.5 w-[1px] bg-black/10 dark:bg-white/10"></div>
+          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
 
-          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center active:scale-90" title="Notification Preferences">
+          <!-- 🔔 PERSISTENT NOTIFICATION SETTINGS BELL BUTTON -->
+          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
             <i class="fa-solid fa-bell text-xs text-amber-500"></i>
           </button>
 
-          <div class="h-3.5 w-[1px] bg-black/10 dark:bg-white/10"></div>
+          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
 
-          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center active:scale-90" title="Toggle Theme">
+          <!-- Theme Button -->
+          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
             <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
           </button>
         </div>
@@ -783,20 +864,21 @@
 
     </div>
 
-    <!-- 4-TAB NAVIGATION BAR -->
+    <!-- 🚀 4-TAB NAVIGATION BAR (Headlines • TV & Media • Radar • Find Jobs) -->
     <div class="max-w-xl mx-auto mt-2.5 px-2">
       <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
-        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
-        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
-        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
+        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
+        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
       </nav>
     </div>
   </header>
 
-  <!-- LIVE CRICKET SCORE MODAL -->
-  <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 transition-all">
-    <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30">
+  <!-- LIVE CRICKET SCORE & COMMENTARY MODAL -->
+  <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all">
+    <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30 animate-in fade-in zoom-in duration-200">
+      
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold">
@@ -831,26 +913,32 @@
       </div>
 
       <div class="p-3.5 rounded-2xl border mb-5 space-y-1.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-green-500">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>Match Status &amp; Commentary</span>
+        </div>
         <p id="modal-match-summary" class="text-xs leading-relaxed font-medium" style="color: var(--text-main);">
           Connecting to match broadcast feed...
         </p>
       </div>
 
-      <button onclick="fetchLiveCricketTicker(true)" class="w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh Live Score
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="fetchLiveCricketTicker(true)" class="w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh Live Score
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- LIVE REAL-TIME TICKER -->
-  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
+  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
         <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
         <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
-        <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="View live commentary">
+        <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
           <i class="fa-solid fa-baseball-bat-ball"></i> Live Cricket: <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b> 
-          <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
+          <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
             <i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i>
           </button>
         </span>
@@ -883,9 +971,9 @@
 
           <div class="apple-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1 sm:pb-0">
-              <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
-              <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
-              <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
+              <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
+              <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
+              <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
             </div>
 
             <div class="flex items-center gap-2">
@@ -893,7 +981,7 @@
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
                 <input type="date" id="news-date-picker" onchange="onDateFilterChange()" class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);">
               </div>
-              <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
+              <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
                 <i id="refresh-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
@@ -910,97 +998,79 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 2: TV & MEDIA ==================== -->
+        <!-- ==================== TAB 2: TV & MEDIA (SMOOTH & ZERO-RELOAD PIP) ==================== -->
         <section id="view-video" class="hidden flex-col gap-6">
-          <div class="apple-card p-4 sm:p-6 relative">
+          <div id="tv-media-parent-card" class="apple-card p-4 sm:p-5 relative transition-all">
             
-            <div class="mb-4">
+            <div class="mb-4 hide-on-pip">
               <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-2">
                   <span id="live-indicator" class="live-dot" style="display: none;"></span>
-                  <h3 id="current-channel-title" class="text-base font-extrabold text-blue-500">25+ Live Channels</h3>
-                  <span id="channel-cat-pill" class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold hidden">NEWS</span>
+                  <h3 id="current-channel-title" class="text-base font-bold text-blue-500" data-i18n="networks">20+ Channels</h3>
+                  <span id="channel-tag-pill" class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold hidden">LIVE</span>
                 </div>
-                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap thumbnail to stream</span>
+                <span class="text-[10px] text-[var(--text-sub)]"><i class="fa-solid fa-circle-play text-red-500 mr-1"></i>Select channel below</span>
               </div>
-
-              <!-- Default Prompt Screen when no channel is playing -->
-              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all mb-4" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
-                  <i class="fa-solid fa-play"></i>
-                </div>
-                <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Live Continuous Streaming</h4>
-                <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
-                  Select any channel below to play. The stream floats as an interactive, draggable &amp; resizable Picture-in-Picture window if you browse other tabs.
-                </p>
-              </div>
-
-              <!-- ==================== PERSISTENT ZERO-RELOAD PLAYER ==================== -->
-              <!-- Sits inline here in TV & Media, and floats when browsing to Headlines/Radar/Jobs -->
-              <div id="persistent-player-hub" class="hidden">
-                
-                <!-- Floating Mini Drag & Action Bar (Visible in PiP mode) -->
-                <div id="pip-top-bar" class="hidden">
-                  <div class="flex items-center gap-2 overflow-hidden pr-2">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
-                    <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
-                  </div>
-                  <div class="flex items-center gap-2 flex-shrink-0">
-                    <button type="button" onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Expand to TV & Media">
-                      <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-                    </button>
-                    <button type="button" onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
-                      <i class="fa-solid fa-xmark"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Full-surface interactive drag touch layer in PiP mode -->
-                <div id="pip-drag-layer" class="pip-gesture-layer"></div>
-                <!-- Laptop corner resize handle -->
-                <div id="pip-resize-corner" class="pip-resize-handle"></div>
-
-                <!-- Video Frames: Clean Single Watermark Only -->
-                <div class="w-full h-full relative aspect-video" id="player-aspect-wrapper">
-                  <iframe id="master-video-player" class="w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-                  
-                  <video id="file-video-player" class="hidden w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
-                    <source src="videos/sample-video.mp4" type="video/mp4">
-                    Your browser does not support HTML5 video playback.
-                  </video>
-                </div>
-              </div>
-
             </div>
 
-            <!-- Apple-Style Smooth Sliding Carousel -->
-            <div class="pt-4 border-t border-[var(--border-color)]">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                <div class="flex items-center gap-2">
-                  <i class="fa-solid fa-circle-play text-red-500 text-sm"></i>
-                  <h4 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-main);">Live Stream Channels</h4>
-                  <span class="text-[10px] bg-red-500/10 text-red-500 font-extrabold px-2 py-0.5 rounded-full">25 STATIONS</span>
-                </div>
+            <!-- Default prompt screen before any channel is played -->
+            <div id="text-view" class="p-6 rounded-xl text-center text-xs hide-on-pip mb-4" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);" data-i18n="selectChannelPrompt">
+              Select any live broadcast or media channel above to watch the continuous stream.
+            </div>
 
-                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                  <button onclick="filterMediaCarousel('all', this)" class="choice-pill selected">All</button>
-                  <button onclick="filterMediaCarousel('news', this)" class="choice-pill">News</button>
-                  <button onclick="filterMediaCarousel('space', this)" class="choice-pill">Space &amp; Air</button>
-                  <button onclick="filterMediaCarousel('devotional', this)" class="choice-pill">Devotional</button>
-                  <button onclick="filterMediaCarousel('special', this)" class="choice-pill">Special</button>
+            <!-- ==================== PERSISTENT HARDWARE-ACCELERATED VIDEO PLAYER ==================== -->
+            <div id="pip-player-wrapper" class="hidden relative">
+              
+              <!-- Floating Mini Action Bar (Visible only when in floating PiP mode) -->
+              <div id="pip-top-bar" class="hidden">
+                <div class="flex items-center gap-1.5 overflow-hidden pr-2">
+                  <span class="live-dot bg-red-500 shadow-red-500"></span>
+                  <span id="pip-title-text" class="text-[11px] font-bold truncate">Live Stream</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button type="button" onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] text-white transition-all" title="Return to TV & Media">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                  </button>
+                  <button type="button" onclick="closeLivePlayer()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] text-white transition-all" title="Close Video">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Full-surface touch drag layer (Catches drags from ANY point of the player) -->
+              <div id="pip-drag-touch-layer" class="pip-touch-layer" title="Drag anywhere to move • Double-tap to expand"></div>
+              <!-- Laptop mouse corner resize grip -->
+              <div id="pip-corner-grip" class="pip-resize-grip" title="Drag to resize"></div>
+
+              <!-- Clean Video Stream Frame: Single Watermark Only (Native Channel Logo) -->
+              <iframe id="master-video-player" class="w-full h-full border-0 block" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+              <video id="file-video-player" class="hidden w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
+                <source src="videos/sample-video.mp4" type="video/mp4">
+                Your browser does not support video playback.
+              </video>
+            </div>
+
+            <!-- Apple-Style Smooth Sliding Carousel with Channel Thumbnails -->
+            <div class="pt-4 border-t border-[var(--border-color)] hide-on-pip mt-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-play-circle text-red-500 text-sm"></i>
+                  <h4 class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-main);">Live Stream Channels</h4>
+                  <span class="text-[9px] bg-red-500/10 text-red-500 font-extrabold px-1.5 py-0.5 rounded-full">25 CHANNELS</span>
                 </div>
               </div>
 
               <div class="channel-carousel-wrap">
-                <button onclick="scrollChannelCarousel(-1)" class="carousel-nav-btn carousel-nav-prev" title="Previous">
+                <button onclick="scrollChannelCarousel(-1)" class="carousel-nav-btn carousel-nav-prev" title="Scroll Left">
                   <i class="fa-solid fa-chevron-left text-xs"></i>
                 </button>
 
                 <div id="channel-carousel-track" class="channel-track no-scrollbar">
-                  <!-- Populated dynamically via JS -->
+                  <!-- Generated dynamically via JS -->
                 </div>
 
-                <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Next">
+                <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Scroll Right">
                   <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
               </div>
@@ -1009,26 +1079,26 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 3: RADAR & OSINT MAP (NO WATERMARK OSM) ==================== -->
+        <!-- TAB 3: UNIFIED RADAR & OSINT COMMAND CENTER -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b" style="border-color: var(--border-color);">
-              <div class="flex items-center gap-2.5">
-                <i id="radar-title-icon" class="fa-solid fa-cloud-sun-rain text-blue-500 text-xl"></i>
+              <div class="flex items-center gap-2">
+                <i id="radar-title-icon" class="fa-solid fa-cloud-sun-rain text-blue-500 text-lg"></i>
                 <div>
                   <h2 id="radar-main-title" class="text-base font-bold" style="color: var(--text-main);">Live Weather Radar</h2>
-                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time Doppler radar &amp; orbital tracking</p>
+                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time meteorological &amp; orbital tracking</p>
                 </div>
                 <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2 py-0.5 rounded-full font-bold ml-2 flex items-center gap-1">
                   <span class="live-dot" style="width:6px;height:6px;"></span> Live
                 </span>
               </div>
 
-              <div class="flex items-center p-1 rounded-xl self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-                <button id="btn-radar-weather" onclick="switchRadarMap('weather')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active-tab" style="background-color: #0071e3; color: #ffffff;">
+              <div class="flex items-center p-1 rounded-xl backdrop-blur-md self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+                <button id="btn-radar-weather" onclick="switchRadarMap('weather')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active-tab" style="background-color: #0071e3; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);">
                   <i class="fa-solid fa-cloud-sun-rain"></i>
-                  <span>Weather Radar</span>
+                  <span>Weather</span>
                 </button>
                 <button id="btn-radar-flight" onclick="switchRadarMap('flight')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5" style="background-color: transparent; color: var(--text-sub);">
                   <i class="fa-solid fa-plane-departure"></i>
@@ -1037,22 +1107,16 @@
               </div>
             </div>
 
-            <div id="weather-layer-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-3">
-              <span class="text-[10px] font-bold text-amber-500 mr-1"><i class="fa-solid fa-sliders"></i> Mode:</span>
-              <button onclick="setWindyLayer('radar', this)" class="choice-pill selected">🌧️ Doppler Rain Radar</button>
-              <button onclick="setWindyLayer('wind', this)" class="choice-pill">💨 Wind Streams</button>
-              <button onclick="setWindyLayer('satellite', this)" class="choice-pill">🛰️ Satellite Clouds</button>
-              <button onclick="setWindyLayer('temp', this)" class="choice-pill">🌡️ Temperature</button>
-            </div>
-
-            <div class="relative w-full h-[430px] sm:h-[480px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub); contain: strict;">
+            <div class="relative w-full h-[400px] sm:h-[460px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub);">
               
-              <div id="radar-frame-weather" class="absolute inset-0 w-full h-full">
-                <iframe id="windy-radar-iframe" width="100%" height="100%" src="about:blank" frameborder="0" class="w-full h-full border-0 block" allow="geolocation"></iframe>
+              <div id="radar-frame-weather" class="w-full h-full relative">
+                <div class="tc-subtle-watermark">T&amp;C METEO RADAR</div>
+                <iframe width="100%" height="100%" src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0" class="w-full h-full"></iframe>
               </div>
 
-              <div id="radar-frame-flight" class="absolute inset-0 w-full h-full" style="display: none;">
-                <div id="osint-map" class="w-full h-full" style="min-height: 100%;"></div>
+              <div id="radar-frame-flight" class="w-full h-full relative" style="display: none;">
+                <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
+                <div id="osint-map" class="w-full h-full"></div>
               </div>
 
             </div>
@@ -1066,7 +1130,7 @@
           </div>
         </section>
 
-        <!-- TAB 4: FIND JOBS -->
+        <!-- 🚀 TAB 4: FIND JOBS (NEW CAREER & VACANCY ENGINE) -->
         <section id="view-jobs" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
@@ -1084,6 +1148,7 @@
               </span>
             </div>
 
+            <!-- Job Sector Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-4">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
               <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
@@ -1092,6 +1157,7 @@
               <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
             </div>
 
+            <!-- Live Job Postings Container -->
             <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1">
               <div class="text-center py-10 text-xs" style="color: var(--text-sub);">
                 <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...
@@ -1116,8 +1182,8 @@
         <div class="apple-card p-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="factCheck">Fact-Check Portal</span></h3>
           <div class="flex flex-col gap-2 text-xs">
-            <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
-            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
           </div>
         </div>
 
@@ -1146,7 +1212,6 @@
     let currentJobSector = 'all';
     let currentTab = 'news';
     let isMediaPlaying = false;
-    let isWindyLoaded = false;
     
     const todayObj = new Date();
     const REAL_TODAY_DATE = todayObj.toISOString().split('T')[0];
@@ -1157,37 +1222,36 @@
     let issHistoryCoords = [];
     let flightLayerGroup = null;
     let flightPolylineGroup = null;
-    const flightMarkerMap = new Map();
 
     const translationCache = {};
 
-    /* Master Channels Database */
-    const masterChannelsList = [
-      { id: 'v6', name: 'V6 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: '28IZl9iM-EE' },
-      { id: 'tv9', name: 'TV9 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: 'II_m28Bm-iM' },
-      { id: 'abcnews', name: 'ABC News Live', genre: 'news', tag: 'WORLD', catName: 'Global News', ytId: 'KQhNZQ_Uag8' },
-      { id: 'bloomberg', name: 'Bloomberg Live', genre: 'news', tag: 'FINANCE', catName: 'Markets & Economy', ytId: 'QB5BNdBFujE' },
-      { id: 'aljazeera', name: 'Al Jazeera Live', genre: 'news', tag: 'GLOBAL', catName: 'International', ytId: 'gCNeDWCI0vo' },
-      { id: 'foxnews', name: 'Fox News Live', genre: 'news', tag: 'US NEWS', catName: 'Live Headlines', ytId: 'C96oohpWBGw' },
-      { id: 'france24', name: 'France24 Live', genre: 'news', tag: 'FRANCE', catName: 'World Feed', ytId: 'HvZt-nh9sGg' },
-      { id: 'cnbc', name: 'CNBC Live', genre: 'news', tag: 'FINANCE', catName: 'Business News', ytId: '1_Ih0JYmkjI' },
-      { id: 'skynews', name: 'Sky News Live', genre: 'news', tag: 'UK NEWS', catName: 'Breaking Stream', ytId: 'umLWFz4izTM' },
-      { id: 'cnn', name: 'CNN Live', genre: 'news', tag: 'US NEWS', catName: 'International', ytId: 'GotlA1KKWoo' },
-      { id: 'nasa', name: 'NASA TV Live', genre: 'space', tag: 'SPACE', catName: 'Deep Space', ytId: 'OKQEMp2555A' },
-      { id: 'starbase', name: 'Starbase Live', genre: 'space', tag: 'SPACEX', catName: 'Starship Cam', ytId: 'mhJRzQsLZGg' },
-      { id: 'lasvegasairside', name: 'Las Vegas Airside', genre: 'space', tag: 'AIRPORT', catName: 'Runway Live', ytId: 'V7_orOtu-oo' },
-      { id: 'heathrowairside', name: 'Heathrow Airside', genre: 'space', tag: 'LONDON', catName: 'Air Traffic', ytId: 'uDBYuEV4zjI' },
-      { id: 'laxairside', name: 'LAX Airside Live', genre: 'space', tag: 'LOS ANGELES', catName: 'Aviation Stream', ytId: 'n4I0d44oBEs' },
-      { id: 'lga-newyorkairside', name: 'LGA NY Airside', genre: 'space', tag: 'NEW YORK', catName: 'Airport Live', ytId: 'T_QsY01tIK0' },
-      { id: 'wildlife', name: 'WildEarth Live', genre: 'special', tag: 'SAFARI', catName: 'Nature Cam', ytId: 'MiQe9ob9aDc' },
-      { id: 'sports', name: 'Sports Action Live', genre: 'special', tag: 'SPORTS', catName: 'Athletics & Games', ytId: 'fE_xxKiCHO0' },
-      { id: 'music', name: 'Lofi Relaxing Music', genre: 'special', tag: 'CHILL', catName: '24/7 Beats', ytId: 'VdG_RC1POC8' },
-      { id: 'hindu', name: 'Bhagavad Gita', genre: 'devotional', tag: 'SPIRITUAL', catName: 'Vedic Wisdom', ytId: 'FFtPSPByBmk' },
-      { id: 'muslim', name: 'Holy Quran Live', genre: 'devotional', tag: 'MAKKAH', catName: 'Sacred Recitation', ytId: '_1FpcN1U_KY' },
-      { id: 'christian', name: 'Holy Bible Sermons', genre: 'devotional', tag: 'GOSPEL', catName: 'Scripture Stream', ytId: 'dmgsOBr2lAA' },
-      { id: 'law', name: 'Indian Constitution', genre: 'special', tag: 'CIVICS', catName: 'Legal & Rights', ytId: 'U71NrLiWWjI' },
-      { id: 't&c', name: 'T&C Studio Special', genre: 'special', tag: 'T&C HUB', catName: 'Original Productions', ytId: 'IzOOvR-XzAg' },
-      { id: 'file', name: 'T&C Media Vault', genre: 'special', tag: 'LOCAL', catName: 'Custom Video Player', ytId: null }
+    /* 25 Channels Master Registry with Direct HD Thumbnails */
+    const masterVideoChannels = [
+      { id: 'v6', name: 'V6 Live News', tag: 'TELUGU', cat: 'Telugu News', ytId: '28IZl9iM-EE' },
+      { id: 'tv9', name: 'TV9 Live News', tag: 'TELUGU', cat: 'Telugu News', ytId: 'II_m28Bm-iM' },
+      { id: 'abcnews', name: 'ABC News Live', tag: 'WORLD', cat: 'Global News', ytId: 'KQhNZQ_Uag8' },
+      { id: 'bloomberg', name: 'Bloomberg Live', tag: 'FINANCE', cat: 'Business & Markets', ytId: 'QB5BNdBFujE' },
+      { id: 'aljazeera', name: 'Al Jazeera Live', tag: 'WORLD', cat: 'International', ytId: 'gCNeDWCI0vo' },
+      { id: 'foxnews', name: 'Fox News Live', tag: 'US', cat: 'Live Headlines', ytId: 'C96oohpWBGw' },
+      { id: 'france24', name: 'France24 Live', tag: 'WORLD', cat: 'International Feed', ytId: 'HvZt-nh9sGg' },
+      { id: 'cnbc', name: 'CNBC Live', tag: 'FINANCE', cat: 'Economy & Markets', ytId: '1_Ih0JYmkjI' },
+      { id: 'skynews', name: 'Sky News Live', tag: 'UK', cat: 'Global Headlines', ytId: 'umLWFz4izTM' },
+      { id: 'cnn', name: 'CNN Live', tag: 'US', cat: 'Breaking News', ytId: 'GotlA1KKWoo' },
+      { id: 'nasa', name: 'NASA Live', tag: 'SPACE', cat: 'Deep Space Mission', ytId: 'OKQEMp2555A' },
+      { id: 'starbase', name: 'Starbase Live', tag: 'SPACE', cat: 'SpaceX Starship Cam', ytId: 'mhJRzQsLZGg' },
+      { id: 'heathrowairside', name: 'Heathrow Airside', tag: 'AIRPORT', cat: 'London Heathrow Cam', ytId: 'uDBYuEV4zjI' },
+      { id: 'laxairside', name: 'LAX Airside', tag: 'AIRPORT', cat: 'Los Angeles Runway', ytId: 'n4I0d44oBEs' },
+      { id: 'lasvegasairside', name: 'Lasvegas Airside', tag: 'AIRPORT', cat: 'Runway Live Cam', ytId: 'V7_orOtu-oo' },
+      { id: 'lga-newyorkairside', name: 'LGA-New York Airside', tag: 'AIRPORT', cat: 'New York LaGuardia', ytId: 'T_QsY01tIK0' },
+      { id: 'wildlife', name: 'Wild Live', tag: 'NATURE', cat: 'Nature & Wildlife', ytId: 'MiQe9ob9aDc' },
+      { id: 'sports', name: 'Sports Live', tag: 'SPORTS', cat: 'Live Sports Feed', ytId: 'fE_xxKiCHO0' },
+      { id: 'music', name: 'Music', tag: 'CHILL', cat: 'Relaxing 24/7 Beats', ytId: 'VdG_RC1POC8' },
+      { id: 'hindu', name: 'Bhagavat Geetha', tag: 'SPIRITUAL', cat: 'Vedic Discourses', ytId: 'FFtPSPByBmk' },
+      { id: 'muslim', name: 'Quran', tag: 'SPIRITUAL', cat: 'Makkah Live Stream', ytId: '_1FpcN1U_KY' },
+      { id: 'christian', name: 'Bible', tag: 'SPIRITUAL', cat: 'Gospel Broadcast', ytId: 'dmgsOBr2lAA' },
+      { id: 'law', name: 'Constitution', tag: 'LAW', cat: 'Civic & Legal Studies', ytId: 'U71NrLiWWjI' },
+      { id: 't&c', name: 'T&C', tag: 'ORIGINAL', cat: 'T&C Production', ytId: 'IzOOvR-XzAg' },
+      { id: 'file', name: 'Media', tag: 'LOCAL', cat: 'Local Video Streaming', ytId: null }
     ];
 
     const i18n = {
@@ -1311,13 +1375,16 @@
       fetchPortalNews();
       fetchRealTimeForex();
       fetchLiveCricketTicker();
-      initMediaChannelsCarousel();
+      initOSINTMap();
+      initISSTracker();
       initISSManifest();
+      fetchLiveAirTraffic();
       fetchLiveJobs();
-      initPiPAnyPointGestures();
+      initChannelThumbnailsCarousel();
+      initPiPInteractions();
 
-      setInterval(fetchLiveAirTraffic, 35000);
-      setInterval(fetchLiveCricketTicker, 30000);
+      setInterval(fetchLiveAirTraffic, 20000);
+      setInterval(fetchLiveCricketTicker, 25000);
 
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
@@ -1329,156 +1396,138 @@
       loadSavedPreferencesUI();
     });
 
-    /* ==================== APPLE-YOUTUBE CHANNEL CAROUSEL ==================== */
-    function initMediaChannelsCarousel() {
+    /* ==================== APPLE-YOUTUBE CHANNEL CAROUSEL BUILDER ==================== */
+    function initChannelThumbnailsCarousel() {
       const track = document.getElementById('channel-carousel-track');
       if (!track) return;
 
       let html = '';
-      masterChannelsList.forEach(chan => {
-        const thumbSrc = chan.ytId ? 
-          `https://img.youtube.com/vi/${chan.ytId}/mqdefault.jpg` : '';
+      masterVideoChannels.forEach(c => {
+        const thumbSrc = c.ytId ? 
+          `https://img.youtube.com/vi/${c.ytId}/mqdefault.jpg` : '';
 
-        const thumbContent = chan.ytId ? 
-          `<img src="${thumbSrc}" alt="${chan.name}" width="320" height="180" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&q=60'">` :
+        const thumbMedia = c.ytId ? 
+          `<img src="${thumbSrc}" alt="${c.name}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&q=60'">` :
           `<div class="w-full h-full bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-500 flex flex-col items-center justify-center text-white"><i class="fa-solid fa-play-circle text-2xl mb-1"></i><span class="text-[10px] font-black uppercase">T&C Media</span></div>`;
 
         html += `
-          <div class="channel-card" id="card-${chan.id}" data-genre="${chan.genre}" onclick="selectChannelCard('${chan.id}')">
+          <div class="channel-card" id="card-${c.id}" onclick="setMode('${c.id}')">
             <div class="thumb-box">
-              ${thumbContent}
+              ${thumbMedia}
               <div class="play-overlay">
                 <div class="play-circle"><i class="fa-solid fa-play ml-0.5"></i></div>
               </div>
               <div class="absolute top-2 left-2 flex items-center gap-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow">
-                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                 <span>LIVE</span>
               </div>
               <div class="absolute bottom-2 right-2 bg-black/80 text-[9px] font-extrabold text-white px-1.5 py-0.5 rounded">
-                ${chan.tag}
+                ${c.tag}
               </div>
             </div>
             <div class="mt-2 px-1">
-              <h5 class="channel-title-text text-xs font-bold truncate" style="color: var(--text-main);">${chan.name}</h5>
-              <p class="text-[10px] truncate" style="color: var(--text-sub);">${chan.catName}</p>
+              <h5 class="channel-title-text text-xs font-bold truncate" style="color: var(--text-main);">${c.name}</h5>
+              <p class="text-[10px] truncate" style="color: var(--text-sub);">${c.cat}</p>
             </div>
           </div>
         `;
       });
-
       track.innerHTML = html;
     }
 
-    function scrollChannelCarousel(dir) {
+    function scrollChannelCarousel(direction) {
       const track = document.getElementById('channel-carousel-track');
       if (track) {
-        const scrollDistance = track.clientWidth * 0.75 * dir;
-        track.scrollBy({ left: scrollDistance, behavior: 'smooth' });
+        const scrollDist = track.clientWidth * 0.75 * direction;
+        track.scrollBy({ left: scrollDist, behavior: 'smooth' });
       }
     }
 
-    function filterMediaCarousel(genre, btnEl) {
-      document.querySelectorAll('#view-video .choice-pill').forEach(b => b.classList.remove('selected'));
-      if (btnEl) btnEl.classList.add('selected');
-
-      document.querySelectorAll('.channel-card').forEach(card => {
-        if (genre === 'all' || card.getAttribute('data-genre') === genre) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    function selectChannelCard(channelId) {
-      document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active-stream'));
-      const activeCard = document.getElementById(`card-${channelId}`);
+    /* ==================== SMOOTH HARDWARE-ACCELERATED STREAMING & PIP ==================== */
+    function setMode(mode) {
+      document.querySelectorAll('.channel-card').forEach(b => b.classList.remove('active-stream'));
+      const activeCard = document.getElementById(`card-${mode}`);
       if (activeCard) {
         activeCard.classList.add('active-stream');
         activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
 
-      const chan = masterChannelsList.find(c => c.id === channelId);
+      const chan = masterVideoChannels.find(c => c.id === mode);
       if (!chan) return;
 
-      const playerHub = document.getElementById('persistent-player-hub');
+      const pipWrapper = document.getElementById('pip-player-wrapper');
       const textView = document.getElementById('text-view');
       const masterPlayer = document.getElementById('master-video-player');
       const filePlayer = document.getElementById('file-video-player');
       const title = document.getElementById('current-channel-title');
-      const pipTitle = document.getElementById('pip-channel-title');
+      const pipTitle = document.getElementById('pip-title-text');
       const dot = document.getElementById('live-indicator');
-      const catPill = document.getElementById('channel-cat-pill');
+      const tagPill = document.getElementById('channel-tag-pill');
 
       isMediaPlaying = true;
       textView.style.display = 'none';
 
-      // Inline docked state in TV & Media
-      playerHub.classList.remove('hidden', 'tc-floating-pip');
-      playerHub.style.left = '';
-      playerHub.style.top = '';
-      playerHub.style.right = '';
-      playerHub.style.bottom = '';
-      playerHub.style.width = '100%';
-      playerHub.style.height = '';
-
+      // Ensure inline docked layout
+      pipWrapper.classList.remove('hidden', 'tc-floating-pip');
+      pipWrapper.style.left = '';
+      pipWrapper.style.top = '';
+      pipWrapper.style.right = '';
+      pipWrapper.style.bottom = '';
+      pipWrapper.style.width = '100%';
+      pipWrapper.style.height = '';
       document.getElementById('pip-top-bar').classList.add('hidden');
 
       title.innerText = chan.name;
       pipTitle.innerText = chan.name;
-      catPill.textContent = chan.tag;
-      catPill.classList.remove('hidden');
-      dot.style.display = "inline-block";
+      tagPill.textContent = chan.tag;
+      tagPill.classList.remove('hidden');
+      dot.style.display = 'inline-block';
 
-      if (channelId === 'file') {
+      if (mode === 'file') {
         masterPlayer.style.display = 'none';
-        masterPlayer.src = "about:blank";
+        masterPlayer.src = 'about:blank';
         filePlayer.classList.remove('hidden');
-        filePlayer.src = "videos/sample-video.mp4";
+        filePlayer.src = 'videos/sample-video.mp4';
         filePlayer.load();
         filePlayer.play().catch(() => {});
       } else {
         filePlayer.classList.add('hidden');
         filePlayer.pause();
         masterPlayer.style.display = 'block';
+        // Direct, non-stutter hardware stream parameters
         masterPlayer.src = `https://www.youtube.com/embed/${chan.ytId}?autoplay=1&mute=1&playsinline=1&controls=1&rel=0`;
       }
     }
 
-    function stopAndCloseVideo() {
-      const playerHub = document.getElementById('persistent-player-hub');
+    function closeLivePlayer() {
+      const pipWrapper = document.getElementById('pip-player-wrapper');
       const masterPlayer = document.getElementById('master-video-player');
       const filePlayer = document.getElementById('file-video-player');
       const dot = document.getElementById('live-indicator');
-      const catPill = document.getElementById('channel-cat-pill');
+      const tagPill = document.getElementById('channel-tag-pill');
       const title = document.getElementById('current-channel-title');
       const textView = document.getElementById('text-view');
+      const tvCard = document.getElementById('tv-media-parent-card');
 
       isMediaPlaying = false;
-      masterPlayer.src = "about:blank";
+      masterPlayer.src = 'about:blank';
       filePlayer.pause();
-      filePlayer.src = "";
+      filePlayer.src = '';
 
-      playerHub.classList.remove('tc-floating-pip');
-      playerHub.classList.add('hidden');
-      playerHub.style.left = '';
-      playerHub.style.top = '';
-      playerHub.style.right = '';
-      playerHub.style.bottom = '';
-      playerHub.style.width = '100%';
-      playerHub.style.height = '';
-
+      pipWrapper.classList.remove('tc-floating-pip');
+      pipWrapper.classList.add('hidden');
       document.getElementById('pip-top-bar').classList.add('hidden');
+      tvCard.classList.remove('pip-floating-state');
 
       dot.style.display = 'none';
-      catPill.classList.add('hidden');
-      title.innerText = '25+ Live Channels';
+      tagPill.classList.add('hidden');
+      title.innerText = '20+ Channels';
       textView.style.display = 'block';
 
-      document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active-stream'));
+      document.querySelectorAll('.channel-card').forEach(b => b.classList.remove('active-stream'));
     }
 
-    /* ==================== ZERO-RELOAD PIP NAVIGATION ==================== */
+    /* ==================== 4-TAB NAVIGATION & ZERO-RELOAD PIP CONTROLLER ==================== */
     function switchMainTab(tab) {
       currentTab = tab;
 
@@ -1499,11 +1548,11 @@
         b.style.boxShadow = 'none';
       });
 
-      const playerHub = document.getElementById('persistent-player-hub');
+      const pipWrapper = document.getElementById('pip-player-wrapper');
+      const tvCard = document.getElementById('tv-media-parent-card');
       const pipTopBar = document.getElementById('pip-top-bar');
 
       let activeBtn = btnNews;
-
       if (tab === 'news') {
         document.getElementById('view-news').classList.remove('hidden');
         activeBtn = btnNews;
@@ -1513,10 +1562,7 @@
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
         activeBtn = btnOsint;
-        ensureRadarLoaded();
-        requestAnimationFrame(() => {
-          if (leafletMap) leafletMap.invalidateSize(true);
-        });
+        if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 150);
       } else if (tab === 'jobs') {
         document.getElementById('view-jobs').classList.remove('hidden');
         activeBtn = btnJobs;
@@ -1525,123 +1571,115 @@
       activeBtn.classList.add('active-tab');
       activeBtn.style.backgroundColor = '#0071e3';
       activeBtn.style.color = '#ffffff';
-      activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
+      activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
 
-      // Never re-parent iframe; simply switch positioning styles
+      // Zero-Reload PiP Transition Logic
       if (isMediaPlaying) {
         if (tab === 'video') {
-          // Dock into TV & Media section
-          playerHub.classList.remove('tc-floating-pip');
-          playerHub.style.left = '';
-          playerHub.style.top = '';
-          playerHub.style.right = '';
-          playerHub.style.bottom = '';
-          playerHub.style.width = '100%';
-          playerHub.style.height = '';
+          // Snap back to inline placement in TV & Media
+          tvCard.classList.remove('pip-floating-state');
+          pipWrapper.classList.remove('tc-floating-pip');
+          pipWrapper.style.left = '';
+          pipWrapper.style.top = '';
+          pipWrapper.style.right = '';
+          pipWrapper.style.bottom = '';
+          pipWrapper.style.width = '100%';
+          pipWrapper.style.height = '';
           pipTopBar.classList.add('hidden');
         } else {
-          // Float smoothly across other tabs without stopping/reloading
-          playerHub.classList.remove('hidden');
-          playerHub.classList.add('tc-floating-pip');
+          // Float as interactive Picture-in-Picture window without stopping iframe
+          document.getElementById('view-video').classList.remove('hidden');
+          tvCard.classList.add('pip-floating-state');
+          pipWrapper.classList.add('tc-floating-pip');
           
-          if (!playerHub.style.left && !playerHub.style.top) {
-            // Default YouTube PiP compact aspect
+          if (!pipWrapper.style.left && !pipWrapper.style.top) {
+            // Ultra-compact YouTube PiP default dimension
             const defaultW = Math.min(260, window.innerWidth - 30);
             const defaultH = Math.round(defaultW * (9 / 16));
-            playerHub.style.right = '20px';
-            playerHub.style.bottom = '20px';
-            playerHub.style.width = `${defaultW}px`;
-            playerHub.style.height = `${defaultH}px`;
+            pipWrapper.style.right = '20px';
+            pipWrapper.style.bottom = '20px';
+            pipWrapper.style.width = `${defaultW}px`;
+            pipWrapper.style.height = `${defaultH}px`;
           }
           pipTopBar.classList.remove('hidden');
         }
       }
     }
 
-    /* ==================== FULL-SURFACE DRAGGABLE & RESIZABLE ENGINE ==================== */
-    function initPiPAnyPointGestures() {
-      const pipHub = document.getElementById('persistent-player-hub');
-      const dragLayer = document.getElementById('pip-drag-layer');
-      const resizeCorner = document.getElementById('pip-resize-corner');
-      if (!pipHub || !dragLayer) return;
+    /* ==================== ANY-POINT DRAG & COMPACT RESIZE ENGINE ==================== */
+    function initPiPInteractions() {
+      const pipBox = document.getElementById('pip-player-wrapper');
+      const touchSurface = document.getElementById('pip-drag-touch-layer');
+      const cornerGrip = document.getElementById('pip-corner-grip');
+      if (!pipBox || !touchSurface) return;
 
       let isDragging = false;
       let isResizing = false;
-      let startX, startY, initialLeft, initialTop, initialWidth, initialHeight;
-      let initialDistance = 0; // For mobile pinch-to-zoom
+      let startX, startY, initialLeft, initialTop, initialW, initialDist = 0;
 
-      // 1. ANY-POINT DRAG GESTURE
+      // 1. Full-Surface Touch & Mouse Dragging from ANY point
       const onDragStart = (e) => {
-        if (!pipHub.classList.contains('tc-floating-pip')) return;
-        
-        // Multi-touch pinch detection (Mobile resize)
+        if (!pipBox.classList.contains('tc-floating-pip')) return;
+
+        // Mobile pinch-to-resize gesture handler
         if (e.touches && e.touches.length === 2) {
           isDragging = false;
           isResizing = true;
-          const t1 = e.touches[0];
-          const t2 = e.touches[1];
-          initialDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-          initialWidth = pipHub.offsetWidth;
+          initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          initialW = pipBox.offsetWidth;
           return;
         }
 
         isDragging = true;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const curX = e.touches ? e.touches[0].clientX : e.clientX;
+        const curY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        const rect = pipHub.getBoundingClientRect();
-        startX = clientX;
-        startY = clientY;
-        initialLeft = rect.left;
-        initialTop = rect.top;
+        const bounds = pipBox.getBoundingClientRect();
+        startX = curX;
+        startY = curY;
+        initialLeft = bounds.left;
+        initialTop = bounds.top;
 
-        // Normalize coordinates to left/top
-        pipHub.style.right = 'auto';
-        pipHub.style.bottom = 'auto';
-        pipHub.style.left = `${initialLeft}px`;
-        pipHub.style.top = `${initialTop}px`;
+        pipBox.style.right = 'auto';
+        pipBox.style.bottom = 'auto';
+        pipBox.style.left = `${initialLeft}px`;
+        pipBox.style.top = `${initialTop}px`;
       };
 
       const onDragMove = (e) => {
-        if (!pipHub.classList.contains('tc-floating-pip')) return;
+        if (!pipBox.classList.contains('tc-floating-pip')) return;
 
-        // Mobile pinch-to-resize gesture handler
+        // Mobile pinch resize logic
         if (isResizing && e.touches && e.touches.length === 2) {
           e.preventDefault();
-          const t1 = e.touches[0];
-          const t2 = e.touches[1];
-          const currentDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-          const scale = currentDistance / (initialDistance || 1);
-          
-          let newWidth = Math.round(initialWidth * scale);
-          newWidth = Math.max(150, Math.min(newWidth, Math.min(720, window.innerWidth - 20)));
-          const newHeight = Math.round(newWidth * (9 / 16));
-
-          pipHub.style.width = `${newWidth}px`;
-          pipHub.style.height = `${newHeight}px`;
+          const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          const ratio = currentDist / (initialDist || 1);
+          let newW = Math.round(initialW * ratio);
+          // YouTube PiP ultra-small size down to 150px
+          newW = Math.max(150, Math.min(newW, Math.min(780, window.innerWidth - 20)));
+          const newH = Math.round(newW * (9 / 16));
+          pipBox.style.width = `${newW}px`;
+          pipBox.style.height = `${newH}px`;
           return;
         }
 
         if (!isDragging) return;
         e.preventDefault();
 
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const curX = e.touches ? e.touches[0].clientX : e.clientX;
+        const curY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        const deltaX = clientX - startX;
-        const deltaY = clientY - startY;
+        let leftPos = initialLeft + (curX - startX);
+        let topPos = initialTop + (curY - startY);
 
-        let newLeft = initialLeft + deltaX;
-        let newTop = initialTop + deltaY;
+        const maxLeft = window.innerWidth - pipBox.offsetWidth - 8;
+        const maxTop = window.innerHeight - pipBox.offsetHeight - 8;
 
-        const maxLeft = window.innerWidth - pipHub.offsetWidth - 8;
-        const maxTop = window.innerHeight - pipHub.offsetHeight - 8;
+        leftPos = Math.max(8, Math.min(leftPos, maxLeft));
+        topPos = Math.max(8, Math.min(topPos, maxTop));
 
-        newLeft = Math.max(8, Math.min(newLeft, maxLeft));
-        newTop = Math.max(8, Math.min(newTop, maxTop));
-
-        pipHub.style.left = `${newLeft}px`;
-        pipHub.style.top = `${newTop}px`;
+        pipBox.style.left = `${leftPos}px`;
+        pipBox.style.top = `${topPos}px`;
       };
 
       const onDragEnd = () => {
@@ -1649,787 +1687,60 @@
         isResizing = false;
       };
 
-      dragLayer.addEventListener('mousedown', onDragStart);
-      dragLayer.addEventListener('touchstart', onDragStart, { passive: false });
+      touchSurface.addEventListener('mousedown', onDragStart);
+      touchSurface.addEventListener('touchstart', onDragStart, { passive: false });
 
-      // Double-click or double-tap anywhere on the player expands back to TV & Media
-      let lastTap = 0;
-      dragLayer.addEventListener('click', (e) => {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
+      // Double-click or double-tap expands back to TV & Media
+      let lastClickTime = 0;
+      touchSurface.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastClickTime < 300) {
           switchMainTab('video');
         }
-        lastTap = currentTime;
+        lastClickTime = now;
       });
 
-      // 2. CORNER RESIZE GESTURE (Laptop mouse & precise drag)
-      const onResizeStart = (e) => {
+      // 2. Corner Resize Grip for Laptop Mouse
+      cornerGrip.addEventListener('mousedown', (e) => {
         e.stopPropagation();
         isResizing = true;
         isDragging = false;
 
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        startX = clientX;
-        initialWidth = pipHub.offsetWidth;
+        const curX = e.clientX;
+        startX = curX;
+        initialW = pipBox.offsetWidth;
 
-        const rect = pipHub.getBoundingClientRect();
-        pipHub.style.right = 'auto';
-        pipHub.style.bottom = 'auto';
-        pipHub.style.left = `${rect.left}px`;
-        pipHub.style.top = `${rect.top}px`;
+        const bounds = pipBox.getBoundingClientRect();
+        pipBox.style.right = 'auto';
+        pipBox.style.bottom = 'auto';
+        pipBox.style.left = `${bounds.left}px`;
+        pipBox.style.top = `${bounds.top}px`;
 
         const onResizeMove = (ev) => {
           if (!isResizing) return;
           ev.preventDefault();
-
-          const curX = ev.touches ? ev.touches[0].clientX : ev.clientX;
-          const deltaW = curX - startX;
-
-          // Allows YouTube PiP ultra-small size down to 150px
-          let newWidth = Math.max(150, Math.min(initialWidth + deltaW, Math.min(760, window.innerWidth - 20)));
-          let newHeight = Math.round(newWidth * (9 / 16));
-
-          pipHub.style.width = `${newWidth}px`;
-          pipHub.style.height = `${newHeight}px`;
+          const deltaX = ev.clientX - startX;
+          // Shrinks down to 150px
+          let newW = Math.max(150, Math.min(initialW + deltaX, Math.min(780, window.innerWidth - 20)));
+          let newH = Math.round(newW * (9 / 16));
+          pipBox.style.width = `${newW}px`;
+          pipBox.style.height = `${newH}px`;
         };
 
         const onResizeEnd = () => {
           isResizing = false;
           window.removeEventListener('mousemove', onResizeMove);
           window.removeEventListener('mouseup', onResizeEnd);
-          window.removeEventListener('touchmove', onResizeMove);
-          window.removeEventListener('touchend', onResizeEnd);
         };
 
         window.addEventListener('mousemove', onResizeMove, { passive: false });
         window.addEventListener('mouseup', onResizeEnd);
-        window.addEventListener('touchmove', onResizeMove, { passive: false });
-        window.addEventListener('touchend', onResizeEnd);
-      };
-
-      resizeCorner.addEventListener('mousedown', onResizeStart);
-      resizeCorner.addEventListener('touchstart', onResizeStart, { passive: false });
+      });
 
       window.addEventListener('mousemove', onDragMove, { passive: false });
       window.addEventListener('mouseup', onDragEnd);
       window.addEventListener('touchmove', onDragMove, { passive: false });
       window.addEventListener('touchend', onDragEnd);
-    }
-
-    /* ==================== RADAR & OSINT MAP (NO WATERMARK OSM) ==================== */
-    function ensureRadarLoaded() {
-      if (!isWindyLoaded) {
-        const iframe = document.getElementById('windy-radar-iframe');
-        if (iframe) {
-          iframe.src = "https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=radar&product=radar&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1";
-          isWindyLoaded = true;
-        }
-      }
-    }
-
-    function switchRadarMap(mode) {
-      const btnWeather = document.getElementById('btn-radar-weather');
-      const btnFlight = document.getElementById('btn-radar-flight');
-      const frameWeather = document.getElementById('radar-frame-weather');
-      const frameFlight = document.getElementById('radar-frame-flight');
-      const titleEl = document.getElementById('radar-main-title');
-      const iconEl = document.getElementById('radar-title-icon');
-      const layerBar = document.getElementById('weather-layer-bar');
-
-      if (!btnWeather || !btnFlight) return;
-
-      if (mode === 'weather') {
-        frameWeather.style.display = 'block';
-        frameFlight.style.display = 'none';
-        layerBar.style.display = 'flex';
-
-        btnWeather.classList.add('active-tab');
-        btnWeather.style.backgroundColor = '#0071e3';
-        btnWeather.style.color = '#ffffff';
-
-        btnFlight.classList.remove('active-tab');
-        btnFlight.style.backgroundColor = 'transparent';
-        btnFlight.style.color = 'var(--text-sub)';
-
-        titleEl.textContent = 'Live Weather Radar';
-        iconEl.className = 'fa-solid fa-cloud-sun-rain text-blue-500 text-xl';
-        ensureRadarLoaded();
-      } else {
-        frameWeather.style.display = 'none';
-        frameFlight.style.display = 'block';
-        layerBar.style.display = 'none';
-
-        btnFlight.classList.add('active-tab');
-        btnFlight.style.backgroundColor = '#0071e3';
-        btnFlight.style.color = '#ffffff';
-
-        btnWeather.classList.remove('active-tab');
-        btnWeather.style.backgroundColor = 'transparent';
-        btnWeather.style.color = 'var(--text-sub)';
-
-        titleEl.textContent = 'Live Flight & ISS Tracker';
-        iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-xl';
-
-        requestAnimationFrame(() => {
-          if (!leafletMap) {
-            initOSINTMap();
-          } else {
-            leafletMap.invalidateSize(true);
-            leafletMap.setView([20.5937, 78.9629], 3, { animate: false });
-          }
-        });
-      }
-    }
-
-    function setWindyLayer(layer, btnEl) {
-      document.querySelectorAll('#weather-layer-bar .choice-pill').forEach(b => b.classList.remove('selected'));
-      if (btnEl) btnEl.classList.add('selected');
-
-      const iframe = document.getElementById('windy-radar-iframe');
-      if (iframe) {
-        const prod = layer === 'radar' ? 'radar' : 'ecmwf';
-        iframe.src = `https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=${layer}&product=${prod}&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
-      }
-    }
-
-    function initOSINTMap() {
-      if (leafletMap) return;
-
-      leafletMap = L.map('osint-map', { 
-        preferCanvas: true,
-        zoomControl: true,
-        fadeAnimation: true,
-        zoomAnimation: true,
-        markerZoomAnimation: true
-      }).setView([20.5937, 78.9629], 3);
-
-      // Official OpenStreetMap Tile Service (Zero Watermark, 100% Free)
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-        maxZoom: 19,
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(leafletMap);
-
-      flightLayerGroup = L.layerGroup().addTo(leafletMap);
-      flightPolylineGroup = L.layerGroup().addTo(leafletMap);
-
-      const legend = L.control({ position: 'bottomright' });
-      legend.onAdd = function () {
-        const div = L.DomUtil.create('div', 'leaflet-apple-legend');
-        div.innerHTML = `
-          <div onclick="toggleLegendContent()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 11px;">
-            <span>Map Legend</span>
-            <i id="legend-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
-          </div>
-          <div id="legend-body" style="display: none; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 5px;">
-            <div class="legend-item"><i class="fa-solid fa-satellite text-green-400 text-xs"></i><span style="font-size:11px;">ISS Satellite</span></div>
-            <div class="legend-item"><i class="fa-solid fa-plane text-blue-500 text-xs"></i><span style="font-size:11px;">Flight Traffic</span></div>
-            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #ff3b30; border-radius: 50%;"></span><span style="font-size:11px;">Earthquake</span></div>
-          </div>
-        `;
-        L.DomEvent.disableClickPropagation(div);
-        return div;
-      };
-      legend.addTo(leafletMap);
-
-      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
-        .then(r => r.json())
-        .then(data => {
-          const count = data.features ? data.features.length : 0;
-          document.getElementById('ticker-quake-count').textContent = `${count} Quakes`;
-          document.getElementById('osint-quake-count').textContent = `${count} Events (24h)`;
-
-          (data.features || []).forEach(quake => {
-            const [lon, lat] = quake.geometry.coordinates;
-            const mag = quake.properties.mag;
-            const place = quake.properties.place;
-            const time = new Date(quake.properties.time).toLocaleString();
-
-            const marker = L.circleMarker([lat, lon], {
-              radius: mag * 1.5,
-              color: '#ff3b30',
-              fillColor: '#ff3b30',
-              fillOpacity: 0.75,
-              weight: 1
-            });
-
-            marker.bindPopup(`
-              <div style="font-size: 12px;">
-                <b style="color: #ff3b30;">🔴 USGS Earthquake Event</b><br>
-                <b>Magnitude:</b> ${mag}<br>
-                <b>Location:</b> ${place}<br>
-                <b>Time:</b> ${time}<br>
-                <b>Coordinates:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
-              </div>
-            `);
-            marker.addTo(leafletMap);
-          });
-        }).catch(() => {});
-
-      initISSTracker();
-      fetchLiveAirTraffic();
-    }
-
-    function toggleLegendContent() {
-      const body = document.getElementById('legend-body');
-      const icon = document.getElementById('legend-icon');
-      if (body.style.display === 'none') {
-        body.style.display = 'block';
-        icon.className = "fa-solid fa-chevron-up text-[10px]";
-      } else {
-        body.style.display = 'none';
-        icon.className = "fa-solid fa-chevron-down text-[10px]";
-      }
-    }
-
-    async function fetchLiveAirTraffic() {
-      if (!leafletMap || !flightLayerGroup) return;
-
-      try {
-        const res = await fetch('https://news-39tq.vercel.app/api/flights');
-        if (!res.ok) return;
-        const data = await res.json();
-
-        if (data && data.states) {
-          const count = data.states.length;
-          document.getElementById('ticker-flights-count').textContent = `${count} Active`;
-
-          const validIcaos = new Set();
-          flightPolylineGroup.clearLayers();
-
-          data.states.slice(0, 30).forEach(flight => {
-            const [icao24, callsign, origin, posTime, contact, lon, lat, altMeters, onGround, speedMs, trackDeg] = flight;
-            if (lat && lon && !onGround) {
-              validIcaos.add(icao24);
-              const speedKmh = Math.round(speedMs * 3.6);
-              const cleanCall = callsign ? callsign.trim() : 'Flight';
-              const heading = trackDeg || 0;
-
-              let marker = flightMarkerMap.get(icao24);
-              if (!marker) {
-                const planeHtml = `<div style="transform: rotate(${heading}deg); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;"><svg viewBox="0 0 24 24" fill="#0071e3" width="18" height="18"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`;
-                const planeIcon = L.divIcon({ html: planeHtml, className: '', iconSize: [22, 22], iconAnchor: [11, 11] });
-                marker = L.marker([lat, lon], { icon: planeIcon });
-                marker.bindPopup(`
-                  <div style="font-size: 12px; min-width: 140px;">
-                    <b style="color: #0071e3;">✈️ ${cleanCall}</b><br>
-                    <b>Altitude:</b> ${Math.round(altMeters)} m<br>
-                    <b>Speed:</b> ${speedKmh} km/h<br>
-                    <b>Heading:</b> ${Math.round(heading)}°
-                  </div>
-                `);
-                flightLayerGroup.addLayer(marker);
-                flightMarkerMap.set(icao24, marker);
-              } else {
-                marker.setLatLng([lat, lon]);
-              }
-
-              const rad = (heading - 90) * (Math.PI / 180);
-              const destLat = lat + Math.sin(-rad) * 1.0;
-              const destLon = lon + Math.cos(-rad) * 1.0;
-              const routeLine = L.polyline([[lat, lon], [destLat, destLon]], { color: '#0071e3', weight: 1.5, dashArray: '3, 4', opacity: 0.6 });
-              flightPolylineGroup.addLayer(routeLine);
-            }
-          });
-
-          flightMarkerMap.forEach((m, icao) => {
-            if (!validIcaos.has(icao)) {
-              flightLayerGroup.removeLayer(m);
-              flightMarkerMap.delete(icao);
-            }
-          });
-        }
-      } catch (e) {}
-    }
-
-    function initISSTracker() {
-      async function updateISS() {
-        try {
-          const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
-          const data = await res.json();
-          const lat = parseFloat(data.latitude);
-          const lon = parseFloat(data.longitude);
-          
-          document.getElementById('ticker-iss-pos').textContent = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-          document.getElementById('osint-iss-alt').textContent = `${Math.round(data.altitude)} km`;
-          document.getElementById('osint-iss-spd').textContent = `${Math.round(data.velocity)} km/h`;
-
-          if (leafletMap) {
-            const currentPos = [lat, lon];
-            issHistoryCoords.push(currentPos);
-            if (issHistoryCoords.length > 20) issHistoryCoords.shift();
-
-            const issHtml = `<div style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-satellite text-green-400 text-base"></i></div>`;
-            const issIcon = L.divIcon({ html: issHtml, className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
-
-            if (!issMarker) {
-              issMarker = L.marker(currentPos, { icon: issIcon }).addTo(leafletMap);
-            } else {
-              issMarker.setLatLng(currentPos);
-            }
-
-            if (issPolyline) leafletMap.removeLayer(issPolyline);
-            if (issHistoryCoords.length > 1) {
-              issPolyline = L.polyline(issHistoryCoords, { color: '#34c759', weight: 2.5, opacity: 0.85 }).addTo(leafletMap);
-            }
-
-            issMarker.bindPopup(`
-              <div style="font-size: 12px;">
-                <b style="color: #34c759;">🛰️ ISS Satellite</b><br>
-                <b>Alt:</b> ${Math.round(data.altitude)} km | <b>Speed:</b> ${Math.round(data.velocity)} km/h
-              </div>
-            `);
-          }
-        } catch(e) {}
-      }
-      updateISS();
-      setInterval(updateISS, 15000);
-    }
-
-    async function initISSManifest() {
-      const container = document.getElementById('iss-crew-list');
-      try {
-        const res = await fetch('https://api.open-notify.org/astros.json');
-        const data = await res.json();
-        const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
-        document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
-        container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${p.name}</div>`).join('') || '<div class="italic">Offline</div>';
-      } catch(e) {
-        container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
-      }
-    }
-
-    function setNewsScope(scope) {
-      currentScope = scope;
-      document.querySelectorAll('.scope-btn').forEach(btn => {
-        btn.classList.remove('active-scope');
-        btn.style.backgroundColor = "var(--bg-sub)";
-        btn.style.color = "var(--text-sub)";
-        btn.style.border = "1px solid var(--border-color)";
-      });
-
-      const activeBtn = document.getElementById(`scope-btn-${scope}`);
-      if (activeBtn) {
-        activeBtn.classList.add('active-scope');
-        activeBtn.style.border = "none";
-      }
-
-      const dict = i18n[currentLanguage] || i18n.en;
-      const titleMap = {
-        'local': dict.scopeLocalTitle,
-        'national': dict.scopeNatTitle,
-        'world': dict.scopeWorldTitle
-      };
-      document.getElementById('active-scope-title').textContent = titleMap[scope];
-      fetchPortalNews();
-    }
-
-    function onDateFilterChange() {
-      const picker = document.getElementById('news-date-picker');
-      const currentDateStr = new Date().toISOString().split('T')[0];
-      if (picker.value > currentDateStr) {
-        alert("🗓️ Future Date Warning: Cannot select future dates.");
-        picker.value = currentDateStr;
-      }
-      fetchPortalNews();
-    }
-
-    async function fetchPortalNews() {
-      const feedContainer = document.getElementById('news-feed-container');
-      const badge = document.getElementById('news-status-badge');
-      const selectedDateStr = document.getElementById('news-date-picker').value;
-      const refreshIcon = document.getElementById('refresh-icon');
-
-      if (refreshIcon) refreshIcon.classList.add('fa-spin');
-      badge.textContent = "Updating...";
-
-      try {
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&date=${selectedDateStr}`);
-        if (!res.ok) throw new Error("API error");
-        
-        const xmlText = await res.text();
-        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        let items = Array.from(xml.querySelectorAll("item"));
-
-        items.sort((a, b) => {
-          const dateA = new Date(a.querySelector("pubDate")?.textContent || 0);
-          const dateB = new Date(b.querySelector("pubDate")?.textContent || 0);
-          return dateB - dateA;
-        });
-
-        let filteredItems = items.filter(item => {
-          const pubDate = item.querySelector("pubDate")?.textContent;
-          if (!pubDate) return false;
-          return new Date(pubDate).toISOString().split('T')[0] === selectedDateStr;
-        });
-
-        if (filteredItems.length === 0) {
-          const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
-          const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
-
-          feedContainer.innerHTML = `
-            <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
-              <div>
-                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Stories Found for ${selectedDateStr}</h4>
-                <p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct records matched this exact date. You can explore archives below:</p>
-              </div>
-              <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
-                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Archive (${selectedDateStr})
-              </a>
-            </div>
-          `;
-          badge.textContent = "No Records for Date";
-          return;
-        }
-
-        let html = '';
-        for (const item of filteredItems) {
-          const rawTitle = item.querySelector("title")?.textContent || "News Story";
-          const link = item.querySelector("link")?.textContent || "#";
-          const pubDateStr = item.querySelector("pubDate")?.textContent || "";
-          
-          let formattedDateTime = "Live Feed";
-          if (pubDateStr) {
-            const dateObj = new Date(pubDateStr);
-            const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const day = dateObj.getDate();
-            const getOrdinal = (n) => (n > 3 && n < 21) ? 'th' : (n % 10 === 1 ? 'st' : (n % 10 === 2 ? 'nd' : (n % 10 === 3 ? 'rd' : 'th')));
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
-          }
-
-          const title = await translateText(rawTitle, currentLanguage);
-          let sourceName = "Trusted by T&C";
-          if (link.includes("tv9")) sourceName = "TV9 Telugu";
-          else if (link.includes("france24")) sourceName = "France24";
-          else if (link.includes("hindu")) sourceName = "The Hindu";
-
-          html += `
-            <div class="p-3.5 rounded-xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <div class="flex-grow">
-                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
-                  ${title}
-                </h4>
-                <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
-                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
-                  <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
-                </div>
-              </div>
-              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
-                <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
-              </a>
-            </div>
-          `;
-        }
-        feedContainer.innerHTML = html;
-        badge.textContent = `Live (${filteredItems.length} Stories)`;
-      } catch (err) {
-        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
-        badge.textContent = "Error";
-      } finally {
-        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-      }
-    }
-
-    async function fetchPinnedWorldNews() {
-      const container = document.getElementById('pinned-world-news');
-      try {
-        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=world`);
-        const xmlText = await res.text();
-        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        let items = Array.from(xml.querySelectorAll("item"));
-        
-        items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
-        const topItems = items.slice(0, 3);
-
-        let html = '';
-        for (const item of topItems) {
-          const rawTitle = item.querySelector("title")?.textContent || "";
-          const link = item.querySelector("link")?.textContent || "#";
-          const title = await translateText(rawTitle, currentLanguage);
-          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
-        }
-        container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">Highlights loading...</div>';
-      }
-    }
-
-    async function fetchRealTimeForex() {
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await res.json();
-        if (data && data.rates) {
-          document.getElementById('ticker-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
-          document.getElementById('side-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
-          document.getElementById('side-eurinr').textContent = `₹${(data.rates.INR / data.rates.EUR).toFixed(2)}`;
-        }
-      } catch (e) {}
-    }
-
-    async function fetchSolarSchedule() {
-      try {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&start_date=${todayStr}&end_date=${todayStr}&timezone=auto`);
-        const data = await res.json();
-        if (data && data.daily && data.daily.sunrise && data.daily.sunset) {
-          const formatTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('pill-sunrise').textContent = formatTime(data.daily.sunrise[0]);
-          document.getElementById('pill-sunset').textContent = formatTime(data.daily.sunset[0]);
-        }
-      } catch (err) {
-        document.getElementById('pill-sunrise').textContent = "06:00 AM";
-        document.getElementById('pill-sunset').textContent = "06:30 PM";
-      }
-    }
-
-    /* ==================== CRICKET LIVE ENGINE ==================== */
-    function openCricketModal() {
-      document.getElementById('cricket-modal').classList.remove('hidden');
-    }
-
-    function closeCricketModal() {
-      document.getElementById('cricket-modal').classList.add('hidden');
-    }
-
-    async function fetchLiveCricketTicker() {
-      const tickerEl = document.getElementById('ticker-cricket');
-      const icon = document.getElementById('cricket-refresh-icon');
-      if (icon) icon.classList.add('fa-spin');
-
-      try {
-        const res = await fetch('https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel');
-        if (!res.ok) throw new Error('ESPN API unreachable');
-        const data = await res.json();
-
-        let allMatches = data.scores || data.events || [];
-        if (allMatches.length > 0) {
-          const activeMatch = allMatches.find(m => m.status && (m.status.type?.state === 'in' || m.status.state === 'in')) || allMatches[0];
-
-          const team1 = activeMatch.competitors?.[0];
-          const team2 = activeMatch.competitors?.[1];
-
-          const t1Name = team1?.team?.abbreviation || team1?.team?.shortDisplayName || 'Team 1';
-          const t2Name = team2?.team?.abbreviation || team2?.team?.shortDisplayName || 'Team 2';
-
-          const t1Score = team1?.score || (team1?.linescores?.[0]?.displayValue) || 'Yet to Bat';
-          const t2Score = team2?.score || (team2?.linescores?.[0]?.displayValue) || '';
-
-          const statusSummary = activeMatch.status?.summary || activeMatch.status?.type?.detail || activeMatch.summary || 'Live Match';
-          const isLive = activeMatch.status?.type?.state === 'in' || activeMatch.status?.state === 'in';
-
-          tickerEl.innerHTML = `
-            <span class="${isLive ? 'text-green-400 font-extrabold' : 'text-amber-400 font-bold'}">
-              <i class="fa-solid fa-circle text-[8px] mr-1"></i>
-              ${t1Name} ${t1Score} vs ${t2Name} ${t2Score} • ${statusSummary}
-            </span>
-          `;
-
-          document.getElementById('modal-match-title').textContent = activeMatch.name || `${t1Name} vs ${t2Name}`;
-          document.getElementById('modal-match-series').textContent = activeMatch.series?.name || 'International Cricket';
-          document.getElementById('modal-match-state').textContent = isLive ? 'LIVE' : 'UPDATE';
-          document.getElementById('modal-match-state').className = `text-[10px] ${isLive ? 'bg-green-500' : 'bg-blue-600'} text-white font-black px-2 py-0.5 rounded-full uppercase`;
-
-          document.getElementById('modal-team1-name').textContent = team1?.team?.displayName || t1Name;
-          document.getElementById('modal-team1-score').textContent = t1Score;
-          document.getElementById('modal-team2-name').textContent = team2?.team?.displayName || t2Name;
-          document.getElementById('modal-team2-score').textContent = t2Score || '-';
-          document.getElementById('modal-match-summary').textContent = statusSummary;
-
-          if (icon) icon.classList.remove('fa-spin');
-          return;
-        }
-      } catch (err) {}
-
-      const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      tickerEl.innerHTML = `<span class="text-amber-500 font-medium">No live match in play • Checked at ${currentTimeStr}</span>`;
-      document.getElementById('modal-match-summary').textContent = 'No international match is live right now.';
-      if (icon) icon.classList.remove('fa-spin');
-    }
-
-    /* ==================== JOBS CAREER ENGINE ==================== */
-    async function fetchLiveJobs() {
-      const container = document.getElementById('job-listings-container');
-      const countBadge = document.getElementById('job-count-badge');
-      if (!container) return;
-
-      container.innerHTML = '<div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div>';
-
-      let jobsList = [];
-      try {
-        if (typeof db !== 'undefined') {
-          const snapshot = await db.collection('live_jobs').where('status', '==', 'active').get();
-          if (!snapshot.empty) jobsList = snapshot.docs.map(doc => doc.data());
-        }
-      } catch (e) {}
-
-      let filtered = jobsList;
-      if (currentJobSector !== 'all') {
-        filtered = jobsList.filter(j => j.sector === currentJobSector);
-      }
-
-      countBadge.textContent = `${filtered.length} Openings Active`;
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="p-8 rounded-2xl text-center border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-            <i class="fa-solid fa-magnifying-glass text-amber-500 text-xl mb-2"></i>
-            <h4 class="text-xs font-bold" style="color: var(--text-main);">No Vacancies Under Selected Filter</h4>
-            <p class="text-[11px] mt-1" style="color: var(--text-sub);">All verified notifications will populate here in real-time.</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-      filtered.forEach(job => {
-        html += `
-          <div class="p-4 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-              <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
-              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date || 'Active'}</span>
-            </div>
-            <div class="text-[11px] space-y-1 mb-3" style="color: var(--text-sub);">
-              <p><i class="fa-regular fa-building mr-1.5 text-blue-500"></i><b>${job.company}</b> • <i class="fa-solid fa-location-dot mx-1 text-red-500"></i>${job.location}</p>
-              <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${job.eligibility} | <b>Salary:</b> ${job.salary}</p>
-            </div>
-            <div class="flex items-center justify-between gap-3 pt-2 border-t border-black/5 dark:border-white/5">
-              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Apply Portal
-              </a>
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function filterJobs(sector, btnEl) {
-      currentJobSector = sector;
-      document.querySelectorAll('#view-jobs .choice-pill').forEach(b => b.classList.remove('selected'));
-      if (btnEl) btnEl.classList.add('selected');
-      fetchLiveJobs();
-    }
-
-    /* ==================== NOTIFICATION PREFERENCES ==================== */
-    function openNotificationPreferences() {
-      document.getElementById('notification-prefs-modal').classList.remove('hidden');
-      loadSavedPreferencesUI();
-    }
-
-    function closeNotificationPreferences() {
-      document.getElementById('notification-prefs-modal').classList.add('hidden');
-    }
-
-    function onTopicToggle(topic) {
-      const isChecked = document.getElementById(`topic-${topic}`).checked;
-      const subContainer = document.getElementById(`sub-q-${topic}`);
-      if (subContainer) {
-        if (isChecked) subContainer.classList.remove('hidden');
-        else subContainer.classList.add('hidden');
-      }
-      checkMasterToggleState();
-    }
-
-    function checkMasterToggleState() {
-      const news = document.getElementById('topic-news').checked;
-      const weather = document.getElementById('topic-weather').checked;
-      const jobs = document.getElementById('topic-jobs').checked;
-      const iss = document.getElementById('topic-iss').checked;
-      document.getElementById('pref-select-all').checked = (news && weather && jobs && iss);
-    }
-
-    function toggleSelectAllTopics(masterChecked) {
-      ['news', 'weather', 'jobs', 'iss'].forEach(t => {
-        const checkbox = document.getElementById(`topic-${t}`);
-        if (checkbox) {
-          checkbox.checked = masterChecked;
-          onTopicToggle(t);
-        }
-      });
-    }
-
-    function selectChoicePill(groupKey, value, btnEl) {
-      const parent = btnEl.parentElement;
-      parent.querySelectorAll('.choice-pill').forEach(b => b.classList.remove('selected'));
-      btnEl.classList.add('selected');
-      localStorage.setItem(`tc_pref_${groupKey}`, value);
-    }
-
-    function detectGPSCity(btnEl) {
-      if ('geolocation' in navigator) {
-        btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            btnEl.innerHTML = '📍 GPS Locked';
-            localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4));
-            localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4));
-            selectChoicePill('weather-city', 'GPS_Auto', btnEl);
-          },
-          () => {
-            btnEl.innerHTML = '📍 GPS Unavailable';
-            setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000);
-          },
-          { enableHighAccuracy: true, timeout: 5000 }
-        );
-      }
-    }
-
-    function loadSavedPreferencesUI() {
-      const savedTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
-      ['news', 'weather', 'jobs', 'iss'].forEach(t => {
-        const el = document.getElementById(`topic-${t}`);
-        if (el) {
-          el.checked = savedTopics[t] !== undefined ? savedTopics[t] : true;
-          onTopicToggle(t);
-        }
-      });
-      checkMasterToggleState();
-    }
-
-    async function saveNotificationPreferences() {
-      const saveBtn = document.getElementById('btn-save-prefs');
-      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Saving...';
-
-      const topics = {
-        news: document.getElementById('topic-news').checked,
-        weather: document.getElementById('topic-weather').checked,
-        jobs: document.getElementById('topic-jobs').checked,
-        iss: document.getElementById('topic-iss').checked,
-        platform: true
-      };
-
-      const realLat = localStorage.getItem('tc_gps_lat');
-      const realLon = localStorage.getItem('tc_gps_lon');
-      const preferences = {
-        weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
-        gpsCoords: (realLat && realLon) ? { lat: parseFloat(realLat), lon: parseFloat(realLon) } : null,
-        jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
-        issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
-      };
-
-      localStorage.setItem('tc_user_topics', JSON.stringify(topics));
-
-      try {
-        let deviceId = localStorage.getItem('tc_device_id') || ('dev_' + Math.random().toString(36).substring(2, 12));
-        localStorage.setItem('tc_device_id', deviceId);
-
-        if (typeof db !== 'undefined') {
-          await db.collection('fcm_tokens').doc(deviceId).set({
-            topics: topics,
-            preferences: preferences,
-            updatedAt: new Date()
-          }, { merge: true });
-        }
-      } catch (err) {}
-
-      saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs mr-1"></i> Saved!';
-      setTimeout(() => {
-        saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Save Preferences';
-        closeNotificationPreferences();
-      }, 500);
     }
 
     function openAnnouncementModal() {
@@ -2483,11 +1794,13 @@
         const res = await fetch(url);
         const data = await res.json();
         if (data && data[0]) {
-          const translated = data[0].map(s => s[0]).join('');
+          const translated = data[0].map(segment => segment[0]).join('');
           translationCache[cacheKey] = translated;
           return translated;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Translation error:", e);
+      }
       return text;
     }
 
@@ -2502,6 +1815,741 @@
         themeIcon.className = "fa-solid fa-sun text-xs text-amber-500";
       }
     }
+
+    async function fetchSolarSchedule() {
+      try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&start_date=${todayStr}&end_date=${todayStr}&timezone=auto`);
+        const data = await res.json();
+        if (data && data.daily && data.daily.sunrise && data.daily.sunset) {
+          const formatTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          document.getElementById('pill-sunrise').textContent = formatTime(data.daily.sunrise[0]);
+          document.getElementById('pill-sunset').textContent = formatTime(data.daily.sunset[0]);
+        }
+      } catch (err) {
+        document.getElementById('pill-sunrise').textContent = "06:00 AM";
+        document.getElementById('pill-sunset').textContent = "06:30 PM";
+      }
+    }
+
+    function setNewsScope(scope) {
+      currentScope = scope;
+      document.querySelectorAll('.scope-btn').forEach(btn => {
+        btn.classList.remove('active-scope');
+        btn.style.backgroundColor = "var(--bg-sub)";
+        btn.style.color = "var(--text-sub)";
+        btn.style.border = "1px solid var(--border-color)";
+      });
+
+      const activeBtn = document.getElementById(`scope-btn-${scope}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active-scope');
+        activeBtn.style.border = "none";
+      }
+
+      const dict = i18n[currentLanguage] || i18n.en;
+      const titleMap = {
+        'local': dict.scopeLocalTitle,
+        'national': dict.scopeNatTitle,
+        'world': dict.scopeWorldTitle
+      };
+      document.getElementById('active-scope-title').textContent = titleMap[scope];
+      fetchPortalNews();
+    }
+
+    function onDateFilterChange() {
+      const picker = document.getElementById('news-date-picker');
+      const currentDateStr = new Date().toISOString().split('T')[0];
+      if (picker.value > currentDateStr) {
+        alert("🗓️ Future Date Warning: Cannot select future dates.");
+        picker.value = currentDateStr;
+      }
+      fetchPortalNews();
+    }
+
+    async function fetchPortalNews() {
+      const feedContainer = document.getElementById('news-feed-container');
+      const badge = document.getElementById('news-status-badge');
+      const selectedDateStr = document.getElementById('news-date-picker').value;
+      const refreshIcon = document.getElementById('refresh-icon');
+
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+      badge.textContent = "Updating...";
+      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading stories...</div>';
+
+      try {
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&date=${selectedDateStr}`);
+        if (!res.ok) throw new Error("API error");
+        
+        const xmlText = await res.text();
+        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+        let items = Array.from(xml.querySelectorAll("item"));
+
+        items.sort((a, b) => {
+          const dateA = new Date(a.querySelector("pubDate")?.textContent || 0);
+          const dateB = new Date(b.querySelector("pubDate")?.textContent || 0);
+          return dateB - dateA;
+        });
+
+        let filteredItems = items.filter(item => {
+          const pubDate = item.querySelector("pubDate")?.textContent;
+          if (!pubDate) return false;
+          return new Date(pubDate).toISOString().split('T')[0] === selectedDateStr;
+        });
+
+        if (filteredItems.length === 0) {
+          const scopeLabel = currentScope === 'local' ? 'Telangana State' : (currentScope === 'national' ? 'India' : 'World');
+          const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
+
+          feedContainer.innerHTML = `
+            <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
+              <div>
+                <h4 class="text-xs font-bold" style="color: var(--text-main);">No Stories Found for ${selectedDateStr}</h4>
+                <p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct RSS records matched this exact date. Check the official news archive source below:</p>
+              </div>
+              <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
+                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Source Archive (${selectedDateStr})
+              </a>
+            </div>
+          `;
+          badge.textContent = "No Records for Date";
+          return;
+        }
+
+        let html = '';
+        const displayList = filteredItems;
+
+        for (const item of displayList) {
+          const rawTitle = item.querySelector("title")?.textContent || "News Story";
+          const link = item.querySelector("link")?.textContent || "#";
+          const pubDateStr = item.querySelector("pubDate")?.textContent || "";
+          
+          let formattedDateTime = "Live Feed";
+          if (pubDateStr) {
+            const dateObj = new Date(pubDateStr);
+            const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const day = dateObj.getDate();
+            
+            const getOrdinal = (n) => {
+              if (n > 3 && n < 21) return 'th';
+              switch (n % 10) {
+                case 1:  return "st";
+                case 2:  return "nd";
+                case 3:  return "rd";
+                default: return "th";
+              }
+            };
+            
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const monthPart = monthNames[dateObj.getMonth()];
+            const yearPart = dateObj.getFullYear();
+
+            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthPart} ${yearPart}`;
+          }
+
+          const title = await translateText(rawTitle, currentLanguage);
+          let sourceName = "Trusted by T&C";
+          if (link.includes("tv9")) sourceName = "TV9 Telugu";
+          else if (link.includes("france24")) sourceName = "France24";
+          else if (link.includes("hindu")) sourceName = "The Hindu";
+
+          html += `
+            <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <div class="flex-grow">
+                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
+                  ${title}
+                </h4>
+                <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
+                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
+                </div>
+              </div>
+              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
+                <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
+              </a>
+            </div>
+          `;
+        }
+        feedContainer.innerHTML = html;
+        badge.textContent = `Live (${displayList.length} Stories)`;
+      } catch (err) {
+        feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
+        badge.textContent = "Error";
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+      }
+    }
+
+    async function fetchPinnedWorldNews() {
+      const container = document.getElementById('pinned-world-news');
+      try {
+        const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=world`);
+        const xmlText = await res.text();
+        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+        let items = Array.from(xml.querySelectorAll("item"));
+        
+        items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
+        const topItems = items.slice(0, 3);
+
+        let html = '';
+        for (const item of topItems) {
+          const rawTitle = item.querySelector("title")?.textContent || "";
+          const link = item.querySelector("link")?.textContent || "#";
+          const title = await translateText(rawTitle, currentLanguage);
+          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
+        }
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">Highlights loading...</div>';
+      }
+    }
+
+    async function fetchRealTimeForex() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data && data.rates) {
+          document.getElementById('ticker-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+          document.getElementById('side-usdinr').textContent = `₹${data.rates.INR.toFixed(2)}`;
+          document.getElementById('side-eurinr').textContent = `₹${(data.rates.INR / data.rates.EUR).toFixed(2)}`;
+        }
+      } catch (e) {}
+    }
+
+    /* ==================== UNIFIED RADAR MAP SWITCHER ==================== */
+    function switchRadarMap(mode) {
+      const btnWeather = document.getElementById('btn-radar-weather');
+      const btnFlight = document.getElementById('btn-radar-flight');
+      const frameWeather = document.getElementById('radar-frame-weather');
+      const frameFlight = document.getElementById('radar-frame-flight');
+      const titleEl = document.getElementById('radar-main-title');
+      const iconEl = document.getElementById('radar-title-icon');
+
+      if (!btnWeather || !btnFlight) return;
+
+      [btnWeather, btnFlight].forEach(b => {
+        b.classList.remove('active-tab');
+        b.style.backgroundColor = 'transparent';
+        b.style.color = 'var(--text-sub)';
+        b.style.boxShadow = 'none';
+      });
+
+      if (mode === 'weather') {
+        frameWeather.style.display = 'block';
+        frameFlight.style.display = 'none';
+
+        btnWeather.classList.add('active-tab');
+        btnWeather.style.backgroundColor = '#0071e3';
+        btnWeather.style.color = '#ffffff';
+        btnWeather.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+
+        titleEl.textContent = 'Live Weather Radar';
+        iconEl.className = 'fa-solid fa-cloud-sun-rain text-blue-500 text-lg';
+      } else {
+        frameWeather.style.display = 'none';
+        frameFlight.style.display = 'block';
+
+        btnFlight.classList.add('active-tab');
+        btnFlight.style.backgroundColor = '#0071e3';
+        btnFlight.style.color = '#ffffff';
+        btnFlight.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+
+        titleEl.textContent = 'Live Flight & ISS Tracker';
+        iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-lg';
+
+        setTimeout(() => {
+          if (leafletMap) leafletMap.invalidateSize();
+        }, 150);
+      }
+    }
+    
+    /* ==================== REAL-TIME CRICKET ENGINE & MODAL ==================== */
+    let currentLiveMatchData = null;
+
+    function openCricketModal() {
+      document.getElementById('cricket-modal').classList.remove('hidden');
+    }
+
+    function closeCricketModal() {
+      document.getElementById('cricket-modal').classList.add('hidden');
+    }
+
+    async function fetchLiveCricketTicker(isManualRefresh = false) {
+      const tickerEl = document.getElementById('ticker-cricket');
+      const icon = document.getElementById('cricket-refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      try {
+        const res = await fetch('https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel');
+        if (!res.ok) throw new Error('ESPN API unreachable');
+        const data = await res.json();
+
+        let allMatches = [];
+        if (data && data.scores && Array.isArray(data.scores)) {
+          allMatches = data.scores;
+        } else if (data && data.events && Array.isArray(data.events)) {
+          allMatches = data.events;
+        }
+
+        if (allMatches.length > 0) {
+          const activeMatch = allMatches.find(m => m.status && (m.status.type?.state === 'in' || m.status.state === 'in')) || allMatches[0];
+          currentLiveMatchData = activeMatch;
+
+          const team1 = activeMatch.competitors?.[0];
+          const team2 = activeMatch.competitors?.[1];
+
+          const t1Name = team1?.team?.abbreviation || team1?.team?.shortDisplayName || 'Team 1';
+          const t2Name = team2?.team?.abbreviation || team2?.team?.shortDisplayName || 'Team 2';
+
+          const t1Score = team1?.score || (team1?.linescores?.[0]?.displayValue) || 'Yet to Bat';
+          const t2Score = team2?.score || (team2?.linescores?.[0]?.displayValue) || '';
+
+          const statusSummary = activeMatch.status?.summary || activeMatch.status?.type?.detail || activeMatch.summary || 'Live Match in Progress';
+          const isLive = activeMatch.status?.type?.state === 'in' || activeMatch.status?.state === 'in';
+
+          tickerEl.innerHTML = `
+            <span class="${isLive ? 'text-green-400 font-extrabold' : 'text-amber-400 font-bold'}">
+              <i class="fa-solid fa-circle text-[8px] ${isLive ? 'animate-pulse' : ''} mr-1"></i>
+              ${t1Name} ${t1Score} vs ${t2Name} ${t2Score} • ${statusSummary}
+            </span>
+          `;
+
+          document.getElementById('modal-match-title').textContent = activeMatch.name || `${t1Name} vs ${t2Name}`;
+          document.getElementById('modal-match-series').textContent = activeMatch.series?.name || 'International Cricket';
+          document.getElementById('modal-match-state').textContent = isLive ? 'LIVE' : (activeMatch.status?.type?.state || 'UPDATE');
+          document.getElementById('modal-match-state').className = `text-[10px] ${isLive ? 'bg-green-500' : 'bg-blue-600'} text-white font-black px-2 py-0.5 rounded-full uppercase`;
+
+          document.getElementById('modal-team1-name').textContent = team1?.team?.displayName || t1Name;
+          document.getElementById('modal-team1-score').textContent = t1Score;
+          document.getElementById('modal-team2-name').textContent = team2?.team?.displayName || t2Name;
+          document.getElementById('modal-team2-score').textContent = t2Score || '-';
+          document.getElementById('modal-match-summary').textContent = statusSummary;
+
+          if (icon) icon.classList.remove('fa-spin');
+          return;
+        }
+      } catch (err) {
+        console.warn('Cricket score fetch error:', err.message);
+      }
+
+      const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      tickerEl.innerHTML = `<span class="text-amber-500 font-medium">No live match in play • Checked at ${currentTimeStr}</span>`;
+      document.getElementById('modal-match-summary').textContent = 'No international match is live right now. Live ball-by-ball commentary resumes with the next match.';
+      if (icon) icon.classList.remove('fa-spin');
+    }
+
+    /* MAP INITIALIZATION WITH 100% FREE OFFICIAL OPENSTREETMAP TILES (NO WATERMARK) */
+    function initOSINTMap() {
+      leafletMap = L.map('osint-map', { zoomControl: true }).setView([20.5937, 78.9629], 3);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+        maxZoom: 19,
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(leafletMap);
+
+      flightLayerGroup = L.layerGroup().addTo(leafletMap);
+      flightPolylineGroup = L.layerGroup().addTo(leafletMap);
+
+      const legend = L.control({ position: 'bottomright' });
+      legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'leaflet-apple-legend');
+        div.innerHTML = `
+          <div onclick="toggleLegendContent()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 11px;">
+            <span>Map Legend</span>
+            <i id="legend-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
+          </div>
+          <div id="legend-body" style="display: none; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 5px;">
+            <div class="legend-item"><i class="fa-solid fa-satellite text-green-400 text-xs"></i><span style="font-size:11px;">ISS </span></div>
+            <div class="legend-item"><i class="fa-solid fa-plane text-blue-500 text-xs"></i><span style="font-size:11px;">Flight </span></div>
+            <div class="legend-item"><span style="width: 8px; height: 8px; background-color: #ff3b30; border-radius: 50%;"></span><span style="font-size:11px;">Earthquake</span></div>
+          </div>
+        `;
+        L.DomEvent.disableClickPropagation(div);
+        return div;
+      };
+      legend.addTo(leafletMap);
+
+      fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson')
+        .then(r => r.json())
+        .then(data => {
+          const count = data.features ? data.features.length : 0;
+          document.getElementById('ticker-quake-count').textContent = `${count} Quakes`;
+          document.getElementById('osint-quake-count').textContent = `${count} Events (24h)`;
+
+          (data.features || []).forEach(quake => {
+            const [lon, lat] = quake.geometry.coordinates;
+            const mag = quake.properties.mag;
+            const place = quake.properties.place;
+            const time = new Date(quake.properties.time).toLocaleString();
+
+            const marker = L.circleMarker([lat, lon], {
+              radius: mag * 1.5,
+              color: '#ff3b30',
+              fillColor: '#ff3b30',
+              fillOpacity: 0.7
+            });
+
+            marker.bindPopup(`
+              <div style="font-family: inherit; font-size: 12px;">
+                <b style="color: #ff3b30;">🔴 USGS Earthquake Event</b><br>
+                <b>Magnitude:</b> ${mag}<br>
+                <b>Location:</b> ${place}<br>
+                <b>Time:</b> ${time}<br>
+                <b>Coordinates:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
+              </div>
+            `);
+            marker.addTo(leafletMap);
+          });
+        }).catch(() => {});
+    }
+
+    function toggleLegendContent() {
+      const body = document.getElementById('legend-body');
+      const icon = document.getElementById('legend-icon');
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.className = "fa-solid fa-chevron-up text-[10px]";
+      } else {
+        body.style.display = 'none';
+        icon.className = "fa-solid fa-chevron-down text-[10px]";
+      }
+    }
+
+    /* REAL FLIGHT TRAFFIC FETCH & ROUTING POLYLINES */
+    async function fetchLiveAirTraffic() {
+      try {
+        const res = await fetch('https://news-39tq.vercel.app/api/flights');
+        const data = await res.json();
+
+        if (data && data.states && flightLayerGroup) {
+          flightLayerGroup.clearLayers();
+          flightPolylineGroup.clearLayers();
+          const count = data.states.length;
+          document.getElementById('ticker-flights-count').textContent = `${count} Active`;
+
+          data.states.slice(0, 40).forEach(flight => {
+            const [icao24, callsign, origin, posTime, contact, lon, lat, altMeters, onGround, speedMs, trackDeg] = flight;
+            if (lat && lon && !onGround) {
+              const speedKmh = Math.round(speedMs * 3.6);
+              const cleanCall = callsign ? callsign.trim() : 'Flight';
+              const heading = trackDeg || 0;
+
+              const planeHtml = `<div style="transform: rotate(${heading}deg); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;"><svg viewBox="0 0 24 24" fill="#0071e3" width="20" height="20"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`;
+              const planeIcon = L.divIcon({ html: planeHtml, className: '', iconSize: [22, 22], iconAnchor: [11, 11] });
+              const marker = L.marker([lat, lon], { icon: planeIcon });
+
+              const rad = (heading - 90) * (Math.PI / 180);
+              const destLat = lat + Math.sin(-rad) * 1.2;
+              const destLon = lon + Math.cos(-rad) * 1.2;
+              const routeLine = L.polyline([[lat, lon], [destLat, destLon]], { color: '#0071e3', weight: 2, dashArray: '4, 4', opacity: 0.7 });
+              flightPolylineGroup.addLayer(routeLine);
+
+              marker.bindPopup(`
+                <div style="font-size: 12px; min-width: 150px;">
+                  <b style="color: #0071e3;">✈️ ${cleanCall}</b><br>
+                  <b>Altitude:</b> ${Math.round(altMeters)} m<br>
+                  <b>Speed:</b> ${speedKmh} km/h<br>
+                  <b>Heading:</b> ${Math.round(heading)}°
+                </div>
+              `);
+              flightLayerGroup.addLayer(marker);
+            }
+          });
+        }
+      } catch (e) {}
+    }
+
+    /* ISS SATELLITE ORBIT TRACKER */
+    function initISSTracker() {
+      async function updateISS() {
+        try {
+          const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+          const data = await res.json();
+          const lat = parseFloat(data.latitude);
+          const lon = parseFloat(data.longitude);
+          
+          document.getElementById('ticker-iss-pos').textContent = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+          document.getElementById('osint-iss-alt').textContent = `${Math.round(data.altitude)} km`;
+          document.getElementById('osint-iss-spd').textContent = `${Math.round(data.velocity)} km/h`;
+
+          if (leafletMap) {
+            const currentPos = [lat, lon];
+            issHistoryCoords.push(currentPos);
+            if (issHistoryCoords.length > 25) issHistoryCoords.shift();
+
+            const issHtml = `<div style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-satellite text-green-400 text-lg"></i></div>`;
+            const issIcon = L.divIcon({ html: issHtml, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
+
+            if (!issMarker) {
+              issMarker = L.marker(currentPos, { icon: issIcon }).addTo(leafletMap);
+            } else {
+              issMarker.setLatLng(currentPos);
+            }
+
+            if (issPolyline) leafletMap.removeLayer(issPolyline);
+            if (issHistoryCoords.length > 1) {
+              issPolyline = L.polyline(issHistoryCoords, { color: '#34c759', weight: 3, opacity: 0.85 }).addTo(leafletMap);
+            }
+
+            issMarker.bindPopup(`
+              <div style="font-size: 12px;">
+                <b style="color: #34c759;">🛰️ ISS Satellite</b><br>
+                <b>Alt:</b> ${Math.round(data.altitude)} km | <b>Speed:</b> ${Math.round(data.velocity)} km/h
+              </div>
+            `);
+          }
+        } catch(e) {}
+      }
+      updateISS();
+      setInterval(updateISS, 12000);
+    }
+
+    async function initISSManifest() {
+      const container = document.getElementById('iss-crew-list');
+      try {
+        const res = await fetch('https://api.open-notify.org/astros.json');
+        const data = await res.json();
+        const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
+        document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
+        container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${p.name}</div>`).join('') || '<div class="italic">Offline</div>';
+      } catch(e) {
+        container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
+      }
+    }
+
+    /* ==================== 💼 LIVE JOB VACANCIES ENGINE ==================== */
+    const sampleVerifiedJobs = [];
+
+    async function fetchLiveJobs() {
+      const container = document.getElementById('job-listings-container');
+      const countBadge = document.getElementById('job-count-badge');
+      if (!container) return;
+
+      container.innerHTML = '<div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div>';
+
+      let jobsList = [];
+      try {
+        if (typeof db !== 'undefined') {
+          const snapshot = await db.collection('live_jobs').where('status', '==', 'active').get();
+          if (!snapshot.empty) {
+            jobsList = snapshot.docs.map(doc => doc.data());
+          }
+        }
+      } catch (e) {
+        console.warn('Firestore jobs fetch fallback:', e);
+      }
+
+      if (jobsList.length === 0) {
+        jobsList = sampleVerifiedJobs;
+      }
+
+      let filtered = jobsList;
+      if (currentJobSector !== 'all') {
+        filtered = jobsList.filter(j => j.sector === currentJobSector);
+      }
+
+      countBadge.textContent = `${filtered.length} Openings Active`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-xs" style="color: var(--text-sub);">No active openings found in this category.</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(job => {
+        const sectorBadges = {
+          'it': '<span class="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-0.5 rounded text-[10px] font-bold">IT &amp; Tech</span>',
+          'freshers': '<span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Freshers</span>',
+          'healthcare': '<span class="bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Healthcare</span>',
+          'govt': '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[10px] font-bold">Govt / Public</span>'
+        };
+
+        const contactBtn = job.contact && job.contact.startsWith('+') ? 
+          `<a href="tel:${job.contact}" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[11px] shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-phone text-[9px]"></i> Call: ${job.contact}</a>` :
+          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${job.contact || 'Portal Verified'}</span>`;
+
+        html += `
+          <div class="p-4 rounded-2xl border transition-all hover:border-blue-500/30" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
+                ${sectorBadges[job.sector] || ''}
+              </div>
+              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date || 'Active'}</span>
+            </div>
+
+            <div class="text-[11px] space-y-1 mb-3" style="color: var(--text-sub);">
+              <p><i class="fa-regular fa-building mr-1.5 text-blue-500"></i><b>${job.company}</b> • <i class="fa-solid fa-location-dot mx-1 text-red-500"></i>${job.location}</p>
+              <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${job.eligibility} | <b>Salary:</b> ${job.salary}</p>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-black/5 dark:border-white/5 flex-wrap">
+              <div class="flex items-center gap-2">
+                ${contactBtn}
+              </div>
+              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-md flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Official Apply Portal
+              </a>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+    
+    function filterJobs(sector, btnEl) {
+      currentJobSector = sector;
+      document.querySelectorAll('#view-jobs .choice-pill').forEach(b => b.classList.remove('selected'));
+      if (btnEl) btnEl.classList.add('selected');
+      fetchLiveJobs();
+    }
+
+    /* ==================== 🔔 NOTIFICATION PREFERENCES MODAL LOGIC ==================== */
+    function openNotificationPreferences() {
+      document.getElementById('notification-prefs-modal').classList.remove('hidden');
+      loadSavedPreferencesUI();
+    }
+
+    function closeNotificationPreferences() {
+      document.getElementById('notification-prefs-modal').classList.add('hidden');
+    }
+
+    function onTopicToggle(topic) {
+      const isChecked = document.getElementById(`topic-${topic}`).checked;
+      const subContainer = document.getElementById(`sub-q-${topic}`);
+      if (subContainer) {
+        if (isChecked) {
+          subContainer.classList.remove('hidden');
+        } else {
+          subContainer.classList.add('hidden');
+        }
+      }
+      checkMasterToggleState();
+    }
+
+    function checkMasterToggleState() {
+      const news = document.getElementById('topic-news').checked;
+      const weather = document.getElementById('topic-weather').checked;
+      const jobs = document.getElementById('topic-jobs').checked;
+      const iss = document.getElementById('topic-iss').checked;
+      document.getElementById('pref-select-all').checked = (news && weather && jobs && iss);
+    }
+
+    function toggleSelectAllTopics(masterChecked) {
+      const topics = ['news', 'weather', 'jobs', 'iss'];
+      topics.forEach(t => {
+        const checkbox = document.getElementById(`topic-${t}`);
+        if (checkbox) {
+          checkbox.checked = masterChecked;
+          onTopicToggle(t);
+        }
+      });
+    }
+
+    function selectChoicePill(groupKey, value, btnEl) {
+      const parent = btnEl.parentElement;
+      parent.querySelectorAll('.choice-pill').forEach(b => b.classList.remove('selected'));
+      btnEl.classList.add('selected');
+      localStorage.setItem(`tc_pref_${groupKey}`, value);
+    }
+
+    function detectGPSCity(btnEl) {
+      if ('geolocation' in navigator) {
+        btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            btnEl.innerHTML = '📍 GPS Locked';
+            localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4));
+            localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4));
+            selectChoicePill('weather-city', 'GPS_Auto', btnEl);
+          },
+          (err) => {
+            btnEl.innerHTML = '📍 GPS Unavailable';
+            setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000);
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      }
+    }
+
+    function loadSavedPreferencesUI() {
+      const savedTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
+      
+      ['news', 'weather', 'jobs', 'iss'].forEach(t => {
+        const el = document.getElementById(`topic-${t}`);
+        if (el) {
+          el.checked = savedTopics[t] !== undefined ? savedTopics[t] : true;
+          onTopicToggle(t);
+        }
+      });
+
+      checkMasterToggleState();
+
+      const savedCity = localStorage.getItem('tc_pref_weather-city') || 'Hyderabad';
+      document.querySelectorAll('#weather-city-pills .choice-pill').forEach(b => {
+        if (b.textContent.includes(savedCity)) b.classList.add('selected');
+      });
+
+      const savedSector = localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree';
+      document.querySelectorAll('#job-sector-pills .choice-pill').forEach(b => {
+        if (b.textContent.includes(savedSector)) b.classList.add('selected');
+      });
+    }
+
+    async function saveNotificationPreferences() {
+      const saveBtn = document.getElementById('btn-save-prefs');
+      saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Saving...';
+
+      const topics = {
+        news: document.getElementById('topic-news').checked,
+        weather: document.getElementById('topic-weather').checked,
+        jobs: document.getElementById('topic-jobs').checked,
+        iss: document.getElementById('topic-iss').checked,
+        platform: true
+      };
+
+      const realLat = localStorage.getItem('tc_gps_lat');
+      const realLon = localStorage.getItem('tc_gps_lon');
+      
+      const preferences = {
+        weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
+        gpsCoords: (realLat && realLon) ? {
+          lat: parseFloat(realLat),
+          lon: parseFloat(realLon)
+        } : null,
+        jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
+        issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
+      };
+
+      localStorage.setItem('tc_user_topics', JSON.stringify(topics));
+
+      try {
+        let deviceId = localStorage.getItem('tc_device_id');
+        if (!deviceId) {
+          deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+          localStorage.setItem('tc_device_id', deviceId);
+        }
+
+        if (typeof db !== 'undefined') {
+          await db.collection('fcm_tokens').doc(deviceId).set({
+            topics: topics,
+            preferences: preferences,
+            updatedAt: new Date()
+          }, { merge: true });
+          console.log('Real GPS preferences synced to Firestore for:', deviceId);
+        }
+      } catch (err) {
+        console.warn('Firestore topic sync warning:', err);
+      }
+
+      saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs mr-1"></i> Saved Successfully!';
+      setTimeout(() => {
+        saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Save Preferences';
+        closeNotificationPreferences();
+      }, 700);
+    }
   </script>
 
   <!-- Apple-Style Install Button -->
@@ -2514,40 +2562,57 @@
     <span>Install App</span>
   </button>
 
+  <!-- Apple Styling -->
   <style>
     .apple-btn {
       position: fixed;
       bottom: calc(22px + env(safe-area-inset-bottom));
       right: 20px;
-      z-index: 9999;
+      z-index: 99999;
       display: inline-flex;
       align-items: center;
       gap: 7px;
       padding: 10px 18px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.82);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.2px;
       color: #000000;
       border: 0.5px solid rgba(0, 0, 0, 0.12);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
       cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  box-shadow 0.2s ease, 
+                  background 0.2s ease;
     }
-    .apple-btn:active { transform: scale(0.95); }
+    .apple-btn:active {
+      transform: scale(0.93);
+      background: rgba(235, 235, 235, 0.9);
+    }
     @media (prefers-color-scheme: dark) {
       .apple-btn {
-        background: rgba(30, 30, 32, 0.94);
+        background: rgba(30, 30, 32, 0.82);
         color: #ffffff;
         border: 0.5px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      }
+      .apple-btn:active {
+        background: rgba(50, 50, 54, 0.9);
       }
     }
   </style>
 
+  <!-- Script for Android & iPhone Handling -->
   <script>
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
+
     const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
 
@@ -2565,10 +2630,12 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') installBtn.style.display = 'none';
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
         deferredPrompt = null;
       } else if (isIos) {
-        alert("To install on iPhone:\n\n1. Tap the Share button (square with arrow ⬆).\n2. Scroll down and tap 'Add to Home Screen' (+).");
+        alert("To install on your iPhone:\n\n1. Tap the Share button (square with arrow ⬆) at the bottom.\n2. Scroll down and tap 'Add to Home Screen' (+).");
       }
     });
 
@@ -2598,6 +2665,7 @@
 
     async function initPushRegistration() {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
       try {
         let permission = Notification.permission;
         if (permission === 'default') {
@@ -2606,14 +2674,18 @@
 
         if (permission === 'granted') {
           const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
+          
           const token = await messaging.getToken({
             vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
             serviceWorkerRegistration: reg
           });
 
           if (token) {
-            let deviceId = localStorage.getItem('tc_device_id') || ('dev_' + Math.random().toString(36).substring(2, 12));
-            localStorage.setItem('tc_device_id', deviceId);
+            let deviceId = localStorage.getItem('tc_device_id');
+            if (!deviceId) {
+              deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+              localStorage.setItem('tc_device_id', deviceId);
+            }
 
             const initialTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
             const initialPrefs = {
@@ -2629,9 +2701,25 @@
               preferences: initialPrefs,
               updatedAt: new Date()
             }, { merge: true });
+
+            console.log('Push device token synced with preferences:', deviceId);
           }
+        } else if (permission === 'denied') {
+          let deviceId = localStorage.getItem('tc_device_id');
+          if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
+            localStorage.setItem('tc_device_id', deviceId);
+          }
+
+          await db.collection('denied_stats').doc(deviceId).set({
+            status: 'denied',
+            device: navigator.userAgent,
+            lastSeen: new Date()
+          }, { merge: true });
         }
-      } catch (err) {}
+      } catch (err) {
+        console.warn('Push registration error:', err);
+      }
     }
 
     window.addEventListener('load', initPushRegistration);
