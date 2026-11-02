@@ -1,3 +1,4 @@
+
 const admin = require('firebase-admin');
 
 // 1. Initialize Firebase Admin SDK
@@ -189,6 +190,7 @@ async function runNotificationTask() {
       data: {
         title: dynamicTitle,
         body: liveHeadline,
+        tag: "tc-daily-news",
         url: "https://tastyandcomfort.github.io/news/"
       },
       android: {
