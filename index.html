@@ -27,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://img.youtube.com" crossorigin>
-  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
   <link rel="dns-prefetch" href="https://embed.windy.com">
   <link rel="dns-prefetch" href="https://earthquake.usgs.gov">
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -84,33 +84,33 @@
       overscroll-behavior-y: contain;
     }
     
-    /* Apple Light Theme (DEFAULT) */
+    /* Apple Light Theme */
     :root {
       --bg-main: #f5f5f7;
-      --bg-card: rgba(255, 255, 255, 0.90);
-      --bg-sub: #e5e5ea;
+      --bg-card: rgba(255, 255, 255, 0.94);
+      --bg-sub: #e8e8ed;
       --bg-pill-active: #ffffff;
       --text-main: #1d1d1f;
       --text-sub: #86868b;
       --border-color: rgba(0, 0, 0, 0.08);
-      --header-bg: rgba(255, 255, 255, 0.88);
+      --header-bg: rgba(255, 255, 255, 0.94);
       --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      --solar-pill-bg: rgba(255, 255, 255, 0.85);
+      --solar-pill-bg: rgba(255, 255, 255, 0.9);
       --solar-pill-border: rgba(0, 0, 0, 0.1);
     }
 
     /* Apple Dark Theme */
     .dark {
       --bg-main: #000000;
-      --bg-card: rgba(28, 28, 30, 0.85);
+      --bg-card: rgba(28, 28, 30, 0.94);
       --bg-sub: #1c1c1e;
       --bg-pill-active: #2c2c2e;
       --text-main: #f5f5f7;
       --text-sub: #a1a1a6;
       --border-color: rgba(255, 255, 255, 0.12);
-      --header-bg: rgba(0, 0, 0, 0.85);
+      --header-bg: rgba(18, 18, 20, 0.94);
       --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      --solar-pill-bg: rgba(30, 30, 35, 0.85);
+      --solar-pill-bg: rgba(30, 30, 35, 0.9);
       --solar-pill-border: rgba(255, 255, 255, 0.14);
     }
 
@@ -121,25 +121,16 @@
 
     .apple-card {
       background-color: var(--bg-card);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
-      contain: content;
+      contain: layout paint;
     }
 
     .apple-header {
       background-color: var(--header-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-color);
-    }
-
-    /* Video player container: Zero layout thrashing */
-    #active-video-container, #file-view {
-      contain: strict;
-      transform: translate3d(0, 0, 0);
+      contain: layout paint;
     }
 
     .logo-anchored-pill {
@@ -158,7 +149,7 @@
       background: var(--solar-pill-bg);
       border: 1px solid var(--solar-pill-border);
       border-radius: 9999px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .solar-item {
@@ -218,11 +209,9 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     
-    /* Hardware-accelerated lightweight pulses (No box-shadow animations) */
     .pulse-gold {
       background-color: #ffcc00;
       border-radius: 50%;
-      will-change: opacity, transform;
       animation: pulseGold 2s infinite ease-in-out;
     }
     @keyframes pulseGold {
@@ -237,7 +226,6 @@
       background-color: #34c759;
       border-radius: 50%;
       display: inline-block;
-      will-change: opacity, transform;
       animation: pulseGreen 1.8s infinite ease-in-out;
     }
     @keyframes pulseGreen {
@@ -269,7 +257,6 @@
       box-shadow: 0 3px 10px rgba(0, 113, 227, 0.3);
     }
 
-    /* Clean Solid Translucent Watermark (NO BLUR SHADER OVER PLAYING VIDEO) */
     .tc-subtle-watermark {
       position: absolute;
       top: 14px;
@@ -297,13 +284,13 @@
     .apple-slider {
       position: absolute; cursor: pointer; inset: 0;
       background-color: rgba(120, 120, 128, 0.3);
-      transition: .25s ease;
+      transition: .2s ease;
       border-radius: 9999px;
     }
     .apple-slider:before {
       position: absolute; content: ""; height: 20px; width: 20px;
       left: 3px; bottom: 3px; background-color: #ffffff;
-      transition: .25s ease;
+      transition: .2s ease;
       border-radius: 50%;
       box-shadow: 0 2px 5px rgba(0,0,0,0.25);
     }
@@ -329,11 +316,10 @@
       border-color: #0071e3 !important;
     }
 
-    /* ==================== APPLE-YOUTUBE SLIDING CAROUSEL (OPTIMIZED) ==================== */
+    /* ==================== APPLE-YOUTUBE SLIDING CAROUSEL ==================== */
     .channel-carousel-wrap {
       position: relative;
       width: 100%;
-      contain: content;
     }
 
     .channel-track {
@@ -351,7 +337,6 @@
       scroll-snap-align: start;
       cursor: pointer;
       user-select: none;
-      contain: content;
       transition: transform 0.2s ease;
     }
 
@@ -390,7 +375,7 @@
     .play-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -427,7 +412,7 @@
       background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       cursor: pointer;
       transition: background 0.15s ease, color 0.15s ease;
     }
@@ -443,6 +428,27 @@
 
     @media (max-width: 640px) {
       .carousel-nav-btn { display: none; }
+    }
+
+    /* ==================== SEAMLESS IN-PAGE FLOATING OVERLAY (PIP) ==================== */
+    #persistent-player-hub.tc-floating-pip {
+      position: fixed !important;
+      bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+      right: 20px !important;
+      width: 330px !important;
+      max-width: calc(100vw - 40px) !important;
+      aspect-ratio: 16 / 9 !important;
+      z-index: 1000 !important;
+      border-radius: 16px !important;
+      overflow: hidden !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px #0071e3 !important;
+      background: #000000 !important;
+      animation: pipEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes pipEnter {
+      from { transform: translateY(20px) scale(0.92); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -505,7 +511,7 @@
               <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-cloud-sun"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Weather Outlook &amp; Rain Alerts</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Choose location to get morning/evening alerts &amp; rain radar</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Choose location to get alerts &amp; rain radar</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -531,7 +537,7 @@
               <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-briefcase"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Career &amp; Job Vacancies</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Local job alerts &amp; openings</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Local job alerts &amp; vacancies</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -540,7 +546,7 @@
             </label>
           </div>
           <div id="sub-q-jobs" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
-            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Preference / Sector:</p>
+            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Sector:</p>
             <div class="flex flex-wrap gap-1.5" id="job-sector-pills">
               <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected">Freshers / Any Degree</button>
               <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill">IT &amp; Tech</button>
@@ -556,7 +562,7 @@
               <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-satellite"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">ISS Satellite &amp; Space Events</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Visible flyovers over your location &amp; launches</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Visible passes over your location</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -582,7 +588,7 @@
                   <h5 class="text-xs font-bold" style="color: var(--text-main);">T&amp;C Developer</h5>
                   <span class="text-[9px] bg-blue-500/20 text-blue-500 font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i class="fa-solid fa-lock text-[8px]"></i> REQUIRED</span>
                 </div>
-                <p class="text-[10px]" style="color: var(--text-sub);">Platform notifications and system upgrades from Murali Manohar.</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Platform advisories and feature updates by Murali Manohar.</p>
               </div>
             </div>
             <label class="apple-switch" title="T&C Platform updates are always active">
@@ -623,18 +629,14 @@
 
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
         <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
+          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Advisory
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> Intel Brief: Singur and Manjeera reservoir levels may reach critical points around December 15, 2026. A citywide shutdown is unconfirmed; residents are advised to practice conservation.
+          T&C News Hub advisory: Singur and Manjeera reservoir levels are being monitored. Residents are advised to avoid water wastage and follow official HMWSSB updates.
         </p>
-        <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span>Status:</span> <b>Monitoring Reserves</b></div>
-          <div class="flex justify-between"><span>Water Levels:</span> <b>LOW</b></div>
-        </div>
       </div>
 
-      <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+      <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2">
         <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
       </button>
     </div>
@@ -667,7 +669,6 @@
       </div>
 
       <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
-        <!-- SOLAR PILL -->
         <div class="apple-solar-pill" id="apple-solar-pill">
           <div class="solar-item" title="Sunrise">
             <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -690,7 +691,6 @@
           </div>
         </div>
 
-        <!-- UTILITY CLUSTER -->
         <div class="flex items-center gap-1.5 p-1 rounded-full shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="relative" id="lang-menu-wrapper">
             <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="color: var(--text-main);">
@@ -804,6 +804,35 @@
     </div>
   </div>
 
+  <!-- ==================== PERSISTENT HARDWARE-ACCELERATED VIDEO PLAYER HUB ==================== -->
+  <!-- Stays permanently alive; docks in TV & Media and floats when navigating to other tabs -->
+  <div id="persistent-player-hub" class="hidden relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="border: 1px solid var(--border-color);">
+    
+    <!-- Mini PiP Top Floating Controls -->
+    <div id="pip-top-bar" class="hidden absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-black/85 via-black/40 to-transparent p-2.5 flex items-center justify-between text-white pointer-events-auto">
+      <div class="flex items-center gap-1.5 overflow-hidden pr-2">
+        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
+        <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Return to TV & Media">
+          <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+        </button>
+        <button onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="tc-subtle-watermark">T&amp;C LIVE HUB</div>
+    <iframe id="master-video-player" class="absolute inset-0 w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    
+    <video id="file-video-player" class="hidden absolute inset-0 w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
+      <source src="videos/sample-video.mp4" type="video/mp4">
+      Your browser does not support HTML5 video playback.
+    </video>
+  </div>
+
   <!-- MAIN CONTENT CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -852,7 +881,7 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 2: TV & MEDIA (SMOOTH & ZERO-STUTTER) ==================== -->
+        <!-- ==================== TAB 2: TV & MEDIA ==================== -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-6 relative">
             
@@ -863,33 +892,21 @@
                   <h3 id="current-channel-title" class="text-base font-extrabold text-blue-500">25+ Live Channels</h3>
                   <span id="channel-cat-pill" class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold hidden">NEWS</span>
                 </div>
-                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap thumbnail to stream</span>
+                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap card below to stream</span>
               </div>
 
-              <!-- Default Prompt Screen before Selection -->
-              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
-                  <i class="fa-solid fa-play"></i>
+              <!-- Anchor dock where persistent player lives when on TV & Media tab -->
+              <div id="video-inline-anchor" class="w-full">
+                <!-- Prompt Screen shown when no channel is playing -->
+                <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
+                  <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-play"></i>
+                  </div>
+                  <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Live Continuous Streaming</h4>
+                  <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
+                    Select any channel from the carousel below. Playback seamlessly continues as a floating overlay if you browse to other sections.
+                  </p>
                 </div>
-                <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Instant Hardware-Accelerated Streaming</h4>
-                <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
-                  Select any channel from the carousel below for uninterrupted, high-definition live playback.
-                </p>
-              </div>
-
-              <!-- Master Live Iframe Stream Player (Optimized for 60fps) -->
-              <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="display:none; border: 1px solid var(--border-color);">
-                <div class="tc-subtle-watermark">T&amp;C LIVE HUB</div>
-                <iframe id="master-video-player" class="absolute inset-0 w-full h-full border-0 block" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-              </div>
-
-              <!-- Local Media Stream Player -->
-              <div id="file-view" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="display:none; border: 1px solid var(--border-color);">
-                <div class="tc-subtle-watermark">T&amp;C Media Player</div>
-                <video id="file-video-player" class="absolute inset-0 w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
-                  <source src="videos/sample-video.mp4" type="video/mp4">
-                  Your browser does not support HTML5 video playback.
-                </video>
               </div>
             </div>
 
@@ -903,7 +920,6 @@
                   <span class="text-[10px] bg-red-500/10 text-red-500 font-extrabold px-2 py-0.5 rounded-full">25 STATIONS</span>
                 </div>
 
-                <!-- Genre Filters -->
                 <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                   <button onclick="filterMediaCarousel('all', this)" class="choice-pill selected">All</button>
                   <button onclick="filterMediaCarousel('news', this)" class="choice-pill">News</button>
@@ -919,7 +935,7 @@
                 </button>
 
                 <div id="channel-carousel-track" class="channel-track no-scrollbar">
-                  <!-- Channels populated dynamically via script -->
+                  <!-- Populated dynamically -->
                 </div>
 
                 <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Next">
@@ -932,7 +948,7 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 3: RADAR & OSINT MAP (FAST GPU-CANVAS RENDERING) ==================== -->
+        <!-- ==================== TAB 3: RADAR & OSINT MAP (NO WATERMARK) ==================== -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
@@ -941,7 +957,7 @@
                 <i id="radar-title-icon" class="fa-solid fa-cloud-sun-rain text-blue-500 text-xl"></i>
                 <div>
                   <h2 id="radar-main-title" class="text-base font-bold" style="color: var(--text-main);">Live Weather Radar</h2>
-                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time meteorological &amp; orbital tracking</p>
+                  <p class="text-[10px]" style="color: var(--text-sub);">Real-time Doppler radar &amp; orbital tracking</p>
                 </div>
                 <span class="text-xs bg-green-500/10 text-green-500 border border-green-500/30 px-2 py-0.5 rounded-full font-bold ml-2 flex items-center gap-1">
                   <span class="live-dot" style="width:6px;height:6px;"></span> Live
@@ -960,7 +976,6 @@
               </div>
             </div>
 
-            <!-- Weather Layer Toggles -->
             <div id="weather-layer-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-3">
               <span class="text-[10px] font-bold text-amber-500 mr-1"><i class="fa-solid fa-sliders"></i> Mode:</span>
               <button onclick="setWindyLayer('radar', this)" class="choice-pill selected">🌧️ Doppler Rain Radar</button>
@@ -972,13 +987,13 @@
             <!-- Resilient Map Container -->
             <div class="relative w-full h-[430px] sm:h-[480px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub); contain: strict;">
               
-              <!-- 1. Live Weather Radar Frame (Lazy-Loaded) -->
+              <!-- 1. Live Weather Radar Frame -->
               <div id="radar-frame-weather" class="absolute inset-0 w-full h-full">
                 <div class="tc-subtle-watermark">T&amp;C LIVE RADAR</div>
                 <iframe id="windy-radar-iframe" width="100%" height="100%" src="about:blank" frameborder="0" class="w-full h-full border-0 block" allow="geolocation"></iframe>
               </div>
 
-              <!-- 2. Live Flights & ISS Map (GPU-Accelerated Leaflet Canvas) -->
+              <!-- 2. Live Flights & ISS Map (No Watermark OSM) -->
               <div id="radar-frame-flight" class="absolute inset-0 w-full h-full" style="display: none;">
                 <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
                 <div id="osint-map" class="w-full h-full" style="min-height: 100%;"></div>
@@ -1073,6 +1088,8 @@
     let currentScope = 'local';
     let currentLanguage = 'en';
     let currentJobSector = 'all';
+    let currentTab = 'news';
+    let isMediaPlaying = false;
     let isWindyLoaded = false;
     
     const todayObj = new Date();
@@ -1088,7 +1105,7 @@
 
     const translationCache = {};
 
-    /* Master Channels Database with Direct High-Res Thumbnails & Meta */
+    /* Master Channels Database */
     const masterChannelsList = [
       { id: 'v6', name: 'V6 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: '28IZl9iM-EE' },
       { id: 'tv9', name: 'TV9 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: 'II_m28Bm-iM' },
@@ -1242,7 +1259,6 @@
       initISSManifest();
       fetchLiveJobs();
 
-      // Moderate interval ticks to avoid GC pauses
       setInterval(fetchLiveAirTraffic, 35000);
       setInterval(fetchLiveCricketTicker, 30000);
 
@@ -1256,7 +1272,7 @@
       loadSavedPreferencesUI();
     });
 
-    /* ==================== APPLE-YOUTUBE CHANNEL CAROUSEL ENGINE ==================== */
+    /* ==================== APPLE-YOUTUBE CHANNEL CAROUSEL ==================== */
     function initMediaChannelsCarousel() {
       const track = document.getElementById('channel-carousel-track');
       if (!track) return;
@@ -1328,41 +1344,138 @@
       const chan = masterChannelsList.find(c => c.id === channelId);
       if (!chan) return;
 
+      const playerHub = document.getElementById('persistent-player-hub');
+      const inlineAnchor = document.getElementById('video-inline-anchor');
       const textView = document.getElementById('text-view');
-      const activeVideoContainer = document.getElementById('active-video-container');
       const masterPlayer = document.getElementById('master-video-player');
-      const fileView = document.getElementById('file-view');
       const filePlayer = document.getElementById('file-video-player');
       const title = document.getElementById('current-channel-title');
+      const pipTitle = document.getElementById('pip-channel-title');
       const dot = document.getElementById('live-indicator');
       const catPill = document.getElementById('channel-cat-pill');
 
+      isMediaPlaying = true;
       textView.style.display = 'none';
-      activeVideoContainer.style.display = 'none';
-      fileView.style.display = 'none';
-      masterPlayer.src = "about:blank"; 
-      filePlayer.pause();
-      filePlayer.src = "";
+
+      // Ensure docked inside TV & Media view
+      inlineAnchor.appendChild(playerHub);
+      playerHub.classList.remove('hidden', 'tc-floating-pip');
+      document.getElementById('pip-top-bar').classList.add('hidden');
 
       title.innerText = chan.name;
+      pipTitle.innerText = chan.name;
       catPill.textContent = chan.tag;
       catPill.classList.remove('hidden');
       dot.style.display = "inline-block";
 
       if (channelId === 'file') {
-        fileView.style.display = 'block';
+        masterPlayer.style.display = 'none';
+        masterPlayer.src = "about:blank";
+        filePlayer.classList.remove('hidden');
         filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
         filePlayer.play().catch(() => {});
       } else {
-        activeVideoContainer.style.display = 'block';
-        // Clean high-performance embed parameters
-        const streamUrl = `https://www.youtube.com/embed/${chan.ytId}?autoplay=1&mute=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=0`;
-        masterPlayer.src = streamUrl;
+        filePlayer.classList.add('hidden');
+        filePlayer.pause();
+        masterPlayer.style.display = 'block';
+        masterPlayer.src = `https://www.youtube.com/embed/${chan.ytId}?autoplay=1&mute=1&playsinline=1&controls=1&rel=0`;
       }
     }
 
-    /* ==================== RADAR & FAST OSINT MAP ENGINE ==================== */
+    function stopAndCloseVideo() {
+      const playerHub = document.getElementById('persistent-player-hub');
+      const masterPlayer = document.getElementById('master-video-player');
+      const filePlayer = document.getElementById('file-video-player');
+      const dot = document.getElementById('live-indicator');
+      const catPill = document.getElementById('channel-cat-pill');
+      const title = document.getElementById('current-channel-title');
+      const textView = document.getElementById('text-view');
+
+      isMediaPlaying = false;
+      masterPlayer.src = "about:blank";
+      filePlayer.pause();
+      filePlayer.src = "";
+
+      playerHub.classList.remove('tc-floating-pip');
+      playerHub.classList.add('hidden');
+      document.getElementById('pip-top-bar').classList.add('hidden');
+
+      dot.style.display = 'none';
+      catPill.classList.add('hidden');
+      title.innerText = '25+ Live Channels';
+      textView.style.display = 'block';
+
+      document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active-stream'));
+    }
+
+    /* ==================== 4-TAB NAVIGATION & FLOATING PIP SYNC ==================== */
+    function switchMainTab(tab) {
+      currentTab = tab;
+
+      document.getElementById('view-news').classList.add('hidden');
+      document.getElementById('view-video').classList.add('hidden');
+      document.getElementById('view-osint').classList.add('hidden');
+      document.getElementById('view-jobs').classList.add('hidden');
+
+      const btnNews = document.getElementById('tab-btn-news');
+      const btnVideo = document.getElementById('tab-btn-video');
+      const btnOsint = document.getElementById('tab-btn-osint');
+      const btnJobs = document.getElementById('tab-btn-jobs');
+
+      [btnNews, btnVideo, btnOsint, btnJobs].forEach(b => {
+        b.classList.remove('active-tab');
+        b.style.backgroundColor = 'transparent';
+        b.style.color = 'var(--text-sub)';
+        b.style.boxShadow = 'none';
+      });
+
+      const playerHub = document.getElementById('persistent-player-hub');
+      const inlineAnchor = document.getElementById('video-inline-anchor');
+      const pipTopBar = document.getElementById('pip-top-bar');
+
+      let activeBtn = btnNews;
+
+      if (tab === 'news') {
+        document.getElementById('view-news').classList.remove('hidden');
+        activeBtn = btnNews;
+      } else if (tab === 'video') {
+        document.getElementById('view-video').classList.remove('hidden');
+        activeBtn = btnVideo;
+      } else if (tab === 'osint') {
+        document.getElementById('view-osint').classList.remove('hidden');
+        activeBtn = btnOsint;
+        ensureRadarLoaded();
+        requestAnimationFrame(() => {
+          if (leafletMap) leafletMap.invalidateSize(true);
+        });
+      } else if (tab === 'jobs') {
+        document.getElementById('view-jobs').classList.remove('hidden');
+        activeBtn = btnJobs;
+      }
+
+      activeBtn.classList.add('active-tab');
+      activeBtn.style.backgroundColor = '#0071e3';
+      activeBtn.style.color = '#ffffff';
+      activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
+
+      // Seamless Floating Overlay Logic
+      if (isMediaPlaying) {
+        if (tab === 'video') {
+          // Dock into normal position in TV & Media
+          inlineAnchor.appendChild(playerHub);
+          playerHub.classList.remove('tc-floating-pip');
+          pipTopBar.classList.add('hidden');
+        } else {
+          // Float smoothly over Headlines, Radar, or Jobs
+          document.body.appendChild(playerHub);
+          playerHub.classList.add('tc-floating-pip');
+          pipTopBar.classList.remove('hidden');
+        }
+      }
+    }
+
+    /* ==================== RADAR & OSINT MAP (NO WATERMARK OSM) ==================== */
     function ensureRadarLoaded() {
       if (!isWindyLoaded) {
         const iframe = document.getElementById('windy-radar-iframe');
@@ -1416,7 +1529,6 @@
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-xl';
 
-        // Fast canvas rendering with zero lag
         requestAnimationFrame(() => {
           if (!leafletMap) {
             initOSINTMap();
@@ -1442,7 +1554,6 @@
     function initOSINTMap() {
       if (leafletMap) return;
 
-      // GPU Canvas mode (preferCanvas: true) for 60fps performance
       leafletMap = L.map('osint-map', { 
         preferCanvas: true,
         zoomControl: true,
@@ -1451,11 +1562,11 @@
         markerZoomAnimation: true
       }).setView([20.5937, 78.9629], 3);
 
-      // Fast CDN edge tiles (CartoDB Positron / Voyager)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
-        subdomains: 'abcd',
+      // OpenStreetMap Official Global CDN (Zero Watermark, 100% Free)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
         maxZoom: 19,
-        attribution: '© CartoDB, © OpenStreetMap'
+        subdomains: ['a', 'b', 'c'],
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(leafletMap);
 
       flightLayerGroup = L.layerGroup().addTo(leafletMap);
@@ -1530,7 +1641,6 @@
       }
     }
 
-    // Marker pooling for Flights: Zero DOM recreation lag
     async function fetchLiveAirTraffic() {
       if (!leafletMap || !flightLayerGroup) return;
 
@@ -1581,7 +1691,6 @@
             }
           });
 
-          // Cleanup stale markers
           flightMarkerMap.forEach((m, icao) => {
             if (!validIcaos.has(icao)) {
               flightLayerGroup.removeLayer(m);
@@ -1647,50 +1756,6 @@
       } catch(e) {
         container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
       }
-    }
-
-    /* ==================== 4-TAB NAVIGATION SWITCHER ==================== */
-    function switchMainTab(tab) {
-      document.getElementById('view-news').classList.add('hidden');
-      document.getElementById('view-video').classList.add('hidden');
-      document.getElementById('view-osint').classList.add('hidden');
-      document.getElementById('view-jobs').classList.add('hidden');
-
-      const btnNews = document.getElementById('tab-btn-news');
-      const btnVideo = document.getElementById('tab-btn-video');
-      const btnOsint = document.getElementById('tab-btn-osint');
-      const btnJobs = document.getElementById('tab-btn-jobs');
-
-      [btnNews, btnVideo, btnOsint, btnJobs].forEach(b => {
-        b.classList.remove('active-tab');
-        b.style.backgroundColor = 'transparent';
-        b.style.color = 'var(--text-sub)';
-        b.style.boxShadow = 'none';
-      });
-
-      let activeBtn = btnNews;
-      if (tab === 'news') {
-        document.getElementById('view-news').classList.remove('hidden');
-        activeBtn = btnNews;
-      } else if (tab === 'video') {
-        document.getElementById('view-video').classList.remove('hidden');
-        activeBtn = btnVideo;
-      } else if (tab === 'osint') {
-        document.getElementById('view-osint').classList.remove('hidden');
-        activeBtn = btnOsint;
-        ensureRadarLoaded();
-        requestAnimationFrame(() => {
-          if (leafletMap) leafletMap.invalidateSize(true);
-        });
-      } else if (tab === 'jobs') {
-        document.getElementById('view-jobs').classList.remove('hidden');
-        activeBtn = btnJobs;
-      }
-
-      activeBtn.classList.add('active-tab');
-      activeBtn.style.backgroundColor = '#0071e3';
-      activeBtn.style.color = '#ffffff';
-      activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
     }
 
     function setNewsScope(scope) {
@@ -2219,7 +2284,7 @@
       gap: 7px;
       padding: 10px 18px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.94);
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.2px;
@@ -2231,7 +2296,7 @@
     .apple-btn:active { transform: scale(0.95); }
     @media (prefers-color-scheme: dark) {
       .apple-btn {
-        background: rgba(30, 30, 32, 0.9);
+        background: rgba(30, 30, 32, 0.94);
         color: #ffffff;
         border: 0.5px solid rgba(255, 255, 255, 0.18);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
