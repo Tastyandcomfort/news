@@ -135,34 +135,55 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    /* Optimized Video Frame (Lag-free on Laptops) */
-    #active-video-container, #file-view {
+    /* 🚀 HARDWARE-OPTIMIZED VIDEO PLAYER (ZERO LAPTOP FREEZING) */
+    #active-video-container {
+      isolation: isolate;
+      contain: layout style;
+      background: #000000;
       border-radius: 16px;
       overflow: hidden;
-      background: #000000;
+      transition: box-shadow 0.3s ease;
     }
 
-    /* 🚀 YOUTUBE / APPLE TV PICTURE-IN-PICTURE (PiP) FLOATING MINI-PLAYER */
+    /* 🚀 YOUTUBE / APPLE TV IN-APP PiP OVERLAY MODE */
     .pip-floating-mode {
       position: fixed !important;
       bottom: calc(20px + env(safe-area-inset-bottom)) !important;
       right: 20px !important;
       width: 320px !important;
-      max-width: 86vw !important;
-      z-index: 99998 !important;
+      max-width: 88vw !important;
+      aspect-ratio: 16 / 9;
+      z-index: 999999 !important;
       border-radius: 18px !important;
-      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.65) !important;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75) !important;
       border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
       resize: both;
       overflow: hidden;
-      min-width: 220px;
-      min-height: 140px;
-      max-width: 480px;
+      min-width: 200px;
+      min-height: 120px;
+      max-width: 520px;
       animation: pipPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      touch-action: none;
     }
     @keyframes pipPopIn {
       from { transform: scale(0.85); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Touch Barrier over iframe for Full-Player Drag & Pinch */
+    #pip-touch-barrier {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      cursor: grab;
+      touch-action: none;
+      display: none;
+    }
+    #pip-touch-barrier:active {
+      cursor: grabbing;
+    }
+    .pip-floating-mode #pip-touch-barrier {
+      display: block;
     }
 
     .logo-anchored-pill {
@@ -316,7 +337,7 @@
       left: 14px;
       top: auto;
       right: auto;
-      z-index: 30;
+      z-index: 10;
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
@@ -734,7 +755,7 @@
       </div>
     </header>
 
-    <!-- 🚀 PERSISTENT STICKY TICKER (Pins right under header on scroll) -->
+    <!-- 🚀 PERSISTENT STICKY TICKER -->
     <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: var(--border-color); color: var(--text-sub);">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
         <div class="flex items-center gap-6">
@@ -861,7 +882,7 @@
 
         <!-- 🚀 TAB 2: TV & MEDIA WITH YOUTUBE / APPLE TV HORIZONTAL THUMBNAIL SLIDER -->
         <section id="view-video" class="hidden flex-col gap-6">
-          <div class="apple-card p-4 sm:p-5 relative">
+          <div id="tv-main-card" class="apple-card p-4 sm:p-5 relative">
             <div class="mb-4">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
@@ -1162,18 +1183,21 @@
               Select any live broadcast channel above to watch the stream.
             </div>
 
-            <!-- 🚀 PiP DOCKABLE / FLOATING VIDEO CONTAINER -->
+            <!-- 🚀 PiP DOCKABLE / FLOATING VIDEO CONTAINER WITH TOUCH-ANYWHERE DRAG & PINCH RESIZE -->
             <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               
-              <!-- PiP Control Bar (Visible only when floating) -->
-              <div id="pip-header-bar" class="hidden items-center justify-between px-3 py-1.5 bg-black/85 backdrop-blur-md cursor-move text-white text-[11px] font-bold select-none border-b border-white/10">
+              <!-- Transparent Touch Barrier (Allows Drag & Pinch Anywhere on the Player!) -->
+              <div id="pip-touch-barrier"></div>
+
+              <!-- PiP Control Bar (Floating Header with Live Pulse & Buttons) -->
+              <div id="pip-header-bar" class="hidden items-center justify-between px-3 py-1.5 bg-black/85 backdrop-blur-md text-white text-[11px] font-bold select-none border-b border-white/10 relative z-30">
                 <div class="flex items-center gap-1.5">
                   <span class="live-dot" style="width:6px;height:6px;"></span>
                   <span id="pip-channel-label" class="truncate max-w-[140px]">Live TV</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <button onclick="restoreMainPlayer()" class="hover:text-cyan-400 p-1 transition-all" title="Expand to Full View">
-                    <i class="fa-solid fa-up-right-and-down-left-from-center text-[10px]"></i>
+                    <i class="fa-solid fa-up-right-and-down-left-from-center text-[11px]"></i>
                   </button>
                   <button onclick="closeActivePlayer()" class="hover:text-red-400 p-1 transition-all" title="Close Player">
                     <i class="fa-solid fa-xmark text-xs"></i>
@@ -1182,6 +1206,7 @@
               </div>
 
               <div class="tc-subtle-watermark">T&amp;C Hub</div>
+              <!-- Hardware Accelerated Smooth Video Iframe -->
               <iframe id="master-video-player" class="w-full h-full border-0" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
 
@@ -1195,7 +1220,7 @@
           </div>
         </section>
 
-        <!-- 🚀 TAB 3: UNIFIED RADAR COMMAND CENTER (100% BALANCED GRID LAYOUT) -->
+        <!-- 🚀 TAB 3: UNIFIED RADAR COMMAND CENTER -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
@@ -1483,7 +1508,7 @@
       });
 
       loadSavedPreferencesUI();
-      initDraggablePiP();
+      initTouchAnywherePiP();
     });
 
     function openAnnouncementModal() {
@@ -1574,10 +1599,9 @@
       }
     }
 
-    /* ==================== 4-TAB NAVIGATION SWITCHER (WITH PiP RETENTION) ==================== */
+    /* ==================== 4-TAB NAVIGATION SWITCHER (PERSISTENT PiP LOGIC) ==================== */
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
-      document.getElementById('view-video').classList.add('hidden');
       document.getElementById('view-osint').classList.add('hidden');
       document.getElementById('view-jobs').classList.add('hidden');
 
@@ -1598,7 +1622,6 @@
         document.getElementById('view-news').classList.remove('hidden');
         activeBtn = btnNews;
       } else if (tab === 'video') {
-        document.getElementById('view-video').classList.remove('hidden');
         activeBtn = btnVideo;
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
@@ -1615,24 +1638,41 @@
       activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
 
       // 🚀 YOUTUBE / APPLE TV IN-APP PiP TRANSITION LOGIC
+      const videoSection = document.getElementById('view-video');
+      const videoCard = document.getElementById('tv-main-card');
       const videoContainer = document.getElementById('active-video-container');
       const pipBar = document.getElementById('pip-header-bar');
 
-      if (isVideoPlaying && videoContainer) {
-        if (tab !== 'video') {
-          // Keep playing in floating PiP mode!
-          videoContainer.classList.add('pip-floating-mode');
-          if (pipBar) pipBar.classList.remove('hidden');
-          if (pipBar) pipBar.classList.add('flex');
-          isMiniPlayerActive = true;
-        } else {
-          // Re-dock into full TV & Media tab
+      if (tab === 'video') {
+        // Dock player back into main TV view
+        videoSection.classList.remove('hidden');
+        if (videoCard) videoCard.style.display = 'block';
+        if (videoContainer) {
           videoContainer.classList.remove('pip-floating-mode');
           videoContainer.style.left = '';
           videoContainer.style.top = '';
-          if (pipBar) pipBar.classList.add('hidden');
-          if (pipBar) pipBar.classList.remove('flex');
-          isMiniPlayerActive = false;
+          videoContainer.style.width = '';
+        }
+        if (pipBar) {
+          pipBar.classList.add('hidden');
+          pipBar.classList.remove('flex');
+        }
+        isMiniPlayerActive = false;
+      } else {
+        if (isVideoPlaying && videoContainer) {
+          // Keep view-video container alive for the child, but hide the background card!
+          videoSection.classList.remove('hidden');
+          if (videoCard) videoCard.style.display = 'none';
+          
+          // Elevate player into floating PiP overlay!
+          videoContainer.classList.add('pip-floating-mode');
+          if (pipBar) {
+            pipBar.classList.remove('hidden');
+            pipBar.classList.add('flex');
+          }
+          isMiniPlayerActive = true;
+        } else {
+          videoSection.classList.add('hidden');
         }
       }
     }
@@ -1647,17 +1687,30 @@
       const textView = document.getElementById('text-view');
       const dot = document.getElementById('live-indicator');
       const pipBar = document.getElementById('pip-header-bar');
+      const videoSection = document.getElementById('view-video');
+      const videoCard = document.getElementById('tv-main-card');
 
       if (activeVideoContainer) {
         activeVideoContainer.classList.remove('pip-floating-mode');
         activeVideoContainer.style.display = 'none';
         activeVideoContainer.style.left = '';
         activeVideoContainer.style.top = '';
+        activeVideoContainer.style.width = '';
       }
-      if (pipBar) pipBar.classList.add('hidden');
+      if (pipBar) {
+        pipBar.classList.add('hidden');
+        pipBar.classList.remove('flex');
+      }
       if (masterPlayer) masterPlayer.src = "about:blank";
       if (textView) textView.style.display = 'block';
       if (dot) dot.style.display = 'none';
+      if (videoCard) videoCard.style.display = 'block';
+      
+      const currentTabBtn = document.querySelector('.tab-btn.active-tab');
+      if (currentTabBtn && currentTabBtn.id !== 'tab-btn-video') {
+        videoSection.classList.add('hidden');
+      }
+
       isVideoPlaying = false;
       isMiniPlayerActive = false;
     }
@@ -1985,7 +2038,7 @@
       const dot = document.getElementById('live-indicator');
 
       textView.style.display = 'none';
-      activeVideoContainer.style.display = 'none';
+      activeVideoContainer.style.display = 'block';
       fileView.style.display = 'none';
       filePlayer.pause();
       filePlayer.src = "";
@@ -1994,19 +2047,20 @@
         if (title) title.innerText = "Latest Updates";
         if (dot) dot.style.display = "none";
         textView.style.display = 'block';
+        activeVideoContainer.style.display = 'none';
         masterPlayer.src = "about:blank";
         isVideoPlaying = false;
       } else if (mode === 'file') {
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
+        activeVideoContainer.style.display = 'none';
         masterPlayer.src = "about:blank";
         filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
         filePlayer.play().catch(e => console.log("Autoplay blocked"));
         isVideoPlaying = true;
       } else {
-        activeVideoContainer.style.display = 'block';
         if (dot) dot.style.display = "inline-block";
 
         let streamUrl = "";
@@ -2042,7 +2096,7 @@
         if (title) title.innerText = channelName;
         if (pipLabel) pipLabel.innerText = channelName;
         
-        // Prevents memory and CPU freeze on laptops
+        // Direct stream insertion for smooth hardware-accelerated playback
         if (masterPlayer.src !== streamUrl) {
           masterPlayer.src = streamUrl;
         }
@@ -2050,47 +2104,121 @@
       }
     }
 
-    /* 🚀 DRAGGABLE PiP MINI-PLAYER HANDLER */
-    function initDraggablePiP() {
+    /* 🚀 TOUCH-ANYWHERE DRAG & TWO-FINGER PINCH-TO-RESIZE FOR PiP PLAYER */
+    function initTouchAnywherePiP() {
       const container = document.getElementById('active-video-container');
-      const header = document.getElementById('pip-header-bar');
-      if (!container || !header) return;
+      const barrier = document.getElementById('pip-touch-barrier');
+      if (!container || !barrier) return;
 
       let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
+      let isPinching = false;
+      let startX = 0, startY = 0;
+      let initialLeft = 0, initialTop = 0;
+      let initialDist = 0, initialWidth = 320;
+      let lastTapTime = 0;
 
-      const onMouseDown = (e) => {
+      // TOUCH EVENTS (MOBILE PINCH & DRAG)
+      barrier.addEventListener('touchstart', (e) => {
+        if (!isMiniPlayerActive) return;
+
+        // Double-tap to restore full player
+        const now = Date.now();
+        if (now - lastTapTime < 300) {
+          restoreMainPlayer();
+          return;
+        }
+        lastTapTime = now;
+
+        if (e.touches.length === 2) {
+          // 2-Fingers: Pinch to resize!
+          isPinching = true;
+          isDragging = false;
+          initialDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initialWidth = container.offsetWidth;
+        } else if (e.touches.length === 1) {
+          // 1-Finger: Drag anywhere!
+          isDragging = true;
+          isPinching = false;
+          const rect = container.getBoundingClientRect();
+          initialLeft = rect.left;
+          initialTop = rect.top;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          container.style.right = 'auto';
+          container.style.bottom = 'auto';
+          container.style.left = `${initialLeft}px`;
+          container.style.top = `${initialTop}px`;
+        }
+      }, { passive: false });
+
+      barrier.addEventListener('touchmove', (e) => {
+        if (!isMiniPlayerActive) return;
+
+        if (isPinching && e.touches.length === 2) {
+          e.preventDefault();
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const scale = currentDist / initialDist;
+          const newW = Math.min(Math.max(initialWidth * scale, 180), window.innerWidth * 0.95);
+          container.style.width = `${newW}px`;
+        } else if (isDragging && e.touches.length === 1) {
+          e.preventDefault();
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+          let targetX = initialLeft + dx;
+          let targetY = initialTop + dy;
+
+          // Safe Screen Boundaries
+          targetX = Math.max(10, Math.min(targetX, window.innerWidth - container.offsetWidth - 10));
+          targetY = Math.max(10, Math.min(targetY, window.innerHeight - container.offsetHeight - 10));
+
+          container.style.left = `${targetX}px`;
+          container.style.top = `${targetY}px`;
+        }
+      }, { passive: false });
+
+      const onTouchEnd = () => {
+        isDragging = false;
+        isPinching = false;
+      };
+      barrier.addEventListener('touchend', onTouchEnd);
+      barrier.addEventListener('touchcancel', onTouchEnd);
+
+      // MOUSE DRAG (LAPTOP / DESKTOP)
+      barrier.addEventListener('mousedown', (e) => {
         if (!isMiniPlayerActive) return;
         isDragging = true;
         const rect = container.getBoundingClientRect();
         initialLeft = rect.left;
         initialTop = rect.top;
-        startX = e.clientX || (e.touches && e.touches[0].clientX);
-        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        startX = e.clientX;
+        startY = e.clientY;
         container.style.right = 'auto';
         container.style.bottom = 'auto';
         container.style.left = `${initialLeft}px`;
         container.style.top = `${initialTop}px`;
-      };
+      });
 
-      const onMouseMove = (e) => {
-        if (!isDragging) return;
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-        container.style.left = `${initialLeft + dx}px`;
-        container.style.top = `${initialTop + dy}px`;
-      };
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging || !isMiniPlayerActive) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        let targetX = initialLeft + dx;
+        let targetY = initialTop + dy;
 
-      const onMouseUp = () => { isDragging = false; };
+        targetX = Math.max(10, Math.min(targetX, window.innerWidth - container.offsetWidth - 10));
+        targetY = Math.max(10, Math.min(targetY, window.innerHeight - container.offsetHeight - 10));
 
-      header.addEventListener('mousedown', onMouseDown);
-      header.addEventListener('touchstart', onMouseDown, { passive: true });
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('touchmove', onMouseMove, { passive: true });
-      window.addEventListener('mouseup', onMouseUp);
-      window.addEventListener('touchend', onMouseUp);
+        container.style.left = `${targetX}px`;
+        container.style.top = `${targetY}px`;
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
     }
 
     /* MAP INITIALIZATION WITH ZOOM CONTROL & COLLAPSIBLE LEGEND */
