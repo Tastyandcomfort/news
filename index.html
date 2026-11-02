@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <title>T&C News Hub</title>
   
-  <!-- Single Viewport with notch support -->
+  <!-- Viewport with Notch Support -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  
-  <!-- Single Theme Color matching light background -->
   <meta name="theme-color" content="#ffffff">
 
   <!-- PWA Settings -->
@@ -24,15 +22,15 @@
     }
   </script>
 
-  <!-- Fast Network Preconnects & DNS Prefetch -->
+  <!-- High-Speed Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://img.youtube.com" crossorigin>
-  <link rel="preconnect" href="https://embed.windy.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+  <link rel="dns-prefetch" href="https://embed.windy.com">
   <link rel="dns-prefetch" href="https://earthquake.usgs.gov">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -74,7 +72,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.2s ease, color 0.2s ease;
       -webkit-font-smoothing: antialiased;
       margin: 0;
       padding: 0;
@@ -89,31 +87,31 @@
     /* Apple Light Theme (DEFAULT) */
     :root {
       --bg-main: #f5f5f7;
-      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card: rgba(255, 255, 255, 0.90);
       --bg-sub: #e5e5ea;
       --bg-pill-active: #ffffff;
       --text-main: #1d1d1f;
       --text-sub: #86868b;
       --border-color: rgba(0, 0, 0, 0.08);
-      --header-bg: rgba(255, 255, 255, 0.82);
-      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      --solar-pill-bg: rgba(255, 255, 255, 0.7);
+      --header-bg: rgba(255, 255, 255, 0.88);
+      --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      --solar-pill-bg: rgba(255, 255, 255, 0.85);
       --solar-pill-border: rgba(0, 0, 0, 0.1);
     }
 
     /* Apple Dark Theme */
     .dark {
       --bg-main: #000000;
-      --bg-card: rgba(28, 28, 30, 0.78);
+      --bg-card: rgba(28, 28, 30, 0.85);
       --bg-sub: #1c1c1e;
       --bg-pill-active: #2c2c2e;
       --text-main: #f5f5f7;
       --text-sub: #a1a1a6;
       --border-color: rgba(255, 255, 255, 0.12);
-      --header-bg: rgba(0, 0, 0, 0.8);
-      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      --solar-pill-bg: rgba(30, 30, 35, 0.7);
-      --solar-pill-border: rgba(255, 255, 255, 0.12);
+      --header-bg: rgba(0, 0, 0, 0.85);
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --solar-pill-bg: rgba(30, 30, 35, 0.85);
+      --solar-pill-border: rgba(255, 255, 255, 0.14);
     }
 
     body {
@@ -123,36 +121,33 @@
 
     .apple-card {
       background-color: var(--bg-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
-      transform: translateZ(0);
-      will-change: transform;
+      contain: content;
     }
 
     .apple-header {
       background-color: var(--header-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-color);
     }
 
-    video, iframe, #active-video-container, #file-view {
-      transform: translateZ(0);
-      will-change: transform;
-      backface-visibility: hidden;
+    /* Video player container: Zero layout thrashing */
+    #active-video-container, #file-view {
+      contain: strict;
+      transform: translate3d(0, 0, 0);
     }
 
     .logo-anchored-pill {
-      background: rgba(0, 113, 227, 0.9);
+      background: rgba(0, 113, 227, 0.95);
       color: #ffffff;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3);
+      transition: transform 0.25s ease;
     }
 
     .apple-solar-pill {
@@ -161,12 +156,9 @@
       gap: 10px;
       padding: 5px 14px;
       background: var(--solar-pill-bg);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
       border: 1px solid var(--solar-pill-border);
       border-radius: 9999px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
 
     .solar-item {
@@ -182,18 +174,10 @@
       flex-shrink: 0;
     }
 
-    .sf-sunrise {
-      color: #ff9f0a;
-      filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5));
-    }
-
-    .sf-sunset {
-      color: #ff453a;
-      filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5));
-    }
+    .sf-sunrise { color: #ff9f0a; }
+    .sf-sunset { color: #ff453a; }
 
     .solar-time {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
       font-size: 0.73rem;
       font-weight: 600;
       color: var(--text-main);
@@ -209,12 +193,10 @@
     .leaflet-apple-legend {
       background: var(--bg-card) !important;
       color: var(--text-main) !important;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 10px 14px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
       line-height: 1.4;
       max-width: 190px;
       pointer-events: auto;
@@ -227,7 +209,6 @@
       cursor: pointer;
       padding: 3px 6px;
       border-radius: 8px;
-      transition: background 0.2s;
     }
     .legend-item:hover {
       background: var(--bg-sub);
@@ -237,15 +218,17 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     
+    /* Hardware-accelerated lightweight pulses (No box-shadow animations) */
     .pulse-gold {
       background-color: #ffcc00;
-      box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
-      animation: pulseGold 2s infinite;
+      border-radius: 50%;
+      will-change: opacity, transform;
+      animation: pulseGold 2s infinite ease-in-out;
     }
     @keyframes pulseGold {
-      0% { opacity: 0.5; transform: scale(0.95); }
-      50% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 0.5; transform: scale(0.95); }
+      0% { opacity: 0.5; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1.08); }
+      100% { opacity: 0.5; transform: scale(0.92); }
     }
 
     .live-dot {
@@ -254,13 +237,13 @@
       background-color: #34c759;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 8px #34c759;
-      animation: pulseGreen 1.5s infinite ease-in-out;
+      will-change: opacity, transform;
+      animation: pulseGreen 1.8s infinite ease-in-out;
     }
     @keyframes pulseGreen {
-      0% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
-      50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 12px #34c759; }
-      100% { opacity: 0.4; transform: scale(0.9); box-shadow: 0 0 4px #34c759; }
+      0% { opacity: 0.45; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.45; transform: scale(0.9); }
     }
 
     .desktop-scrollbar::-webkit-scrollbar {
@@ -276,40 +259,33 @@
       border-radius: 10px;
     }
 
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     .scope-btn.active-scope, .tab-btn.active-tab {
       background: #0071e3 !important;
       color: #ffffff !important;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35);
+      box-shadow: 0 3px 10px rgba(0, 113, 227, 0.3);
     }
 
+    /* Clean Solid Translucent Watermark (NO BLUR SHADER OVER PLAYING VIDEO) */
     .tc-subtle-watermark {
       position: absolute;
       top: 14px;
       left: 14px;
       z-index: 30;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(18, 18, 20, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       padding: 4px 10px;
       border-radius: 8px;
-      color: rgba(255, 255, 255, 0.95);
+      color: #ffffff;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.5px;
       pointer-events: none;
     }
 
-    /* Apple-Style iOS Toggle Switches */
     .apple-switch {
       position: relative;
       display: inline-block;
@@ -321,13 +297,13 @@
     .apple-slider {
       position: absolute; cursor: pointer; inset: 0;
       background-color: rgba(120, 120, 128, 0.3);
-      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: .25s ease;
       border-radius: 9999px;
     }
     .apple-slider:before {
       position: absolute; content: ""; height: 20px; width: 20px;
       left: 3px; bottom: 3px; background-color: #ffffff;
-      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: .25s ease;
       border-radius: 50%;
       box-shadow: 0 2px 5px rgba(0,0,0,0.25);
     }
@@ -335,7 +311,6 @@
     input:checked + .apple-slider:before { transform: translateX(18px); }
     input:disabled + .apple-slider { opacity: 0.65; cursor: not-allowed; }
 
-    /* Interactive Sub-Question Pills */
     .choice-pill {
       padding: 5px 12px;
       border-radius: 9999px;
@@ -345,20 +320,20 @@
       background: var(--bg-sub);
       color: var(--text-main);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.15s ease, color 0.15s ease;
       white-space: nowrap;
     }
     .choice-pill.selected {
       background: #0071e3 !important;
       color: #ffffff !important;
       border-color: #0071e3 !important;
-      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
     }
 
-    /* ==================== APPLE-YOUTUBE SLIDING THUMBNAIL SYSTEM ==================== */
+    /* ==================== APPLE-YOUTUBE SLIDING CAROUSEL (OPTIMIZED) ==================== */
     .channel-carousel-wrap {
       position: relative;
       width: 100%;
+      contain: content;
     }
 
     .channel-track {
@@ -368,34 +343,27 @@
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
-      padding: 6px 4px 16px 4px;
+      padding: 6px 2px 14px 2px;
     }
 
     .channel-card {
-      flex: 0 0 200px;
+      flex: 0 0 195px;
       scroll-snap-align: start;
       cursor: pointer;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
       user-select: none;
+      contain: content;
+      transition: transform 0.2s ease;
     }
 
     @media (min-width: 640px) {
-      .channel-card {
-        flex: 0 0 228px;
-      }
+      .channel-card { flex: 0 0 220px; }
     }
 
-    .channel-card:active {
-      transform: scale(0.96);
-    }
-
-    .channel-card.active-stream {
-      transform: translateY(-2px);
-    }
+    .channel-card:active { transform: scale(0.97); }
 
     .channel-card.active-stream .thumb-box {
       border-color: #0071e3 !important;
-      box-shadow: 0 0 0 2px #0071e3, 0 8px 24px rgba(0, 113, 227, 0.35);
+      box-shadow: 0 0 0 2px #0071e3;
     }
 
     .channel-card.active-stream .channel-title-text {
@@ -408,61 +376,41 @@
       width: 100%;
       border-radius: 14px;
       overflow: hidden;
-      background: #111;
+      background: #111113;
       border: 1px solid var(--border-color);
-      transition: all 0.25s ease;
-    }
-
-    .channel-card:hover .thumb-box {
-      border-color: rgba(0, 113, 227, 0.6);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
     .thumb-box img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.35s ease;
-    }
-
-    .channel-card:hover .thumb-box img {
-      transform: scale(1.06);
+      display: block;
     }
 
     .play-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
+      background: rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.15s ease;
     }
 
-    .channel-card:hover .play-overlay {
-      opacity: 1;
-    }
+    .channel-card:hover .play-overlay { opacity: 1; }
 
     .play-circle {
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.95);
+      background: #ffffff;
       color: #0071e3;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-      transform: scale(0.85);
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .channel-card:hover .play-circle {
-      transform: scale(1);
+      font-size: 13px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     .carousel-nav-btn {
@@ -478,21 +426,16 @@
       justify-content: center;
       background: var(--bg-card);
       color: var(--text-main);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       cursor: pointer;
-      transition: all 0.2s ease;
-      opacity: 0.92;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .carousel-nav-btn:hover {
       background: #0071e3;
       color: #ffffff;
       border-color: #0071e3;
-      transform: translateY(-50%) scale(1.08);
-      opacity: 1;
     }
 
     .carousel-nav-prev { left: -14px; }
@@ -506,10 +449,9 @@
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
   <!-- ==================== APPLE NOTIFICATION PREFERENCES MODAL ==================== -->
-  <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-md transition-all overflow-y-auto">
-    <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto animate-in fade-in zoom-in duration-200">
+  <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/60 transition-all overflow-y-auto">
+    <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto">
       
-      <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm font-bold shadow-sm">
@@ -517,7 +459,7 @@
           </div>
           <div>
             <h3 class="text-sm font-extrabold" style="color: var(--text-main);">Notification Preferences</h3>
-            <p class="text-[10px]" style="color: var(--text-sub);">Allow notification in your phone & Choose real-time alerts.</p>
+            <p class="text-[10px]" style="color: var(--text-sub);">Allow notifications in your phone &amp; Choose real-time alerts.</p>
           </div>
         </div>
         <button onclick="closeNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
@@ -525,7 +467,6 @@
         </button>
       </div>
 
-      <!-- Master Select All Switch -->
       <div class="flex items-center justify-between p-3 rounded-2xl mb-3 border shadow-sm" style="background-color: var(--bg-sub); border-color: var(--border-color);">
         <div class="flex items-center gap-2.5">
           <i class="fa-solid fa-layer-group text-blue-500 text-sm"></i>
@@ -540,14 +481,12 @@
         </label>
       </div>
 
-      <!-- Topics Grouped Inset List -->
       <div class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
 
-        <!-- 1. NEWS CHANNEL -->
         <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-newspaper"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-newspaper"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Live News Bulletins</h5>
                 <p class="text-[10px]" style="color: var(--text-sub);">Real-time breaking headlines</p>
@@ -560,14 +499,13 @@
           </div>
         </div>
 
-        <!-- 2. WEATHER CHANNEL + INTERACTIVE QUESTION -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-cloud-sun"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Weather Outlook &amp; Rain Alerts</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Choose a location to get alerts morning/evening &amp; rain radar</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Choose location to get morning/evening alerts &amp; rain radar</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -576,7 +514,7 @@
             </label>
           </div>
           <div id="sub-q-weather" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
-            <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Your Weather Alert City:</p>
+            <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Alert City:</p>
             <div class="flex flex-wrap gap-1.5" id="weather-city-pills">
               <button type="button" onclick="selectChoicePill('weather-city', 'Hyderabad', this)" class="choice-pill selected">Hyderabad</button>
               <button type="button" onclick="selectChoicePill('weather-city', 'Warangal', this)" class="choice-pill">Warangal</button>
@@ -587,14 +525,13 @@
           </div>
         </div>
 
-        <!-- 3. JOBS CHANNEL + INTERACTIVE QUESTION -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-briefcase"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Career &amp; Job Vacancies</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Local jobs &amp; Information</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Local job alerts &amp; openings</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -603,7 +540,7 @@
             </label>
           </div>
           <div id="sub-q-jobs" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
-            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Your Preference or Sector:</p>
+            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Preference / Sector:</p>
             <div class="flex flex-wrap gap-1.5" id="job-sector-pills">
               <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected">Freshers / Any Degree</button>
               <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill">IT &amp; Tech</button>
@@ -613,14 +550,13 @@
           </div>
         </div>
 
-        <!-- 4. ISS & SPACE TRACKING CHANNEL -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-satellite"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-satellite"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">ISS Satellite &amp; Space Events</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Visible flyovers over your location &amp; Sightseeing</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Visible flyovers over your location &amp; launches</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -632,25 +568,24 @@
             <p class="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5"><i class="fa-solid fa-telescope"></i> Sighting Preference:</p>
             <div class="flex flex-wrap gap-1.5" id="iss-pref-pills">
               <button type="button" onclick="selectChoicePill('iss-pref', 'Night Passes Only', this)" class="choice-pill selected">Naked-Eye Night Passes</button>
-              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">All Rocket &amp; Space Events</button>
+              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">All Space Events</button>
             </div>
           </div>
         </div>
 
-        <!-- 5. T&C PLATFORM UPDATES -->
         <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color); opacity: 0.95;">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
               <div>
                 <div class="flex items-center gap-1.5">
                   <h5 class="text-xs font-bold" style="color: var(--text-main);">T&amp;C Developer</h5>
                   <span class="text-[9px] bg-blue-500/20 text-blue-500 font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i class="fa-solid fa-lock text-[8px]"></i> REQUIRED</span>
                 </div>
-                <p class="text-[10px]" style="color: var(--text-sub);">Murali Manohar will release platform upgrades, feature releases, and critical system advisories.</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Platform notifications and system upgrades from Murali Manohar.</p>
               </div>
             </div>
-            <label class="apple-switch" title="T&C Platform system updates are always active">
+            <label class="apple-switch" title="T&C Platform updates are always active">
               <input type="checkbox" id="topic-platform" checked disabled>
               <span class="apple-slider"></span>
             </label>
@@ -659,7 +594,6 @@
 
       </div>
 
-      <!-- Action Button -->
       <div class="mt-4 pt-3 border-t border-black/5 dark:border-white/5">
         <button onclick="saveNotificationPreferences()" id="btn-save-prefs" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
           <i class="fa-solid fa-check text-xs"></i> Save Preferences
@@ -670,8 +604,8 @@
   </div>
 
   <!-- ANNOUNCEMENT MODAL -->
-  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
-    <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
+  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 transition-all">
+    <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs font-bold">
@@ -692,22 +626,17 @@
           <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
+          Dear User, the <b>T&C News Hub</b> Intel Brief: Singur and Manjeera reservoir levels may reach critical points around December 15, 2026. A citywide shutdown is unconfirmed; residents are advised to practice conservation.
         </p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex justify-between"><span>Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
-          <div class="flex justify-between"><span>Water Levels:</span> <b>VERY LOW</b></div>
+          <div class="flex justify-between"><span>Status:</span> <b>Monitoring Reserves</b></div>
+          <div class="flex justify-between"><span>Water Levels:</span> <b>LOW</b></div>
         </div>
-        <p class="text-[11px] italic" style="color: var(--text-sub);">
-          Public Advisory: Residents are advised to conserve water, avoid unnecessary wastage, and follow official updates from the Hyderabad Metropolitan Water Supply and Sewerage Board (HMWSSB). Stay informed. Save water. Stay prepared.
-        </p>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
-        </button>
-      </div>
+      <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
+      </button>
     </div>
   </div>
 
@@ -715,11 +644,10 @@
   <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
       
-      <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
       <div class="relative flex flex-col items-center md:items-start gap-1">
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
           <div class="relative flex items-center justify-center">
-            <div class="w-3 h-3 rounded-full pulse-gold"></div>
+            <div class="w-3 h-3 pulse-gold"></div>
           </div>
           <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
             <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
@@ -729,18 +657,17 @@
 
         <div id="dynamic-island-wrapper" class="hidden absolute top-10 left-0 z-40 cursor-pointer transition-all duration-300 transform" onclick="openAnnouncementModal()">
           <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2 hover:scale-105">
-            <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
+            <span class="live-dot bg-amber-400"></span>
             <span class="text-[10px] font-bold tracking-wide flex items-center gap-1 whitespace-nowrap">
               <i class="fa-solid fa-bullhorn text-[9px]"></i> T&C Update
             </span>
-            <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full flex-shrink-0">1</span>
+            <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full">1</span>
           </div>
         </div>
       </div>
 
-      <!-- Center: Solar Pill & Right: Utility Cluster (Lang + Persistent Bell + Theme) -->
       <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
-        <!-- APPLE DYNAMIC ISLAND SOLAR PILL -->
+        <!-- SOLAR PILL -->
         <div class="apple-solar-pill" id="apple-solar-pill">
           <div class="solar-item" title="Sunrise">
             <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -763,36 +690,33 @@
           </div>
         </div>
 
-        <!-- UNIFIED UTILITY CLUSTER (Language + Persistent Bell + Theme) -->
-        <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <!-- Language Selector -->
+        <!-- UTILITY CLUSTER -->
+        <div class="flex items-center gap-1.5 p-1 rounded-full shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="relative" id="lang-menu-wrapper">
-            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
+            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="color: var(--text-main);">
               <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
               <span id="current-lang-code">EN</span>
               <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
             </button>
             <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
-              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
-              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
-              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
-              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
-              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
-              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
+              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
+              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
+              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
+              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
+              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
             </div>
           </div>
 
-          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+          <div class="h-3.5 w-[1px] bg-black/10 dark:bg-white/10"></div>
 
-          <!-- PERSISTENT NOTIFICATION SETTINGS BELL BUTTON -->
-          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
+          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center active:scale-90" title="Notification Preferences">
             <i class="fa-solid fa-bell text-xs text-amber-500"></i>
           </button>
 
-          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+          <div class="h-3.5 w-[1px] bg-black/10 dark:bg-white/10"></div>
 
-          <!-- Theme Button -->
-          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
+          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center active:scale-90" title="Toggle Theme">
             <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
           </button>
         </div>
@@ -804,18 +728,17 @@
     <!-- 4-TAB NAVIGATION BAR -->
     <div class="max-w-xl mx-auto mt-2.5 px-2">
       <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
-        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
-        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
-        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
+        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
+        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
       </nav>
     </div>
   </header>
 
-  <!-- LIVE CRICKET SCORE & COMMENTARY MODAL -->
-  <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all">
-    <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30 animate-in fade-in zoom-in duration-200">
-      
+  <!-- LIVE CRICKET SCORE MODAL -->
+  <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 transition-all">
+    <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold">
@@ -850,32 +773,26 @@
       </div>
 
       <div class="p-3.5 rounded-2xl border mb-5 space-y-1.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-green-500">
-          <i class="fa-solid fa-microphone-lines"></i>
-          <span>Match Status &amp; Commentary</span>
-        </div>
         <p id="modal-match-summary" class="text-xs leading-relaxed font-medium" style="color: var(--text-main);">
           Connecting to match broadcast feed...
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button onclick="fetchLiveCricketTicker(true)" class="w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh Live Score
-        </button>
-      </div>
+      <button onclick="fetchLiveCricketTicker(true)" class="w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh Live Score
+      </button>
     </div>
   </div>
 
   <!-- LIVE REAL-TIME TICKER -->
-  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
+  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
       <div class="flex items-center gap-6">
         <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
         <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
-        <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
+        <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="View live commentary">
           <i class="fa-solid fa-baseball-bat-ball"></i> Live Cricket: <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b> 
-          <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
+          <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
             <i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i>
           </button>
         </span>
@@ -908,9 +825,9 @@
 
           <div class="apple-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1 sm:pb-0">
-              <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
-              <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
-              <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
+              <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
+              <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
+              <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
             </div>
 
             <div class="flex items-center gap-2">
@@ -918,7 +835,7 @@
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
                 <input type="date" id="news-date-picker" onchange="onDateFilterChange()" class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);">
               </div>
-              <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl transition-all flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
+              <button id="refresh-news-btn" onclick="fetchPortalNews()" class="p-2 rounded-xl flex-shrink-0" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh">
                 <i id="refresh-icon" class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
             </div>
@@ -935,11 +852,10 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 2: TV & MEDIA (YOUTUBE / APPLE-STYLE THUMBNAIL CAROUSEL) ==================== -->
+        <!-- ==================== TAB 2: TV & MEDIA (SMOOTH & ZERO-STUTTER) ==================== -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-6 relative">
             
-            <!-- Video Player Display Container -->
             <div class="mb-5">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2.5">
@@ -947,29 +863,29 @@
                   <h3 id="current-channel-title" class="text-base font-extrabold text-blue-500">25+ Live Channels</h3>
                   <span id="channel-cat-pill" class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold hidden">NEWS</span>
                 </div>
-                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap card below to stream</span>
+                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap thumbnail to stream</span>
               </div>
 
               <!-- Default Prompt Screen before Selection -->
-              <div id="text-view" class="p-8 rounded-2xl text-center border shadow-sm transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl shadow-inner">
+              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
                   <i class="fa-solid fa-play"></i>
                 </div>
-                <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Apple-Style Continuous Live Streaming</h4>
+                <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Instant Hardware-Accelerated Streaming</h4>
                 <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
-                  Select any channel from the carousel below to launch instant high-definition broadcast.
+                  Select any channel from the carousel below for uninterrupted, high-definition live playback.
                 </p>
               </div>
 
-              <!-- Master Live Iframe Stream Player -->
-              <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
+              <!-- Master Live Iframe Stream Player (Optimized for 60fps) -->
+              <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="display:none; border: 1px solid var(--border-color);">
                 <div class="tc-subtle-watermark">T&amp;C LIVE HUB</div>
-                <iframe id="master-video-player" class="absolute inset-0 w-full h-full border-0" src="" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                <iframe id="master-video-player" class="absolute inset-0 w-full h-full border-0 block" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
               </div>
 
               <!-- Local Media Stream Player -->
-              <div id="file-view" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
-                <div class="tc-subtle-watermark">T&amp;C News Media</div>
+              <div id="file-view" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="display:none; border: 1px solid var(--border-color);">
+                <div class="tc-subtle-watermark">T&amp;C Media Player</div>
                 <video id="file-video-player" class="absolute inset-0 w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
                   <source src="videos/sample-video.mp4" type="video/mp4">
                   Your browser does not support HTML5 video playback.
@@ -977,7 +893,7 @@
               </div>
             </div>
 
-            <!-- Apple-Style Sliding Carousel Section -->
+            <!-- Apple-Style Smooth Sliding Carousel -->
             <div class="pt-4 border-t border-[var(--border-color)]">
               
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -987,7 +903,7 @@
                   <span class="text-[10px] bg-red-500/10 text-red-500 font-extrabold px-2 py-0.5 rounded-full">25 STATIONS</span>
                 </div>
 
-                <!-- Genre Quick Filters -->
+                <!-- Genre Filters -->
                 <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                   <button onclick="filterMediaCarousel('all', this)" class="choice-pill selected">All</button>
                   <button onclick="filterMediaCarousel('news', this)" class="choice-pill">News</button>
@@ -997,17 +913,16 @@
                 </div>
               </div>
 
-              <!-- Sliding Carousel Track with Left/Right Apple Arrows -->
               <div class="channel-carousel-wrap">
-                <button onclick="scrollChannelCarousel(-1)" class="carousel-nav-btn carousel-nav-prev" title="Previous Channels">
+                <button onclick="scrollChannelCarousel(-1)" class="carousel-nav-btn carousel-nav-prev" title="Previous">
                   <i class="fa-solid fa-chevron-left text-xs"></i>
                 </button>
 
                 <div id="channel-carousel-track" class="channel-track no-scrollbar">
-                  <!-- Channels populated dynamically via script for 100% performance -->
+                  <!-- Channels populated dynamically via script -->
                 </div>
 
-                <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Next Channels">
+                <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Next">
                   <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
               </div>
@@ -1017,7 +932,7 @@
           </div>
         </section>
 
-        <!-- ==================== TAB 3: UNIFIED RADAR & OSINT COMMAND CENTER (FIXED) ==================== -->
+        <!-- ==================== TAB 3: RADAR & OSINT MAP (FAST GPU-CANVAS RENDERING) ==================== -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
@@ -1033,8 +948,7 @@
                 </span>
               </div>
 
-              <!-- Master Radar Mode Switcher -->
-              <div class="flex items-center p-1 rounded-xl backdrop-blur-md self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <div class="flex items-center p-1 rounded-xl self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <button id="btn-radar-weather" onclick="switchRadarMap('weather')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active-tab" style="background-color: #0071e3; color: #ffffff;">
                   <i class="fa-solid fa-cloud-sun-rain"></i>
                   <span>Weather Radar</span>
@@ -1046,25 +960,25 @@
               </div>
             </div>
 
-            <!-- Weather Quick-Layer Buttons -->
+            <!-- Weather Layer Toggles -->
             <div id="weather-layer-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-3">
-              <span class="text-[10px] font-bold text-amber-500 mr-1"><i class="fa-solid fa-sliders"></i> Radar Layer:</span>
+              <span class="text-[10px] font-bold text-amber-500 mr-1"><i class="fa-solid fa-sliders"></i> Mode:</span>
               <button onclick="setWindyLayer('radar', this)" class="choice-pill selected">🌧️ Doppler Rain Radar</button>
-              <button onclick="setWindyLayer('wind', this)" class="choice-pill">💨 Wind Currents</button>
+              <button onclick="setWindyLayer('wind', this)" class="choice-pill">💨 Wind Streams</button>
               <button onclick="setWindyLayer('satellite', this)" class="choice-pill">🛰️ Satellite Clouds</button>
               <button onclick="setWindyLayer('temp', this)" class="choice-pill">🌡️ Temperature</button>
             </div>
 
-            <!-- Fixed Dimensions Map Container (Ensures zero grey-screen deformation) -->
-            <div class="relative w-full h-[430px] sm:h-[480px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub);">
+            <!-- Resilient Map Container -->
+            <div class="relative w-full h-[430px] sm:h-[480px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub); contain: strict;">
               
-              <!-- 1. Live Weather Doppler / Wind Frame -->
+              <!-- 1. Live Weather Radar Frame (Lazy-Loaded) -->
               <div id="radar-frame-weather" class="absolute inset-0 w-full h-full">
                 <div class="tc-subtle-watermark">T&amp;C LIVE RADAR</div>
-                <iframe id="windy-radar-iframe" width="100%" height="100%" src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=radar&product=radar&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0" class="w-full h-full border-0 block" allow="geolocation" loading="lazy"></iframe>
+                <iframe id="windy-radar-iframe" width="100%" height="100%" src="about:blank" frameborder="0" class="w-full h-full border-0 block" allow="geolocation"></iframe>
               </div>
 
-              <!-- 2. Live Flights & ISS Map (Leaflet) -->
+              <!-- 2. Live Flights & ISS Map (GPU-Accelerated Leaflet Canvas) -->
               <div id="radar-frame-flight" class="absolute inset-0 w-full h-full" style="display: none;">
                 <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
                 <div id="osint-map" class="w-full h-full" style="min-height: 100%;"></div>
@@ -1099,7 +1013,6 @@
               </span>
             </div>
 
-            <!-- Job Sector Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-4">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
               <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
@@ -1108,7 +1021,6 @@
               <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
             </div>
 
-            <!-- Live Job Postings Container -->
             <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1">
               <div class="text-center py-10 text-xs" style="color: var(--text-sub);">
                 <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...
@@ -1133,8 +1045,8 @@
         <div class="apple-card p-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-3 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="factCheck">Fact-Check Portal</span></h3>
           <div class="flex flex-col gap-2 text-xs">
-            <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
-            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
           </div>
         </div>
 
@@ -1161,7 +1073,7 @@
     let currentScope = 'local';
     let currentLanguage = 'en';
     let currentJobSector = 'all';
-    let currentVideoChannel = null;
+    let isWindyLoaded = false;
     
     const todayObj = new Date();
     const REAL_TODAY_DATE = todayObj.toISOString().split('T')[0];
@@ -1172,10 +1084,11 @@
     let issHistoryCoords = [];
     let flightLayerGroup = null;
     let flightPolylineGroup = null;
+    const flightMarkerMap = new Map();
 
     const translationCache = {};
 
-    /* 25+ Master Channels Database with Direct High-Res Thumbnails & Meta */
+    /* Master Channels Database with Direct High-Res Thumbnails & Meta */
     const masterChannelsList = [
       { id: 'v6', name: 'V6 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: '28IZl9iM-EE' },
       { id: 'tv9', name: 'TV9 Live News', genre: 'news', tag: 'TELUGU', catName: 'Telugu News', ytId: 'II_m28Bm-iM' },
@@ -1329,8 +1242,9 @@
       initISSManifest();
       fetchLiveJobs();
 
-      setInterval(fetchLiveAirTraffic, 20000);
-      setInterval(fetchLiveCricketTicker, 25000);
+      // Moderate interval ticks to avoid GC pauses
+      setInterval(fetchLiveAirTraffic, 35000);
+      setInterval(fetchLiveCricketTicker, 30000);
 
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
@@ -1350,11 +1264,10 @@
       let html = '';
       masterChannelsList.forEach(chan => {
         const thumbSrc = chan.ytId ? 
-          `https://img.youtube.com/vi/${chan.ytId}/mqdefault.jpg` : 
-          '';
+          `https://img.youtube.com/vi/${chan.ytId}/mqdefault.jpg` : '';
 
         const thumbContent = chan.ytId ? 
-          `<img src="${thumbSrc}" alt="${chan.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=500&auto=format&fit=crop&q=60'">` :
+          `<img src="${thumbSrc}" alt="${chan.name}" width="320" height="180" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&q=60'">` :
           `<div class="w-full h-full bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-500 flex flex-col items-center justify-center text-white"><i class="fa-solid fa-play-circle text-2xl mb-1"></i><span class="text-[10px] font-black uppercase">T&C Media</span></div>`;
 
         html += `
@@ -1364,11 +1277,11 @@
               <div class="play-overlay">
                 <div class="play-circle"><i class="fa-solid fa-play ml-0.5"></i></div>
               </div>
-              <div class="absolute top-2 left-2 flex items-center gap-1 bg-red-600/90 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow">
-                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              <div class="absolute top-2 left-2 flex items-center gap-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                 <span>LIVE</span>
               </div>
-              <div class="absolute bottom-2 right-2 bg-black/75 backdrop-blur-md text-[9px] font-extrabold text-white px-1.5 py-0.5 rounded">
+              <div class="absolute bottom-2 right-2 bg-black/80 text-[9px] font-extrabold text-white px-1.5 py-0.5 rounded">
                 ${chan.tag}
               </div>
             </div>
@@ -1443,12 +1356,23 @@
         filePlayer.play().catch(() => {});
       } else {
         activeVideoContainer.style.display = 'block';
-        const streamUrl = `https://www.youtube.com/embed/${chan.ytId}?autoplay=1&mute=1&playsinline=1&modestbranding=1&rel=0`;
-        setTimeout(() => { masterPlayer.src = streamUrl; }, 40);
+        // Clean high-performance embed parameters
+        const streamUrl = `https://www.youtube.com/embed/${chan.ytId}?autoplay=1&mute=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=0`;
+        masterPlayer.src = streamUrl;
       }
     }
 
-    /* ==================== RADAR & OSINT MAP ENGINE (FIXED) ==================== */
+    /* ==================== RADAR & FAST OSINT MAP ENGINE ==================== */
+    function ensureRadarLoaded() {
+      if (!isWindyLoaded) {
+        const iframe = document.getElementById('windy-radar-iframe');
+        if (iframe) {
+          iframe.src = "https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=radar&product=radar&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1";
+          isWindyLoaded = true;
+        }
+      }
+    }
+
     function switchRadarMap(mode) {
       const btnWeather = document.getElementById('btn-radar-weather');
       const btnFlight = document.getElementById('btn-radar-flight');
@@ -1475,6 +1399,7 @@
 
         titleEl.textContent = 'Live Weather Radar';
         iconEl.className = 'fa-solid fa-cloud-sun-rain text-blue-500 text-xl';
+        ensureRadarLoaded();
       } else {
         frameWeather.style.display = 'none';
         frameFlight.style.display = 'block';
@@ -1491,15 +1416,15 @@
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-xl';
 
-        // Ensure Leaflet map recalculates its dimensions smoothly
-        setTimeout(() => {
+        // Fast canvas rendering with zero lag
+        requestAnimationFrame(() => {
           if (!leafletMap) {
             initOSINTMap();
           } else {
             leafletMap.invalidateSize(true);
             leafletMap.setView([20.5937, 78.9629], 3, { animate: false });
           }
-        }, 150);
+        });
       }
     }
 
@@ -1517,8 +1442,21 @@
     function initOSINTMap() {
       if (leafletMap) return;
 
-      leafletMap = L.map('osint-map', { zoomControl: true }).setView([20.5937, 78.9629], 3);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(leafletMap);
+      // GPU Canvas mode (preferCanvas: true) for 60fps performance
+      leafletMap = L.map('osint-map', { 
+        preferCanvas: true,
+        zoomControl: true,
+        fadeAnimation: true,
+        zoomAnimation: true,
+        markerZoomAnimation: true
+      }).setView([20.5937, 78.9629], 3);
+
+      // Fast CDN edge tiles (CartoDB Positron / Voyager)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
+        subdomains: 'abcd',
+        maxZoom: 19,
+        attribution: '© CartoDB, © OpenStreetMap'
+      }).addTo(leafletMap);
 
       flightLayerGroup = L.layerGroup().addTo(leafletMap);
       flightPolylineGroup = L.layerGroup().addTo(leafletMap);
@@ -1559,7 +1497,8 @@
               radius: mag * 1.5,
               color: '#ff3b30',
               fillColor: '#ff3b30',
-              fillOpacity: 0.7
+              fillOpacity: 0.75,
+              weight: 1
             });
 
             marker.bindPopup(`
@@ -1591,44 +1530,62 @@
       }
     }
 
+    // Marker pooling for Flights: Zero DOM recreation lag
     async function fetchLiveAirTraffic() {
+      if (!leafletMap || !flightLayerGroup) return;
+
       try {
         const res = await fetch('https://news-39tq.vercel.app/api/flights');
         if (!res.ok) return;
         const data = await res.json();
 
-        if (data && data.states && flightLayerGroup) {
-          flightLayerGroup.clearLayers();
-          flightPolylineGroup.clearLayers();
+        if (data && data.states) {
           const count = data.states.length;
           document.getElementById('ticker-flights-count').textContent = `${count} Active`;
 
-          data.states.slice(0, 40).forEach(flight => {
+          const validIcaos = new Set();
+          flightPolylineGroup.clearLayers();
+
+          data.states.slice(0, 30).forEach(flight => {
             const [icao24, callsign, origin, posTime, contact, lon, lat, altMeters, onGround, speedMs, trackDeg] = flight;
             if (lat && lon && !onGround) {
+              validIcaos.add(icao24);
               const speedKmh = Math.round(speedMs * 3.6);
               const cleanCall = callsign ? callsign.trim() : 'Flight';
               const heading = trackDeg || 0;
 
-              const planeHtml = `<div style="transform: rotate(${heading}deg); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;"><svg viewBox="0 0 24 24" fill="#0071e3" width="20" height="20"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`;
-              const planeIcon = L.divIcon({ html: planeHtml, className: '', iconSize: [22, 22], iconAnchor: [11, 11] });
-              const marker = L.marker([lat, lon], { icon: planeIcon });
+              let marker = flightMarkerMap.get(icao24);
+              if (!marker) {
+                const planeHtml = `<div style="transform: rotate(${heading}deg); width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;"><svg viewBox="0 0 24 24" fill="#0071e3" width="18" height="18"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`;
+                const planeIcon = L.divIcon({ html: planeHtml, className: '', iconSize: [22, 22], iconAnchor: [11, 11] });
+                marker = L.marker([lat, lon], { icon: planeIcon });
+                marker.bindPopup(`
+                  <div style="font-size: 12px; min-width: 140px;">
+                    <b style="color: #0071e3;">✈️ ${cleanCall}</b><br>
+                    <b>Altitude:</b> ${Math.round(altMeters)} m<br>
+                    <b>Speed:</b> ${speedKmh} km/h<br>
+                    <b>Heading:</b> ${Math.round(heading)}°
+                  </div>
+                `);
+                flightLayerGroup.addLayer(marker);
+                flightMarkerMap.set(icao24, marker);
+              } else {
+                marker.setLatLng([lat, lon]);
+              }
 
               const rad = (heading - 90) * (Math.PI / 180);
-              const destLat = lat + Math.sin(-rad) * 1.2;
-              const destLon = lon + Math.cos(-rad) * 1.2;
-              const routeLine = L.polyline([[lat, lon], [destLat, destLon]], { color: '#0071e3', weight: 2, dashArray: '4, 4', opacity: 0.7 });
+              const destLat = lat + Math.sin(-rad) * 1.0;
+              const destLon = lon + Math.cos(-rad) * 1.0;
+              const routeLine = L.polyline([[lat, lon], [destLat, destLon]], { color: '#0071e3', weight: 1.5, dashArray: '3, 4', opacity: 0.6 });
               flightPolylineGroup.addLayer(routeLine);
+            }
+          });
 
-              marker.bindPopup(`
-                <div style="font-size: 12px; min-width: 150px;">
-                  <b style="color: #0071e3;">✈️ ${cleanCall}</b><br>
-                  <b>Altitude:</b> ${Math.round(altMeters)} m<br>
-                  <b>Speed:</b> ${speedKmh} km/h<br>
-                  <b>Heading:</b> ${Math.round(heading)}°
-                </div>
-              `);
-              flightLayerGroup.addLayer(marker);
+          // Cleanup stale markers
+          flightMarkerMap.forEach((m, icao) => {
+            if (!validIcaos.has(icao)) {
+              flightLayerGroup.removeLayer(m);
+              flightMarkerMap.delete(icao);
             }
           });
         }
@@ -1650,10 +1607,10 @@
           if (leafletMap) {
             const currentPos = [lat, lon];
             issHistoryCoords.push(currentPos);
-            if (issHistoryCoords.length > 25) issHistoryCoords.shift();
+            if (issHistoryCoords.length > 20) issHistoryCoords.shift();
 
-            const issHtml = `<div style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-satellite text-green-400 text-lg"></i></div>`;
-            const issIcon = L.divIcon({ html: issHtml, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
+            const issHtml = `<div style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-satellite text-green-400 text-base"></i></div>`;
+            const issIcon = L.divIcon({ html: issHtml, className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
 
             if (!issMarker) {
               issMarker = L.marker(currentPos, { icon: issIcon }).addTo(leafletMap);
@@ -1663,7 +1620,7 @@
 
             if (issPolyline) leafletMap.removeLayer(issPolyline);
             if (issHistoryCoords.length > 1) {
-              issPolyline = L.polyline(issHistoryCoords, { color: '#34c759', weight: 3, opacity: 0.85 }).addTo(leafletMap);
+              issPolyline = L.polyline(issHistoryCoords, { color: '#34c759', weight: 2.5, opacity: 0.85 }).addTo(leafletMap);
             }
 
             issMarker.bindPopup(`
@@ -1676,7 +1633,7 @@
         } catch(e) {}
       }
       updateISS();
-      setInterval(updateISS, 12000);
+      setInterval(updateISS, 15000);
     }
 
     async function initISSManifest() {
@@ -1721,9 +1678,10 @@
       } else if (tab === 'osint') {
         document.getElementById('view-osint').classList.remove('hidden');
         activeBtn = btnOsint;
-        setTimeout(() => {
+        ensureRadarLoaded();
+        requestAnimationFrame(() => {
           if (leafletMap) leafletMap.invalidateSize(true);
-        }, 150);
+        });
       } else if (tab === 'jobs') {
         document.getElementById('view-jobs').classList.remove('hidden');
         activeBtn = btnJobs;
@@ -1732,7 +1690,7 @@
       activeBtn.classList.add('active-tab');
       activeBtn.style.backgroundColor = '#0071e3';
       activeBtn.style.color = '#ffffff';
-      activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+      activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
     }
 
     function setNewsScope(scope) {
@@ -1778,7 +1736,6 @@
 
       if (refreshIcon) refreshIcon.classList.add('fa-spin');
       badge.textContent = "Updating...";
-      feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading stories...</div>';
 
       try {
         const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${currentScope}&date=${selectedDateStr}`);
@@ -1809,11 +1766,11 @@
               <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
               <div>
                 <h4 class="text-xs font-bold" style="color: var(--text-main);">No Stories Found for ${selectedDateStr}</h4>
-                <p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct RSS records matched this exact date. Check the official news archive source below:</p>
+                <p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct records matched this exact date. You can explore archives below:</p>
               </div>
               <a href="${googleArchiveUrl}" target="_blank" rel="noopener" 
-                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Source Archive (${selectedDateStr})
+                class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Archive (${selectedDateStr})
               </a>
             </div>
           `;
@@ -1844,7 +1801,7 @@
           else if (link.includes("hindu")) sourceName = "The Hindu";
 
           html += `
-            <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+            <div class="p-3.5 rounded-xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
                 <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
                   ${title}
@@ -1886,7 +1843,7 @@
           const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           const title = await translateText(rawTitle, currentLanguage);
-          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
+          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
         }
         container.innerHTML = html;
       } catch (e) {
@@ -1954,12 +1911,12 @@
           const t1Score = team1?.score || (team1?.linescores?.[0]?.displayValue) || 'Yet to Bat';
           const t2Score = team2?.score || (team2?.linescores?.[0]?.displayValue) || '';
 
-          const statusSummary = activeMatch.status?.summary || activeMatch.status?.type?.detail || activeMatch.summary || 'Live Match in Progress';
+          const statusSummary = activeMatch.status?.summary || activeMatch.status?.type?.detail || activeMatch.summary || 'Live Match';
           const isLive = activeMatch.status?.type?.state === 'in' || activeMatch.status?.state === 'in';
 
           tickerEl.innerHTML = `
             <span class="${isLive ? 'text-green-400 font-extrabold' : 'text-amber-400 font-bold'}">
-              <i class="fa-solid fa-circle text-[8px] ${isLive ? 'animate-pulse' : ''} mr-1"></i>
+              <i class="fa-solid fa-circle text-[8px] mr-1"></i>
               ${t1Name} ${t1Score} vs ${t2Name} ${t2Score} • ${statusSummary}
             </span>
           `;
@@ -1982,7 +1939,7 @@
 
       const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       tickerEl.innerHTML = `<span class="text-amber-500 font-medium">No live match in play • Checked at ${currentTimeStr}</span>`;
-      document.getElementById('modal-match-summary').textContent = 'No international match is live right now. Live commentary resumes with the next match.';
+      document.getElementById('modal-match-summary').textContent = 'No international match is live right now.';
       if (icon) icon.classList.remove('fa-spin');
     }
 
@@ -2014,7 +1971,7 @@
           <div class="p-8 rounded-2xl text-center border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
             <i class="fa-solid fa-magnifying-glass text-amber-500 text-xl mb-2"></i>
             <h4 class="text-xs font-bold" style="color: var(--text-main);">No Vacancies Under Selected Filter</h4>
-            <p class="text-[11px] mt-1" style="color: var(--text-sub);">All verified notifications will populate in real-time as published.</p>
+            <p class="text-[11px] mt-1" style="color: var(--text-sub);">All verified notifications will populate here in real-time.</p>
           </div>
         `;
         return;
@@ -2023,7 +1980,7 @@
       let html = '';
       filtered.forEach(job => {
         html += `
-          <div class="p-4 rounded-2xl border transition-all hover:border-blue-500/30" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div class="p-4 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
               <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
               <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date || 'Active'}</span>
@@ -2033,7 +1990,7 @@
               <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${job.eligibility} | <b>Salary:</b> ${job.salary}</p>
             </div>
             <div class="flex items-center justify-between gap-3 pt-2 border-t border-black/5 dark:border-white/5">
-              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-md flex items-center gap-1.5">
+              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Apply Portal
               </a>
             </div>
@@ -2166,7 +2123,7 @@
       setTimeout(() => {
         saveBtn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Save Preferences';
         closeNotificationPreferences();
-      }, 600);
+      }, 500);
     }
 
     function openAnnouncementModal() {
@@ -2262,25 +2219,22 @@
       gap: 7px;
       padding: 10px 18px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.85);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(255, 255, 255, 0.9);
       font-size: 14px;
       font-weight: 600;
       letter-spacing: -0.2px;
       color: #000000;
       border: 0.5px solid rgba(0, 0, 0, 0.12);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .apple-btn:active { transform: scale(0.93); }
+    .apple-btn:active { transform: scale(0.95); }
     @media (prefers-color-scheme: dark) {
       .apple-btn {
-        background: rgba(30, 30, 32, 0.85);
+        background: rgba(30, 30, 32, 0.9);
         color: #ffffff;
         border: 0.5px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       }
     }
   </style>
