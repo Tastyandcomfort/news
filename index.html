@@ -1,35 +1,3 @@
-Here is the complete, fully updated and tested index.html file.
-
-What Was Fixed:
-
-1.  True Zero-Reload Picture-in-Picture (PiP):
-    The player is now a direct child of the section, completely independent from
-    card-level CSS transforms and backdrop filters. When you play a video and
-    switch to Headlines, Radar, or Find Jobs, the iframe is never reparented or
-    hidden with display: none. It transitions to fixed viewport coordinates
-    instantly—audio and video play continuously without restarting or reloading.
-2.  Draggable by Touching/Clicking Anywhere:
-    In floating mode, an invisible full-surface gesture layer covers the player.
-    You can click/touch anywhere on the floating window to drag and position it
-    anywhere on your screen. Double-clicking or double-tapping anywhere on it
-    expands it back to the TV & Media section.
-3.  Resizable to Ultra-Small (YouTube PiP Size):
-      - Allows shrinking down to 150px width (matching YouTube’s mini-player).
-      - Touchscreens: Pinch with two fingers anywhere on the floating player to
-        expand or shrink it.
-      - Laptops/Desktops: Drag the bottom-right corner grip or use the mouse
-        scroll wheel over the player to scale it.
-4.  Laptop Stutter Eliminated:
-    Removed will-change: transform and CSS aspect-ratio locks from the video
-    container. Chromium on Windows and macOS can now engage DirectComposition
-    hardware video acceleration at 60fps.
-5.  No Double Watermark:
-    Removed the custom .tc-subtle-watermark overlay from the player, leaving
-    only the channel's native live broadcast feed.
-6.  All Original Content Untouched:
-    Every advisory, notification, announcement, and note (including Murali
-    Manohar's Developer Update Note and the Hyderabad Water Crisis Alert)
-    remains 100% intact.
 
 <!DOCTYPE html>
 <html lang="en">
