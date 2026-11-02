@@ -134,7 +134,7 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    /* 🚀 HARDWARE-ACCELERATED ISOLATED VIDEO CONTAINER */
+    /* 🚀 HARDWARE-OPTIMIZED VIDEO DOCK CONTAINER */
     #active-video-container {
       isolation: isolate;
       contain: layout style;
@@ -142,9 +142,11 @@
       border-radius: 16px;
       overflow: hidden;
       margin: 0;
+      width: 100%;
+      aspect-ratio: 16 / 9;
     }
 
-    /* 🚀 TRUE IN-APP PiP FLOATING OVERLAY (16:9 PROPORTIONAL & DRAGGABLE) */
+    /* 🚀 TRUE IN-APP PiP FLOATING OVERLAY (PROPORTIONAL 16:9 & TOUCH-ANYWHERE DRAGGABLE) */
     .pip-floating-mode {
       position: fixed !important;
       bottom: calc(20px + env(safe-area-inset-bottom)) !important;
@@ -152,6 +154,7 @@
       top: auto !important;
       left: auto !important;
       margin: 0 !important;
+      padding: 0 !important;
       width: 320px !important;
       max-width: 90vw !important;
       aspect-ratio: 16 / 9 !important;
@@ -162,17 +165,37 @@
       border: 2px solid rgba(0, 113, 227, 0.9) !important;
       overflow: hidden !important;
       will-change: transform;
-      animation: pipPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      resize: horizontal; /* Resizes width while aspect-ratio maintains 16:9 height automatically! */
+      animation: pipPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      resize: both; /* Native 2D resize corner on Laptop/Desktop */
       min-width: 190px;
+      min-height: 107px;
       max-width: 580px;
+      max-height: 326px;
     }
     @keyframes pipPopIn {
       from { transform: scale(0.85) translate3d(0, 20px, 0); opacity: 0; }
       to { transform: scale(1) translate3d(0, 0, 0); opacity: 1; }
     }
 
-    /* Top Drag Handle Bar (Allows smooth dragging while letting video receive clicks) */
+    /* 🚀 TOUCH-SHIELD: Enables touch-anywhere drag & pinch while stopping YouTube from opening */
+    #pip-touch-barrier {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #pip-touch-barrier:active {
+      cursor: grabbing;
+    }
+    .pip-floating-mode #pip-touch-barrier {
+      display: block;
+    }
+
+    /* Top Drag Header Bar in PiP mode */
     .pip-drag-bar {
       display: none;
       position: absolute;
@@ -180,15 +203,11 @@
       left: 0;
       right: 0;
       height: 32px;
-      z-index: 40;
+      z-index: 30;
       background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 75%, transparent 100%);
-      cursor: grab;
-      touch-action: none;
+      pointer-events: none;
       user-select: none;
       -webkit-user-select: none;
-    }
-    .pip-drag-bar:active {
-      cursor: grabbing;
     }
     .pip-floating-mode .pip-drag-bar {
       display: flex;
@@ -677,7 +696,7 @@
             </div>
           </div>
 
-          <!-- 🚀 T&C Update Notification (Drops smoothly after 20s as originally requested) -->
+          <!-- 🚀 T&C Update Notification (Drops smoothly after 20 seconds as requested) -->
           <div id="dynamic-island-wrapper" class="hidden absolute top-10 left-0 z-40 cursor-pointer transition-all duration-300 transform" onclick="openAnnouncementModal()">
             <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2 hover:scale-105">
               <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
@@ -1161,7 +1180,6 @@
               </div>
             </div>
 
-            <!-- Video Player Display Container -->
             <div id="text-view" class="p-6 rounded-xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);" data-i18n="selectChannelPrompt">
               Select any live broadcast channel above to watch the stream.
             </div>
@@ -1175,20 +1193,23 @@
             </div>
           </div>
 
-          <!-- 🚀 DOCKED / FLOATING PiP VIDEO CONTAINER (SMOOTH DRAG & SKIP-AD ENABLED) -->
+          <!-- 🚀 DOCKED / FLOATING PiP VIDEO CONTAINER (TOUCH ANYWHERE TO DRAG + AUTO RESTORE ON TAP) -->
           <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
             
-            <!-- 🚀 TOP DRAG BAR (Grab here to move freely; video below receives 100% of clicks for Skip Ad!) -->
+            <!-- 🚀 TRANSPARENT SHIELD: Touch/Click anywhere on player to drag or tap to restore to TV tab! -->
+            <div id="pip-touch-barrier"></div>
+
+            <!-- Floating PiP Top Control Bar -->
             <div id="pip-header-bar" class="pip-drag-bar items-center justify-between px-3 text-white">
               <div class="flex items-center gap-1.5 pointer-events-none">
                 <span class="live-dot" style="width:6px;height:6px;"></span>
                 <span id="pip-channel-label" class="text-[10px] font-bold tracking-tight truncate max-w-[130px]">Live TV</span>
               </div>
-              <div class="flex items-center gap-2">
-                <button onclick="restoreMainPlayer()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all pointer-events-auto" title="Expand to TV Tab">
+              <div class="flex items-center gap-2 pointer-events-auto">
+                <button onclick="restoreMainPlayer()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all" title="Return to TV Section">
                   <i class="fa-solid fa-up-right-and-down-left-from-center text-[9px]"></i>
                 </button>
-                <button onclick="closeActivePlayer()" class="w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-600 flex items-center justify-center text-white transition-all pointer-events-auto" title="Close Player">
+                <button onclick="closeActivePlayer()" class="w-6 h-6 rounded-full bg-red-600/80 hover:bg-red-600 flex items-center justify-center text-white transition-all" title="Close Player">
                   <i class="fa-solid fa-xmark text-[11px]"></i>
                 </button>
               </div>
@@ -1196,7 +1217,7 @@
 
             <div class="tc-subtle-watermark">T&amp;C Hub</div>
             
-            <!-- Lag-Free Direct Iframe (Eager Loading & Proper Referrer Policy to prevent 2-sec freeze) -->
+            <!-- Lag-Free Iframe with Strict Origin Policy to eliminate freezing on laptop -->
             <iframe id="master-video-player" class="w-full h-full border-0" src="" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </section>
@@ -1249,10 +1270,10 @@
 
             <!-- Telemetry Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
-              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
-              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">Space Crew Active</p><p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p></div>
-              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">USGS M4.5+ Earthquakes</p><p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issAlt">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="issVel">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="spaceCrew">Space Crew Active</p><p class="text-sm font-extrabold text-amber-500" id="osint-iss-crew">Fetching...</p></div>
+              <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);" data-i18n="usgsQuakesStat">USGS M4.5+ Earthquakes</p><p class="text-sm font-extrabold text-red-500" id="osint-quake-count">Fetching...</p></div>
             </div>
           </div>
         </section>
@@ -1492,7 +1513,7 @@
       });
 
       loadSavedPreferencesUI();
-      initAcceleratedPiP();
+      initUniversalPiPEngine();
     });
 
     function openAnnouncementModal() {
@@ -1502,7 +1523,6 @@
     function closeAnnouncementModal(rememberChoice = false) {
       document.getElementById('announcement-modal').classList.add('hidden');
       if (rememberChoice) {
-        sessionStorage.setItem('tc_dynamic_island_dismissed', 'true');
         const pill = document.getElementById('dynamic-island-wrapper');
         if (pill) {
           pill.style.opacity = '0';
@@ -2002,7 +2022,7 @@
       if (icon) icon.classList.remove('fa-spin');
     }
     
-    /* 🚀 LAG-FREE CHANNEL SWITCHER WITH DIRECT REFERRER INTEGRATION */
+    /* 🚀 LAG-FREE CHANNEL SWITCHER */
     function setMode(mode, element) {
       document.querySelectorAll('.channel-card').forEach(btn => btn.classList.remove('active-mode'));
       if (element) element.classList.add('active-mode');
@@ -2082,72 +2102,48 @@
       }
     }
 
-    /* 🚀 GPU-ACCELERATED PiP ENGINE (TOUCH ANYWHERE TO DRAG + 16:9 PINCH RESIZE + ZERO AD-BLOCKING) */
-    function initAcceleratedPiP() {
+    /* 🚀 ADVANCED GPU PiP ENGINE: DRAG ANYWHERE + FREE PINCH RESIZE + CLICK RESTORES TO TV */
+    function initUniversalPiPEngine() {
       const container = document.getElementById('active-video-container');
-      const dragBar = document.getElementById('pip-header-bar');
-      if (!container || !dragBar) return;
+      const barrier = document.getElementById('pip-touch-barrier');
+      if (!container || !barrier) return;
 
       let isDragging = false;
       let isPinching = false;
       let startX = 0, startY = 0;
       let currentTranslateX = 0, currentTranslateY = 0;
       let initialPinchDist = 0;
-      let initialContainerWidth = 320;
+      let initialWidth = 320;
+      let dragDistance = 0;
       let rafId = null;
 
-      // Update position via hardware GPU layer
-      function updatePosition() {
+      function renderTranslate() {
         container.style.transform = `translate3d(${currentTranslateX}px, ${currentTranslateY}px, 0)`;
         rafId = null;
       }
 
       function requestTick() {
         if (!rafId) {
-          rafId = requestAnimationFrame(updatePosition);
+          rafId = requestAnimationFrame(renderTranslate);
         }
       }
 
-      // Dragging via the Top Drag Bar (Leaves video below 100% interactable for Skip Ad!)
-      dragBar.addEventListener('mousedown', (e) => {
+      // 🚀 TOUCH HANDLING (MOBILE DRAG ANYWHERE & TWO-FINGER PINCH)
+      barrier.addEventListener('touchstart', (e) => {
         if (!isMiniPlayerActive) return;
-        isDragging = true;
-        document.body.style.userSelect = 'none';
-        document.body.style.webkitUserSelect = 'none';
-        startX = e.clientX - currentTranslateX;
-        startY = e.clientY - currentTranslateY;
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging || !isMiniPlayerActive) return;
-        currentTranslateX = e.clientX - startX;
-        currentTranslateY = e.clientY - startY;
-        requestTick();
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          document.body.style.userSelect = '';
-          document.body.style.webkitUserSelect = '';
-        }
-      });
-
-      // MOBILE TOUCH DRAG & PINCH RESIZE (No false double-tap returns!)
-      container.addEventListener('touchstart', (e) => {
-        if (!isMiniPlayerActive) return;
+        dragDistance = 0;
 
         if (e.touches.length === 2) {
-          // 2-Fingers: Pure 16:9 Pinch Zoom
+          // 2-Fingers: Smooth Proportional 16:9 Pinch Zoom
           isPinching = true;
           isDragging = false;
           initialPinchDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
           );
-          initialContainerWidth = container.offsetWidth;
-        } else if (e.touches.length === 1 && e.target.closest('#pip-header-bar')) {
-          // 1-Finger drag only when touching top bar or grip
+          initialWidth = container.offsetWidth;
+        } else if (e.touches.length === 1) {
+          // 1-Finger: Drag from ANYWHERE on player!
           isDragging = true;
           isPinching = false;
           startX = e.touches[0].clientX - currentTranslateX;
@@ -2155,7 +2151,7 @@
         }
       }, { passive: true });
 
-      container.addEventListener('touchmove', (e) => {
+      barrier.addEventListener('touchmove', (e) => {
         if (!isMiniPlayerActive) return;
 
         if (isPinching && e.touches.length === 2) {
@@ -2164,23 +2160,65 @@
             e.touches[0].clientY - e.touches[1].clientY
           );
           const scale = currentDist / initialPinchDist;
-          const newW = Math.min(Math.max(initialContainerWidth * scale, 190), window.innerWidth * 0.92);
-          
-          // Width scales while aspect-ratio: 16/9 automatically scales height without distortion!
+          // Scales width smoothly while aspect-ratio: 16/9 automatically scales height!
+          const newW = Math.min(Math.max(initialWidth * scale, 190), window.innerWidth * 0.94);
           container.style.width = `${newW}px`;
+          dragDistance += 10;
         } else if (isDragging && e.touches.length === 1) {
-          currentTranslateX = e.touches[0].clientX - startX;
-          currentTranslateY = e.touches[0].clientY - startY;
+          const newX = e.touches[0].clientX - startX;
+          const newY = e.touches[0].clientY - startY;
+          dragDistance += Math.hypot(newX - currentTranslateX, newY - currentTranslateY);
+          currentTranslateX = newX;
+          currentTranslateY = newY;
           requestTick();
         }
       }, { passive: true });
 
-      const onTouchEnd = () => {
+      barrier.addEventListener('touchend', (e) => {
+        if (!isMiniPlayerActive) return;
+        
+        // 🚀 CLICK/TAP ON OVERLAY: Takes user straight to TV & Media tab (never opens YouTube!)
+        if (dragDistance < 8 && !isPinching) {
+          restoreMainPlayer();
+          return;
+        }
         isDragging = false;
         isPinching = false;
-      };
-      container.addEventListener('touchend', onTouchEnd);
-      container.addEventListener('touchcancel', onTouchEnd);
+      });
+
+      // 🚀 MOUSE HANDLING (LAPTOP / DESKTOP DRAG ANYWHERE & CLICK TO RESTORE)
+      barrier.addEventListener('mousedown', (e) => {
+        if (!isMiniPlayerActive) return;
+        isDragging = true;
+        dragDistance = 0;
+        document.body.style.userSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
+        startX = e.clientX - currentTranslateX;
+        startY = e.clientY - currentTranslateY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging || !isMiniPlayerActive) return;
+        const newX = e.clientX - startX;
+        const newY = e.clientY - startY;
+        dragDistance += Math.hypot(newX - currentTranslateX, newY - currentTranslateY);
+        currentTranslateX = newX;
+        currentTranslateY = newY;
+        requestTick();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          document.body.style.userSelect = '';
+          document.body.style.webkitUserSelect = '';
+          
+          // 🚀 CLICK/TAP: Returns directly to TV & Media section!
+          if (dragDistance < 6) {
+            restoreMainPlayer();
+          }
+        }
+      });
     }
 
     /* MAP INITIALIZATION WITH ZOOM CONTROL & COLLAPSIBLE LEGEND */
@@ -2789,5 +2827,3 @@
   </script>
 </body>
 </html>
-
-
