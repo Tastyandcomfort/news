@@ -93,7 +93,7 @@
       --text-main: #1d1d1f;
       --text-sub: #86868b;
       --border-color: rgba(0, 0, 0, 0.1);
-      --header-bg: rgba(255, 255, 255, 0.75);
+      --header-bg: rgba(255, 255, 255, 0.88);
       --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       --solar-pill-bg: rgba(255, 255, 255, 0.65);
       --solar-pill-border: rgba(0, 0, 0, 0.1);
@@ -108,7 +108,7 @@
       --text-main: #f5f5f7;
       --text-sub: #a1a1a6;
       --border-color: rgba(255, 255, 255, 0.12);
-      --header-bg: rgba(0, 0, 0, 0.75);
+      --header-bg: rgba(18, 18, 20, 0.88);
       --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       --solar-pill-bg: rgba(30, 30, 35, 0.65);
       --solar-pill-border: rgba(255, 255, 255, 0.12);
@@ -126,8 +126,6 @@
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
-      transform: translateZ(0);
-      will-change: transform;
     }
 
     .apple-header {
@@ -137,20 +135,44 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    video, iframe, #active-video-container, #file-view {
-      transform: translateZ(0);
-      will-change: transform;
-      backface-visibility: hidden;
+    /* Optimized Video Frame (Lag-free on Laptops) */
+    #active-video-container, #file-view {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000000;
+    }
+
+    /* 🚀 YOUTUBE / APPLE TV PICTURE-IN-PICTURE (PiP) FLOATING MINI-PLAYER */
+    .pip-floating-mode {
+      position: fixed !important;
+      bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+      right: 20px !important;
+      width: 320px !important;
+      max-width: 86vw !important;
+      z-index: 99998 !important;
+      border-radius: 18px !important;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.65) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+      resize: both;
+      overflow: hidden;
+      min-width: 220px;
+      min-height: 140px;
+      max-width: 480px;
+      animation: pipPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes pipPopIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .logo-anchored-pill {
-      background: rgba(0, 113, 227, 0.9);
+      background: rgba(0, 113, 227, 0.95);
       color: #ffffff;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.35);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.4);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .apple-solar-pill {
@@ -334,16 +356,22 @@
     input:checked + .apple-slider:before { transform: translateX(18px); }
     input:disabled + .apple-slider { opacity: 0.65; cursor: not-allowed; }
 
+    /* 🚀 MOBILE JOB FILTER PILLS: Never broken or squashed */
     .choice-pill {
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 9999px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       border: 1px solid var(--border-color);
       background: var(--bg-sub);
       color: var(--text-main);
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     .choice-pill.selected {
       background: #0071e3 !important;
@@ -393,7 +421,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
     }
   </style>
 </head>
@@ -559,96 +587,174 @@
     </div>
   </div>
 
-  <!-- TOP APPLE HEADER (MODEL 1 + PERSISTENT NOTIFICATION BELL) -->
-  <header class="apple-header sticky top-0 z-50 px-4 py-2.5">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-      
-      <!-- Brand Logo Badge -->
-      <div class="relative flex flex-col items-center md:items-start gap-1">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
-          <div class="relative flex items-center justify-center">
-            <div class="w-3 h-3 rounded-full pulse-gold"></div>
+  <!-- ANNOUNCEMENT MODAL -->
+  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
+    <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs font-bold">
+            <i class="fa-solid fa-crown"></i>
           </div>
-          <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
-            <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
-            <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
+          <div>
+            <h3 class="text-sm font-extrabold text-blue-500">Announcement</h3>
+            <p class="text-[10px]" style="color: var(--text-sub);">From T&C NEWS HUB</p>
           </div>
         </div>
+        <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
-      <!-- Center: Solar Pill & Right: Utility Cluster -->
-      <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
-        <!-- SOLAR PILL -->
-        <div class="apple-solar-pill" id="apple-solar-pill">
-          <div class="solar-item" title="Sunrise">
-            <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 10l-2.5 2.5M12 10l2.5 2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="solar-time" id="pill-sunrise">Syncing...</span>
-          </div>
-          <span class="solar-divider"></span>
-          <div class="solar-item" title="Sunset">
-            <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
-              <path d="M12 14l-2.5-2.5M12 14l2.5-2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="solar-time" id="pill-sunset">Syncing...</span>
-          </div>
+      <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
+        <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
         </div>
+        <p class="leading-relaxed">
+          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
+        </p>
+        <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
+          <div class="flex justify-between"><span> Water Levels:</span> <b>VERY LOW</b></div>
+        </div>
+        <p class="text-[11px] italic" style="color: var(--text-sub);">
+          Public Advisory: Residents are advised to conserve water, avoid unnecessary wastage, and follow official updates from the Hyderabad Metropolitan Water Supply and Sewerage Board (HMWSSB). Stay informed. Save water. Stay prepared.
+        </p>
+      </div>
 
-        <!-- 🚀 UNIFIED CLUSTER (Language + 🔔 Bell + Theme) -->
-        <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <!-- Language Selector -->
-          <div class="relative" id="lang-menu-wrapper">
-            <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
-              <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
-              <span id="current-lang-code">EN</span>
-              <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
-            </button>
-            <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
-              <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
-              <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
-              <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
-              <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
-              <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
-              <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+      <div class="flex items-center gap-2">
+        <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚀 STICKY UNIFIED HEADER & REAL-TIME TICKER CONTAINER -->
+  <div class="sticky top-0 z-50 shadow-sm">
+    
+    <!-- TOP APPLE HEADER -->
+    <header class="apple-header px-4 py-2.5">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+        
+        <!-- Brand Logo Badge & Anchored Dynamic Island Pill -->
+        <div class="relative flex flex-col items-center md:items-start gap-1">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('news')">
+            <div class="relative flex items-center justify-center">
+              <div class="w-3 h-3 rounded-full pulse-gold"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
+              <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
+              <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
             </div>
           </div>
 
-          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+          <!-- 🚀 T&C Update Notification (Drops smoothly in 1.2s) -->
+          <div id="dynamic-island-wrapper" class="hidden absolute top-10 left-0 z-40 cursor-pointer transition-all duration-300 transform" onclick="openAnnouncementModal()">
+            <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2 hover:scale-105">
+              <span class="live-dot bg-amber-400 shadow-amber-400 flex-shrink-0"></span>
+              <span class="text-[10px] font-bold tracking-wide flex items-center gap-1 whitespace-nowrap">
+                <i class="fa-solid fa-bullhorn text-[9px]"></i> T&C Update
+              </span>
+              <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full flex-shrink-0">1</span>
+            </div>
+          </div>
+        </div>
 
-          <!-- 🔔 PERSISTENT NOTIFICATION BELL -->
-          <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
-            <i class="fa-solid fa-bell text-xs text-amber-500"></i>
-          </button>
+        <!-- Center: Solar Pill & Right: Utility Cluster -->
+        <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
+          <!-- SOLAR PILL -->
+          <div class="apple-solar-pill" id="apple-solar-pill">
+            <div class="solar-item" title="Sunrise">
+              <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 2v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 10l-2.5 2.5M12 10l2.5 2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="solar-time" id="pill-sunrise">Syncing...</span>
+            </div>
+            <span class="solar-divider"></span>
+            <div class="solar-item" title="Sunset">
+              <svg class="sf-solar-icon sf-sunset" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 10v4M4.93 10.93l2.83 2.83M19.07 10.93l-2.83 2.83" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 18a6 6 0 006-6H6a6 6 0 006 6z" fill="currentColor" fill-opacity="0.3" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M2 18h20" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 14l-2.5-2.5M12 14l2.5-2.5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="solar-time" id="pill-sunset">Syncing...</span>
+            </div>
+          </div>
 
-          <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+          <!-- 🚀 UNIFIED CLUSTER (Language + 🔔 Bell + Theme) -->
+          <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+            <!-- Language Selector -->
+            <div class="relative" id="lang-menu-wrapper">
+              <button onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
+                <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
+                <span id="current-lang-code">EN</span>
+                <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
+              </button>
+              <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-50">
+                <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
+                <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
+                <button onclick="changeLanguage('hi')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>हिन्दी</span> <span class="text-[10px] opacity-60">HI</span></button>
+                <button onclick="changeLanguage('kn')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>ಕನ್ನಡ</span> <span class="text-[10px] opacity-60">KN</span></button>
+                <button onclick="changeLanguage('ta')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>தமிழ்</span> <span class="text-[10px] opacity-60">TA</span></button>
+                <button onclick="changeLanguage('ml')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>മലയാളം</span> <span class="text-[10px] opacity-60">ML</span></button>
+              </div>
+            </div>
 
-          <!-- Theme Button -->
-          <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
-            <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
-          </button>
+            <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
+            <!-- 🔔 PERSISTENT NOTIFICATION SETTINGS BELL BUTTON -->
+            <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
+              <i class="fa-solid fa-bell text-xs text-amber-500"></i>
+            </button>
+
+            <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
+            <!-- Theme Button -->
+            <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
+              <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
+            </button>
+          </div>
+
         </div>
 
       </div>
 
+      <!-- 4-TAB NAVIGATION BAR -->
+      <div class="max-w-xl mx-auto mt-2.5 px-2">
+        <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+          <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
+          <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 🚀 PERSISTENT STICKY TICKER (Pins right under header on scroll) -->
+    <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: var(--border-color); color: var(--text-sub);">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
+        <div class="flex items-center gap-6">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
+          <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
+          <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
+            <i class="fa-solid fa-baseball-bat-ball"></i> Live Cricket: <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b> 
+            <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
+              <i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i>
+            </button>
+          </span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-plane"></i> Flights: <b id="ticker-flights-count">Syncing...</b></span>
+          <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Cord: <b id="ticker-iss-pos">Syncing...</b></span>
+        </div>
+      </div>
     </div>
 
-    <!-- 🚀 4-TAB NAVIGATION BAR -->
-    <div class="max-w-xl mx-auto mt-2.5 px-2">
-      <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-        <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
-        <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
-        <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
-        <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
-      </nav>
-    </div>
-  </header>
+  </div> <!-- END STICKY HEADER CONTAINER -->
 
   <!-- LIVE CRICKET SCORE & COMMENTARY MODAL -->
   <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all">
@@ -705,26 +811,6 @@
     </div>
   </div>
 
-  <!-- LIVE REAL-TIME TICKER -->
-  <div class="border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-sub);">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
-      <div class="flex items-center gap-6">
-        <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
-        <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-volcano"></i> <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
-        <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
-          <i class="fa-solid fa-baseball-bat-ball"></i> Live Cricket: <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b> 
-          <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score">
-            <i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i>
-          </button>
-        </span>
-      </div>
-      <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-plane"></i> Flights: <b id="ticker-flights-count">Syncing...</b></span>
-        <span class="flex items-center gap-1.5 text-blue-400"><i class="fa-solid fa-satellite"></i> ISS Cord: <b id="ticker-iss-pos">Syncing...</b></span>
-      </div>
-    </div>
-  </div>
-
   <!-- MAIN CONTENT CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -773,7 +859,7 @@
           </div>
         </section>
 
-        <!-- 🚀 TAB 2: TV & MEDIA WITH YOUTUBE/APPLE TV HORIZONTAL THUMBNAIL SLIDER -->
+        <!-- 🚀 TAB 2: TV & MEDIA WITH YOUTUBE / APPLE TV HORIZONTAL THUMBNAIL SLIDER -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5 relative">
             <div class="mb-4">
@@ -787,7 +873,7 @@
                 </span>
               </div>
 
-              <!-- 🚀 APPLE TV / YOUTUBE STYLE SMOOTH HORIZONTAL SLIDER -->
+              <!-- 🚀 SMOOTH YOUTUBE-STYLE HORIZONTAL SLIDER -->
               <div class="channel-carousel desktop-scrollbar">
                 
                 <!-- 1. V6 -->
@@ -921,7 +1007,7 @@
                   </div>
                   <div class="mt-1.5 px-0.5">
                     <p class="text-xs font-bold truncate" style="color: var(--text-main);">Starbase</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">SpaceX Launchpad</p>
+                    <p class="text-[9.5px]" style="color: var(--text-sub);">SpaceX Launch</p>
                   </div>
                 </div>
 
@@ -1076,14 +1162,32 @@
               Select any live broadcast channel above to watch the stream.
             </div>
 
-            <div id="active-video-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
+            <!-- 🚀 PiP DOCKABLE / FLOATING VIDEO CONTAINER -->
+            <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
+              
+              <!-- PiP Control Bar (Visible only when floating) -->
+              <div id="pip-header-bar" class="hidden items-center justify-between px-3 py-1.5 bg-black/85 backdrop-blur-md cursor-move text-white text-[11px] font-bold select-none border-b border-white/10">
+                <div class="flex items-center gap-1.5">
+                  <span class="live-dot" style="width:6px;height:6px;"></span>
+                  <span id="pip-channel-label" class="truncate max-w-[140px]">Live TV</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="restoreMainPlayer()" class="hover:text-cyan-400 p-1 transition-all" title="Expand to Full View">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center text-[10px]"></i>
+                  </button>
+                  <button onclick="closeActivePlayer()" class="hover:text-red-400 p-1 transition-all" title="Close Player">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                </div>
+              </div>
+
               <div class="tc-subtle-watermark">T&amp;C Hub</div>
-              <iframe id="master-video-player" class="absolute top-0 left-0 w-full h-full border-0" src="" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+              <iframe id="master-video-player" class="w-full h-full border-0" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
 
-            <div id="file-view" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
+            <div id="file-view" class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
               <div class="tc-subtle-watermark">T&amp;C News</div>
-              <video id="file-video-player" class="absolute top-0 left-0 w-full h-full object-contain" controls preload="auto" playsinline webkit-playsinline>
+              <video id="file-video-player" class="w-full h-full object-contain" controls preload="auto" playsinline webkit-playsinline>
                 <source src="videos/sample-video.mp4" type="video/mp4">
                 Your browser does not support video playback.
               </video>
@@ -1165,8 +1269,8 @@
               </span>
             </div>
 
-            <!-- Job Sector Filter Pills -->
-            <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-4">
+            <!-- 🚀 MOBILE JOB FILTER PILLS: Clean horizontal slide, no text wrapping -->
+            <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2.5 mb-4 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
               <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
               <button onclick="filterJobs('it', this)" class="choice-pill">💻 IT &amp; Tech</button>
@@ -1228,6 +1332,8 @@
     let currentScope = 'local';
     let currentLanguage = 'en';
     let currentJobSector = 'all';
+    let isVideoPlaying = false;
+    let isMiniPlayerActive = false;
     
     const todayObj = new Date();
     const REAL_TODAY_DATE = todayObj.toISOString().split('T')[0];
@@ -1347,6 +1453,14 @@
         dateInput.max = REAL_TODAY_DATE;
       }
 
+      // 🚀 T&C Update Notification Dropdown (Shows smoothly in 1.2s)
+      setTimeout(() => {
+        const pill = document.getElementById('dynamic-island-wrapper');
+        if (pill) {
+          pill.classList.remove('hidden');
+        }
+      }, 1200);
+
       fetchSolarSchedule();
       fetchPinnedWorldNews();
       fetchPortalNews();
@@ -1369,6 +1483,7 @@
       });
 
       loadSavedPreferencesUI();
+      initDraggablePiP();
     });
 
     function openAnnouncementModal() {
@@ -1378,7 +1493,6 @@
     function closeAnnouncementModal(rememberChoice = false) {
       document.getElementById('announcement-modal').classList.add('hidden');
       if (rememberChoice) {
-        sessionStorage.setItem('tc_dynamic_island_dismissed', 'true');
         const pill = document.getElementById('dynamic-island-wrapper');
         if (pill) {
           pill.style.opacity = '0';
@@ -1460,7 +1574,7 @@
       }
     }
 
-    /* ==================== 4-TAB NAVIGATION SWITCHER ==================== */
+    /* ==================== 4-TAB NAVIGATION SWITCHER (WITH PiP RETENTION) ==================== */
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-video').classList.add('hidden');
@@ -1499,6 +1613,53 @@
       activeBtn.style.backgroundColor = '#0071e3';
       activeBtn.style.color = '#ffffff';
       activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+
+      // 🚀 YOUTUBE / APPLE TV IN-APP PiP TRANSITION LOGIC
+      const videoContainer = document.getElementById('active-video-container');
+      const pipBar = document.getElementById('pip-header-bar');
+
+      if (isVideoPlaying && videoContainer) {
+        if (tab !== 'video') {
+          // Keep playing in floating PiP mode!
+          videoContainer.classList.add('pip-floating-mode');
+          if (pipBar) pipBar.classList.remove('hidden');
+          if (pipBar) pipBar.classList.add('flex');
+          isMiniPlayerActive = true;
+        } else {
+          // Re-dock into full TV & Media tab
+          videoContainer.classList.remove('pip-floating-mode');
+          videoContainer.style.left = '';
+          videoContainer.style.top = '';
+          if (pipBar) pipBar.classList.add('hidden');
+          if (pipBar) pipBar.classList.remove('flex');
+          isMiniPlayerActive = false;
+        }
+      }
+    }
+
+    function restoreMainPlayer() {
+      switchMainTab('video');
+    }
+
+    function closeActivePlayer() {
+      const activeVideoContainer = document.getElementById('active-video-container');
+      const masterPlayer = document.getElementById('master-video-player');
+      const textView = document.getElementById('text-view');
+      const dot = document.getElementById('live-indicator');
+      const pipBar = document.getElementById('pip-header-bar');
+
+      if (activeVideoContainer) {
+        activeVideoContainer.classList.remove('pip-floating-mode');
+        activeVideoContainer.style.display = 'none';
+        activeVideoContainer.style.left = '';
+        activeVideoContainer.style.top = '';
+      }
+      if (pipBar) pipBar.classList.add('hidden');
+      if (masterPlayer) masterPlayer.src = "about:blank";
+      if (textView) textView.style.display = 'block';
+      if (dot) dot.style.display = 'none';
+      isVideoPlaying = false;
+      isMiniPlayerActive = false;
     }
 
     function setNewsScope(scope) {
@@ -1698,7 +1859,6 @@
 
       if (!btnWeather || !btnFlight) return;
 
-      // 1. Clear highlight on both buttons
       [btnWeather, btnFlight].forEach(b => {
         b.classList.remove('active-tab');
         b.style.backgroundColor = 'transparent';
@@ -1706,7 +1866,6 @@
         b.style.boxShadow = 'none';
       });
 
-      // 2. Apply solid Apple Blue highlight to the clicked button
       if (mode === 'weather') {
         frameWeather.style.display = 'block';
         frameFlight.style.display = 'none';
@@ -1730,7 +1889,6 @@
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-lg';
 
-        // Refresh Leaflet so maps render without grey tiles
         setTimeout(() => {
           if (leafletMap) leafletMap.invalidateSize();
         }, 150);
@@ -1812,7 +1970,7 @@
       if (icon) icon.classList.remove('fa-spin');
     }
     
-    /* 🚀 CHANNEL SWITCHER SUPPORTING BOTH CARDS & BUTTONS */
+    /* 🚀 OPTIMIZED CHANNEL SWITCHER (Lag-Free & PiP-Aware) */
     function setMode(mode, element) {
       document.querySelectorAll('.channel-card').forEach(btn => btn.classList.remove('active-mode'));
       if (element) element.classList.add('active-mode');
@@ -1823,12 +1981,12 @@
       const fileView = document.getElementById('file-view');
       const filePlayer = document.getElementById('file-video-player');
       const title = document.getElementById('current-channel-title');
+      const pipLabel = document.getElementById('pip-channel-label');
       const dot = document.getElementById('live-indicator');
 
       textView.style.display = 'none';
       activeVideoContainer.style.display = 'none';
       fileView.style.display = 'none';
-      masterPlayer.src = "about:blank"; 
       filePlayer.pause();
       filePlayer.src = "";
 
@@ -1836,13 +1994,17 @@
         if (title) title.innerText = "Latest Updates";
         if (dot) dot.style.display = "none";
         textView.style.display = 'block';
+        masterPlayer.src = "about:blank";
+        isVideoPlaying = false;
       } else if (mode === 'file') {
         if (title) title.innerText = "Media Streaming";
         if (dot) dot.style.display = "inline-block";
         fileView.style.display = 'block';
+        masterPlayer.src = "about:blank";
         filePlayer.src = "videos/sample-video.mp4";
         filePlayer.load();
         filePlayer.play().catch(e => console.log("Autoplay blocked"));
+        isVideoPlaying = true;
       } else {
         activeVideoContainer.style.display = 'block';
         if (dot) dot.style.display = "inline-block";
@@ -1851,35 +2013,84 @@
         let channelName = "TV9 Live";
 
         switch(mode) {
-          case 'v6': streamUrl = "https://www.youtube.com/embed/28IZl9iM-EE?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "V6 Live News"; break;
-          case 'tv9': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "TV9 Live News"; break;
-          case 'abcnews': streamUrl = "https://www.youtube.com/embed/KQhNZQ_Uag8?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "ABC News Live"; break;
-          case 'bloomberg': streamUrl = "https://www.youtube.com/embed/QB5BNdBFujE?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bloomberg News Live"; break;
-          case 'aljazeera': streamUrl = "https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Al Jazeera Live"; break;
-          case 'foxnews': streamUrl = "https://www.youtube.com/embed/C96oohpWBGw?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "FOX News Live"; break;
-          case 'france24': streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "France24 Live"; break;
-          case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "CNBC Live"; break;
-          case 'skynews': streamUrl = "https://www.youtube.com/embed/umLWFz4izTM?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Sky News Live"; break;
-          case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "CNN Live"; break;
-          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "NASA Live"; break;
-          case 'starbase': streamUrl = "https://www.youtube.com/embed/mhJRzQsLZGg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Starbase Live"; break;
-          case 'lasvegasairside': streamUrl = "https://www.youtube.com/embed/V7_orOtu-oo?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Lasvegas Airside Live"; break;          
-          case 'heathrowairside': streamUrl = "https://www.youtube.com/embed/uDBYuEV4zjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Heathrow Airside Live"; break;
-          case 'laxairside': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "LAX Airside Live"; break;
-          case 'lga-newyorkairside': streamUrl = "https://www.youtube.com/embed/T_QsY01tIK0?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "LGA-New York Airside Live"; break;
-          case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Wild Live"; break;
-          case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Sports Live"; break;
-          case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Music"; break;
-          case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bhagavat Geetha"; break;
-          case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Quran"; break;
-          case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Bible"; break;
-          case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "Constitution"; break;
-          case 't&c': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1&modestbranding=1"; channelName = "T&C"; break;
+          case 'v6': streamUrl = "https://www.youtube.com/embed/28IZl9iM-EE?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "V6 Live News"; break;
+          case 'tv9': streamUrl = "https://www.youtube.com/embed/II_m28Bm-iM?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "TV9 Live News"; break;
+          case 'abcnews': streamUrl = "https://www.youtube.com/embed/KQhNZQ_Uag8?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "ABC News Live"; break;
+          case 'bloomberg': streamUrl = "https://www.youtube.com/embed/QB5BNdBFujE?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Bloomberg TV Live"; break;
+          case 'aljazeera': streamUrl = "https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Al Jazeera Live"; break;
+          case 'foxnews': streamUrl = "https://www.youtube.com/embed/C96oohpWBGw?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "FOX News Live"; break;
+          case 'france24': streamUrl = "https://www.youtube.com/embed/HvZt-nh9sGg?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "France24 Live"; break;
+          case 'cnbc': streamUrl = "https://www.youtube.com/embed/1_Ih0JYmkjI?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "CNBC Live"; break;
+          case 'skynews': streamUrl = "https://www.youtube.com/embed/umLWFz4izTM?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Sky News Live"; break;
+          case 'cnn': streamUrl = "https://www.youtube.com/embed/GotlA1KKWoo?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "CNN Live"; break;
+          case 'nasa': streamUrl = "https://www.youtube.com/embed/OKQEMp2555A?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "NASA TV Live"; break;
+          case 'starbase': streamUrl = "https://www.youtube.com/embed/mhJRzQsLZGg?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Starbase Live"; break;
+          case 'lasvegasairside': streamUrl = "https://www.youtube.com/embed/V7_orOtu-oo?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Las Vegas Airside"; break;          
+          case 'heathrowairside': streamUrl = "https://www.youtube.com/embed/uDBYuEV4zjI?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Heathrow Airside"; break;
+          case 'laxairside': streamUrl = "https://www.youtube.com/embed/n4I0d44oBEs?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "LAX Airside"; break;
+          case 'lga-newyorkairside': streamUrl = "https://www.youtube.com/embed/T_QsY01tIK0?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "LGA New York Airside"; break;
+          case 'wildlife': streamUrl = "https://www.youtube.com/embed/MiQe9ob9aDc?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Wild Africa Live"; break;
+          case 'sports': streamUrl = "https://www.youtube.com/embed/fE_xxKiCHO0?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Live Sports"; break;
+          case 'music': streamUrl = "https://www.youtube.com/embed/VdG_RC1POC8?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Music Lo-Fi"; break;
+          case 'hindu': streamUrl = "https://www.youtube.com/embed/FFtPSPByBmk?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Bhagavat Geetha"; break;
+          case 'muslim': streamUrl = "https://www.youtube.com/embed/_1FpcN1U_KY?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Holy Quran"; break;
+          case 'christian': streamUrl = "https://www.youtube.com/embed/dmgsOBr2lAA?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Holy Bible"; break;
+          case 'law': streamUrl = "https://www.youtube.com/embed/U71NrLiWWjI?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "Constitution"; break;
+          case 't&c': streamUrl = "https://www.youtube.com/embed/IzOOvR-XzAg?autoplay=1&mute=1&playsinline=1&enablejsapi=1"; channelName = "T&C Original"; break;
         }
 
         if (title) title.innerText = channelName;
-        setTimeout(() => { masterPlayer.src = streamUrl; }, 50);
+        if (pipLabel) pipLabel.innerText = channelName;
+        
+        // Prevents memory and CPU freeze on laptops
+        if (masterPlayer.src !== streamUrl) {
+          masterPlayer.src = streamUrl;
+        }
+        isVideoPlaying = true;
       }
+    }
+
+    /* 🚀 DRAGGABLE PiP MINI-PLAYER HANDLER */
+    function initDraggablePiP() {
+      const container = document.getElementById('active-video-container');
+      const header = document.getElementById('pip-header-bar');
+      if (!container || !header) return;
+
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      const onMouseDown = (e) => {
+        if (!isMiniPlayerActive) return;
+        isDragging = true;
+        const rect = container.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        startX = e.clientX || (e.touches && e.touches[0].clientX);
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        container.style.right = 'auto';
+        container.style.bottom = 'auto';
+        container.style.left = `${initialLeft}px`;
+        container.style.top = `${initialTop}px`;
+      };
+
+      const onMouseMove = (e) => {
+        if (!isDragging) return;
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        container.style.left = `${initialLeft + dx}px`;
+        container.style.top = `${initialTop + dy}px`;
+      };
+
+      const onMouseUp = () => { isDragging = false; };
+
+      header.addEventListener('mousedown', onMouseDown);
+      header.addEventListener('touchstart', onMouseDown, { passive: true });
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('touchmove', onMouseMove, { passive: true });
+      window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('touchend', onMouseUp);
     }
 
     /* MAP INITIALIZATION WITH ZOOM CONTROL & COLLAPSIBLE LEGEND */
@@ -2353,12 +2564,10 @@
                   box-shadow 0.2s ease, 
                   background 0.2s ease;
     }
-
     .apple-btn:active {
       transform: scale(0.93);
       background: rgba(235, 235, 235, 0.9);
     }
-
     @media (prefers-color-scheme: dark) {
       .apple-btn {
         background: rgba(30, 30, 32, 0.82);
@@ -2490,3 +2699,4 @@
   </script>
 </body>
 </html>
+
