@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>T&C News Hub</title>
   
-  <!-- Viewport with Notch Support -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
 
@@ -84,7 +83,7 @@
       overscroll-behavior-y: contain;
     }
     
-    /* Apple Light Theme */
+    /* Apple Theme Variables */
     :root {
       --bg-main: #f5f5f7;
       --bg-card: rgba(255, 255, 255, 0.94);
@@ -99,7 +98,6 @@
       --solar-pill-border: rgba(0, 0, 0, 0.1);
     }
 
-    /* Apple Dark Theme */
     .dark {
       --bg-main: #000000;
       --bg-card: rgba(28, 28, 30, 0.94);
@@ -124,13 +122,11 @@
       border: 1px solid var(--border-color);
       border-radius: 18px;
       box-shadow: var(--card-shadow);
-      contain: layout paint;
     }
 
     .apple-header {
       background-color: var(--header-bg);
       border-bottom: 1px solid var(--border-color);
-      contain: layout paint;
     }
 
     .logo-anchored-pill {
@@ -234,18 +230,9 @@
       100% { opacity: 0.45; transform: scale(0.9); }
     }
 
-    .desktop-scrollbar::-webkit-scrollbar {
-      height: 6px;
-      display: block;
-    }
-    .desktop-scrollbar::-webkit-scrollbar-track {
-      background: var(--bg-sub);
-      border-radius: 10px;
-    }
-    .desktop-scrollbar::-webkit-scrollbar-thumb {
-      background: #0071e3;
-      border-radius: 10px;
-    }
+    .desktop-scrollbar::-webkit-scrollbar { height: 6px; display: block; }
+    .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
+    .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -255,22 +242,6 @@
       color: #ffffff !important;
       font-weight: 700;
       box-shadow: 0 3px 10px rgba(0, 113, 227, 0.3);
-    }
-
-    .tc-subtle-watermark {
-      position: absolute;
-      top: 14px;
-      left: 14px;
-      z-index: 30;
-      background: rgba(18, 18, 20, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      padding: 4px 10px;
-      border-radius: 8px;
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      pointer-events: none;
     }
 
     .apple-switch {
@@ -430,25 +401,39 @@
       .carousel-nav-btn { display: none; }
     }
 
-    /* ==================== SEAMLESS IN-PAGE FLOATING OVERLAY (PIP) ==================== */
+    /* ==================== RESIZABLE & DRAGGABLE SEAMLESS PIP OVERLAY ==================== */
     #persistent-player-hub.tc-floating-pip {
       position: fixed !important;
-      bottom: calc(20px + env(safe-area-inset-bottom)) !important;
-      right: 20px !important;
-      width: 330px !important;
-      max-width: calc(100vw - 40px) !important;
-      aspect-ratio: 16 / 9 !important;
-      z-index: 1000 !important;
+      z-index: 9999 !important;
+      min-width: 260px !important;
+      max-width: 720px !important;
+      min-height: 160px !important;
+      max-height: 480px !important;
       border-radius: 16px !important;
       overflow: hidden !important;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px #0071e3 !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 2px #0071e3 !important;
       background: #000000 !important;
-      animation: pipEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      resize: both !important;
+      transition: box-shadow 0.2s ease;
     }
 
-    @keyframes pipEnter {
-      from { transform: translateY(20px) scale(0.92); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
+    /* Apple-Style Corner Resize Grip Indicator */
+    #persistent-player-hub.tc-floating-pip::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.7) 50%);
+      cursor: se-resize;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .pip-drag-handle {
+      cursor: move;
+      user-select: none;
     }
   </style>
 </head>
@@ -804,41 +789,41 @@
     </div>
   </div>
 
-  <!-- ==================== PERSISTENT HARDWARE-ACCELERATED VIDEO PLAYER HUB ==================== -->
-  <!-- Stays permanently alive; docks in TV & Media and floats when navigating to other tabs -->
-  <div id="persistent-player-hub" class="hidden relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="border: 1px solid var(--border-color);">
-    
-    <!-- Mini PiP Top Floating Controls -->
-    <div id="pip-top-bar" class="hidden absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-black/85 via-black/40 to-transparent p-2.5 flex items-center justify-between text-white pointer-events-auto">
-      <div class="flex items-center gap-1.5 overflow-hidden pr-2">
-        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
-        <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
-      </div>
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <button onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Return to TV & Media">
-          <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-        </button>
-        <button onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-    </div>
-
-    <div class="tc-subtle-watermark">T&amp;C LIVE HUB</div>
-    <iframe id="master-video-player" class="absolute inset-0 w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-    
-    <video id="file-video-player" class="hidden absolute inset-0 w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
-      <source src="videos/sample-video.mp4" type="video/mp4">
-      Your browser does not support HTML5 video playback.
-    </video>
-  </div>
-
   <!-- MAIN CONTENT CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-6 flex-grow">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- LEFT PRIMARY PANEL -->
       <div class="lg:col-span-8 flex flex-col gap-6">
+
+        <!-- ==================== PERSISTENT PLAYER HOST (NEVER RE-PARENTED, ZERO-RELOAD) ==================== -->
+        <div id="persistent-player-hub" class="hidden relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="border: 1px solid var(--border-color);">
+          
+          <!-- Draggable Top Bar in Floating PiP Mode -->
+          <div id="pip-top-bar" class="hidden absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-2.5 flex items-center justify-between text-white pointer-events-auto pip-drag-handle">
+            <div class="flex items-center gap-2 overflow-hidden pr-2">
+              <i class="fa-solid fa-grip-lines opacity-60 text-xs"></i>
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
+              <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button type="button" onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Return to TV & Media">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+              </button>
+              <button type="button" onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Video Stream Frame: Single Watermark Only (Native) -->
+          <iframe id="master-video-player" class="w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+          
+          <video id="file-video-player" class="hidden w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
+            <source src="videos/sample-video.mp4" type="video/mp4">
+            Your browser does not support HTML5 video playback.
+          </video>
+        </div>
 
         <!-- TAB 1: NEWS FEEDS -->
         <section id="view-news" class="flex flex-col gap-6">
@@ -892,27 +877,23 @@
                   <h3 id="current-channel-title" class="text-base font-extrabold text-blue-500">25+ Live Channels</h3>
                   <span id="channel-cat-pill" class="text-[10px] bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full font-bold hidden">NEWS</span>
                 </div>
-                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap card below to stream</span>
+                <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap thumbnail to stream</span>
               </div>
 
-              <!-- Anchor dock where persistent player lives when on TV & Media tab -->
-              <div id="video-inline-anchor" class="w-full">
-                <!-- Prompt Screen shown when no channel is playing -->
-                <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
-                  <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-play"></i>
-                  </div>
-                  <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Live Continuous Streaming</h4>
-                  <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
-                    Select any channel from the carousel below. Playback seamlessly continues as a floating overlay if you browse to other sections.
-                  </p>
+              <!-- Inline Player Placeholder Screen -->
+              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+                  <i class="fa-solid fa-play"></i>
                 </div>
+                <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Live Continuous Streaming</h4>
+                <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
+                  Select any channel below to play. The stream floats as an interactive Picture-in-Picture window if you navigate to other tabs.
+                </p>
               </div>
             </div>
 
             <!-- Apple-Style Smooth Sliding Carousel -->
             <div class="pt-4 border-t border-[var(--border-color)]">
-              
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div class="flex items-center gap-2">
                   <i class="fa-solid fa-circle-play text-red-500 text-sm"></i>
@@ -935,20 +916,19 @@
                 </button>
 
                 <div id="channel-carousel-track" class="channel-track no-scrollbar">
-                  <!-- Populated dynamically -->
+                  <!-- Populated dynamically via JS -->
                 </div>
 
                 <button onclick="scrollChannelCarousel(1)" class="carousel-nav-btn carousel-nav-next" title="Next">
                   <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
               </div>
-
             </div>
 
           </div>
         </section>
 
-        <!-- ==================== TAB 3: RADAR & OSINT MAP (NO WATERMARK) ==================== -->
+        <!-- ==================== TAB 3: RADAR & OSINT MAP (NO WATERMARK OSM) ==================== -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
@@ -984,18 +964,13 @@
               <button onclick="setWindyLayer('temp', this)" class="choice-pill">🌡️ Temperature</button>
             </div>
 
-            <!-- Resilient Map Container -->
             <div class="relative w-full h-[430px] sm:h-[480px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub); contain: strict;">
               
-              <!-- 1. Live Weather Radar Frame -->
               <div id="radar-frame-weather" class="absolute inset-0 w-full h-full">
-                <div class="tc-subtle-watermark">T&amp;C LIVE RADAR</div>
                 <iframe id="windy-radar-iframe" width="100%" height="100%" src="about:blank" frameborder="0" class="w-full h-full border-0 block" allow="geolocation"></iframe>
               </div>
 
-              <!-- 2. Live Flights & ISS Map (No Watermark OSM) -->
               <div id="radar-frame-flight" class="absolute inset-0 w-full h-full" style="display: none;">
-                <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
                 <div id="osint-map" class="w-full h-full" style="min-height: 100%;"></div>
               </div>
 
@@ -1258,6 +1233,7 @@
       initMediaChannelsCarousel();
       initISSManifest();
       fetchLiveJobs();
+      initPiPDraggable();
 
       setInterval(fetchLiveAirTraffic, 35000);
       setInterval(fetchLiveCricketTicker, 30000);
@@ -1345,7 +1321,6 @@
       if (!chan) return;
 
       const playerHub = document.getElementById('persistent-player-hub');
-      const inlineAnchor = document.getElementById('video-inline-anchor');
       const textView = document.getElementById('text-view');
       const masterPlayer = document.getElementById('master-video-player');
       const filePlayer = document.getElementById('file-video-player');
@@ -1357,9 +1332,15 @@
       isMediaPlaying = true;
       textView.style.display = 'none';
 
-      // Ensure docked inside TV & Media view
-      inlineAnchor.appendChild(playerHub);
+      // Reset inline layout styles
       playerHub.classList.remove('hidden', 'tc-floating-pip');
+      playerHub.style.left = '';
+      playerHub.style.top = '';
+      playerHub.style.right = '';
+      playerHub.style.bottom = '';
+      playerHub.style.width = '';
+      playerHub.style.height = '';
+
       document.getElementById('pip-top-bar').classList.add('hidden');
 
       title.innerText = chan.name;
@@ -1399,6 +1380,13 @@
 
       playerHub.classList.remove('tc-floating-pip');
       playerHub.classList.add('hidden');
+      playerHub.style.left = '';
+      playerHub.style.top = '';
+      playerHub.style.right = '';
+      playerHub.style.bottom = '';
+      playerHub.style.width = '';
+      playerHub.style.height = '';
+
       document.getElementById('pip-top-bar').classList.add('hidden');
 
       dot.style.display = 'none';
@@ -1409,7 +1397,7 @@
       document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active-stream'));
     }
 
-    /* ==================== 4-TAB NAVIGATION & FLOATING PIP SYNC ==================== */
+    /* ==================== 4-TAB NAVIGATION & ZERO-RELOAD PIP TRANSITION ==================== */
     function switchMainTab(tab) {
       currentTab = tab;
 
@@ -1431,7 +1419,6 @@
       });
 
       const playerHub = document.getElementById('persistent-player-hub');
-      const inlineAnchor = document.getElementById('video-inline-anchor');
       const pipTopBar = document.getElementById('pip-top-bar');
 
       let activeBtn = btnNews;
@@ -1459,20 +1446,106 @@
       activeBtn.style.color = '#ffffff';
       activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
 
-      // Seamless Floating Overlay Logic
+      // Zero-Reload Persistent PiP Logic
       if (isMediaPlaying) {
         if (tab === 'video') {
-          // Dock into normal position in TV & Media
-          inlineAnchor.appendChild(playerHub);
+          // Snap back into docked position inside TV & Media view
           playerHub.classList.remove('tc-floating-pip');
+          playerHub.style.left = '';
+          playerHub.style.top = '';
+          playerHub.style.right = '';
+          playerHub.style.bottom = '';
+          playerHub.style.width = '';
+          playerHub.style.height = '';
           pipTopBar.classList.add('hidden');
         } else {
-          // Float smoothly over Headlines, Radar, or Jobs
-          document.body.appendChild(playerHub);
+          // Float smoothly over Headlines, Radar, or Jobs without reload
+          playerHub.classList.remove('hidden');
           playerHub.classList.add('tc-floating-pip');
+          
+          if (!playerHub.style.left && !playerHub.style.top) {
+            playerHub.style.right = '20px';
+            playerHub.style.bottom = '20px';
+            playerHub.style.width = '330px';
+            playerHub.style.height = '186px';
+          }
           pipTopBar.classList.remove('hidden');
         }
+      } else {
+        playerHub.classList.add('hidden');
       }
+    }
+
+    /* ==================== INTERACTIVE DRAGGABLE PIP ENGINE ==================== */
+    function initPiPDraggable() {
+      const pipHub = document.getElementById('persistent-player-hub');
+      const dragBar = document.getElementById('pip-top-bar');
+      if (!pipHub || !dragBar) return;
+
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      const onStart = (e) => {
+        if (!pipHub.classList.contains('tc-floating-pip')) return;
+        // Do not drag if clicking control buttons
+        if (e.target.closest('button')) return;
+
+        isDragging = true;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const rect = pipHub.getBoundingClientRect();
+        startX = clientX;
+        startY = clientY;
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        // Convert bottom/right CSS to exact left/top coordinates
+        pipHub.style.right = 'auto';
+        pipHub.style.bottom = 'auto';
+        pipHub.style.left = `${initialLeft}px`;
+        pipHub.style.top = `${initialTop}px`;
+
+        document.addEventListener('mousemove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onEnd);
+      };
+
+      const onMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+
+        let newLeft = initialLeft + deltaX;
+        let newTop = initialTop + deltaY;
+
+        // Viewport boundaries clamping
+        const maxLeft = window.innerWidth - pipHub.offsetWidth - 10;
+        const maxTop = window.innerHeight - pipHub.offsetHeight - 10;
+
+        newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+        newTop = Math.max(10, Math.min(newTop, maxTop));
+
+        pipHub.style.left = `${newLeft}px`;
+        pipHub.style.top = `${newTop}px`;
+      };
+
+      const onEnd = () => {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+
+      dragBar.addEventListener('mousedown', onStart);
+      dragBar.addEventListener('touchstart', onStart, { passive: true });
     }
 
     /* ==================== RADAR & OSINT MAP (NO WATERMARK OSM) ==================== */
@@ -1562,7 +1635,7 @@
         markerZoomAnimation: true
       }).setView([20.5937, 78.9629], 3);
 
-      // OpenStreetMap Official Global CDN (Zero Watermark, 100% Free)
+      // Official OpenStreetMap CDN Tile Service (Zero Watermark, 100% Free)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
         maxZoom: 19,
         subdomains: ['a', 'b', 'c'],
@@ -2278,7 +2351,7 @@
       position: fixed;
       bottom: calc(22px + env(safe-area-inset-bottom));
       right: 20px;
-      z-index: 99999;
+      z-index: 9999;
       display: inline-flex;
       align-items: center;
       gap: 7px;
