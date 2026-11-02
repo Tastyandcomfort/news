@@ -287,7 +287,7 @@
       border-color: #0071e3 !important;
     }
 
-    /* ==================== APPLE-YOUTUBE SLIDING CAROUSEL ==================== */
+    /* Apple-Style Sliding Carousel */
     .channel-carousel-wrap {
       position: relative;
       width: 100%;
@@ -401,48 +401,104 @@
       .carousel-nav-btn { display: none; }
     }
 
-    /* ==================== RESIZABLE & DRAGGABLE SEAMLESS PIP OVERLAY ==================== */
+    /* ==================== RESIZABLE & ANY-POINT DRAGGABLE FLOATING PIP PLAYER ==================== */
+    #persistent-player-hub {
+      width: 100%;
+      position: relative;
+      background: #000000;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      transition: border-radius 0.2s ease;
+    }
+
+    /* Floating Picture-in-Picture State */
     #persistent-player-hub.tc-floating-pip {
       position: fixed !important;
-      z-index: 9999 !important;
-      min-width: 260px !important;
-      max-width: 720px !important;
-      min-height: 160px !important;
-      max-height: 480px !important;
-      border-radius: 16px !important;
-      overflow: hidden !important;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 2px #0071e3 !important;
-      background: #000000 !important;
-      resize: both !important;
-      transition: box-shadow 0.2s ease;
+      z-index: 99999 !important;
+      min-width: 150px !important;
+      max-width: 800px !important;
+      min-height: 85px !important;
+      max-height: 520px !important;
+      border-radius: 14px !important;
+      border: 2px solid #0071e3 !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65) !important;
+      touch-action: none;
+      user-select: none;
     }
 
-    /* Apple-Style Corner Resize Grip Indicator */
-    #persistent-player-hub.tc-floating-pip::after {
+    /* Transparent drag layer that catches touches and clicks from ANY point of the player */
+    .pip-gesture-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      cursor: grab;
+      touch-action: none;
+      display: none;
+    }
+
+    #persistent-player-hub.tc-floating-pip .pip-gesture-layer {
+      display: block;
+    }
+
+    .pip-gesture-layer:active {
+      cursor: grabbing;
+    }
+
+    /* Floating Top Mini Bar */
+    #pip-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      padding: 6px 10px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      pointer-events: auto;
+    }
+
+    /* Corner Resize Grip for Laptops */
+    .pip-resize-handle {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 22px;
+      height: 22px;
+      cursor: nwse-resize;
+      z-index: 50;
+      display: none;
+      touch-action: none;
+    }
+
+    #persistent-player-hub.tc-floating-pip .pip-resize-handle {
+      display: block;
+    }
+
+    .pip-resize-handle::after {
       content: '';
       position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 12px;
-      height: 12px;
-      background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.7) 50%);
-      cursor: se-resize;
-      pointer-events: none;
-      z-index: 50;
-    }
-
-    .pip-drag-handle {
-      cursor: move;
-      user-select: none;
+      right: 4px;
+      bottom: 4px;
+      width: 8px;
+      height: 8px;
+      border-right: 2.5px solid rgba(255, 255, 255, 0.85);
+      border-bottom: 2.5px solid rgba(255, 255, 255, 0.85);
+      border-radius: 1px;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
   <!-- ==================== APPLE NOTIFICATION PREFERENCES MODAL ==================== -->
-  <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/60 transition-all overflow-y-auto">
+  <div id="notification-prefs-modal" class="hidden fixed inset-0 z-[125] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-md transition-all overflow-y-auto">
     <div class="apple-card max-w-lg w-full p-5 sm:p-6 shadow-2xl relative border my-auto">
       
+      <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-sm font-bold shadow-sm">
@@ -450,7 +506,7 @@
           </div>
           <div>
             <h3 class="text-sm font-extrabold" style="color: var(--text-main);">Notification Preferences</h3>
-            <p class="text-[10px]" style="color: var(--text-sub);">Allow notifications in your phone &amp; Choose real-time alerts.</p>
+            <p class="text-[10px]" style="color: var(--text-sub);">Allow notification in your phone & Choose real-time alerts.</p>
           </div>
         </div>
         <button onclick="closeNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
@@ -458,6 +514,7 @@
         </button>
       </div>
 
+      <!-- Master Select All Switch -->
       <div class="flex items-center justify-between p-3 rounded-2xl mb-3 border shadow-sm" style="background-color: var(--bg-sub); border-color: var(--border-color);">
         <div class="flex items-center gap-2.5">
           <i class="fa-solid fa-layer-group text-blue-500 text-sm"></i>
@@ -472,12 +529,14 @@
         </label>
       </div>
 
+      <!-- Topics Grouped Inset List -->
       <div class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
 
+        <!-- 1. NEWS CHANNEL -->
         <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-newspaper"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-newspaper"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Live News Bulletins</h5>
                 <p class="text-[10px]" style="color: var(--text-sub);">Real-time breaking headlines</p>
@@ -490,13 +549,14 @@
           </div>
         </div>
 
+        <!-- 2. WEATHER CHANNEL + INTERACTIVE QUESTION -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-cloud-sun"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-cloud-sun"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Weather Outlook &amp; Rain Alerts</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Choose location to get alerts &amp; rain radar</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Choose a location to get alerts morning/evening &amp; rain radar</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -505,7 +565,7 @@
             </label>
           </div>
           <div id="sub-q-weather" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
-            <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Alert City:</p>
+            <p class="text-[11px] font-bold text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> Select Your Weather Alert City:</p>
             <div class="flex flex-wrap gap-1.5" id="weather-city-pills">
               <button type="button" onclick="selectChoicePill('weather-city', 'Hyderabad', this)" class="choice-pill selected">Hyderabad</button>
               <button type="button" onclick="selectChoicePill('weather-city', 'Warangal', this)" class="choice-pill">Warangal</button>
@@ -516,13 +576,14 @@
           </div>
         </div>
 
+        <!-- 3. JOBS CHANNEL + INTERACTIVE QUESTION -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-green-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-briefcase"></i></div>
               <div>
                 <h5 class="text-xs font-bold" style="color: var(--text-main);">Career &amp; Job Vacancies</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Local job alerts &amp; vacancies</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Local jobs &amp; Information</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -531,7 +592,7 @@
             </label>
           </div>
           <div id="sub-q-jobs" class="mt-3 pt-3 border-t border-black/5 dark:border-white/5 space-y-2">
-            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Sector:</p>
+            <p class="text-[11px] font-bold text-green-500 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap"></i> Select Your Preference or Sector:</p>
             <div class="flex flex-wrap gap-1.5" id="job-sector-pills">
               <button type="button" onclick="selectChoicePill('job-sector', 'Freshers & Any Degree', this)" class="choice-pill selected">Freshers / Any Degree</button>
               <button type="button" onclick="selectChoicePill('job-sector', 'IT & Software', this)" class="choice-pill">IT &amp; Tech</button>
@@ -541,13 +602,14 @@
           </div>
         </div>
 
+        <!-- 4. ISS & SPACE TRACKING CHANNEL -->
         <div class="p-3.5 rounded-2xl border transition-all" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-satellite"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-satellite"></i></div>
               <div>
-                <h5 class="text-xs font-bold" style="color: var(--text-main);">ISS Satellite &amp; Space Events</h5>
-                <p class="text-[10px]" style="color: var(--text-sub);">Visible passes over your location</p>
+                <h5 class="text-xs font-bold" style="color: var(--text-main);">ISS or Satilate &amp; Space Events</h5>
+                <p class="text-[10px]" style="color: var(--text-sub);">Visible flyovers over your location &amp; Sightseeing</p>
               </div>
             </div>
             <label class="apple-switch">
@@ -559,24 +621,25 @@
             <p class="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5"><i class="fa-solid fa-telescope"></i> Sighting Preference:</p>
             <div class="flex flex-wrap gap-1.5" id="iss-pref-pills">
               <button type="button" onclick="selectChoicePill('iss-pref', 'Night Passes Only', this)" class="choice-pill selected">Naked-Eye Night Passes</button>
-              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">All Space Events</button>
+              <button type="button" onclick="selectChoicePill('iss-pref', 'All Missions', this)" class="choice-pill">All Rocket &amp; Space Events</button>
             </div>
           </div>
         </div>
 
+        <!-- 5. T&C PLATFORM UPDATES (PERMANENTLY LOCKED ON) -->
         <div class="p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color); opacity: 0.95;">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs shadow-md"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
               <div>
                 <div class="flex items-center gap-1.5">
                   <h5 class="text-xs font-bold" style="color: var(--text-main);">T&amp;C Developer</h5>
                   <span class="text-[9px] bg-blue-500/20 text-blue-500 font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-1"><i class="fa-solid fa-lock text-[8px]"></i> REQUIRED</span>
                 </div>
-                <p class="text-[10px]" style="color: var(--text-sub);">Platform advisories and feature updates by Murali Manohar.</p>
+                <p class="text-[10px]" style="color: var(--text-sub);">Murali may release updates anytime related to App/Website's: New features, Performance upgrades &amp; Important information</p>
               </div>
             </div>
-            <label class="apple-switch" title="T&C Platform updates are always active">
+            <label class="apple-switch" title="T&C Platform system updates are always active">
               <input type="checkbox" id="topic-platform" checked disabled>
               <span class="apple-slider"></span>
             </label>
@@ -585,6 +648,7 @@
 
       </div>
 
+      <!-- Action Button -->
       <div class="mt-4 pt-3 border-t border-black/5 dark:border-white/5">
         <button onclick="saveNotificationPreferences()" id="btn-save-prefs" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
           <i class="fa-solid fa-check text-xs"></i> Save Preferences
@@ -595,8 +659,8 @@
   </div>
 
   <!-- ANNOUNCEMENT MODAL -->
-  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 transition-all">
-    <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30">
+  <div id="announcement-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md transition-all">
+    <div class="apple-card max-w-md w-full p-6 shadow-2xl relative border border-blue-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs font-bold">
@@ -614,16 +678,25 @@
 
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
         <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Advisory
+          <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
         </div>
         <p class="leading-relaxed">
-          T&C News Hub advisory: Singur and Manjeera reservoir levels are being monitored. Residents are advised to avoid water wastage and follow official HMWSSB updates.
+          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
+        </p>
+        <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+          <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
+          <div class="flex justify-between"><span> Water Levels:</span> <b>VERY LOW</b></div>
+        </div>
+        <p class="text-[11px] italic" style="color: var(--text-sub);">
+          Public Advisory: Residents are advised to conserve water, avoid unnecessary wastage, and follow official updates from the Hyderabad Metropolitan Water Supply and Sewerage Board (HMWSSB). Stay informed. Save water. Stay prepared.
         </p>
       </div>
 
-      <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="closeAnnouncementModal(true)" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check-circle text-xs"></i> I Save Water
+        </button>
+      </div>
     </div>
   </div>
 
@@ -796,35 +869,6 @@
       <!-- LEFT PRIMARY PANEL -->
       <div class="lg:col-span-8 flex flex-col gap-6">
 
-        <!-- ==================== PERSISTENT PLAYER HOST (NEVER RE-PARENTED, ZERO-RELOAD) ==================== -->
-        <div id="persistent-player-hub" class="hidden relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-xl" style="border: 1px solid var(--border-color);">
-          
-          <!-- Draggable Top Bar in Floating PiP Mode -->
-          <div id="pip-top-bar" class="hidden absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-2.5 flex items-center justify-between text-white pointer-events-auto pip-drag-handle">
-            <div class="flex items-center gap-2 overflow-hidden pr-2">
-              <i class="fa-solid fa-grip-lines opacity-60 text-xs"></i>
-              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
-              <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <button type="button" onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Return to TV & Media">
-                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-              </button>
-              <button type="button" onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Video Stream Frame: Single Watermark Only (Native) -->
-          <iframe id="master-video-player" class="w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-          
-          <video id="file-video-player" class="hidden w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
-            <source src="videos/sample-video.mp4" type="video/mp4">
-            Your browser does not support HTML5 video playback.
-          </video>
-        </div>
-
         <!-- TAB 1: NEWS FEEDS -->
         <section id="view-news" class="flex flex-col gap-6">
           <div class="apple-card p-4">
@@ -870,7 +914,7 @@
         <section id="view-video" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-6 relative">
             
-            <div class="mb-5">
+            <div class="mb-4">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2.5">
                   <span id="live-indicator" class="live-dot" style="display: none;"></span>
@@ -880,16 +924,53 @@
                 <span class="text-[11px] text-[var(--text-sub)]"><i class="fa-solid fa-fingerprint text-blue-500 mr-1"></i>Tap thumbnail to stream</span>
               </div>
 
-              <!-- Inline Player Placeholder Screen -->
-              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
+              <!-- Default Prompt Screen when no channel is playing -->
+              <div id="text-view" class="p-8 rounded-2xl text-center border transition-all mb-4" style="background-color: var(--bg-sub); color: var(--text-sub); border-color: var(--border-color);">
                 <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
                   <i class="fa-solid fa-play"></i>
                 </div>
                 <h4 class="text-sm font-bold mb-1" style="color: var(--text-main);">Live Continuous Streaming</h4>
                 <p class="text-xs max-w-md mx-auto" style="color: var(--text-sub);">
-                  Select any channel below to play. The stream floats as an interactive Picture-in-Picture window if you navigate to other tabs.
+                  Select any channel below to play. The stream floats as an interactive, draggable &amp; resizable Picture-in-Picture window if you browse other tabs.
                 </p>
               </div>
+
+              <!-- ==================== PERSISTENT ZERO-RELOAD PLAYER ==================== -->
+              <!-- Sits inline here in TV & Media, and floats when browsing to Headlines/Radar/Jobs -->
+              <div id="persistent-player-hub" class="hidden">
+                
+                <!-- Floating Mini Drag & Action Bar (Visible in PiP mode) -->
+                <div id="pip-top-bar" class="hidden">
+                  <div class="flex items-center gap-2 overflow-hidden pr-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></span>
+                    <span id="pip-channel-title" class="text-[11px] font-bold truncate">Live Stream</span>
+                  </div>
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <button type="button" onclick="switchMainTab('video')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-[10px] transition-all" title="Expand to TV & Media">
+                      <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                    </button>
+                    <button type="button" onclick="stopAndCloseVideo()" class="w-6 h-6 rounded-full bg-white/20 hover:bg-red-600 flex items-center justify-center text-[10px] transition-all" title="Close Video">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Full-surface interactive drag touch layer in PiP mode -->
+                <div id="pip-drag-layer" class="pip-gesture-layer"></div>
+                <!-- Laptop corner resize handle -->
+                <div id="pip-resize-corner" class="pip-resize-handle"></div>
+
+                <!-- Video Frames: Clean Single Watermark Only -->
+                <div class="w-full h-full relative aspect-video" id="player-aspect-wrapper">
+                  <iframe id="master-video-player" class="w-full h-full border-0 block" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                  
+                  <video id="file-video-player" class="hidden w-full h-full object-contain" controls preload="metadata" playsinline webkit-playsinline>
+                    <source src="videos/sample-video.mp4" type="video/mp4">
+                    Your browser does not support HTML5 video playback.
+                  </video>
+                </div>
+              </div>
+
             </div>
 
             <!-- Apple-Style Smooth Sliding Carousel -->
@@ -1233,7 +1314,7 @@
       initMediaChannelsCarousel();
       initISSManifest();
       fetchLiveJobs();
-      initPiPDraggable();
+      initPiPAnyPointGestures();
 
       setInterval(fetchLiveAirTraffic, 35000);
       setInterval(fetchLiveCricketTicker, 30000);
@@ -1332,13 +1413,13 @@
       isMediaPlaying = true;
       textView.style.display = 'none';
 
-      // Reset inline layout styles
+      // Inline docked state in TV & Media
       playerHub.classList.remove('hidden', 'tc-floating-pip');
       playerHub.style.left = '';
       playerHub.style.top = '';
       playerHub.style.right = '';
       playerHub.style.bottom = '';
-      playerHub.style.width = '';
+      playerHub.style.width = '100%';
       playerHub.style.height = '';
 
       document.getElementById('pip-top-bar').classList.add('hidden');
@@ -1384,7 +1465,7 @@
       playerHub.style.top = '';
       playerHub.style.right = '';
       playerHub.style.bottom = '';
-      playerHub.style.width = '';
+      playerHub.style.width = '100%';
       playerHub.style.height = '';
 
       document.getElementById('pip-top-bar').classList.add('hidden');
@@ -1397,7 +1478,7 @@
       document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active-stream'));
     }
 
-    /* ==================== 4-TAB NAVIGATION & ZERO-RELOAD PIP TRANSITION ==================== */
+    /* ==================== ZERO-RELOAD PIP NAVIGATION ==================== */
     function switchMainTab(tab) {
       currentTab = tab;
 
@@ -1446,49 +1527,63 @@
       activeBtn.style.color = '#ffffff';
       activeBtn.style.boxShadow = '0 3px 10px rgba(0, 113, 227, 0.3)';
 
-      // Zero-Reload Persistent PiP Logic
+      // Never re-parent iframe; simply switch positioning styles
       if (isMediaPlaying) {
         if (tab === 'video') {
-          // Snap back into docked position inside TV & Media view
+          // Dock into TV & Media section
           playerHub.classList.remove('tc-floating-pip');
           playerHub.style.left = '';
           playerHub.style.top = '';
           playerHub.style.right = '';
           playerHub.style.bottom = '';
-          playerHub.style.width = '';
+          playerHub.style.width = '100%';
           playerHub.style.height = '';
           pipTopBar.classList.add('hidden');
         } else {
-          // Float smoothly over Headlines, Radar, or Jobs without reload
+          // Float smoothly across other tabs without stopping/reloading
           playerHub.classList.remove('hidden');
           playerHub.classList.add('tc-floating-pip');
           
           if (!playerHub.style.left && !playerHub.style.top) {
+            // Default YouTube PiP compact aspect
+            const defaultW = Math.min(260, window.innerWidth - 30);
+            const defaultH = Math.round(defaultW * (9 / 16));
             playerHub.style.right = '20px';
             playerHub.style.bottom = '20px';
-            playerHub.style.width = '330px';
-            playerHub.style.height = '186px';
+            playerHub.style.width = `${defaultW}px`;
+            playerHub.style.height = `${defaultH}px`;
           }
           pipTopBar.classList.remove('hidden');
         }
-      } else {
-        playerHub.classList.add('hidden');
       }
     }
 
-    /* ==================== INTERACTIVE DRAGGABLE PIP ENGINE ==================== */
-    function initPiPDraggable() {
+    /* ==================== FULL-SURFACE DRAGGABLE & RESIZABLE ENGINE ==================== */
+    function initPiPAnyPointGestures() {
       const pipHub = document.getElementById('persistent-player-hub');
-      const dragBar = document.getElementById('pip-top-bar');
-      if (!pipHub || !dragBar) return;
+      const dragLayer = document.getElementById('pip-drag-layer');
+      const resizeCorner = document.getElementById('pip-resize-corner');
+      if (!pipHub || !dragLayer) return;
 
       let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
+      let isResizing = false;
+      let startX, startY, initialLeft, initialTop, initialWidth, initialHeight;
+      let initialDistance = 0; // For mobile pinch-to-zoom
 
-      const onStart = (e) => {
+      // 1. ANY-POINT DRAG GESTURE
+      const onDragStart = (e) => {
         if (!pipHub.classList.contains('tc-floating-pip')) return;
-        // Do not drag if clicking control buttons
-        if (e.target.closest('button')) return;
+        
+        // Multi-touch pinch detection (Mobile resize)
+        if (e.touches && e.touches.length === 2) {
+          isDragging = false;
+          isResizing = true;
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          initialDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+          initialWidth = pipHub.offsetWidth;
+          return;
+        }
 
         isDragging = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1500,19 +1595,33 @@
         initialLeft = rect.left;
         initialTop = rect.top;
 
-        // Convert bottom/right CSS to exact left/top coordinates
+        // Normalize coordinates to left/top
         pipHub.style.right = 'auto';
         pipHub.style.bottom = 'auto';
         pipHub.style.left = `${initialLeft}px`;
         pipHub.style.top = `${initialTop}px`;
-
-        document.addEventListener('mousemove', onMove, { passive: false });
-        document.addEventListener('mouseup', onEnd);
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend', onEnd);
       };
 
-      const onMove = (e) => {
+      const onDragMove = (e) => {
+        if (!pipHub.classList.contains('tc-floating-pip')) return;
+
+        // Mobile pinch-to-resize gesture handler
+        if (isResizing && e.touches && e.touches.length === 2) {
+          e.preventDefault();
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          const currentDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+          const scale = currentDistance / (initialDistance || 1);
+          
+          let newWidth = Math.round(initialWidth * scale);
+          newWidth = Math.max(150, Math.min(newWidth, Math.min(720, window.innerWidth - 20)));
+          const newHeight = Math.round(newWidth * (9 / 16));
+
+          pipHub.style.width = `${newWidth}px`;
+          pipHub.style.height = `${newHeight}px`;
+          return;
+        }
+
         if (!isDragging) return;
         e.preventDefault();
 
@@ -1525,27 +1634,87 @@
         let newLeft = initialLeft + deltaX;
         let newTop = initialTop + deltaY;
 
-        // Viewport boundaries clamping
-        const maxLeft = window.innerWidth - pipHub.offsetWidth - 10;
-        const maxTop = window.innerHeight - pipHub.offsetHeight - 10;
+        const maxLeft = window.innerWidth - pipHub.offsetWidth - 8;
+        const maxTop = window.innerHeight - pipHub.offsetHeight - 8;
 
-        newLeft = Math.max(10, Math.min(newLeft, maxLeft));
-        newTop = Math.max(10, Math.min(newTop, maxTop));
+        newLeft = Math.max(8, Math.min(newLeft, maxLeft));
+        newTop = Math.max(8, Math.min(newTop, maxTop));
 
         pipHub.style.left = `${newLeft}px`;
         pipHub.style.top = `${newTop}px`;
       };
 
-      const onEnd = () => {
+      const onDragEnd = () => {
         isDragging = false;
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onEnd);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend', onEnd);
+        isResizing = false;
       };
 
-      dragBar.addEventListener('mousedown', onStart);
-      dragBar.addEventListener('touchstart', onStart, { passive: true });
+      dragLayer.addEventListener('mousedown', onDragStart);
+      dragLayer.addEventListener('touchstart', onDragStart, { passive: false });
+
+      // Double-click or double-tap anywhere on the player expands back to TV & Media
+      let lastTap = 0;
+      dragLayer.addEventListener('click', (e) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          switchMainTab('video');
+        }
+        lastTap = currentTime;
+      });
+
+      // 2. CORNER RESIZE GESTURE (Laptop mouse & precise drag)
+      const onResizeStart = (e) => {
+        e.stopPropagation();
+        isResizing = true;
+        isDragging = false;
+
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        startX = clientX;
+        initialWidth = pipHub.offsetWidth;
+
+        const rect = pipHub.getBoundingClientRect();
+        pipHub.style.right = 'auto';
+        pipHub.style.bottom = 'auto';
+        pipHub.style.left = `${rect.left}px`;
+        pipHub.style.top = `${rect.top}px`;
+
+        const onResizeMove = (ev) => {
+          if (!isResizing) return;
+          ev.preventDefault();
+
+          const curX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+          const deltaW = curX - startX;
+
+          // Allows YouTube PiP ultra-small size down to 150px
+          let newWidth = Math.max(150, Math.min(initialWidth + deltaW, Math.min(760, window.innerWidth - 20)));
+          let newHeight = Math.round(newWidth * (9 / 16));
+
+          pipHub.style.width = `${newWidth}px`;
+          pipHub.style.height = `${newHeight}px`;
+        };
+
+        const onResizeEnd = () => {
+          isResizing = false;
+          window.removeEventListener('mousemove', onResizeMove);
+          window.removeEventListener('mouseup', onResizeEnd);
+          window.removeEventListener('touchmove', onResizeMove);
+          window.removeEventListener('touchend', onResizeEnd);
+        };
+
+        window.addEventListener('mousemove', onResizeMove, { passive: false });
+        window.addEventListener('mouseup', onResizeEnd);
+        window.addEventListener('touchmove', onResizeMove, { passive: false });
+        window.addEventListener('touchend', onResizeEnd);
+      };
+
+      resizeCorner.addEventListener('mousedown', onResizeStart);
+      resizeCorner.addEventListener('touchstart', onResizeStart, { passive: false });
+
+      window.addEventListener('mousemove', onDragMove, { passive: false });
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
     }
 
     /* ==================== RADAR & OSINT MAP (NO WATERMARK OSM) ==================== */
@@ -1635,10 +1804,9 @@
         markerZoomAnimation: true
       }).setView([20.5937, 78.9629], 3);
 
-      // Official OpenStreetMap CDN Tile Service (Zero Watermark, 100% Free)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+      // Official OpenStreetMap Tile Service (Zero Watermark, 100% Free)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { 
         maxZoom: 19,
-        subdomains: ['a', 'b', 'c'],
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(leafletMap);
 
