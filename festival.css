@@ -1,34 +1,68 @@
+/* =========================================================
+   DIWALI FESTIVAL THEME (festival.css)
+   ========================================================= */
 
-
-/* ================= DIWALI THEME ================= */
-
-/* 1. Glowing Greeting Bar at the very top */
+/* 1. Festive Greeting Bar at Top */
 body::before {
-  content: "🪔 Shubh Deepawali! Wishing you peace and prosperity ✨";
+  content: "🪔 Happy Diwali! Wishing you and your family prosperity & joy ✨";
   display: block;
   background: linear-gradient(90deg, #880e4f, #b71c1c, #e65100, #ff8f00);
   color: #ffffff !important;
   text-align: center;
   padding: 10px 15px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 0.5px;
-  box-shadow: 0 3px 12px rgba(230, 81, 0, 0.4);
+  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.4);
+  position: relative;
+  z-index: 9999;
 }
 
-/* 2. Top Header / Navbar Border Accent */
-header, nav, .navbar, .header {
+/* 2. Header & Navigation Festive Accents */
+header, nav, .navbar, .nav-container, .header {
   border-bottom: 3px solid #ffb300 !important;
   box-shadow: 0 4px 15px rgba(255, 179, 0, 0.15) !important;
 }
 
-/* 3. News Badges / Breaking News */
-.breaking, .badge, .category, .tag, [class*="badge"], [class*="tag"] {
+/* 3. News Category Badges, Tags & Buttons */
+button, 
+.badge, 
+.category, 
+.tag, 
+.btn, 
+.breaking-badge,
+[class*="category"], 
+[class*="badge"], 
+[class*="tag"] {
   background-color: #b71c1c !important;
   color: #ffffff !important;
+  border-color: #ffd54f !important;
 }
 
-/* 4. Link Hover Colors */
-a:hover {
-  color: #ff6f00 !important;
+button:hover, .btn:hover {
+  background-color: #d84315 !important;
+}
+
+/* 4. Article Links & Headings Hover Glow */
+a:hover, 
+h1 a:hover, 
+h2 a:hover, 
+h3 a:hover {
+  color: #e65100 !important;
+  transition: color 0.2s ease-in-out;
+}
+
+/* 5. Article Cards Subtle Warm Glow */
+article, .card, .post, .news-card, [class*="card"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+article:hover, .card:hover, .post:hover, .news-card:hover {
+  box-shadow: 0 6px 16px rgba(255, 143, 0, 0.2) !important;
+  border-color: #ffca28 !important;
+}
+
+/* 6. Footer Festive Border */
+footer, .footer {
+  border-top: 3px solid #ffb300 !important;
 }
