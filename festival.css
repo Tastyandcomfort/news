@@ -1,70 +1,69 @@
 /* =========================================================
-   DASARA & VIJAYADASHAMI THEME (విజయదశమి & దసరా వేడుకలు)
+   EID & RAMZAN THEME (ఈద్ ముబారక్ & రంజాన్ వేడుకలు)
    ========================================================= */
 
-@keyframes jammiShimmer {
-  0%, 100% { filter: drop-shadow(0 0 4px #ffd700); }
-  50%      { filter: drop-shadow(0 0 12px #ffe082) drop-shadow(0 0 18px #ff6f00); }
+@keyframes crescentAura {
+  0%, 100% { filter: drop-shadow(0 0 5px #ffd700); }
+  50% { filter: drop-shadow(0 0 12px #ffe082) drop-shadow(0 0 18px #a5d6a7); }
 }
 
-/* 1. Golden Jammi Leaves & Bow-Arrow Motif Across Top */
+/* 1. Hanging Golden Crescent Moon & Stars Across the Top */
 body::before {
   content: "";
   display: block;
   width: 100%;
   height: 38px;
-  /* Embedded SVG: Gold Jammi Leaves & Royal Archery */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3Cpath d='M0,4 Q50,16 100,4' fill='none' stroke='%23d4af37' stroke-width='1.5'/%3E%3C!-- Golden Jammi Leaf 1 --%3E%3Cpath d='M25,6 Q15,18 25,30 Q35,18 25,6 Z' fill='%23d4af37'/%3E%3C!-- Golden Jammi Leaf 2 --%3E%3Cpath d='M75,6 Q65,18 75,30 Q85,18 75,6 Z' fill='%23d4af37'/%3E%3C!-- Central Bow & Arrow (ధనుస్సు) --%3E%3Cpath d='M44,22 Q50,10 56,22' fill='none' stroke='%23ffd700' stroke-width='2'/%3E%3Cline x1='50' y1='8' x2='50' y2='24' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='0' cy='4' r='3.5' fill='%23d4af37'/%3E%3Ccircle cx='100' cy='4' r='3.5' fill='%23d4af37'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Gold String --%3E%3Cpath d='M0,4 Q50,16 100,4' fill='none' stroke='%23d4af37' stroke-width='1.5'/%3E%3C!-- Crescent Moon --%3E%3Cpath d='M50,10 A7,7 0 1 0 57,24 A9,9 0 1 1 50,10 Z' fill='%23ffd700'/%3E%3C!-- Stars --%3E%3Ccircle cx='20' cy='18' r='2.5' fill='%23ffd54f'/%3E%3Ccircle cx='80' cy='18' r='2.5' fill='%23ffd54f'/%3E%3Ccircle cx='0' cy='4' r='3.5' fill='%23d4af37'/%3E%3Ccircle cx='100' cy='4' r='3.5' fill='%23d4af37'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-size: 85px 36px;
-  background-color: #3b020a;
+  background-color: #01281e;
   border-bottom: 1.5px solid #d4af37;
   position: relative;
   z-index: 100000;
 }
 
-/* 2. Vijayadashami Banner */
+/* 2. Eid Mubarak Banner */
 header::before, .header::before, .navbar::before {
-  content: "🏹 ✨ విజయదశమి & దసరా శుభాకాంక్షలు • HAPPY DASARA • విజయీభవ 🪔";
+  content: "🌙 ✨ ఈద్ ముబారక్ • EID MUBARAK • WISHING PEACE & PROSPERITY ✨ 🌙";
   display: block;
-  background: linear-gradient(90deg, #4a030d, #800020, #a30029, #800020, #4a030d);
+  background: linear-gradient(90deg, #003322 0%, #004d33 30%, #006644 50%, #004d33 70%, #003322 100%);
   color: #fff9e6 !important;
   text-align: center;
   padding: 9px 14px;
   font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  border-bottom: 2px solid #ffd54f;
-  animation: jammiShimmer 4s infinite ease-in-out;
+  border-bottom: 2px solid #d4af37;
+  animation: crescentAura 4s infinite ease-in-out;
 }
 
-/* 3. Header Royal Trim */
+/* 3. Navigation Emerald & Gold Accent */
 header, nav, .navbar, .header {
-  border-bottom: 3px double #d4af37 !important;
-  background-color: #fffdf9 !important;
+  border-bottom: 3px solid #d4af37 !important;
+  background-color: #f7fdf9 !important;
 }
 
-/* 4. Badges in Durga Crimson & Gold */
+/* 4. Badges in Deep Emerald & Gold Trim */
 button, .badge, .category, .tag, .breaking-badge,
 [class*="category"], [class*="badge"], [class*="tag"] {
-  background: linear-gradient(135deg, #800020, #a30029) !important;
-  color: #fff8e1 !important;
+  background: linear-gradient(135deg, #004d40, #005f52) !important;
+  color: #fffde7 !important;
   border: 1.5px solid #d4af37 !important;
   border-radius: 4px;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 button:hover, .btn:hover {
-  background: #a30029 !important;
+  background: #00796b !important;
 }
 
-/* 5. Article Cards Hover */
+/* 5. Article Cards Hover Glow */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #d4af37 !important;
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.22) !important;
+  border-color: #004d40 !important;
+  box-shadow: 0 8px 24px rgba(0, 77, 64, 0.22) !important;
   transform: translateY(-2px);
 }
 
 a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #a30029 !important;
+  color: #004d40 !important;
 }
