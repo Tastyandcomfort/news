@@ -1,0 +1,65 @@
+/* =========================================================
+   UGADI THEME (శ్రీ శోభకృత్/క్రోధి నామ సంవత్సర ఉగాది వేడుకలు)
+   ========================================================= */
+
+/* 1. Fresh Mangoes & Neem Leaves Garland Across Top */
+body::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 38px;
+  /* Embedded SVG: Raw Mangoes (పచ్చి మామిడికాయలు) & Leaves */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3Cpath d='M0,4 Q50,16 100,4' fill='none' stroke='%238d6e63' stroke-width='1.5'/%3E%3Cpath d='M25,8 Q15,22 25,32 Q35,22 25,8 Z' fill='%232e7d32'/%3E%3C!-- Raw Mango (మామిడి పిందె) --%3E%3Cpath d='M50,8 C40,12 40,26 50,32 C58,28 58,16 50,8 Z' fill='%237cb342' stroke='%2333691e' stroke-width='1'/%3E%3Cpath d='M75,8 Q65,22 75,32 Q85,22 75,8 Z' fill='%232e7d32'/%3E%3Ccircle cx='50' cy='6' r='3' fill='%23fbc02d'/%3E%3Ccircle cx='0' cy='4' r='3.5' fill='%23ff9800'/%3E%3Ccircle cx='100' cy='4' r='3.5' fill='%23ff9800'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 85px 36px;
+  background-color: #123315;
+  border-bottom: 2px solid #fbc02d;
+  position: relative;
+  z-index: 100000;
+}
+
+/* 2. Ugadi Shadvruchula Banner */
+header::before, .header::before, .navbar::before {
+  content: "🥭 🌸 ఉగాది పండుగ శుభాకాంక్షలు • HAPPY UGADI • షడ్రుచుల సమ్మేళనం 🌿 🍯";
+  display: block;
+  background: linear-gradient(90deg, #1b5e20, #2e7d32, #388e3c, #2e7d32, #1b5e20);
+  color: #fffde7 !important;
+  text-align: center;
+  padding: 9px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid #fbc02d;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 3. Navigation Spring Green Trim */
+header, nav, .navbar, .header {
+  border-bottom: 3px solid #689f38 !important;
+  background-color: #fafffa !important;
+}
+
+/* 4. Badges in Spring Leaf Green & Mango Gold */
+button, .badge, .category, .tag, .breaking-badge,
+[class*="category"], [class*="badge"], [class*="tag"] {
+  background: linear-gradient(135deg, #2e7d32, #388e3c) !important;
+  color: #ffffff !important;
+  border: 1px solid #c0ca33 !important;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+button:hover, .btn:hover {
+  background: #1b5e20 !important;
+}
+
+/* 5. Article Cards Hover */
+article:hover, .card:hover, .post:hover, .news-card:hover {
+  border-color: #689f38 !important;
+  box-shadow: 0 8px 24px rgba(56, 142, 60, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
+  color: #2e7d32 !important;
+}
