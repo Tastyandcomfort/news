@@ -1,0 +1,64 @@
+/* =========================================================
+   SANKRANTI & PONGAL THEME (సంక్రాంతి, భోగి & కనుమ పండుగ)
+   ========================================================= */
+
+/* 1. Sky Full of Kites (గాలిపటాల తోరణం) Across the Top */
+body::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Golden String --%3E%3Cpath d='M0,5 Q50,18 100,5' fill='none' stroke='%23ffb300' stroke-width='1.5'/%3E%3C!-- Kite 1 (Magenta) --%3E%3Cpolygon points='25,4 33,14 25,24 17,14' fill='%23e91e63'/%3E%3Cpolygon points='25,24 23,29 27,29' fill='%23ffeb3b'/%3E%3C!-- Kite 2 (Sun Orange) --%3E%3Cpolygon points='75,4 83,14 75,24 67,14' fill='%23ff6f00'/%3E%3Cpolygon points='75,24 73,29 77,29' fill='%2300e676'/%3E%3Ccircle cx='50' cy='12' r='4' fill='%23ffd700'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 85px 36px;
+  background-color: #024a70;
+  border-bottom: 2px solid #ffb300;
+  position: relative;
+  z-index: 100000;
+}
+
+/* 2. Sankranti Harvest Banner */
+header::before, .header::before, .navbar::before {
+  content: "🪁 🌾 మకర సంక్రాంతి, భోగి & కనుమ శుభాకాంక్షలు • HAPPY SANKRANTI 🪁 🌾";
+  display: block;
+  background: linear-gradient(90deg, #d84315, #f57c00, #ff8f00, #f57c00, #d84315);
+  color: #ffffff !important;
+  text-align: center;
+  padding: 9px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid #ffd54f;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* 3. Navigation Warm Sunshine Border */
+header, nav, .navbar, .header {
+  border-bottom: 3px solid #ff8f00 !important;
+  background-color: #fffdf9 !important;
+}
+
+/* 4. Badges in Harvest Saffron & Gold */
+button, .badge, .category, .tag, .breaking-badge,
+[class*="category"], [class*="badge"], [class*="tag"] {
+  background: linear-gradient(135deg, #e65100, #f57c00) !important;
+  color: #ffffff !important;
+  border: 1px solid #ffca28 !important;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+button:hover, .btn:hover {
+  background: #bf360c !important;
+}
+
+/* 5. Article Cards Hover (Sunshine Glow) */
+article:hover, .card:hover, .post:hover, .news-card:hover {
+  border-color: #ff8f00 !important;
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
+  color: #e65100 !important;
+}
