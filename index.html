@@ -3100,6 +3100,19 @@
     }
 
     window.addEventListener('load', initPushRegistration);
+
+
+
+// Safe Festive Theme Loader
+(function loadFestivalTheme() {
+  const festiveLink = document.createElement('link');
+  festiveLink.rel = 'stylesheet';
+  festiveLink.href = 'festival.css?t=' + new Date().getTime();
+  document.head.appendChild(festiveLink);
+})();
+
+    
+    
   </script>
 </body>
 </html>
