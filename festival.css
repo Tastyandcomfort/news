@@ -1,68 +1,76 @@
 /* =========================================================
-   DIWALI FESTIVAL THEME (festival.css)
+   THEME 1: ROYAL PALACE GOLD & CRIMSON
    ========================================================= */
 
-/* 1. Festive Greeting Bar at Top */
+/* Shimmer Animation for Greeting Banner */
+@keyframes goldShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 1. Shimmering Festive Greeting Bar */
 body::before {
-  content: "🪔 Happy Diwali! Wishing you and your family prosperity & joy ✨";
+  content: "🪔 शुभ दीपावली • Wishing You Joy, Peace & Prosperity • Happy Diwali 🪔";
   display: block;
-  background: linear-gradient(90deg, #880e4f, #b71c1c, #e65100, #ff8f00);
-  color: #ffffff !important;
+  background: linear-gradient(90deg, #4a000f, #800020, #d4af37, #800020, #4a000f);
+  background-size: 200% auto;
+  animation: goldShimmer 6s ease infinite;
+  color: #fff9e6 !important;
   text-align: center;
-  padding: 10px 15px;
+  padding: 11px 16px;
   font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.4);
+  font-size: 14.5px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 3px 15px rgba(212, 175, 55, 0.4);
   position: relative;
-  z-index: 9999;
+  z-index: 99999;
 }
 
-/* 2. Header & Navigation Festive Accents */
-header, nav, .navbar, .nav-container, .header {
-  border-bottom: 3px solid #ffb300 !important;
-  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.15) !important;
+/* 2. Top Header with Gold Filigree Underline */
+header, nav, .navbar, .header {
+  border-bottom: 3px double #d4af37 !important;
+  background: linear-gradient(to bottom, #ffffff, #fffdf7) !important;
+  box-shadow: 0 5px 20px rgba(128, 0, 32, 0.08) !important;
 }
 
-/* 3. News Category Badges, Tags & Buttons */
+/* 3. Category Tags & Badges (Rich Ruby Red + Gold Border) */
 button, 
 .badge, 
 .category, 
 .tag, 
-.btn, 
 .breaking-badge,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background-color: #b71c1c !important;
-  color: #ffffff !important;
-  border-color: #ffd54f !important;
+  background: linear-gradient(135deg, #800020, #a30029) !important;
+  color: #fff8e7 !important;
+  border: 1px solid #d4af37 !important;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(128, 0, 32, 0.25);
+  font-weight: 600;
 }
 
-button:hover, .btn:hover {
-  background-color: #d84315 !important;
-}
-
-/* 4. Article Links & Headings Hover Glow */
-a:hover, 
-h1 a:hover, 
-h2 a:hover, 
-h3 a:hover {
-  color: #e65100 !important;
-  transition: color 0.2s ease-in-out;
-}
-
-/* 5. Article Cards Subtle Warm Glow */
+/* 4. News Cards Hover Accent */
 article, .card, .post, .news-card, [class*="card"] {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid #f0e6d2 !important;
 }
 
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  box-shadow: 0 6px 16px rgba(255, 143, 0, 0.2) !important;
-  border-color: #ffca28 !important;
+  transform: translateY(-3px);
+  border-color: #d4af37 !important;
+  box-shadow: 0 10px 24px rgba(212, 175, 55, 0.22) !important;
 }
 
-/* 6. Footer Festive Border */
+/* 5. Headings & Hover State */
+a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
+  color: #b37d14 !important;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+}
+
+/* 6. Footer Royal Trim */
 footer, .footer {
-  border-top: 3px solid #ffb300 !important;
+  border-top: 3px double #d4af37 !important;
 }
