@@ -1,73 +1,64 @@
 /* =========================================================
-   REPUBLIC DAY THEME (భారత గణతంత్ర దినోత్సవం - జనవరి 26)
+   SANKRANTI & PONGAL THEME (సంక్రాంతి, భోగి & కనుమ పండుగ)
    ========================================================= */
 
-@keyframes chakraGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px #000080) drop-shadow(0 0 10px #ffd700); }
-  50%      { filter: drop-shadow(0 0 8px #000080) drop-shadow(0 0 18px #ffffff); }
-}
-
-/* 1. Ashoka Dharma Chakra (ధర్మ చక్రం) Ribbon Across Top */
+/* 1. Sky Full of Kites (గాలిపటాల తోరణం) Across the Top */
 body::before {
   content: "";
   display: block;
   width: 100%;
   height: 38px;
-  /* Embedded SVG: Navy Blue Dharma Chakra & Golden Constitution Filigree */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Golden Edge --%3E%3Cpath d='M0,4 L100,4' stroke='%23d4af37' stroke-width='1.5'/%3E%3C!-- 24-Spoke Ashoka Chakra --%3E%3Ccircle cx='50' cy='20' r='10' fill='%23ffffff' stroke='%23000080' stroke-width='2'/%3E%3Ccircle cx='50' cy='20' r='2' fill='%23000080'/%3E%3Cpath d='M50,10 L50,30 M40,20 L60,20 M43,13 L57,27 M43,27 L57,13' stroke='%23000080' stroke-width='1'/%3E%3C!-- Side Tricolor Dots --%3E%3Ccircle cx='15' cy='20' r='4' fill='%23ff9933'/%3E%3Ccircle cx='85' cy='20' r='4' fill='%23138808'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Golden String --%3E%3Cpath d='M0,5 Q50,18 100,5' fill='none' stroke='%23ffb300' stroke-width='1.5'/%3E%3C!-- Kite 1 (Magenta) --%3E%3Cpolygon points='25,4 33,14 25,24 17,14' fill='%23e91e63'/%3E%3Cpolygon points='25,24 23,29 27,29' fill='%23ffeb3b'/%3E%3C!-- Kite 2 (Sun Orange) --%3E%3Cpolygon points='75,4 83,14 75,24 67,14' fill='%23ff6f00'/%3E%3Cpolygon points='75,24 73,29 77,29' fill='%2300e676'/%3E%3Ccircle cx='50' cy='12' r='4' fill='%23ffd700'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-size: 85px 36px;
-  background-color: #030a1c;
-  border-bottom: 2px solid #000080;
+  background-color: #024a70;
+  border-bottom: 2px solid #ffb300;
   position: relative;
   z-index: 100000;
 }
 
-/* 2. Republic Day Patriotic Banner */
+/* 2. Sankranti Harvest Banner */
 header::before, .header::before, .navbar::before {
-  content: "🇮🇳 భారత గణతంత్ర దినోత్సవ శుభాకాంక్షలు • HAPPY REPUBLIC DAY • 26th JANUARY • సత్యమేవ జయతే 🇮🇳";
+  content: "🪁 🌾 మకర సంక్రాంతి, భోగి & కనుమ శుభాకాంక్షలు • HAPPY SANKRANTI 🪁 🌾";
   display: block;
-  background: linear-gradient(90deg, #020917 0%, #000080 30%, #001f5c 50%, #000080 70%, #020917 100%);
-  color: #fffde7 !important;
+  background: linear-gradient(90deg, #d84315, #f57c00, #ff8f00, #f57c00, #d84315);
+  color: #ffffff !important;
   text-align: center;
   padding: 9px 14px;
   font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  border-bottom: 2px solid #d4af37;
-  animation: chakraGlow 4s infinite ease-in-out;
+  border-bottom: 2px solid #ffd54f;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-/* 3. Navigation Royal Navy Underline */
+/* 3. Navigation Warm Sunshine Border */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #000080 !important;
-  background-color: #f7f9fd !important;
+  border-bottom: 3px solid #ff8f00 !important;
+  background-color: #fffdf9 !important;
 }
 
-/* 4. Badges in Dignified Navy Blue & Gold */
+/* 4. Badges in Harvest Saffron & Gold */
 button, .badge, .category, .tag, .breaking-badge,
 [class*="category"], [class*="badge"], [class*="tag"] {
-  background: linear-gradient(135deg, #000080, #001f5c) !important;
+  background: linear-gradient(135deg, #e65100, #f57c00) !important;
   color: #ffffff !important;
-  border: 1.5px solid #d4af37 !important;
+  border: 1px solid #ffca28 !important;
   border-radius: 4px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
+  font-weight: bold;
 }
 
 button:hover, .btn:hover {
-  background: #ff9933 !important;
-  color: #000080 !important;
-  border-color: #000080 !important;
+  background: #bf360c !important;
 }
 
-/* 5. Article Cards Hover */
+/* 5. Article Cards Hover (Sunshine Glow) */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #000080 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 128, 0.22) !important;
+  border-color: #ff8f00 !important;
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.25) !important;
   transform: translateY(-2px);
 }
 
 a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #000080 !important;
+  color: #e65100 !important;
 }
