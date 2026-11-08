@@ -1,0 +1,22 @@
+
+/* ================= HOLI THEME ================= */
+
+body::before {
+  content: "🎨 Happy Holi! Wishing you a joyful & colorful life 🌈";
+  display: block;
+  background: linear-gradient(90deg, #d81b60, #8e24aa, #0288d1, #43a047);
+  color: #ffffff !important;
+  text-align: center;
+  padding: 10px 15px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+header, nav, .navbar, .header {
+  border-bottom: 3px solid #d81b60 !important;
+}
+
+.breaking, .badge, .category, .tag, [class*="badge"], [class*="tag"] {
+  background-color: #d81b60 !important;
+  color: #ffffff !important;
+}
