@@ -1,114 +1,73 @@
 /* =========================================================
-   STANDALONE NEW YEAR THEME (నూతన సంవత్సర వేడుకలు)
+   REPUBLIC DAY THEME (భారత గణతంత్ర దినోత్సవం - జనవరి 26)
    ========================================================= */
 
-/* 1. Golden Confetti & Star Shimmer Animation */
-@keyframes newYearShimmer {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes chakraGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px #000080) drop-shadow(0 0 10px #ffd700); }
+  50%      { filter: drop-shadow(0 0 8px #000080) drop-shadow(0 0 18px #ffffff); }
 }
 
-@keyframes starGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px #ffd700) drop-shadow(0 0 10px #ffb300); }
-  50%      { filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 20px #ffd700); }
-}
-
-/* 2. Hanging Golden Stars & Starlight Ribbon Across Top */
+/* 1. Ashoka Dharma Chakra (ధర్మ చక్రం) Ribbon Across Top */
 body::before {
   content: "";
   display: block;
   width: 100%;
   height: 38px;
-  /* Embedded SVG: 24K Gold Stars & Midnight Confetti */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Golden Thread --%3E%3Cpath d='M0,4 Q50,16 100,4' fill='none' stroke='%23d4af37' stroke-width='1.5'/%3E%3C!-- Golden Star 1 --%3E%3Cpolygon points='25,8 27,15 34,15 28,19 30,26 25,22 20,26 22,19 16,15 23,15' fill='%23ffd700'/%3E%3C!-- Golden Star 2 --%3E%3Cpolygon points='75,8 77,15 84,15 78,19 80,26 75,22 70,26 72,19 66,15 73,15' fill='%23ffd700'/%3E%3C!-- Sparkle Dots --%3E%3Ccircle cx='50' cy='18' r='3.5' fill='%23ffffff'/%3E%3Ccircle cx='0' cy='4' r='3.5' fill='%23ffd700'/%3E%3Ccircle cx='100' cy='4' r='3.5' fill='%23ffd700'/%3E%3C/svg%3E");
+  /* Embedded SVG: Navy Blue Dharma Chakra & Golden Constitution Filigree */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3C!-- Golden Edge --%3E%3Cpath d='M0,4 L100,4' stroke='%23d4af37' stroke-width='1.5'/%3E%3C!-- 24-Spoke Ashoka Chakra --%3E%3Ccircle cx='50' cy='20' r='10' fill='%23ffffff' stroke='%23000080' stroke-width='2'/%3E%3Ccircle cx='50' cy='20' r='2' fill='%23000080'/%3E%3Cpath d='M50,10 L50,30 M40,20 L60,20 M43,13 L57,27 M43,27 L57,13' stroke='%23000080' stroke-width='1'/%3E%3C!-- Side Tricolor Dots --%3E%3Ccircle cx='15' cy='20' r='4' fill='%23ff9933'/%3E%3Ccircle cx='85' cy='20' r='4' fill='%23138808'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-size: 85px 36px;
-  background-color: #08090d;
-  border-bottom: 1.5px solid #d4af37;
+  background-color: #030a1c;
+  border-bottom: 2px solid #000080;
   position: relative;
   z-index: 100000;
 }
 
-/* 3. Midnight & Gold Metallic Celebration Banner */
+/* 2. Republic Day Patriotic Banner */
 header::before, .header::before, .navbar::before {
-  content: "🎉 🎆 నూతన సంవత్సర శుభాకాంక్షలు • HAPPY NEW YEAR • PEACE & PROSPERITY ✨ 🥂";
+  content: "🇮🇳 భారత గణతంత్ర దినోత్సవ శుభాకాంక్షలు • HAPPY REPUBLIC DAY • 26th JANUARY • సత్యమేవ జయతే 🇮🇳";
   display: block;
-  background: linear-gradient(90deg, #090a0f, #1e1b18, #d4af37, #1e1b18, #090a0f);
-  background-size: 250% 250%;
-  animation: newYearShimmer 7s ease infinite;
-  color: #ffffff !important;
+  background: linear-gradient(90deg, #020917 0%, #000080 30%, #001f5c 50%, #000080 70%, #020917 100%);
+  color: #fffde7 !important;
   text-align: center;
   padding: 9px 14px;
   font-size: 13.5px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.8px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 215, 0, 0.4);
-  border-bottom: 2px solid #ffd700;
+  border-bottom: 2px solid #d4af37;
+  animation: chakraGlow 4s infinite ease-in-out;
 }
 
-/* 4. Navigation & Header Gold Foil Trim */
+/* 3. Navigation Royal Navy Underline */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #d4af37 !important;
-  background-color: #fbfbfa !important;
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15) !important;
+  border-bottom: 3px solid #000080 !important;
+  background-color: #f7f9fd !important;
 }
 
-/* 5. Category Badges in Midnight Black with 24K Gold Border */
-button, 
-.badge, 
-.category, 
-.tag, 
-.breaking-badge,
-[class*="category"], 
-[class*="badge"], 
-[class*="tag"] {
-  background: linear-gradient(135deg, #12131a, #242533) !important;
-  color: #fff8e1 !important;
+/* 4. Badges in Dignified Navy Blue & Gold */
+button, .badge, .category, .tag, .breaking-badge,
+[class*="category"], [class*="badge"], [class*="tag"] {
+  background: linear-gradient(135deg, #000080, #001f5c) !important;
+  color: #ffffff !important;
   border: 1.5px solid #d4af37 !important;
   border-radius: 4px;
   font-weight: 700;
   letter-spacing: 0.4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 button:hover, .btn:hover {
-  background: linear-gradient(135deg, #d4af37, #b8860b) !important;
-  color: #000000 !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6) !important;
+  background: #ff9933 !important;
+  color: #000080 !important;
+  border-color: #000080 !important;
 }
 
-/* 6. Article Cards (Champagne Glow on Hover) */
-article, .card, .post, .news-card, [class*="card"] {
-  border: 1px solid #e8e3d5 !important;
-  transition: all 0.25s ease-in-out;
-}
-
+/* 5. Article Cards Hover */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #d4af37 !important;
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25) !important;
+  border-color: #000080 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 128, 0.22) !important;
   transform: translateY(-2px);
 }
 
-/* 7. Link Hover Accent */
 a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #b8860b !important;
-}
-
-/* 8. Footer Gold Accent */
-footer, .footer {
-  border-top: 3px solid #d4af37 !important;
-}
-
-/* 9. Mobile Screen Adjustments */
-@media (max-width: 600px) {
-  body::before {
-    height: 30px;
-    background-size: 70px 30px;
-  }
-  header::before, .header::before, .navbar::before {
-    font-size: 11.5px;
-    padding: 7px 8px;
-  }
+  color: #000080 !important;
 }
