@@ -1,33 +1,135 @@
+/* =========================================================
+   IMPERIAL FESTIVE THEME (రాచరిక దీపావళి శైలి)
+   ========================================================= */
 
-/* ================= DIWALI THEME ================= */
+/* 1. Gentle Lamp Sway & Flame Glow Animations */
+@keyframes swayLeft {
+  0%   { transform: rotate(-2.5deg); }
+  100% { transform: rotate(2.5deg); }
+}
 
-/* 1. Glowing Greeting Bar at the very top */
+@keyframes swayRight {
+  0%   { transform: rotate(2.5deg); }
+  100% { transform: rotate(-2.5deg); }
+}
+
+@keyframes flamePulse {
+  0%, 100% { filter: drop-shadow(0 0 6px #ffb300) drop-shadow(0 0 12px #ff6f00); opacity: 0.95; }
+  50%      { filter: drop-shadow(0 0 12px #ffe082) drop-shadow(0 0 20px #ff8f00); opacity: 1; }
+}
+
+/* 2. Left Hanging Brass Lamp (తూగు దీపం) */
+html::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 18px;
+  width: 55px;
+  height: 140px;
+  z-index: 999999;
+  pointer-events: none;
+  transform-origin: top center;
+  animation: swayLeft 4s ease-in-out infinite alternate, flamePulse 2.5s infinite;
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* Crisp Vector Hanging Brass Diya */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 140'%3E%3Cline x1='30' y1='0' x2='30' y2='90' stroke='%23d4af37' stroke-width='2' stroke-dasharray='4,2'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%23b8860b'/%3E%3Ccircle cx='30' cy='60' r='3' fill='%23b8860b'/%3E%3Ccircle cx='30' cy='90' r='4' fill='%23d4af37'/%3E%3Cpath d='M10,105 Q30,135 50,105 Q30,95 10,105 Z' fill='%23b8860b' stroke='%23ffd700' stroke-width='1.5'/%3E%3Cpath d='M30,82 Q36,95 30,102 Q24,95 30,82 Z' fill='%23ff9800'/%3E%3Ccircle cx='30' cy='97' r='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+/* 3. Right Hanging Brass Lamp (తూగు దీపం) */
+html::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 18px;
+  width: 55px;
+  height: 140px;
+  z-index: 999999;
+  pointer-events: none;
+  transform-origin: top center;
+  animation: swayRight 4.5s ease-in-out infinite alternate, flamePulse 2.5s infinite;
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* Crisp Vector Hanging Brass Diya */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 140'%3E%3Cline x1='30' y1='0' x2='30' y2='90' stroke='%23d4af37' stroke-width='2' stroke-dasharray='4,2'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%23b8860b'/%3E%3Ccircle cx='30' cy='60' r='3' fill='%23b8860b'/%3E%3Ccircle cx='30' cy='90' r='4' fill='%23d4af37'/%3E%3Cpath d='M10,105 Q30,135 50,105 Q30,95 10,105 Z' fill='%23b8860b' stroke='%23ffd700' stroke-width='1.5'/%3E%3Cpath d='M30,82 Q36,95 30,102 Q24,95 30,82 Z' fill='%23ff9800'/%3E%3Ccircle cx='30' cy='97' r='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+/* 4. Elegant Top Festive Bar (Polished Gold Border) */
 body::before {
-  content: "🪔 Shubh Deepawali! Wishing you peace and prosperity ✨";
+  content: "✨ దీపావళి మహోత్సవ శుభాకాంక్షలు • SHUBH DEEPAVALI • HAPPY DIWALI ✨";
   display: block;
-  background: linear-gradient(90deg, #880e4f, #b71c1c, #e65100, #ff8f00);
-  color: #ffffff !important;
+  background: linear-gradient(90deg, #300008 0%, #6e0d19 30%, #8b1322 50%, #6e0d19 70%, #300008 100%);
+  color: #fff9e6 !important;
   text-align: center;
-  padding: 10px 15px;
+  padding: 10px 14px;
+  font-size: 13.5px;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 12px rgba(230, 81, 0, 0.4);
+  letter-spacing: 1.2px;
+  border-bottom: 2px solid #d4af37;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.35);
+  position: relative;
+  z-index: 99998;
 }
 
-/* 2. Top Header / Navbar Border Accent */
+/* 5. Header / Navigation Antique Gold Underline */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #ffb300 !important;
-  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.15) !important;
+  border-bottom: 2px solid #d4af37 !important;
+  box-shadow: 0 4px 18px rgba(110, 13, 25, 0.08) !important;
+  background-color: #fffdfa !important;
 }
 
-/* 3. News Badges / Breaking News */
-.breaking, .badge, .category, .tag, [class*="badge"], [class*="tag"] {
-  background-color: #b71c1c !important;
-  color: #ffffff !important;
+/* 6. High-End Lacquer Crimson & Gold Category Badges */
+button, 
+.badge, 
+.category, 
+.tag, 
+.breaking-badge,
+[class*="category"], 
+[class*="badge"], 
+[class*="tag"] {
+  background: linear-gradient(135deg, #700b1a, #991326) !important;
+  color: #fff8e7 !important;
+  border: 1px solid #d4af37 !important;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(112, 11, 26, 0.25);
+  transition: all 0.2s ease;
 }
 
-/* 4. Link Hover Colors */
-a:hover {
-  color: #ff6f00 !important;
+button:hover, .btn:hover {
+  background: linear-gradient(135deg, #991326, #b81b32) !important;
+  border-color: #ffe082 !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* 7. News Article Cards (Warm Candlelight Elevation on Hover) */
+article, .card, .post, .news-card, [class*="card"] {
+  border: 1px solid #ebdcc4 !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+article:hover, .card:hover, .post:hover, .news-card:hover {
+  border-color: #d4af37 !important;
+  box-shadow: 0 10px 24px rgba(184, 134, 11, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+/* 8. Links Hover Accent */
+a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
+  color: #a81c2b !important;
+}
+
+/* 9. Mobile Screen Adjustments */
+@media (max-width: 650px) {
+  html::before, html::after {
+    width: 38px;
+    height: 100px;
+  }
+  html::before { left: 4px; }
+  html::after  { right: 4px; }
+  body::before {
+    font-size: 11.5px;
+    padding: 8px 10px;
+  }
 }
