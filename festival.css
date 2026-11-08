@@ -1,65 +1,58 @@
 /* =========================================================
-   AUTHENTIC INDIAN TRADITIONAL THEME (భారతీయ సాంప్రదాయ శైలి)
+   CLASSIC INDIAN HERITAGE THEME (రాచరిక సాంప్రదాయ శైలి)
    ========================================================= */
 
-/* 1. Terracotta Diya Flame Flicker */
-@keyframes vedicFlame {
+/* 1. Subtle, Dignified Flame Breathe (Steady & Classic) */
+@keyframes classicAura {
   0%, 100% {
-    transform: scale(1) translateY(0);
-    filter: drop-shadow(0 -2px 6px #ffb300) drop-shadow(0 0 10px #ff6f00);
+    box-shadow: 0 4px 18px rgba(179, 135, 40, 0.25);
   }
   50% {
-    transform: scale(1.1) translateY(-2px);
-    filter: drop-shadow(0 -3px 10px #ffe082) drop-shadow(0 0 16px #ff8f00);
+    box-shadow: 0 6px 26px rgba(179, 135, 40, 0.45);
   }
 }
 
-/* 2. Marigold Garlands (బంతిపూల దండ) & Terracotta Diyas (మట్టి ప్రమిదలు) */
+/* 2. Sacred Rice-Flour Kolam / Muggu Lace (సాంప్రదాయ ముగ్గు అంచు) */
 body::before {
   content: "";
   display: block;
   width: 100%;
-  height: 52px;
-  /* Authentic Hand-drawn SVG: Real Earthen Clay Diyas & Fresh Genda Phool */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='100' height='50'%3E%3C!-- Golden Thread --%3E%3Cpath d='M0,8 Q50,22 100,8' fill='none' stroke='%23c8963e' stroke-width='1.5'/%3E%3C!-- Marigold Flowers (బంతి పూలు) --%3E%3Ccircle cx='18' cy='12' r='8' fill='%23ff8f00'/%3E%3Ccircle cx='18' cy='12' r='4' fill='%23ffe082'/%3E%3Ccircle cx='50' cy='15' r='10' fill='%23e65100'/%3E%3Ccircle cx='50' cy='15' r='5' fill='%23ffb300'/%3E%3Ccircle cx='82' cy='12' r='8' fill='%23ff8f00'/%3E%3Ccircle cx='82' cy='12' r='4' fill='%23ffe082'/%3E%3C!-- Earthen Clay Diya (మట్టి ప్రమిద) --%3E%3Cpath d='M35,38 Q50,48 65,38 Q50,33 35,38 Z' fill='%238d3807' stroke='%235c2403' stroke-width='1'/%3E%3C!-- Oil Flame (దీపపు జ్యోతి) --%3E%3Cpath d='M50,23 Q55,31 50,35 Q45,31 50,23 Z' fill='%23ffb300'/%3E%3Ccircle cx='50' cy='32' r='2' fill='%23ffffff'/%3E%3C/svg%3E");
+  height: 24px;
+  /* Embedded Crisp Geometric Rice-Flour Kolam / Muggu Pattern */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' width='80' height='24'%3E%3Ccircle cx='10' cy='12' r='1.8' fill='%23ffffff' opacity='0.9'/%3E%3Ccircle cx='30' cy='12' r='1.8' fill='%23ffffff' opacity='0.9'/%3E%3Ccircle cx='50' cy='12' r='1.8' fill='%23ffffff' opacity='0.9'/%3E%3Ccircle cx='70' cy='12' r='1.8' fill='%23ffffff' opacity='0.9'/%3E%3Cpath d='M0,12 Q10,2 20,12 T40,12 T60,12 T80,12' fill='none' stroke='%23c5a059' stroke-width='1.3'/%3E%3Cpath d='M0,12 Q10,22 20,12 T40,12 T60,12 T80,12' fill='none' stroke='%23c5a059' stroke-width='1.3'/%3E%3Ccircle cx='20' cy='12' r='2.2' fill='%23dfba73'/%3E%3Ccircle cx='60' cy='2' r='2.2' fill='%23dfba73'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
-  background-size: 95px 50px;
-  background-color: #5c0914;
+  background-size: 70px 22px;
+  background-color: #3b0309;
+  border-bottom: 1px solid #c5a059;
   position: relative;
   z-index: 100000;
-  box-shadow: 0 4px 15px rgba(141, 56, 7, 0.4);
 }
 
-/* 3. Auspicious Blessing Ribbon (కుంకుమ & పసుపు అంచు) */
+/* 3. Regal Heritage Shloka & Deepavali Banner */
 header::before, .header::before, .navbar::before {
-  content: "🪔 దీపావళి శుభాకాంక్షలు • సర్వే జనాః సుఖినో భవంతు • SHUBH DEEPAVALI 🪔";
+  content: "॥ 🪔 ॐ శ్రీ మహాలక్ష్మ్యై నమః • దీపావళి శుభాకాంక్షలు • SHUBH DEEPAVALI 🪔 ॥";
   display: block;
-  background: linear-gradient(90deg, #780016, #a01a2e, #800020, #780016);
-  color: #fff8e1 !important;
+  background: linear-gradient(90deg, #3b0309, #5c0b15, #7a121f, #5c0b15, #3b0309);
+  color: #fbf5e8 !important;
   text-align: center;
-  padding: 8px 14px;
-  font-size: 14.5px;
+  padding: 9px 16px;
+  font-size: 13.5px;
   font-weight: 700;
-  letter-spacing: 0.8px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-  border-bottom: 2px solid #e5a93c;
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 1.2px;
+  border-bottom: 1.5px solid #c5a059;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(197, 160, 89, 0.3);
+  animation: classicAura 4s infinite ease-in-out;
 }
 
-/* 4. Silk Saree Zari Border under Navigation */
+/* 4. Navigation & Header with Antique Temple Gold Accent */
 header, nav, .navbar, .header {
-  border-bottom: 5px solid transparent !important;
-  border-image: repeating-linear-gradient(
-    45deg,
-    #c99738,
-    #c99738 8px,
-    #780016 8px,
-    #780016 16px
-  ) 10 !important;
-  background-color: #fffdf9 !important;
-  box-shadow: 0 4px 18px rgba(120, 0, 22, 0.1) !important;
+  border-bottom: 2px solid #c5a059 !important;
+  background-color: #fffefb !important;
+  box-shadow: 0 4px 15px rgba(59, 3, 9, 0.08) !important;
 }
 
-/* 5. Traditional Kumkum & Haldi Badges (కుంకుమ, పసుపు & బంగారు అంచు) */
+/* 5. Classic Regal Category Badges (Deep Crimson Silk + Gold Filigree) */
 button, 
 .badge, 
 .category, 
@@ -68,38 +61,43 @@ button,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background: #780016 !important;
-  color: #fff8e1 !important;
-  border: 1.5px solid #e5a93c !important;
-  border-radius: 2px;
-  font-weight: bold;
+  background: #5c0b15 !important;
+  color: #faf5e6 !important;
+  border: 1px solid #c5a059 !important;
+  border-radius: 3px;
+  font-family: Georgia, serif;
+  font-weight: 600;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(120, 0, 22, 0.3);
+  box-shadow: 0 2px 5px rgba(59, 3, 9, 0.2);
 }
 
 button:hover, .btn:hover {
-  background: #a01a2e !important;
-  border-color: #ffd54f !important;
+  background: #7a121f !important;
+  border-color: #dfba73 !important;
+  color: #ffffff !important;
 }
 
-/* 6. Traditional News Cards with Warm Earth-Tone Glow */
+/* 6. Heritage Editorial News Cards */
 article, .card, .post, .news-card, [class*="card"] {
-  border: 1px solid #f0dfc8 !important;
-  transition: all 0.3s ease;
+  border: 1px solid #eaddc7 !important;
+  background-color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* Steady Candlelight Aura on Hover */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #c99738 !important;
-  box-shadow: 0 6px 20px rgba(141, 56, 7, 0.2) !important;
+  border-color: #c5a059 !important;
+  box-shadow: 0 8px 24px rgba(197, 160, 89, 0.22) !important;
   transform: translateY(-2px);
 }
 
-/* 7. Headings Hover (Warm Saffron Gold) */
+/* 7. Classic Editorial Headings Hover (Warm Antique Saffron) */
 a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #b33900 !important;
+  color: #9c2a10 !important;
 }
 
-/* 8. Traditional Zari Pattern for Footer */
+/* 8. Traditional Zari Trim for Footer */
 footer, .footer {
-  border-top: 4px solid #c99738 !important;
+  border-top: 3px solid #c5a059 !important;
+  background-color: #fffefb;
 }
