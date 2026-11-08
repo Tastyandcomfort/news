@@ -1,50 +1,65 @@
 /* =========================================================
-   STYLE 2: NIGHT SKY FIREWORKS & CRACKERS FIESTA
+   AUTHENTIC INDIAN TRADITIONAL THEME (భారతీయ సాంప్రదాయ శైలి)
    ========================================================= */
 
-/* Fireworks Burst Animation */
-@keyframes crackerSky {
-  0% {
-    background-position: 0% 0%, 50% 50%, 100% 0%;
+/* 1. Terracotta Diya Flame Flicker */
+@keyframes vedicFlame {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 -2px 6px #ffb300) drop-shadow(0 0 10px #ff6f00);
   }
   50% {
-    background-position: 100% 50%, 0% 100%, 50% 0%;
-  }
-  100% {
-    background-position: 0% 0%, 50% 50%, 100% 0%;
+    transform: scale(1.1) translateY(-2px);
+    filter: drop-shadow(0 -3px 10px #ffe082) drop-shadow(0 0 16px #ff8f00);
   }
 }
 
-/* 1. Glowing Night Sky Header with Crackers Bursting */
+/* 2. Marigold Garlands (బంతిపూల దండ) & Terracotta Diyas (మట్టి ప్రమిదలు) */
 body::before {
-  content: "🎆 ✨ వెలుగుల పండుగ దీపావళి వేడుకలు • Happy Diwali 🎇 🪔";
+  content: "";
   display: block;
-  background: 
-    radial-gradient(circle, #ffeb3b 2px, transparent 3px) 0 0/60px 60px,
-    radial-gradient(circle, #ff5722 2px, transparent 3px) 30px 30px/70px 70px,
-    radial-gradient(circle, #00e676 2px, transparent 3px) 15px 45px/80px 80px,
-    linear-gradient(90deg, #0a0e17, #1a103c, #2b0938, #0a0e17);
-  animation: crackerSky 12s linear infinite;
-  color: #fff !important;
-  text-align: center;
-  padding: 13px 16px;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.6px;
-  text-shadow: 0 0 8px #ffeb3b, 0 0 16px #ff5722;
-  border-bottom: 2px solid #ffb300;
-  box-shadow: 0 4px 20px rgba(255, 152, 0, 0.4);
+  width: 100%;
+  height: 52px;
+  /* Authentic Hand-drawn SVG: Real Earthen Clay Diyas & Fresh Genda Phool */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='100' height='50'%3E%3C!-- Golden Thread --%3E%3Cpath d='M0,8 Q50,22 100,8' fill='none' stroke='%23c8963e' stroke-width='1.5'/%3E%3C!-- Marigold Flowers (బంతి పూలు) --%3E%3Ccircle cx='18' cy='12' r='8' fill='%23ff8f00'/%3E%3Ccircle cx='18' cy='12' r='4' fill='%23ffe082'/%3E%3Ccircle cx='50' cy='15' r='10' fill='%23e65100'/%3E%3Ccircle cx='50' cy='15' r='5' fill='%23ffb300'/%3E%3Ccircle cx='82' cy='12' r='8' fill='%23ff8f00'/%3E%3Ccircle cx='82' cy='12' r='4' fill='%23ffe082'/%3E%3C!-- Earthen Clay Diya (మట్టి ప్రమిద) --%3E%3Cpath d='M35,38 Q50,48 65,38 Q50,33 35,38 Z' fill='%238d3807' stroke='%235c2403' stroke-width='1'/%3E%3C!-- Oil Flame (దీపపు జ్యోతి) --%3E%3Cpath d='M50,23 Q55,31 50,35 Q45,31 50,23 Z' fill='%23ffb300'/%3E%3Ccircle cx='50' cy='32' r='2' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 95px 50px;
+  background-color: #5c0914;
   position: relative;
-  z-index: 99999;
+  z-index: 100000;
+  box-shadow: 0 4px 15px rgba(141, 56, 7, 0.4);
 }
 
-/* 2. Top Header Accent Glow */
+/* 3. Auspicious Blessing Ribbon (కుంకుమ & పసుపు అంచు) */
+header::before, .header::before, .navbar::before {
+  content: "🪔 దీపావళి శుభాకాంక్షలు • సర్వే జనాః సుఖినో భవంతు • SHUBH DEEPAVALI 🪔";
+  display: block;
+  background: linear-gradient(90deg, #780016, #a01a2e, #800020, #780016);
+  color: #fff8e1 !important;
+  text-align: center;
+  padding: 8px 14px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  border-bottom: 2px solid #e5a93c;
+}
+
+/* 4. Silk Saree Zari Border under Navigation */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #ff7043 !important;
-  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.15) !important;
+  border-bottom: 5px solid transparent !important;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #c99738,
+    #c99738 8px,
+    #780016 8px,
+    #780016 16px
+  ) 10 !important;
+  background-color: #fffdf9 !important;
+  box-shadow: 0 4px 18px rgba(120, 0, 22, 0.1) !important;
 }
 
-/* 3. News Badges with Sparkler Yellow/Orange Gradient */
+/* 5. Traditional Kumkum & Haldi Badges (కుంకుమ, పసుపు & బంగారు అంచు) */
 button, 
 .badge, 
 .category, 
@@ -53,26 +68,38 @@ button,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background: linear-gradient(135deg, #d84315, #f57c00) !important;
-  color: #ffffff !important;
+  background: #780016 !important;
+  color: #fff8e1 !important;
+  border: 1.5px solid #e5a93c !important;
+  border-radius: 2px;
   font-weight: bold;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(245, 124, 0, 0.4);
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(120, 0, 22, 0.3);
 }
 
-button:hover, .tag:hover {
-  background: linear-gradient(135deg, #f57c00, #ffb300) !important;
-  box-shadow: 0 0 12px rgba(255, 179, 0, 0.8) !important;
+button:hover, .btn:hover {
+  background: #a01a2e !important;
+  border-color: #ffd54f !important;
 }
 
-/* 4. Article Cards Glow */
+/* 6. Traditional News Cards with Warm Earth-Tone Glow */
+article, .card, .post, .news-card, [class*="card"] {
+  border: 1px solid #f0dfc8 !important;
+  transition: all 0.3s ease;
+}
+
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #ff7043 !important;
-  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.22) !important;
+  border-color: #c99738 !important;
+  box-shadow: 0 6px 20px rgba(141, 56, 7, 0.2) !important;
   transform: translateY(-2px);
 }
 
-/* 5. Link Hover with Neon Flame Color */
-a:hover {
-  color: #ff5722 !important;
+/* 7. Headings Hover (Warm Saffron Gold) */
+a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
+  color: #b33900 !important;
+}
+
+/* 8. Traditional Zari Pattern for Footer */
+footer, .footer {
+  border-top: 4px solid #c99738 !important;
 }
