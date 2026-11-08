@@ -1,61 +1,50 @@
 /* =========================================================
-   TELUGU DEEPAVALI THEME (తోరణాలు & దీపావళి వేడుకలు)
+   STYLE 2: NIGHT SKY FIREWORKS & CRACKERS FIESTA
    ========================================================= */
 
-/* 1. Sparkler & Cracker Light Animation */
-@keyframes sparklerGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px #ffeb3b) drop-shadow(0 0 10px #ff9800); }
-  50% { filter: drop-shadow(0 0 12px #ffff00) drop-shadow(0 0 22px #ff5722); }
+/* Fireworks Burst Animation */
+@keyframes crackerSky {
+  0% {
+    background-position: 0% 0%, 50% 50%, 100% 0%;
+  }
+  50% {
+    background-position: 100% 50%, 0% 100%, 50% 0%;
+  }
+  100% {
+    background-position: 0% 0%, 50% 50%, 100% 0%;
+  }
 }
 
-@keyframes crackerSparks {
-  0% { transform: translateY(0) scale(0.9); opacity: 0.8; }
-  50% { transform: translateY(-5px) scale(1.1); opacity: 1; }
-  100% { transform: translateY(0) scale(0.9); opacity: 0.8; }
-}
-
-/* 2. Mango Leaves & Marigold Toranam (మామిడి ఆకుల తోరణం) */
-body {
-  position: relative;
-}
-
+/* 1. Glowing Night Sky Header with Crackers Bursting */
 body::before {
-  content: "";
+  content: "🎆 ✨ వెలుగుల పండుగ దీపావళి వేడుకలు • Happy Diwali 🎇 🪔";
   display: block;
-  width: 100%;
-  height: 38px;
-  /* Embedded SVG: Fresh Green Mango Leaves with Orange Marigold Flowers */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36' width='100' height='36'%3E%3Cpath d='M0,4 Q50,18 100,4' fill='none' stroke='%238d6e63' stroke-width='2'/%3E%3Cpath d='M22,10 C14,20 18,32 22,35 C26,32 30,20 22,10 Z' fill='%232e7d32'/%3E%3Cpath d='M50,12 C41,22 45,34 50,36 C55,34 59,22 50,12 Z' fill='%231b5e20'/%3E%3Cpath d='M78,10 C70,20 74,32 78,35 C82,32 86,20 78,10 Z' fill='%232e7d32'/%3E%3Ccircle cx='50' cy='12' r='6' fill='%23ff9800'/%3E%3Ccircle cx='50' cy='12' r='3.5' fill='%23ffeb3b'/%3E%3Ccircle cx='0' cy='4' r='5' fill='%23ff9800'/%3E%3Ccircle cx='100' cy='4' r='5' fill='%23ff9800'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: 90px 36px;
-  position: sticky;
-  top: 0;
-  z-index: 100000;
-  pointer-events: none;
-}
-
-/* 3. Festive Telugu Greeting Bar */
-header::before, .header::before, .navbar::before {
-  content: "🪔 అందరికీ దీపావళి శుభాకాంక్షలు • Happy Deepavali! 🎆";
-  display: block;
-  background: linear-gradient(90deg, #880e4f, #b71c1c, #e65100, #ff8f00);
-  color: #ffffff !important;
+  background: 
+    radial-gradient(circle, #ffeb3b 2px, transparent 3px) 0 0/60px 60px,
+    radial-gradient(circle, #ff5722 2px, transparent 3px) 30px 30px/70px 70px,
+    radial-gradient(circle, #00e676 2px, transparent 3px) 15px 45px/80px 80px,
+    linear-gradient(90deg, #0a0e17, #1a103c, #2b0938, #0a0e17);
+  animation: crackerSky 12s linear infinite;
+  color: #fff !important;
   text-align: center;
-  padding: 8px 12px;
-  font-weight: 700;
-  font-size: 14.5px;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 10px rgba(230, 81, 0, 0.35);
+  padding: 13px 16px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.6px;
+  text-shadow: 0 0 8px #ffeb3b, 0 0 16px #ff5722;
+  border-bottom: 2px solid #ffb300;
+  box-shadow: 0 4px 20px rgba(255, 152, 0, 0.4);
+  position: relative;
+  z-index: 99999;
 }
 
-/* 4. Navigation & Header Traditional Trim */
+/* 2. Top Header Accent Glow */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #ffb300 !important;
-  box-shadow: 0 4px 14px rgba(255, 179, 0, 0.15) !important;
+  border-bottom: 3px solid #ff7043 !important;
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.15) !important;
 }
 
-/* 5. Category Badges & Breaking News (Deep Kumkum Red + Gold) */
+/* 3. News Badges with Sparkler Yellow/Orange Gradient */
 button, 
 .badge, 
 .category, 
@@ -64,55 +53,26 @@ button,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background: linear-gradient(135deg, #b71c1c, #d84315) !important;
+  background: linear-gradient(135deg, #d84315, #f57c00) !important;
   color: #ffffff !important;
-  border: 1px solid #ffca28 !important;
-  border-radius: 4px;
-  font-weight: 600;
+  font-weight: bold;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(245, 124, 0, 0.4);
 }
 
-/* 6. Article Cards (Warm Diya Hover Glow) */
-article, .card, .post, .news-card, [class*="card"] {
-  transition: all 0.25s ease-in-out;
+button:hover, .tag:hover {
+  background: linear-gradient(135deg, #f57c00, #ffb300) !important;
+  box-shadow: 0 0 12px rgba(255, 179, 0, 0.8) !important;
 }
 
+/* 4. Article Cards Glow */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #ffa000 !important;
-  box-shadow: 0 8px 22px rgba(255, 143, 0, 0.25) !important;
+  border-color: #ff7043 !important;
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.22) !important;
   transform: translateY(-2px);
 }
 
-/* 7. Link Hover Color */
-a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #e65100 !important;
-}
-
-/* 8. Floating Crackers Celebration Badge (కాకరపువ్వొత్తులు & చిచ్చుబుడ్లు) 
-   Appears in the bottom-right corner without blocking your articles */
-body::after {
-  content: "👧🏻🎆 🪔 చిచ్చుబుడ్లు & కాకరపువ్వొత్తుల సంబరాలు ✨";
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  background: rgba(183, 28, 28, 0.95);
-  color: #fff9c4 !important;
-  padding: 8px 14px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px #ffb300;
-  border: 1.5px solid #ffd54f;
-  z-index: 99998;
-  animation: sparklerGlow 2s infinite ease-in-out, crackerSparks 3s infinite ease-in-out;
-  pointer-events: none;
-}
-
-/* Mobile responsive adjustment */
-@media (max-width: 600px) {
-  body::after {
-    font-size: 11px;
-    padding: 6px 10px;
-    bottom: 10px;
-    right: 10px;
-  }
+/* 5. Link Hover with Neon Flame Color */
+a:hover {
+  color: #ff5722 !important;
 }
