@@ -1,41 +1,30 @@
 /* =========================================================
-   THEME 1: ROYAL PALACE GOLD & CRIMSON
+   THEME 3: SAFFRON & MARIGOLD CELEBRATION
    ========================================================= */
 
-/* Shimmer Animation for Greeting Banner */
-@keyframes goldShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* 1. Shimmering Festive Greeting Bar */
+/* 1. Festive Garland / Toran Style Border at Top */
 body::before {
-  content: "🪔 शुभ दीपावली • Wishing You Joy, Peace & Prosperity • Happy Diwali 🪔";
+  content: "🎉 ✨ Wishing You a Joyous & Prosperous Deepawali! ✨ 🎉";
   display: block;
-  background: linear-gradient(90deg, #4a000f, #800020, #d4af37, #800020, #4a000f);
-  background-size: 200% auto;
-  animation: goldShimmer 6s ease infinite;
-  color: #fff9e6 !important;
+  background: linear-gradient(135deg, #d84315, #f57c00, #fbc02d);
+  color: #ffffff !important;
   text-align: center;
-  padding: 11px 16px;
-  font-weight: 700;
-  font-size: 14.5px;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-  box-shadow: 0 3px 15px rgba(212, 175, 55, 0.4);
+  padding: 10px 12px;
+  font-weight: bold;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 3px 12px rgba(216, 67, 21, 0.35);
   position: relative;
   z-index: 99999;
 }
 
-/* 2. Top Header with Gold Filigree Underline */
+/* 2. Top Header Warm Amber Glow */
 header, nav, .navbar, .header {
-  border-bottom: 3px double #d4af37 !important;
-  background: linear-gradient(to bottom, #ffffff, #fffdf7) !important;
-  box-shadow: 0 5px 20px rgba(128, 0, 32, 0.08) !important;
+  border-bottom: 3px solid #f57c00 !important;
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.12) !important;
 }
 
-/* 3. Category Tags & Badges (Rich Ruby Red + Gold Border) */
+/* 3. Badges & Buttons (Marigold Yellow & Red) */
 button, 
 .badge, 
 .category, 
@@ -44,33 +33,23 @@ button,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background: linear-gradient(135deg, #800020, #a30029) !important;
-  color: #fff8e7 !important;
-  border: 1px solid #d4af37 !important;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(128, 0, 32, 0.25);
-  font-weight: 600;
+  background: #d84315 !important;
+  color: #fff !important;
+  border-radius: 3px;
+  font-weight: bold;
 }
 
-/* 4. News Cards Hover Accent */
-article, .card, .post, .news-card, [class*="card"] {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid #f0e6d2 !important;
+button:hover {
+  background: #bf360c !important;
 }
 
+/* 4. Article Cards Accent */
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  transform: translateY(-3px);
-  border-color: #d4af37 !important;
-  box-shadow: 0 10px 24px rgba(212, 175, 55, 0.22) !important;
+  border-color: #f57c00 !important;
+  box-shadow: 0 6px 18px rgba(245, 124, 0, 0.22) !important;
 }
 
-/* 5. Headings & Hover State */
-a:hover, h1 a:hover, h2 a:hover, h3 a:hover {
-  color: #b37d14 !important;
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
-}
-
-/* 6. Footer Royal Trim */
-footer, .footer {
-  border-top: 3px double #d4af37 !important;
+/* 5. Link Hover Color */
+a:hover {
+  color: #d84315 !important;
 }
