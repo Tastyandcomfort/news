@@ -1,0 +1,23 @@
+
+/* ================= CHRISTMAS & NEW YEAR ================= */
+
+body::before {
+  content: "❄️ Merry Christmas & Happy New Year! 🎄";
+  display: block;
+  background: linear-gradient(90deg, #1b5e20, #b71c1c);
+  color: #ffffff !important;
+  text-align: center;
+  padding: 10px 15px;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+header, nav, .navbar, .header {
+  border-bottom: 3px solid #c62828 !important;
+}
+
+.breaking, .badge, .category, .tag, [class*="badge"], [class*="tag"] {
+  background-color: #1b5e20 !important;
+  color: #ffffff !important;
+}
