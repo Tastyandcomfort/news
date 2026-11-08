@@ -1,30 +1,35 @@
 /* =========================================================
-   THEME 3: SAFFRON & MARIGOLD CELEBRATION
+   THEME 2: MIDNIGHT SKY & GOLDEN DIYAS
    ========================================================= */
 
-/* 1. Festive Garland / Toran Style Border at Top */
+/* Flame Pulse Animation */
+@keyframes flameGlow {
+  0%, 100% { box-shadow: 0 2px 14px rgba(255, 167, 38, 0.5); }
+  50% { box-shadow: 0 3px 22px rgba(255, 213, 79, 0.9); }
+}
+
+/* 1. Midnight Banner with Flame Glow */
 body::before {
-  content: "🎉 ✨ Wishing You a Joyous & Prosperous Deepawali! ✨ 🎉";
+  content: "✨ 🪔 Light over Darkness • Hope over Despair • Happy Diwali 🪔 ✨";
   display: block;
-  background: linear-gradient(135deg, #d84315, #f57c00, #fbc02d);
+  background: linear-gradient(90deg, #0d1b2a, #1b263b, #ff8f00, #1b263b, #0d1b2a);
   color: #ffffff !important;
   text-align: center;
-  padding: 10px 12px;
-  font-weight: bold;
-  font-size: 15px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  box-shadow: 0 3px 12px rgba(216, 67, 21, 0.35);
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.8px;
+  animation: flameGlow 2.5s infinite ease-in-out;
   position: relative;
   z-index: 99999;
 }
 
-/* 2. Top Header Warm Amber Glow */
+/* 2. Top Header Accent */
 header, nav, .navbar, .header {
-  border-bottom: 3px solid #f57c00 !important;
-  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.12) !important;
+  border-bottom: 2px solid #ff9800 !important;
 }
 
-/* 3. Badges & Buttons (Marigold Yellow & Red) */
+/* 3. Glowing Category Badges */
 button, 
 .badge, 
 .category, 
@@ -33,23 +38,29 @@ button,
 [class*="category"], 
 [class*="badge"], 
 [class*="tag"] {
-  background: #d84315 !important;
-  color: #fff !important;
-  border-radius: 3px;
+  background: #ff8f00 !important;
+  color: #0d1b2a !important;
   font-weight: bold;
+  border-radius: 20px;
+  border: none !important;
 }
 
-button:hover {
-  background: #bf360c !important;
+button:hover, .tag:hover {
+  background: #ffa726 !important;
+  box-shadow: 0 0 12px rgba(255, 167, 38, 0.6) !important;
 }
 
-/* 4. Article Cards Accent */
+/* 4. Cards with Warm Diya Aura on Hover */
+article, .card, .post, .news-card, [class*="card"] {
+  transition: all 0.25s ease;
+}
+
 article:hover, .card:hover, .post:hover, .news-card:hover {
-  border-color: #f57c00 !important;
-  box-shadow: 0 6px 18px rgba(245, 124, 0, 0.22) !important;
+  box-shadow: 0 8px 25px rgba(255, 143, 0, 0.2) !important;
+  border-color: #ffb74d !important;
 }
 
-/* 5. Link Hover Color */
+/* 5. Link Hover */
 a:hover {
-  color: #d84315 !important;
+  color: #e65100 !important;
 }
