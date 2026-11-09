@@ -14,14 +14,41 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
-      });
-    }
-  </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js', {
+          // Bypasses GitHub Pages HTTP cache for the worker script:
+          updateViaCache: 'none'
+        });
 
+        // 1. Force update check immediately when the app launches
+        registration.update();
+
+        // 2. Force check every time the user unlocks their phone or re-opens the app
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            registration.update();
+          }
+        });
+
+        // 3. When a new version is installed and takes over, refresh so the user sees new features immediately
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+
+      } catch (err) {
+        console.error('Service Worker registration error:', err);
+      }
+    });
+  }
+</script>
+  
   <!-- Fast Network Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
