@@ -1407,6 +1407,19 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
     }
+    function cleanAgencyText(str, allowBreaks = true) {
+      if (!str) return '';
+      const plain = String(str)
+        .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      const safe = escapeHtml(plain);
+      return allowBreaks ? safe.replace(/\n/g, '<br>') : safe.replace(/\n+/g, ' ');
+    }
 
     function getLocalDateStr(date = new Date()) {
       const y = date.getFullYear();
@@ -2171,9 +2184,22 @@
       }).join('');
     }
 
-    function openWantedDossier(id) {
+function openWantedDossier(id) {
       const item = wantedDataset.find(x => x.id === id);
       if (!item) return;
+
+      const cleanAgencyText = (str) => {
+        if (!str) return '';
+        const plain = String(str)
+          .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&nbsp;/gi, ' ')
+          .replace(/[ \t]+/g, ' ')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        return escapeHtml(plain).replace(/\n/g, '<br>');
+      };
 
       document.getElementById('dossier-modal-title').textContent = item.name;
       document.getElementById('dossier-modal-dept').textContent = `${item.department} • ${item.noticeType || 'OFFICIAL NOTICE'}`;
@@ -2200,9 +2226,9 @@
 
         <div class="p-3.5 rounded-2xl border space-y-1.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <p class="font-bold text-red-500"><i class="fa-solid fa-scale-balanced mr-1.5"></i>Charges &amp; Official Details</p>
-          <p class="leading-relaxed" style="color: var(--text-main);">${escapeHtml(item.charges)}</p>
-          ${item.description && item.description !== item.charges ? `<p class="leading-relaxed pt-1" style="color: var(--text-sub);">${escapeHtml(item.description)}</p>` : ''}
-          ${item.caution ? `<p class="leading-relaxed pt-1 text-amber-500 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Caution: ${escapeHtml(item.caution)}</p>` : ''}
+          <p class="leading-relaxed" style="color: var(--text-main);">${cleanAgencyText(item.charges)}</p>
+          ${item.description && item.description !== item.charges ? `<p class="leading-relaxed pt-1" style="color: var(--text-sub);">${cleanAgencyText(item.description)}</p>` : ''}
+          ${item.caution ? `<p class="leading-relaxed pt-1 text-amber-500 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Caution: ${cleanAgencyText(item.caution)}</p>` : ''}
         </div>
 
         <div class="p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]" style="background-color: var(--bg-sub); border-color: var(--border-color);">
@@ -2218,7 +2244,7 @@
 
       document.getElementById('wanted-dossier-modal').classList.remove('hidden');
     }
-
+    
     function closeWantedDossier() {
       document.getElementById('wanted-dossier-modal').classList.add('hidden');
     }
