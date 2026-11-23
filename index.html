@@ -1855,10 +1855,13 @@
     }
 
     /* ==================== OFFICIAL MOST WANTED ENGINE ==================== */
-    function formatAgencyTimestamp(isoStr) {
-      if (!isoStr) return 'Active Notice (Date N/A)';
+ function formatAgencyTimestamp(isoStr) {
+      if (!isoStr) return 'Not Published by Agency';
+      if (typeof isoStr === 'string' && (isoStr.startsWith('Notice Year:') || isoStr.startsWith('Case Year:'))) {
+        return isoStr;
+      }
       const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return escapeHtml(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
 
       const day = d.getDate();
       const getOrdinal = (n) => {
@@ -1881,12 +1884,12 @@
 
     function getWantedFreshnessBadge(publishedAt, updatedAt) {
       const refStr = updatedAt || publishedAt;
-      if (!refStr) {
-        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE NOTICE</span>';
+      if (!refStr || (typeof refStr === 'string' && (refStr.startsWith('Notice Year:') || refStr.startsWith('Case Year:')))) {
+        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">OFFICIAL ACTIVE NOTICE</span>';
       }
       const refDate = new Date(refStr);
       if (isNaN(refDate.getTime())) {
-        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE NOTICE</span>';
+        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">OFFICIAL ACTIVE NOTICE</span>';
       }
       const diffDays = (Date.now() - refDate.getTime()) / (1000 * 60 * 60 * 24);
       if (diffDays <= 30) {
@@ -1897,7 +1900,7 @@
       }
       return '<span class="bg-slate-500/15 text-slate-400 border border-slate-500/25 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE LONG-TERM</span>';
     }
-
+    
     function normalizeFbiDirectItem(item) {
       const offices = Array.isArray(item.field_offices) && item.field_offices.length > 0
         ? item.field_offices.map(o => o.charAt(0).toUpperCase() + o.slice(1)).join(', ')
