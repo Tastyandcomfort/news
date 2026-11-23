@@ -358,6 +358,46 @@
     .live-dot-red { width: 7px; height: 7px; background-color: #ff3b30; border-radius: 50%; display: inline-block; animation: pulseRed 1.5s infinite ease-in-out; }
     .live-dot-blue { width: 7px; height: 7px; background-color: #0071e3; border-radius: 50%; display: inline-block; animation: pulseBlue 1.5s infinite ease-in-out; }
 
+
+
+
+   /* NETWORK-AWARE PULSING LIGHTS */
+    body.net-offline .pulse-gold,
+    body.net-offline .live-dot,
+    body.net-offline .live-dot-red,
+    body.net-offline .live-dot-blue {
+      animation: none !important;
+      background-color: #8e8e93 !important;
+      box-shadow: none !important;
+      opacity: 0.45 !important;
+    }
+
+    body.net-slow .pulse-gold,
+    body.net-slow .live-dot,
+    body.net-slow .live-dot-red,
+    body.net-slow .live-dot-blue {
+      background-color: #f59e0b !important;
+      animation-duration: 3.6s !important;
+      opacity: 0.8 !important;
+    }
+
+    body.net-normal .pulse-gold,
+    body.net-normal .live-dot,
+    body.net-normal .live-dot-red,
+    body.net-normal .live-dot-blue {
+      animation-duration: 1.8s !important;
+    }
+
+    body.net-fast .pulse-gold,
+    body.net-fast .live-dot,
+    body.net-fast .live-dot-red,
+    body.net-fast .live-dot-blue {
+      animation-duration: 0.95s !important;
+    }
+    
+
+
+    
     .desktop-scrollbar::-webkit-scrollbar { height: 5px; display: block; }
     .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
     .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
@@ -802,6 +842,15 @@
             </div>
           </div>
 
+          
+          <button onclick="manualHubRefresh()" id="global-refresh-btn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all active:scale-90" style="color: var(--text-main);" title="Refresh all live feeds & check connection">
+              <i id="global-refresh-icon" class="fa-solid fa-arrows-rotate text-xs text-blue-500"></i>
+              <span id="net-speed-label" class="text-[10px]">Syncing</span>
+            </button>
+
+            <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
+          
           <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm relative z-50" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
             <div class="relative" id="lang-menu-wrapper">
               <button onclick="toggleLangDropdown(event)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
@@ -1590,6 +1639,13 @@
       setInterval(fetchLiveCricketTicker, 25000);
       setInterval(fetchWantedAlerts, 1800000); // Auto-checks every 30 minutes
       
+      checkNetworkStatus();
+      window.addEventListener('online', checkNetworkStatus);
+      window.addEventListener('offline', checkNetworkStatus);
+      if (navigator.connection) {
+        navigator.connection.addEventListener('change', checkNetworkStatus);
+      }
+      setInterval(checkNetworkStatus, 15000);
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
         if (wrapper && !wrapper.contains(e.target)) {
