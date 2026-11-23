@@ -1,29 +1,49 @@
 // api/news.js
 export default async function handler(req, res) {
-  // Set CORS headers so your GitHub Pages frontend can access this API[cite: 3]
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
 
   const { scope } = req.query;
 
-  // Map requested scope to Google News RSS feeds[cite: 3]
-  const rssUrls = {
-    local: "https://news.google.com/rss/search?q=Telangana+Hyderabad&hl=en-IN&gl=IN&ceid=IN:en",
-    india: "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en",
-    world: "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en"
+  const rssMap = {
+    local: [
+      'https://www.thehindu.com/news/national/telangana/feeder/default.rss',
+      'https://www.thehindu.com/news/cities/Hyderabad/feeder/default.rss'
+    ],
+    national: [
+      'https://www.thehindu.com/news/national/feeder/default.rss'
+    ],
+    india: [
+      'https://www.thehindu.com/news/national/feeder/default.rss'
+    ],
+    world: [
+      'https://www.france24.com/en/rss',
+      'https://feeds.bbci.co.uk/news/world/rss.xml'
+    ]
   };
 
-  const targetUrl = rssUrls[scope] || rssUrls.local;
+  const candidates = rssMap[scope] || rssMap.local;
 
-  try {
-    // Fetch raw RSS XML from Google News[cite: 3]
-    const response = await fetch(targetUrl);
-    const xmlText = await response.text();
+  for (const targetUrl of candidates) {
+    try {
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; TCNewsHub/1.0)',
+          'Accept': 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8'
+        }
+      });
 
-    // Send XML back with 200 OK status[cite: 3]
-    res.status(200).send(xmlText);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch news feed" });
+      if (!response.ok) continue;
+      const xmlText = await response.text();
+      if (!xmlText.includes('<item')) continue;
+
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      return res.status(200).send(xmlText);
+    } catch {
+      // Try next official feed
+    }
   }
+
+  return res.status(502).json({ error: 'Failed to fetch news feed' });
 }
