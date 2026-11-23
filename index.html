@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,40 +15,35 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <!-- Service Worker Registration -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-      try {
-        const registration = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js', {
-          // Bypasses GitHub Pages HTTP cache for the worker script:
-          updateViaCache: 'none'
-        });
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js', {
+            updateViaCache: 'none'
+          });
 
-        // 1. Force update check immediately when the app launches
-        registration.update();
+          registration.update();
 
-        // 2. Force check every time the user unlocks their phone or re-opens the app
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            registration.update();
-          }
-        });
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              registration.update();
+            }
+          });
 
-        // 3. When a new version is installed and takes over, refresh so the user sees new features immediately
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!refreshing) {
-            refreshing = true;
-            window.location.reload();
-          }
-        });
-
-      } catch (err) {
-        console.error('Service Worker registration error:', err);
-      }
-    });
-  }
-</script>
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          });
+        } catch (err) {
+          console.error('Service Worker registration error:', err);
+        }
+      });
+    }
+  </script>
   
   <!-- Fast Network Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
@@ -176,7 +172,7 @@
       transform: translate3d(0, 0, 0);
     }
 
-    /* 🚀 IN-APP PiP OVERLAY (FREE-FORM RESIZABLE & ACCELERATED) */
+    /* IN-APP PiP OVERLAY */
     .pip-floating-mode {
       position: fixed !important;
       z-index: 999999 !important;
@@ -195,7 +191,6 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    /* 🚀 TOUCH/MOUSE SHIELD: Blocks iframe hijacking in Move Mode */
     #pip-touch-barrier {
       display: none;
       position: absolute;
@@ -207,14 +202,9 @@
       -webkit-user-select: none;
       background: rgba(0, 113, 227, 0.05);
     }
-    #pip-touch-barrier:active {
-      cursor: grabbing;
-    }
-    .pip-floating-mode #pip-touch-barrier {
-      display: block;
-    }
+    #pip-touch-barrier:active { cursor: grabbing; }
+    .pip-floating-mode #pip-touch-barrier { display: block; }
 
-    /* 🚀 ERGONOMIC 2-BUTTON CONTROLS (TOP RIGHT X & MIDDLE RIGHT REACH AREA) */
     .pip-btn-close {
       display: none;
       position: absolute;
@@ -235,15 +225,9 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .pip-btn-close:active {
-      transform: scale(0.88);
-      background: #ff3b30;
-    }
-    .pip-floating-mode .pip-btn-close {
-      display: flex;
-    }
+    .pip-btn-close:active { transform: scale(0.88); background: #ff3b30; }
+    .pip-floating-mode .pip-btn-close { display: flex; }
 
-    /* Middle-Right Ergonomic Finger Reach Lock Toggle Button */
     .pip-btn-lock {
       display: none;
       position: absolute;
@@ -264,14 +248,9 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
       transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .pip-btn-lock:active {
-      transform: translateY(-50%) scale(0.88);
-    }
-    .pip-floating-mode .pip-btn-lock {
-      display: flex;
-    }
+    .pip-btn-lock:active { transform: translateY(-50%) scale(0.88); }
+    .pip-floating-mode .pip-btn-lock { display: flex; }
 
-    /* 🚀 FREE RESIZE CORNER GRIPS */
     .pip-resize-handle {
       display: none;
       position: absolute;
@@ -280,33 +259,19 @@
       z-index: 60;
       touch-action: none;
     }
-    .pip-floating-mode .pip-resize-handle {
-      display: block;
-    }
+    .pip-floating-mode .pip-resize-handle { display: block; }
     .pip-handle-se {
-      bottom: 0;
-      right: 0;
-      cursor: nwse-resize;
+      bottom: 0; right: 0; cursor: nwse-resize;
       background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.7) 50%);
       border-bottom-right-radius: 14px;
     }
     .pip-handle-sw {
-      bottom: 0;
-      left: 0;
-      cursor: nesw-resize;
+      bottom: 0; left: 0; cursor: nesw-resize;
       background: linear-gradient(225deg, transparent 50%, rgba(255,255,255,0.7) 50%);
       border-bottom-left-radius: 14px;
     }
-    .pip-handle-ne {
-      top: 0;
-      right: 0;
-      cursor: nesw-resize;
-    }
-    .pip-handle-nw {
-      top: 0;
-      left: 0;
-      cursor: nwse-resize;
-    }
+    .pip-handle-ne { top: 0; right: 0; cursor: nesw-resize; }
+    .pip-handle-nw { top: 0; left: 0; cursor: nwse-resize; }
 
     .logo-anchored-pill {
       background: rgba(0, 113, 227, 0.95);
@@ -332,28 +297,10 @@
       transition: all 0.3s ease;
     }
 
-    .solar-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sf-solar-icon {
-      width: 17px;
-      height: 17px;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .sf-sunrise {
-      color: #ff9f0a;
-      filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5));
-    }
-
-    .sf-sunset {
-      color: #ff453a;
-      filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5));
-    }
+    .solar-item { display: flex; align-items: center; gap: 6px; }
+    .sf-solar-icon { width: 17px; height: 17px; display: inline-block; flex-shrink: 0; }
+    .sf-sunrise { color: #ff9f0a; filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.5)); }
+    .sf-sunset { color: #ff453a; filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.5)); }
 
     .solar-time {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
@@ -363,11 +310,7 @@
       letter-spacing: -0.2px;
     }
 
-    .solar-divider {
-      width: 1px;
-      height: 11px;
-      background: var(--border-color);
-    }
+    .solar-divider { width: 1px; height: 11px; background: var(--border-color); }
 
     .leaflet-apple-legend {
       background: var(--bg-card) !important;
@@ -383,115 +326,45 @@
       pointer-events: auto;
     }
     .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 5px;
-      cursor: pointer;
-      padding: 3px 6px;
-      border-radius: 8px;
-      transition: background 0.2s;
+      display: flex; align-items: center; gap: 8px; margin-top: 5px;
+      cursor: pointer; padding: 3px 6px; border-radius: 8px; transition: background 0.2s;
     }
-    .legend-item:hover {
-      background: var(--bg-sub);
-    }
+    .legend-item:hover { background: var(--bg-sub); }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     
-    /* 🚀 ACTIVE PULSE LIGHT ANIMATIONS */
+    /* ACTIVE PULSE LIGHT ANIMATIONS */
     @keyframes pulseGold {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.85);
-      }
-      50% {
-        transform: scale(1.22);
-        box-shadow: 0 0 12px 5px rgba(255, 204, 0, 0.45);
-      }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.85); }
+      50% { transform: scale(1.22); box-shadow: 0 0 12px 5px rgba(255, 204, 0, 0.45); }
     }
-
     @keyframes pulseGreen {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.85);
-      }
-      50% {
-        transform: scale(1.25);
-        box-shadow: 0 0 10px 4px rgba(52, 199, 89, 0.5);
-      }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.85); }
+      50% { transform: scale(1.25); box-shadow: 0 0 10px 4px rgba(52, 199, 89, 0.5); }
     }
-
     @keyframes pulseRed {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.85);
-      }
-      50% {
-        transform: scale(1.25);
-        box-shadow: 0 0 10px 4px rgba(255, 59, 48, 0.5);
-      }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.85); }
+      50% { transform: scale(1.25); box-shadow: 0 0 10px 4px rgba(255, 59, 48, 0.5); }
     }
-
     @keyframes pulseBlue {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.85);
-      }
-      50% {
-        transform: scale(1.25);
-        box-shadow: 0 0 10px 4px rgba(0, 113, 227, 0.5);
-      }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.85); }
+      50% { transform: scale(1.25); box-shadow: 0 0 10px 4px rgba(0, 113, 227, 0.5); }
     }
 
-    .pulse-gold {
-      background-color: #ffcc00;
-      animation: pulseGold 2s infinite ease-in-out;
-    }
+    .pulse-gold { background-color: #ffcc00; animation: pulseGold 2s infinite ease-in-out; }
+    .live-dot { width: 8px; height: 8px; background-color: #34c759; border-radius: 50%; display: inline-block; animation: pulseGreen 1.5s infinite ease-in-out; }
+    .live-dot-red { width: 7px; height: 7px; background-color: #ff3b30; border-radius: 50%; display: inline-block; animation: pulseRed 1.5s infinite ease-in-out; }
+    .live-dot-blue { width: 7px; height: 7px; background-color: #0071e3; border-radius: 50%; display: inline-block; animation: pulseBlue 1.5s infinite ease-in-out; }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #34c759;
-      border-radius: 50%;
-      display: inline-block;
-      animation: pulseGreen 1.5s infinite ease-in-out;
-    }
+    .desktop-scrollbar::-webkit-scrollbar { height: 5px; display: block; }
+    .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
+    .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
+    .desktop-scrollbar::-webkit-scrollbar-thumb:hover { background: #005bb5; }
 
-    .live-dot-red {
-      width: 7px;
-      height: 7px;
-      background-color: #ff3b30;
-      border-radius: 50%;
-      display: inline-block;
-      animation: pulseRed 1.5s infinite ease-in-out;
-    }
-
-    .live-dot-blue {
-      width: 7px;
-      height: 7px;
-      background-color: #0071e3;
-      border-radius: 50%;
-      display: inline-block;
-      animation: pulseBlue 1.5s infinite ease-in-out;
-    }
-
-    .desktop-scrollbar::-webkit-scrollbar {
-      height: 6px;
-      display: block;
-    }
-    .desktop-scrollbar::-webkit-scrollbar-track {
-      background: var(--bg-sub);
-      border-radius: 10px;
-    }
-    .desktop-scrollbar::-webkit-scrollbar-thumb {
-      background: #0071e3;
-      border-radius: 10px;
-    }
-    .desktop-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #005bb5;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     .scope-btn.active-scope {
       background: #0071e3 !important;
@@ -501,6 +374,11 @@
       box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35);
     }
 
+    .tab-btn {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
     .tab-btn.active-tab {
       background-color: #0071e3 !important;
       color: #ffffff !important;
@@ -508,13 +386,16 @@
       box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
     }
 
-    /* Watermark positioned to bottom-left */
+    .tab-btn.active-tab-red {
+      background-color: #dc2626 !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(220, 38, 38, 0.35);
+    }
+
     .tc-subtle-watermark {
       position: absolute;
-      bottom: 14px;
-      left: 14px;
-      top: auto;
-      right: auto;
+      bottom: 14px; left: 14px;
       z-index: 10;
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(6px);
@@ -530,11 +411,7 @@
     }
 
     .apple-switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 26px;
-      flex-shrink: 0;
+      position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0;
     }
     .apple-switch input { opacity: 0; width: 0; height: 0; }
     .apple-slider {
@@ -554,7 +431,6 @@
     input:checked + .apple-slider:before { transform: translateX(18px); }
     input:disabled + .apple-slider { opacity: 0.65; cursor: not-allowed; }
 
-    /* Mobile Job Filter Pills */
     .choice-pill {
       padding: 6px 14px;
       border-radius: 9999px;
@@ -576,6 +452,12 @@
       color: #ffffff !important;
       border-color: #0071e3 !important;
       box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);
+    }
+    .choice-pill.selected-red {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      border-color: #dc2626 !important;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
     }
 
     /* Horizontal Thumbnail Carousel */
@@ -602,37 +484,44 @@
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       user-select: none;
     }
-    .channel-card:active {
-      transform: scale(0.95);
-    }
+    .channel-card:active { transform: scale(0.95); }
     .channel-card.active-mode {
       border: 2px solid #0071e3 !important;
       box-shadow: 0 4px 18px rgba(0, 113, 227, 0.35) !important;
       background-color: var(--bg-card) !important;
     }
     .channel-thumb-box {
-      width: 100%;
-      height: 72px;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%; height: 72px; border-radius: 12px; overflow: hidden;
+      position: relative; display: flex; align-items: center; justify-content: center;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.25);
     }
+
+    /* Most Wanted Strip Carousel (Mobile) / Grid (Desktop) */
+    .wanted-strip-carousel {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+    }
+    .wanted-strip-item {
+      width: 250px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+    }
+    @media (min-width: 768px) {
+      .wanted-strip-carousel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow-x: visible;
+        padding-bottom: 0;
+      }
+      .wanted-strip-item {
+        width: auto;
+      }
+    }
   </style>
-
-
-  
-
-<!-- Festival theam -->
-<!-- <link rel="stylesheet" href="festival.css?v=diwali1">  <!-- for next any festival change the *diwali1* to *diwali2* it loads latest ver to all users -->
-<!-- </head> 
-  -->
-
-
-  
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased relative">
 
@@ -806,7 +695,7 @@
           </div>
           <div>
             <h3 class="text-sm font-extrabold text-blue-500">Announcement</h3>
-            <p class="text-[10px]" style="color: var(--text-sub);">From T&C NEWS HUB</p>
+            <p class="text-[10px]" style="color: var(--text-sub);">From T&amp;C NEWS HUB</p>
           </div>
         </div>
         <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
@@ -819,7 +708,7 @@
           <i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert
         </div>
         <p class="leading-relaxed">
-          Dear User, the <b>T&C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
+          Dear User, the <b>T&amp;C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.
         </p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
@@ -838,7 +727,28 @@
     </div>
   </div>
 
-  <!-- 🚀 STICKY UNIFIED HEADER & REAL-TIME TICKER CONTAINER -->
+  <!-- OFFICIAL MOST WANTED DOSSIER MODAL -->
+  <div id="wanted-dossier-modal" class="hidden fixed inset-0 z-[122] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md transition-all overflow-y-auto">
+    <div class="apple-card max-w-xl w-full p-5 sm:p-6 shadow-2xl relative border border-red-500/30 my-auto">
+      <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 id="dossier-modal-title" class="text-sm font-extrabold" style="color: var(--text-main);">Official Wanted Dossier</h3>
+            <p id="dossier-modal-dept" class="text-[10px] font-semibold text-red-500">Official Law-Enforcement Bulletin</p>
+          </div>
+        </div>
+        <button onclick="closeWantedDossier()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="dossier-modal-body" class="space-y-3 text-xs max-h-[68vh] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- STICKY UNIFIED HEADER & REAL-TIME TICKER CONTAINER -->
   <div class="sticky top-0 z-50 shadow-sm">
     
     <!-- TOP APPLE HEADER -->
@@ -852,17 +762,16 @@
               <div class="w-3.5 h-3.5 rounded-full pulse-gold"></div>
             </div>
             <div class="flex items-center gap-2 bg-[var(--bg-sub)] px-3 py-1.5 rounded-xl border border-[var(--border-color)]">
-              <span class="text-xs font-black tracking-wider text-blue-500">T&C</span>
+              <span class="text-xs font-black tracking-wider text-blue-500">T&amp;C</span>
               <span class="text-xs font-semibold tracking-wide border-l border-[var(--border-color)] pl-2" style="color: var(--text-main);">NEWS HUB</span>
             </div>
           </div>
 
-          <!-- 🚀 T&C Update Notification (Drops in smoothly after brief intro) -->
           <div id="dynamic-island-wrapper" class="hidden cursor-pointer transition-all duration-300 transform scale-95 hover:scale-105" onclick="openAnnouncementModal()">
             <div class="logo-anchored-pill px-3 py-1 rounded-xl flex items-center gap-2">
               <span class="live-dot" style="background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; width: 7px; height: 7px;"></span>
               <span class="text-[10.5px] font-bold tracking-wide flex items-center gap-1 whitespace-nowrap">
-                <i class="fa-solid fa-bullhorn text-[9px]"></i> T&C Update
+                <i class="fa-solid fa-bullhorn text-[9px]"></i> T&amp;C Update
               </span>
               <span class="text-[9px] bg-white text-blue-600 font-black px-1.5 py-0.2 rounded-full flex-shrink-0">1</span>
             </div>
@@ -871,7 +780,6 @@
 
         <!-- Center: Solar Pill & Right: Utility Cluster -->
         <div class="flex items-center gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
-          <!-- SOLAR PILL -->
           <div class="apple-solar-pill" id="apple-solar-pill">
             <div class="solar-item" title="Sunrise">
               <svg class="sf-solar-icon sf-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -894,10 +802,7 @@
             </div>
           </div>
 
-          <!-- 🚀 UNIFIED CLUSTER (Language + 🔔 Bell + Theme) -->
           <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm relative z-50" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-            
-            <!-- Language Selector with High z-index elevation -->
             <div class="relative" id="lang-menu-wrapper">
               <button onclick="toggleLangDropdown(event)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
                 <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
@@ -905,7 +810,6 @@
                 <i class="fa-solid fa-chevron-down text-[9px] opacity-60"></i>
               </button>
               
-              <!-- Clean Floating Dropdown elevated over everything -->
               <div id="lang-dropdown" class="hidden absolute right-0 mt-2.5 w-44 rounded-2xl apple-card p-1.5 shadow-2xl z-[100] border" style="background-color: var(--bg-card); border-color: var(--border-color);">
                 <button onclick="changeLanguage('en')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>English</span> <span class="text-[10px] opacity-60">EN</span></button>
                 <button onclick="changeLanguage('te')" class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-600 hover:text-white transition-all flex items-center justify-between" style="color: var(--text-main);"><span>తెలుగు</span> <span class="text-[10px] opacity-60">TE</span></button>
@@ -918,47 +822,43 @@
 
             <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
 
-            <!-- 🔔 PERSISTENT NOTIFICATION SETTINGS BELL BUTTON -->
             <button onclick="openNotificationPreferences()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Notification Preferences">
               <i class="fa-solid fa-bell text-xs text-amber-500"></i>
             </button>
 
             <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
 
-            <!-- Theme Button -->
             <button onclick="toggleAppleTheme()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90" title="Toggle Theme">
               <i id="theme-icon" class="fa-solid fa-moon text-xs text-blue-500"></i>
             </button>
           </div>
-
         </div>
 
       </div>
 
-      <!-- 4-TAB NAVIGATION BAR -->
-      <div class="max-w-xl mx-auto mt-2.5 px-2">
-        <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-center shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
-          <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
-          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
-          <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
+      <!-- 5-TAB NAVIGATION BAR (Wanted Alert Tab Right Between Headlines & TV & Media) -->
+      <div class="max-w-2xl mx-auto mt-2.5 px-1 sm:px-2">
+        <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-start sm:justify-center overflow-x-auto no-scrollbar shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); -webkit-overflow-scrolling: touch;">
+          <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+          <button id="tab-btn-wanted" onclick="switchMainTab('wanted')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center inline-flex items-center justify-center gap-1.5" style="color: var(--text-sub);"><span class="live-dot-red" style="width:6px;height:6px;"></span><span data-i18n="mostWanted">Most Wanted</span></button>
+          <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
+          <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
+          <button id="tab-btn-jobs" onclick="switchMainTab('jobs')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-briefcase mr-1"></i><span data-i18n="findJobs">Find Jobs</span></button>
         </nav>
       </div>
     </header>
 
-    <!-- 🚀 PERSISTENT STICKY TICKER -->
+    <!-- PERSISTENT STICKY TICKER -->
     <div class="relative z-20 border-b py-2 px-4 text-xs overflow-x-auto whitespace-nowrap shadow-inner desktop-scrollbar" style="background-color: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: var(--border-color); color: var(--text-sub);">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
         <div class="flex items-center gap-6">
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
           
-          <!-- Pulsing USGS Quakes -->
           <span class="flex items-center gap-1.5 text-red-500">
             <span class="live-dot-red"></span>
             <span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b>
           </span>
 
-          <!-- Pulsing Live Cricket -->
           <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
             <span class="live-dot" style="width:7px; height:7px;"></span>
             <span class="font-bold">Live Cricket:</span> <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b> 
@@ -969,7 +869,6 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <!-- Pulsing Live Flights -->
           <span class="flex items-center gap-1.5 text-blue-500">
             <span class="live-dot-blue"></span>
             <i class="fa-solid fa-plane text-xs"></i> Flights: <b id="ticker-flights-count">Syncing...</b>
@@ -1057,6 +956,26 @@
             </div>
           </div>
 
+          <!-- EYE-CATCHING PUBLIC ALERT STRIP (PREVIEW ON HEADLINES HOME) -->
+          <div class="apple-card p-4 border border-red-500/20">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 mb-3" style="border-color: var(--border-color);">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="live-dot-red"></span>
+                <h2 class="text-xs font-extrabold uppercase tracking-wider text-red-500 flex items-center gap-1.5">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span data-i18n="publicAlertStrip">Public Safety &amp; Most Wanted Alerts</span>
+                </h2>
+                <span id="wanted-strip-sync-pill" class="text-[10px] bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded-full font-bold">Auto-Synced</span>
+              </div>
+              <button onclick="switchMainTab('wanted')" class="self-start sm:self-auto px-3 py-1 rounded-xl bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shadow-sm transition-all flex items-center gap-1.5">
+                <span data-i18n="viewAllWanted">View All Wanted</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+              </button>
+            </div>
+            <div id="wanted-home-strip" class="wanted-strip-carousel desktop-scrollbar">
+              <div class="text-xs italic py-4" style="color: var(--text-sub);">Syncing official law-enforcement alerts...</div>
+            </div>
+          </div>
+
           <div class="apple-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1 sm:pb-0">
               <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
@@ -1064,7 +983,6 @@
               <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
             </div>
 
-            <!-- Restored High-Precision Responsive Date Picker & Quick Reset -->
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl w-full sm:w-auto" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <i class="fa-regular fa-calendar text-blue-500 text-xs"></i>
@@ -1090,7 +1008,74 @@
           </div>
         </section>
 
-        <!-- 🚀 TAB 2: TV & MEDIA WITH SMOOTH YOUTUBE / APPLE TV THUMBNAIL SLIDER -->
+        <!-- TAB 2 (NEW): PUBLIC SAFETY & MOST WANTED DIRECTORY -->
+        <section id="view-wanted" class="hidden flex-col gap-6">
+          <div class="apple-card p-4 sm:p-5">
+            
+            <!-- Header & Live Count -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-sm font-bold shadow-sm border border-red-500/20">
+                  <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-extrabold flex items-center gap-2" style="color: var(--text-main);">
+                    <span data-i18n="mostWantedTitle">Official Most Wanted Alerts</span>
+                  </h2>
+                  <p id="wanted-last-synced" class="text-[10.5px]" style="color: var(--text-sub);">Syncing with official law-enforcement feeds...</p>
+                </div>
+              </div>
+              <span id="wanted-count-badge" class="text-xs bg-red-500/10 text-red-500 border border-red-500/30 px-3 py-1 rounded-full font-bold self-start sm:self-auto flex items-center gap-1.5">
+                <span class="live-dot-red" style="width:6px;height:6px;"></span> Loading...
+              </span>
+            </div>
+
+            <!-- Official Announcement & Legal Attribution Note (Requested by User) -->
+            <div class="p-3.5 rounded-2xl border border-red-500/25 bg-red-500/5 mb-4 space-y-1.5">
+              <div class="flex items-center gap-2 text-xs font-extrabold text-red-500">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span data-i18n="officialSourceNoteTitle">Official Government &amp; Law-Enforcement Notice</span>
+              </div>
+              <p class="text-[11px] leading-relaxed" style="color: var(--text-main);" data-i18n="officialSourceNoteBody">
+                The Most Wanted records shown here are <b>officially announced and published</b> by the <b>National Investigation Agency (NIA India)</b>, <b>INTERPOL Public Red Notices</b>, and the <b>Federal Bureau of Investigation (FBI)</b>. Every card displays the exact issuing department, location/jurisdiction, official release timestamp, and a clickable <b>"Verified by"</b> link to the original government record.
+              </p>
+              <p class="text-[10px] italic" style="color: var(--text-sub);">
+                Public Advisory: A wanted bulletin or Red Notice is an active law-enforcement alert, not a court conviction. Never approach suspects directly—report tips only to official authorities via the verified source link.
+              </p>
+            </div>
+
+            <!-- Agency Filter Pills (Matching Job Pills Style) -->
+            <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
+              <button onclick="setWantedFilter('all', this)" class="choice-pill selected-red">All Official Agencies</button>
+              <button onclick="setWantedFilter('NIA', this)" class="choice-pill">🇮🇳 India (NIA)</button>
+              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill">🌐 INTERPOL Red Notices</button>
+              <button onclick="setWantedFilter('FBI', this)" class="choice-pill">🇺🇸 FBI Most Wanted</button>
+            </div>
+
+            <!-- Search & Sort Controls -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 mb-4">
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl flex-grow" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+                <i class="fa-solid fa-magnifying-glass text-xs" style="color: var(--text-sub);"></i>
+                <input type="text" id="wanted-search-input" oninput="renderWantedDirectory()" placeholder="Search name, alias, country, state, charge..." class="bg-transparent text-xs focus:outline-none w-full" style="color: var(--text-main);">
+              </div>
+              <select id="wanted-sort-select" onchange="renderWantedDirectory()" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">
+                <option value="latest">Sort: Latest Released</option>
+                <option value="reward">Sort: Reward Listed First</option>
+                <option value="name">Sort: Name (A–Z)</option>
+              </select>
+            </div>
+
+            <!-- Wanted Cards Directory -->
+            <div id="wanted-directory-container" class="space-y-3.5 max-h-[680px] overflow-y-auto pr-1">
+              <div class="text-center py-10 text-xs" style="color: var(--text-sub);">
+                <i class="fa-solid fa-spinner fa-spin mr-2"></i>Fetching verified official records...
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 3: TV & MEDIA WITH YOUTUBE / APPLE TV THUMBNAIL SLIDER -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div id="tv-main-card" class="apple-card p-4 sm:p-5 relative">
             <div class="mb-4">
@@ -1104,18 +1089,13 @@
                 </span>
               </div>
 
-              <!-- SMOOTH YOUTUBE-STYLE HORIZONTAL CAROUSEL -->
               <div class="channel-carousel desktop-scrollbar">
-                
                 <div class="channel-card active-mode" onclick="setMode('v6', this)">
                   <div class="channel-thumb-box" style="background: linear-gradient(135deg, #b91c1c, #450a0a);">
                     <span class="text-white font-black text-sm tracking-tighter">V6 LIVE</span>
                     <span class="absolute top-1 right-1 text-[8px] bg-red-600 text-white font-extrabold px-1 rounded">LIVE</span>
                   </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">V6 News</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Telugu News</p>
-                  </div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">V6 News</p><p class="text-[9.5px]" style="color: var(--text-sub);">Telugu News</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('tv9', this)">
@@ -1123,243 +1103,123 @@
                     <span class="text-white font-black text-sm tracking-tighter">TV9 LIVE</span>
                     <span class="absolute top-1 right-1 text-[8px] bg-red-600 text-white font-extrabold px-1 rounded">LIVE</span>
                   </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">TV9 Telugu</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">24/7 Broadcast</p>
-                  </div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">TV9 Telugu</p><p class="text-[9.5px]" style="color: var(--text-sub);">24/7 Broadcast</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('abcnews', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #0f172a);">
-                    <span class="text-white font-black text-sm tracking-tighter">ABC NEWS</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">ABC News</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Global Wire</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #0f172a);"><span class="text-white font-black text-sm tracking-tighter">ABC NEWS</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">ABC News</p><p class="text-[9.5px]" style="color: var(--text-sub);">Global Wire</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('bloomberg', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #09090b, #27272a); border: 1px solid rgba(255,255,255,0.1);">
-                    <span class="text-amber-400 font-black text-xs tracking-wider">BLOOMBERG</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Bloomberg TV</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Markets &amp; Finance</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #09090b, #27272a); border: 1px solid rgba(255,255,255,0.1);"><span class="text-amber-400 font-black text-xs tracking-wider">BLOOMBERG</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Bloomberg TV</p><p class="text-[9.5px]" style="color: var(--text-sub);">Markets &amp; Finance</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('aljazeera', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #d97706, #78350f);">
-                    <span class="text-white font-black text-xs tracking-tighter">AL JAZEERA</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Al Jazeera</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">World Stream</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #d97706, #78350f);"><span class="text-white font-black text-xs tracking-tighter">AL JAZEERA</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Al Jazeera</p><p class="text-[9.5px]" style="color: var(--text-sub);">World Stream</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('foxnews', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1e3a8a, #dc2626);">
-                    <span class="text-white font-black text-xs tracking-wider">FOX NEWS</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Fox News</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Live Stream</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1e3a8a, #dc2626);"><span class="text-white font-black text-xs tracking-wider">FOX NEWS</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Fox News</p><p class="text-[9.5px]" style="color: var(--text-sub);">Live Stream</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('france24', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #1e40af);">
-                    <span class="text-white font-black text-xs tracking-wider">FRANCE 24</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">France24</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">European News</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #1e40af);"><span class="text-white font-black text-xs tracking-wider">FRANCE 24</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">France24</p><p class="text-[9.5px]" style="color: var(--text-sub);">European News</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('cnbc', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0369a1, #082f49);">
-                    <span class="text-white font-black text-xs tracking-wider">CNBC LIVE</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">CNBC</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Business &amp; Tech</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0369a1, #082f49);"><span class="text-white font-black text-xs tracking-wider">CNBC LIVE</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">CNBC</p><p class="text-[9.5px]" style="color: var(--text-sub);">Business &amp; Tech</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('skynews', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #dc2626, #991b1b);">
-                    <span class="text-white font-black text-xs tracking-wider">SKY NEWS</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Sky News</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">UK &amp; Global</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #dc2626, #991b1b);"><span class="text-white font-black text-xs tracking-wider">SKY NEWS</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Sky News</p><p class="text-[9.5px]" style="color: var(--text-sub);">UK &amp; Global</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('cnn', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #b91c1c, #000000);">
-                    <span class="text-white font-black text-sm tracking-widest">CNN</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">CNN Live</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">International</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #b91c1c, #000000);"><span class="text-white font-black text-sm tracking-widest">CNN</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">CNN Live</p><p class="text-[9.5px]" style="color: var(--text-sub);">International</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('nasa', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0b192c, #1e3a8a);">
-                    <i class="fa-solid fa-user-astronaut text-xl text-cyan-400"></i>
-                    <span class="absolute bottom-1 text-[8px] font-black text-white">NASA TV</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">NASA Live</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Space Missions</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0b192c, #1e3a8a);"><i class="fa-solid fa-user-astronaut text-xl text-cyan-400"></i><span class="absolute bottom-1 text-[8px] font-black text-white">NASA TV</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">NASA Live</p><p class="text-[9.5px]" style="color: var(--text-sub);">Space Missions</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('starbase', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #18181b, #3f3f46);">
-                    <i class="fa-solid fa-shuttle-space text-lg text-amber-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Starbase</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">SpaceX Launch</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #18181b, #3f3f46);"><i class="fa-solid fa-shuttle-space text-lg text-amber-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Starbase</p><p class="text-[9.5px]" style="color: var(--text-sub);">SpaceX Launch</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('heathrowairside', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
-                    <i class="fa-solid fa-plane-departure text-base text-blue-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Heathrow</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">London Airside</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1e293b, #0f172a);"><i class="fa-solid fa-plane-departure text-base text-blue-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Heathrow</p><p class="text-[9.5px]" style="color: var(--text-sub);">London Airside</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('laxairside', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0c4a6e, #075985);">
-                    <i class="fa-solid fa-plane-arrival text-base text-cyan-300"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">LAX Airside</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Los Angeles</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0c4a6e, #075985);"><i class="fa-solid fa-plane-arrival text-base text-cyan-300"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">LAX Airside</p><p class="text-[9.5px]" style="color: var(--text-sub);">Los Angeles</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('lasvegasairside', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #4c1d95, #831843);">
-                    <i class="fa-solid fa-plane text-base text-pink-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Las Vegas</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Strip Airside</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #4c1d95, #831843);"><i class="fa-solid fa-plane text-base text-pink-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Las Vegas</p><p class="text-[9.5px]" style="color: var(--text-sub);">Strip Airside</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('lga-newyorkairside', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #134e4a, #042f2e);">
-                    <i class="fa-solid fa-plane-up text-base text-teal-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">LGA New York</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Runway Cam</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #134e4a, #042f2e);"><i class="fa-solid fa-plane-up text-base text-teal-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">LGA New York</p><p class="text-[9.5px]" style="color: var(--text-sub);">Runway Cam</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('wildlife', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #065f46, #022c22);">
-                    <i class="fa-solid fa-paw text-lg text-emerald-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Wild Africa</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Nature Cam</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #065f46, #022c22);"><i class="fa-solid fa-paw text-lg text-emerald-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Wild Africa</p><p class="text-[9.5px]" style="color: var(--text-sub);">Nature Cam</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('sports', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #15803d, #14532d);">
-                    <i class="fa-solid fa-baseball-bat-ball text-lg text-green-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Live Sports</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Matches &amp; Feeds</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #15803d, #14532d);"><i class="fa-solid fa-baseball-bat-ball text-lg text-green-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Live Sports</p><p class="text-[9.5px]" style="color: var(--text-sub);">Matches &amp; Feeds</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('music', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #86198f, #4a044e);">
-                    <i class="fa-solid fa-music text-lg text-fuchsia-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Music Lo-Fi</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Continuous Beats</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #86198f, #4a044e);"><i class="fa-solid fa-music text-lg text-fuchsia-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Music Lo-Fi</p><p class="text-[9.5px]" style="color: var(--text-sub);">Continuous Beats</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('hindu', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #c2410c, #7c2d12);">
-                    <i class="fa-solid fa-om text-lg text-amber-300"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Bhagavat Geetha</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Chants &amp; Peace</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #c2410c, #7c2d12);"><i class="fa-solid fa-om text-lg text-amber-300"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Bhagavat Geetha</p><p class="text-[9.5px]" style="color: var(--text-sub);">Chants &amp; Peace</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('muslim', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #047857, #064e3b);">
-                    <i class="fa-solid fa-star-and-crescent text-lg text-emerald-300"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Holy Quran</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Makkah Live</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #047857, #064e3b);"><i class="fa-solid fa-star-and-crescent text-lg text-emerald-300"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Holy Quran</p><p class="text-[9.5px]" style="color: var(--text-sub);">Makkah Live</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('christian', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1d4ed8, #1e3a8a);">
-                    <i class="fa-solid fa-cross text-lg text-blue-300"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Holy Bible</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Gospel Live</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #1d4ed8, #1e3a8a);"><i class="fa-solid fa-cross text-lg text-blue-300"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Holy Bible</p><p class="text-[9.5px]" style="color: var(--text-sub);">Gospel Live</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('law', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #374151, #111827);">
-                    <i class="fa-solid fa-scale-balanced text-lg text-amber-400"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Constitution</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Law &amp; Justice</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #374151, #111827);"><i class="fa-solid fa-scale-balanced text-lg text-amber-400"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Constitution</p><p class="text-[9.5px]" style="color: var(--text-sub);">Law &amp; Justice</p></div>
                 </div>
 
-                <div class="channel-card" onclick="setMode('t&c', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
-                    <span class="text-white font-black text-sm">T&amp;C</span>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">T&amp;C Original</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Network Stream</p>
-                  </div>
+                <div class="channel-card" onclick="setMode('t&amp;c', this)">
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #0284c7, #0369a1);"><span class="text-white font-black text-sm">T&amp;C</span></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">T&amp;C Original</p><p class="text-[9.5px]" style="color: var(--text-sub);">Network Stream</p></div>
                 </div>
 
                 <div class="channel-card" onclick="setMode('file', this)">
-                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #334155, #1e293b);">
-                    <i class="fa-solid fa-film text-lg text-slate-300"></i>
-                  </div>
-                  <div class="mt-1.5 px-0.5">
-                    <p class="text-xs font-bold truncate" style="color: var(--text-main);">Local Media</p>
-                    <p class="text-[9.5px]" style="color: var(--text-sub);">Offline Feed</p>
-                  </div>
+                  <div class="channel-thumb-box" style="background: linear-gradient(135deg, #334155, #1e293b);"><i class="fa-solid fa-film text-lg text-slate-300"></i></div>
+                  <div class="mt-1.5 px-0.5"><p class="text-xs font-bold truncate" style="color: var(--text-main);">Local Media</p><p class="text-[9.5px]" style="color: var(--text-sub);">Offline Feed</p></div>
                 </div>
-
               </div>
             </div>
 
@@ -1376,35 +1236,28 @@
             </div>
           </div>
 
-          <!-- 🚀 DOCKED / FLOATING PiP VIDEO CONTAINER (CLEAN 2-BUTTON ERGONOMIC CONTROLS) -->
+          <!-- DOCKED / FLOATING PiP VIDEO CONTAINER -->
           <div id="active-video-container" class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl" style="display:none; border: 1px solid var(--border-color);">
-            
-            <!-- 🚀 TRANSPARENT SHIELD: Active during Move Mode to block iframe hijacking -->
             <div id="pip-touch-barrier"></div>
-
-            <!-- Free-form Corner Resize Grippers (Active on all 4 corners) -->
             <div class="pip-resize-handle pip-handle-se" data-resize="se"></div>
             <div class="pip-resize-handle pip-handle-sw" data-resize="sw"></div>
             <div class="pip-resize-handle pip-handle-ne" data-resize="ne"></div>
             <div class="pip-resize-handle pip-handle-nw" data-resize="nw"></div>
 
-            <!-- 1ST BUTTON: Top Right Close [X] -->
             <button onclick="event.stopPropagation(); closeActivePlayer()" class="pip-btn-close" title="Close Mini Player">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
 
-            <!-- 2ND BUTTON: Middle-Right Ergonomic Finger-Reach Lock Toggle (Locked/Moving vs Unlocked/Controls) -->
             <button onclick="event.stopPropagation(); togglePiPLockMode()" id="pip-lock-btn" class="pip-btn-lock" title="Toggle Move vs Controls Mode">
               <i id="pip-lock-icon" class="fa-solid fa-lock text-xs"></i>
             </button>
 
             <div class="tc-subtle-watermark">T&amp;C Hub</div>
-            
             <iframe id="master-video-player" class="w-full h-full border-0" src="" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </section>
 
-        <!-- TAB 3: UNIFIED RADAR COMMAND CENTER -->
+        <!-- TAB 4: UNIFIED RADAR COMMAND CENTER -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             
@@ -1420,7 +1273,6 @@
                 </span>
               </div>
 
-              <!-- Apple-Style Switcher -->
               <div class="flex items-center p-1 rounded-xl backdrop-blur-md self-start sm:self-auto shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
                 <button id="btn-radar-weather" onclick="switchRadarMap('weather')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active-tab" style="background-color: #0071e3; color: #ffffff; box-shadow: 0 2px 8px rgba(0, 113, 227, 0.35);">
                   <i class="fa-solid fa-cloud-sun-rain"></i>
@@ -1433,23 +1285,16 @@
               </div>
             </div>
 
-            <!-- Single Display Frame -->
             <div class="relative w-full h-[400px] sm:h-[460px] rounded-2xl overflow-hidden shadow-inner mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-sub);">
-              
-              <!-- 1. Windy Weather Radar Frame (WATERMARK REMOVED) -->
               <div id="radar-frame-weather" class="w-full h-full relative">
                 <iframe width="100%" height="100%" src="https://embed.windy.com/embed2.html?lat=17.385&lon=78.486&detailLat=17.385&detailLon=78.486&width=650&height=450&zoom=6&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0" class="w-full h-full"></iframe>
               </div>
-
-              <!-- 2. Leaflet Flight & ISS OSINT Map Frame -->
               <div id="radar-frame-flight" class="w-full h-full relative" style="display: none;">
                 <div class="tc-subtle-watermark">T&amp;C OSINT RADAR</div>
                 <div id="osint-map" class="w-full h-full"></div>
               </div>
-
             </div>
 
-            <!-- Telemetry Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Altitude</p><p class="text-sm font-extrabold text-blue-500" id="osint-iss-alt">Fetching...</p></div>
               <div><p class="text-[10px] uppercase font-bold" style="color: var(--text-sub);">ISS Velocity</p><p class="text-sm font-extrabold text-green-500" id="osint-iss-spd">Fetching...</p></div>
@@ -1459,7 +1304,7 @@
           </div>
         </section>
 
-        <!-- 🚀 TAB 4: FIND JOBS (LIVE VACANCIES) -->
+        <!-- TAB 5: FIND JOBS (LIVE VACANCIES) -->
         <section id="view-jobs" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
@@ -1477,7 +1322,6 @@
               </span>
             </div>
 
-            <!-- Mobile Job Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2.5 mb-4 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
               <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
@@ -1486,7 +1330,6 @@
               <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
             </div>
 
-            <!-- Job Listings Container -->
             <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1">
               <div class="text-center py-10 text-xs" style="color: var(--text-sub);">
                 <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...
@@ -1513,6 +1356,9 @@
           <div class="flex flex-col gap-2 text-xs">
             <a href="https://factly.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>Factly India</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
             <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-blue-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span data-i18n="usgsDirect">USGS Earthquakes Direct</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://www.nia.gov.in" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-red-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>NIA India Most Wanted</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-red-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>INTERPOL Red Notices</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <a href="https://www.fbi.gov/wanted" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-red-500 flex items-center justify-between transition-all" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><span>FBI Official Wanted</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
           </div>
         </div>
 
@@ -1540,12 +1386,24 @@
     let currentScope = 'local';
     let currentLanguage = 'en';
     let currentJobSector = 'all';
+    let currentWantedAgency = 'all';
+    let wantedDataset = [];
+    let wantedMeta = { updatedAt: null, sources: [] };
     let isVideoPlaying = false;
     let isMiniPlayerActive = false;
-    let isPiPMoveMode = true; // Default: Locked in Move mode (Drag anywhere)
+    let isPiPMoveMode = true;
     let autoLockTimer = null;
 
-    // Accurate Local Client Date helper (YYYY-MM-DD)
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function getLocalDateStr(date = new Date()) {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1566,7 +1424,11 @@
 
     const i18n = {
       en: {
-        newsHub: "NEWS HUB", headlines: "Headlines", tvMedia: "TV & Media", radar: "Radar", findJobs: "Find Jobs",
+        newsHub: "NEWS HUB", headlines: "Headlines", mostWanted: "Most Wanted", tvMedia: "TV & Media", radar: "Radar", findJobs: "Find Jobs",
+        publicAlertStrip: "Public Safety & Most Wanted Alerts", viewAllWanted: "View All Wanted",
+        mostWantedTitle: "Official Most Wanted Alerts",
+        officialSourceNoteTitle: "Official Government & Law-Enforcement Notice",
+        officialSourceNoteBody: "The Most Wanted records shown here are officially announced and published by the National Investigation Agency (NIA India), INTERPOL Public Red Notices, and the Federal Bureau of Investigation (FBI). Every card displays the exact issuing department, location/jurisdiction, official release timestamp, and a clickable \"Verified by\" link to the original government record.",
         usgsQuakes: "USGS Quakes", worldHighlights: "World Highlights", latest: "Latest",
         connectingRss: "Connecting to live RSS feed...", telanganaScope: "Telangana",
         indiaScope: "India", worldScope: "World", syncing: "Syncing...", queryingRss: "Querying real-time RSS API...",
@@ -1582,7 +1444,11 @@
         scopeWorldTitle: "Global Worldwide News Stream"
       },
       te: {
-        newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", tvMedia: "టీవీ & మీడియా", radar: "రాడార్", findJobs: "ఉద్యోగాలు",
+        newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", mostWanted: "మోస్ట్ వాంటెడ్", tvMedia: "టీవీ & మీడియా", radar: "రాడార్", findJobs: "ఉద్యోగాలు",
+        publicAlertStrip: "ప్రజా భద్రత & మోస్ట్ వాంటెడ్ హెచ్చరికలు", viewAllWanted: "అన్నీ చూడండి",
+        mostWantedTitle: "అధికారిక మోస్ట్ వాంటెడ్ జాబితా",
+        officialSourceNoteTitle: "అధికారిక ప్రభుత్వ & పోలీసు సంస్థల ప్రకటన",
+        officialSourceNoteBody: "ఇక్కడ చూపబడిన మోస్ట్ వాంటెడ్ వివరాలు నేషనల్ ఇన్వెస్టిగేషన్ ఏజెన్సీ (NIA India), ఇంటర్‌పోల్ (INTERPOL), మరియు FBI ద్వారా అధికారికంగా విడుదల చేయబడినవి. ప్రతి కార్డ్‌లో విభాగం, ప్రాంతం/దేశం, విడుదల చేసిన సమయం మరియు 'Verified by' అధికారిక లింక్ ఉంటాయి.",
         usgsQuakes: "భూకంపాలు", worldHighlights: "ప్రపంచ ముఖ్యాంశాలు", latest: "తాజా",
         connectingRss: "లైవ్ ఫీడ్‌కి కనెక్ట్ అవుతోంది...", telanganaScope: "తెలంగాణ",
         indiaScope: "భారత్", worldScope: "ప్రపంచం", syncing: "సింక్ అవుతోంది...", queryingRss: "రియల్ టైమ్ వార్తలు లోడ్ అవుతున్నాయి...",
@@ -1598,7 +1464,11 @@
         scopeWorldTitle: "అంతర్జాతీయ వార్తల ప్రవాహం"
       },
       hi: {
-        newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", tvMedia: "टीवी और मीडिया", radar: "रडार", findJobs: "नौकरियां",
+        newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", mostWanted: "मोस्ट वांटेड", tvMedia: "टीवी और मीडिया", radar: "रडार", findJobs: "नौकरियां",
+        publicAlertStrip: "जन सुरक्षा और मोस्ट वांटेड अलर्ट", viewAllWanted: "सभी देखें",
+        mostWantedTitle: "आधिकारिक मोस्ट वांटेड अलर्ट",
+        officialSourceNoteTitle: "आधिकारिक सरकारी और कानून-प्रवर्तन सूचना",
+        officialSourceNoteBody: "यहाँ दिखाए गए मोस्ट वांटेड रिकॉर्ड राष्ट्रीय जांच एजेंसी (NIA India), इंटरपोल (INTERPOL) और FBI द्वारा आधिकारिक रूप से घोषित किए गए हैं। प्रत्येक कार्ड में विभाग, स्थान/देश, जारी समय और 'Verified by' आधिकारिक लिंक दिया गया है।",
         usgsQuakes: "भूकंप", worldHighlights: "विश्व मुख्य समाचार", latest: "नवीनतम",
         connectingRss: "लाइव फ़ीड से कनेक्ट हो रहा है...", telanganaScope: "तेलंगाना",
         indiaScope: "भारत", worldScope: "विश्व", syncing: "सिंक हो रहा है...", queryingRss: "रीयल-टाइम आरएसएस एपीआई लोड हो रहा है...",
@@ -1614,7 +1484,11 @@
         scopeWorldTitle: "वैश्विक समाचार स्ट्रीम"
       },
       kn: {
-        newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್", findJobs: "ಉದ್ಯೋಗಗಳು",
+        newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", mostWanted: "ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್", findJobs: "ಉದ್ಯೋಗಗಳು",
+        publicAlertStrip: "ಸಾರ್ವಜನಿಕ ಸುರಕ್ಷತೆ & ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", viewAllWanted: "ಎಲ್ಲಾ ನೋಡಿ",
+        mostWantedTitle: "ಅಧಿಕೃತ ಮೋಸ್ಟ್ ವಾಂಟೆಡ್ ಪಟ್ಟಿ",
+        officialSourceNoteTitle: "ಅಧಿಕೃತ ಸರ್ಕಾರಿ & ಕಾನೂನು ಸಂಸ್ಥೆಗಳ ಪ್ರಕಟಣೆ",
+        officialSourceNoteBody: "ಇಲ್ಲಿ ತೋರಿಸಿರುವ ಮಾಹಿತಿಯನ್ನು NIA India, INTERPOL ಮತ್ತು FBI ಅಧಿಕೃತವಾಗಿ ಪ್ರಕಟಿಸಿವೆ. ಪ್ರತಿ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಇಲಾಖೆ, ಸ್ಥಳ/ದೇಶ, ಬಿಡುಗಡೆ ಸಮಯ ಮತ್ತು 'Verified by' ಅಧಿಕೃತ ಲಿಂಕ್ ಇರುತ್ತದೆ.",
         usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ",
         connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ",
         indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
@@ -1630,9 +1504,13 @@
         scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್"
       },
       ta: {
-        newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்", findJobs: "வேலைவாய்ப்பு",
+        newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", mostWanted: "தேடப்படுவோர்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்", findJobs: "வேலைவாய்ப்பு",
+        publicAlertStrip: "பொது பாதுகாப்பு & தேடப்படுவோர்", viewAllWanted: "அனைத்தையும் காண்க",
+        mostWantedTitle: "அதிகாரப்பூர்வ தேடப்படுவோர் பட்டியல்",
+        officialSourceNoteTitle: "அதிகாரப்பூர்வ அரசு & காவல்துறை அறிவிப்பு",
+        officialSourceNoteBody: "இங்கு காட்டப்படும் தகவல்கள் NIA India, INTERPOL மற்றும் FBI ஆகியவற்றால் அதிகாரப்பூர்வமாக வெளியிடப்பட்டவை. ஒவ்வொரு அட்டையிலும் துறை, இடம்/நாடு, வெளியான நேரம் மற்றும் 'Verified by' இணைப்பு உள்ளது.",
         usgsQuakes: "நிலநடுக்கங்கள்", worldHighlights: "உலக முக்கியச் செய்திகள்", latest: "சமீபத்திய",
-        connectingRss: "நேலைலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா",
+        connectingRss: "நேரலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா",
         indiaScope: "இந்தியா", worldScope: "உலகம்", syncing: "ஒத்திசைக்கிறது...", queryingRss: "செய்திகள் ஏற்றப்படுகின்றன...",
         networks: "வலைப்பின்னல்கள்", selectChannelPrompt: "நேரலை ஒளிபரப்பைக் காண மேலே உள்ள எந்தவொரு சேனலையும் தேர்ந்தெடுக்கவும்.",
         weatherRadar: "வானிலை ரேடார்", usgsTracker: "நிலநடுக்க கண்காணிப்பு (24மணி)", issAlt: "ISS உயரம்",
@@ -1646,7 +1524,11 @@
         scopeWorldTitle: "உலகளாவிய செய்தி ஓடை"
       },
       ml: {
-        newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ", findJobs: "ജോലികൾ",
+        newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", mostWanted: "മോസ്റ്റ് വാണ്ടഡ്", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ", findJobs: "ജോലികൾ",
+        publicAlertStrip: "പൊതു സുരക്ഷ & മോസ്റ്റ് വാണ്ടഡ്", viewAllWanted: "എല്ലാം കാണുക",
+        mostWantedTitle: "ഔദ്യോഗിക മോസ്റ്റ് വാണ്ടഡ് പട്ടിക",
+        officialSourceNoteTitle: "ഔദ്യോഗിക സർക്കാർ & നിയമപാലന അറിയിപ്പ്",
+        officialSourceNoteBody: "ഇവിടെ കാണിക്കുന്ന വിവരങ്ങൾ NIA India, INTERPOL, FBI എന്നിവ ഔദ്യോഗികമായി പുറത്തുവിട്ടതാണ്. ഓരോ കാർഡിലും വകുപ്പ്, സ്ഥലം/രാജ്യം, പ്രസിദ്ധീകരിച്ച സമയം, 'Verified by' ലിങ്ക് എന്നിവ ഉണ്ടായിരിക്കും.",
         usgsQuakes: "ഭൂകമ്പങ്ങൾ", worldHighlights: "ലോക വാർത്തകൾ", latest: "ഏറ്റവും പുതിയത്",
         connectingRss: "ലൈവ് ഫീഡുമായി ബന്ധിപ്പിക്കുന്നു...", telanganaScope: "തെലങ്കാന",
         indiaScope: "ഇന്ത്യ", worldScope: "ലോകം", syncing: "സിങ്ക് ചെയ്യുന്നു...", queryingRss: "വാർത്തകൾ ലഭ്യമാക്കുന്നു...",
@@ -1670,17 +1552,15 @@
         dateInput.max = REAL_TODAY_DATE;
       }
 
-      // 🚀 T&C Update Notification (Drops smoothly after 1.5 seconds)
       setTimeout(() => {
         const pill = document.getElementById('dynamic-island-wrapper');
-        if (pill) {
-          pill.classList.remove('hidden');
-        }
+        if (pill) pill.classList.remove('hidden');
       }, 1500);
 
       fetchSolarSchedule();
       fetchPinnedWorldNews();
       fetchPortalNews();
+      fetchWantedAlerts();
       fetchRealTimeForex();
       fetchLiveCricketTicker();
       initOSINTMap();
@@ -1792,19 +1672,21 @@
       }
     }
 
-    /* ==================== 4-TAB NAVIGATION SWITCHER WITH POSITION & MODE PERSISTENCE ==================== */
+    /* ==================== 5-TAB NAVIGATION SWITCHER WITH PiP PERSISTENCE ==================== */
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
+      document.getElementById('view-wanted').classList.add('hidden');
       document.getElementById('view-osint').classList.add('hidden');
       document.getElementById('view-jobs').classList.add('hidden');
 
       const btnNews = document.getElementById('tab-btn-news');
+      const btnWanted = document.getElementById('tab-btn-wanted');
       const btnVideo = document.getElementById('tab-btn-video');
       const btnOsint = document.getElementById('tab-btn-osint');
       const btnJobs = document.getElementById('tab-btn-jobs');
 
-      [btnNews, btnVideo, btnOsint, btnJobs].forEach(b => {
-        b.classList.remove('active-tab');
+      [btnNews, btnWanted, btnVideo, btnOsint, btnJobs].forEach(b => {
+        b.classList.remove('active-tab', 'active-tab-red');
         b.style.backgroundColor = 'transparent';
         b.style.color = 'var(--text-sub)';
         b.style.boxShadow = 'none';
@@ -1814,6 +1696,10 @@
       if (tab === 'news') {
         document.getElementById('view-news').classList.remove('hidden');
         activeBtn = btnNews;
+      } else if (tab === 'wanted') {
+        document.getElementById('view-wanted').classList.remove('hidden');
+        activeBtn = btnWanted;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (tab === 'video') {
         activeBtn = btnVideo;
       } else if (tab === 'osint') {
@@ -1825,23 +1711,28 @@
         activeBtn = btnJobs;
       }
 
-      activeBtn.classList.add('active-tab');
-      activeBtn.style.backgroundColor = '#0071e3';
-      activeBtn.style.color = '#ffffff';
-      activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+      if (tab === 'wanted') {
+        activeBtn.classList.add('active-tab-red');
+        activeBtn.style.backgroundColor = '#dc2626';
+        activeBtn.style.color = '#ffffff';
+        activeBtn.style.boxShadow = '0 2px 10px rgba(220, 38, 38, 0.35)';
+      } else {
+        activeBtn.classList.add('active-tab');
+        activeBtn.style.backgroundColor = '#0071e3';
+        activeBtn.style.color = '#ffffff';
+        activeBtn.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
+      }
 
-      // 🚀 SEAMLESS PiP TRANSITION LOGIC WITH COORDINATE & MODE PERSISTENCE
+      // SEAMLESS PiP TRANSITION LOGIC
       const videoSection = document.getElementById('view-video');
       const videoCard = document.getElementById('tv-main-card');
       const videoContainer = document.getElementById('active-video-container');
 
       if (tab === 'video') {
-        // Dock player back into main TV view
         videoSection.classList.remove('hidden');
         if (videoCard) videoCard.style.display = 'block';
         if (videoContainer) {
           videoContainer.classList.remove('pip-floating-mode');
-          // 🚀 Clear floating inline layout and restore full width
           videoContainer.style.width = '';
           videoContainer.style.height = '';
           videoContainer.style.left = '';
@@ -1854,13 +1745,10 @@
         clearAutoLockTimer();
       } else {
         if (isVideoPlaying && videoContainer) {
-          // Floating Miniplayer overlay mode across other tabs
           videoSection.classList.remove('hidden');
           if (videoCard) videoCard.style.display = 'none';
-          
           videoContainer.classList.add('pip-floating-mode');
 
-          // Restore saved position or use default bottom-right anchoring
           const savedCoords = JSON.parse(localStorage.getItem('tc_pip_coords') || 'null');
           if (savedCoords && savedCoords.width && savedCoords.left < window.innerWidth && savedCoords.top < window.innerHeight) {
             videoContainer.style.width = `${savedCoords.width}px`;
@@ -1883,7 +1771,6 @@
           videoContainer.style.bottom = 'auto';
 
           isMiniPlayerActive = true;
-          // Remember mode or safely set to Move mode
           const savedMode = localStorage.getItem('tc_pip_move_mode');
           setPiPLockModeState(savedMode !== null ? savedMode === 'true' : true);
         } else {
@@ -1913,7 +1800,7 @@
       if (dot) dot.style.display = 'none';
       if (videoCard) videoCard.style.display = 'block';
       
-      const currentTabBtn = document.querySelector('.tab-btn.active-tab');
+      const currentTabBtn = document.querySelector('.tab-btn.active-tab, .tab-btn.active-tab-red');
       if (currentTabBtn && currentTabBtn.id !== 'tab-btn-video') {
         videoSection.classList.add('hidden');
       }
@@ -1923,7 +1810,6 @@
       clearAutoLockTimer();
     }
 
-    /* 🚀 ERGONOMIC LOCK/MOVE TOGGLE (FINGER REACH BUTTON) & AUTO-LOCK LOGIC */
     function togglePiPLockMode() {
       setPiPLockModeState(!isPiPMoveMode);
     }
@@ -1941,21 +1827,18 @@
       clearAutoLockTimer();
 
       if (isPiPMoveMode) {
-        // Locked in Move Mode: Shield captures touches for smooth drag/pinch
         barrier.style.pointerEvents = 'auto';
         lockBtn.style.backgroundColor = 'rgba(0, 113, 227, 0.9)';
         lockBtn.style.borderColor = 'rgba(255, 255, 255, 0.4)';
         lockIcon.className = "fa-solid fa-lock text-xs text-white";
         lockBtn.title = "Move Mode (Drag anywhere). Tap to unlock controls.";
       } else {
-        // Unlocked to Controls Mode: Video receives direct touch events (Skip Ads, Play, Mute)
         barrier.style.pointerEvents = 'none';
         lockBtn.style.backgroundColor = 'rgba(52, 199, 89, 0.9)';
         lockBtn.style.borderColor = 'rgba(255, 255, 255, 0.5)';
         lockIcon.className = "fa-solid fa-lock-open text-xs text-white";
         lockBtn.title = "Controls Mode (Touch video). Tap to lock & drag.";
 
-        // 🚀 SMART AUTO-LOCK: Returns to Move mode automatically after 15s of engagement
         autoLockTimer = setTimeout(() => {
           if (isMiniPlayerActive && !isPiPMoveMode) {
             setPiPLockModeState(true);
@@ -1969,6 +1852,345 @@
         clearTimeout(autoLockTimer);
         autoLockTimer = null;
       }
+    }
+
+    /* ==================== OFFICIAL MOST WANTED ENGINE ==================== */
+    function formatAgencyTimestamp(isoStr) {
+      if (!isoStr) return 'Active Notice (Date N/A)';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return escapeHtml(isoStr);
+
+      const day = d.getDate();
+      const getOrdinal = (n) => {
+        if (n > 3 && n < 21) return 'th';
+        switch (n % 10) {
+          case 1: return 'st';
+          case 2: return 'nd';
+          case 3: return 'rd';
+          default: return 'th';
+        }
+      };
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const hasTime = typeof isoStr === 'string' && isoStr.includes('T');
+      if (hasTime) {
+        const timePart = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `${timePart}, ${day}${getOrdinal(day)} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      }
+      return `${day}${getOrdinal(day)} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function getWantedFreshnessBadge(publishedAt, updatedAt) {
+      const refStr = updatedAt || publishedAt;
+      if (!refStr) {
+        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE NOTICE</span>';
+      }
+      const refDate = new Date(refStr);
+      if (isNaN(refDate.getTime())) {
+        return '<span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE NOTICE</span>';
+      }
+      const diffDays = (Date.now() - refDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (diffDays <= 30) {
+        return '<span class="bg-red-500 text-white px-2 py-0.5 rounded text-[9.5px] font-black tracking-wide">NEW ALERT</span>';
+      }
+      if (diffDays <= 180) {
+        return '<span class="bg-amber-500/15 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded text-[9.5px] font-bold">RECENTLY UPDATED</span>';
+      }
+      return '<span class="bg-slate-500/15 text-slate-400 border border-slate-500/25 px-2 py-0.5 rounded text-[9.5px] font-bold">ACTIVE LONG-TERM</span>';
+    }
+
+    function normalizeFbiDirectItem(item) {
+      const offices = Array.isArray(item.field_offices) && item.field_offices.length > 0
+        ? item.field_offices.map(o => o.charAt(0).toUpperCase() + o.slice(1)).join(', ')
+        : 'Federal HQ (USA)';
+      const locationParts = [];
+      if (offices) locationParts.push(`${offices} Office`);
+      if (item.place_of_birth) locationParts.push(`Origin: ${item.place_of_birth}`);
+      if (item.nationality) locationParts.push(`Nationality: ${item.nationality}`);
+
+      return {
+        id: 'fbi-' + (item.uid || Math.random().toString(36).slice(2, 9)),
+        agency: 'FBI',
+        verifiedBy: 'FBI Official',
+        department: `FBI (${offices})`,
+        location: locationParts.join(' • ') || 'United States',
+        name: item.title || 'Unknown Subject',
+        aliases: Array.isArray(item.aliases) ? item.aliases.slice(0, 4) : [],
+        photo: item.images?.[0]?.thumb || item.images?.[0]?.large || item.images?.[0]?.original || '',
+        charges: (Array.isArray(item.subjects) && item.subjects.length > 0 ? item.subjects.join(', ') : '') || item.description || 'Official Federal Wanted Notice',
+        description: item.description || '',
+        caution: item.caution || '',
+        rewardText: item.reward_text || (item.reward_max ? `Up to $${Number(item.reward_max).toLocaleString()}` : ''),
+        rewardValue: Number(item.reward_max || item.reward_min || 0),
+        publishedAt: item.publication || null,
+        updatedAt: item.modified || item.publication || null,
+        dob: Array.isArray(item.dates_of_birth_used) && item.dates_of_birth_used.length > 0 ? item.dates_of_birth_used[0] : '',
+        nationality: item.nationality || 'USA / International',
+        noticeType: 'FBI WANTED',
+        sourceUrl: item.url || 'https://www.fbi.gov/wanted'
+      };
+    }
+
+    async function fetchWantedAlerts() {
+      const stripEl = document.getElementById('wanted-home-strip');
+      const dirEl = document.getElementById('wanted-directory-container');
+      const syncLabel = document.getElementById('wanted-last-synced');
+      const countBadge = document.getElementById('wanted-count-badge');
+      const stripPill = document.getElementById('wanted-strip-sync-pill');
+
+      try {
+        // 1. Primary: Auto-updated JSON generated by GitHub Actions (NIA + INTERPOL + FBI)
+        const res = await fetch(`./wanted-data.json?t=${Date.now()}`);
+        if (res.ok) {
+          const payload = await res.json();
+          if (payload && Array.isArray(payload.items) && payload.items.length > 0) {
+            wantedDataset = payload.items;
+            wantedMeta.updatedAt = payload.updatedAt || null;
+            wantedMeta.sources = payload.sources || [];
+            if (syncLabel) {
+              syncLabel.textContent = `Auto-Synced: ${formatAgencyTimestamp(payload.updatedAt)} • Sources: ${(payload.sources || ['NIA', 'INTERPOL', 'FBI']).join(', ')}`;
+            }
+            if (stripPill) stripPill.textContent = `Synced ${formatAgencyTimestamp(payload.updatedAt)}`;
+            if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${wantedDataset.length} Official Records`;
+            renderWantedHomeStrip();
+            renderWantedDirectory();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Local wanted-data.json not found yet, using live FBI official fallback:', err);
+      }
+
+      // 2. Day-1 Fallback: Direct official FBI API (works immediately before first GitHub Action runs)
+      try {
+        const fbiRes = await fetch('https://api.fbi.gov/wanted/v1/list?page=1');
+        if (fbiRes.ok) {
+          const fbiData = await fbiRes.json();
+          wantedDataset = (fbiData.items || []).slice(0, 24).map(normalizeFbiDirectItem);
+          wantedMeta.updatedAt = new Date().toISOString();
+          if (syncLabel) {
+            syncLabel.textContent = `Live Official API Sync: ${formatAgencyTimestamp(wantedMeta.updatedAt)} (Run GitHub Action for NIA + INTERPOL + FBI combined)`;
+          }
+          if (stripPill) stripPill.textContent = 'Live Official Feed';
+          if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${wantedDataset.length} Official Records`;
+          renderWantedHomeStrip();
+          renderWantedDirectory();
+          return;
+        }
+      } catch (e) {
+        console.warn('Direct FBI API fallback error:', e);
+      }
+
+      const offlineMsg = '<div class="p-4 text-center text-xs" style="color: var(--text-sub);">Official feeds temporarily unreachable. Please verify directly via the Fact-Check Portal links.</div>';
+      if (stripEl) stripEl.innerHTML = offlineMsg;
+      if (dirEl) dirEl.innerHTML = offlineMsg;
+      if (countBadge) countBadge.textContent = 'Offline';
+    }
+
+    function setWantedFilter(agency, btnEl) {
+      currentWantedAgency = agency;
+      document.querySelectorAll('#view-wanted .choice-pill').forEach(b => b.classList.remove('selected-red', 'selected'));
+      if (btnEl) btnEl.classList.add('selected-red');
+      renderWantedDirectory();
+    }
+
+    function renderWantedHomeStrip() {
+      const container = document.getElementById('wanted-home-strip');
+      if (!container) return;
+
+      if (!wantedDataset.length) {
+        container.innerHTML = '<div class="text-xs italic py-4" style="color: var(--text-sub);">No official alerts loaded.</div>';
+        return;
+      }
+
+      // Pick top 4 varied alerts (prioritizing NIA / INTERPOL India / high reward / newest)
+      const niaItems = wantedDataset.filter(i => i.agency === 'NIA');
+      const interpolItems = wantedDataset.filter(i => i.agency === 'INTERPOL');
+      const fbiItems = wantedDataset.filter(i => i.agency === 'FBI');
+      const preview = [...niaItems.slice(0, 2), ...interpolItems.slice(0, 2), ...fbiItems.slice(0, 4)].slice(0, 4);
+
+      container.innerHTML = preview.map(item => {
+        const photoHtml = item.photo
+          ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" class="w-14 h-16 rounded-xl object-cover border flex-shrink-0" style="border-color: var(--border-color);"><div style="display:none; border-color: var(--border-color);" class="w-14 h-16 rounded-xl bg-red-500/10 text-red-500 border items-center justify-center flex-shrink-0"><i class="fa-solid fa-user-secret text-lg"></i></div>`
+          : `<div class="w-14 h-16 rounded-xl bg-red-500/10 text-red-500 border flex items-center justify-center flex-shrink-0" style="border-color: var(--border-color);"><i class="fa-solid fa-user-secret text-lg"></i></div>`;
+
+        const releaseStr = formatAgencyTimestamp(item.publishedAt || item.updatedAt);
+
+        return `
+          <div class="wanted-strip-item p-3 rounded-2xl border flex flex-col justify-between gap-2.5 transition-all hover:border-red-500/40" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+            <div class="flex items-start gap-2.5 cursor-pointer" onclick="openWantedDossier('${escapeHtml(item.id)}')">
+              ${photoHtml}
+              <div class="min-w-0 flex-grow">
+                <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                  <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-600 text-white uppercase">${escapeHtml(item.noticeType || 'WANTED')}</span>
+                  ${item.rewardText ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-500 border border-amber-500/30 truncate max-w-[110px]">Reward</span>` : ''}
+                </div>
+                <h4 class="text-xs font-extrabold truncate" style="color: var(--text-main);">${escapeHtml(item.name)}</h4>
+                <p class="text-[10px] truncate mt-0.5" style="color: var(--text-sub);"><i class="fa-solid fa-building-shield mr-1 text-red-500"></i>${escapeHtml(item.department)}</p>
+                <p class="text-[10px] truncate" style="color: var(--text-sub);"><i class="fa-solid fa-location-dot mr-1 text-blue-500"></i>${escapeHtml(item.location)}</p>
+              </div>
+            </div>
+            <div class="pt-2 border-t flex items-center justify-between gap-2 flex-wrap" style="border-color: var(--border-color);">
+              <span class="text-[9.5px]" style="color: var(--text-sub);"><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(releaseStr)}</span>
+              <a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener" class="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[10px] font-bold transition-all whitespace-nowrap flex items-center gap-1 border border-blue-500/30">
+                <i class="fa-solid fa-circle-check text-[9px]"></i> Verified by ${escapeHtml(item.verifiedBy)}
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderWantedDirectory() {
+      const container = document.getElementById('wanted-directory-container');
+      const countBadge = document.getElementById('wanted-count-badge');
+      if (!container) return;
+
+      const query = (document.getElementById('wanted-search-input')?.value || '').trim().toLowerCase();
+      const sortMode = document.getElementById('wanted-sort-select')?.value || 'latest';
+
+      let list = wantedDataset.filter(item => {
+        if (currentWantedAgency !== 'all' && item.agency !== currentWantedAgency) return false;
+        if (!query) return true;
+        const haystack = [
+          item.name,
+          ...(item.aliases || []),
+          item.department,
+          item.location,
+          item.nationality,
+          item.charges,
+          item.verifiedBy
+        ].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+
+      if (sortMode === 'latest') {
+        list.sort((a, b) => new Date(b.updatedAt || b.publishedAt || 0) - new Date(a.updatedAt || a.publishedAt || 0));
+      } else if (sortMode === 'reward') {
+        list.sort((a, b) => (b.rewardValue || (b.rewardText ? 1 : 0)) - (a.rewardValue || (a.rewardText ? 1 : 0)));
+      } else if (sortMode === 'name') {
+        list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      }
+
+      if (countBadge) {
+        countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${list.length} Official Records`;
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+            <i class="fa-solid fa-magnifying-glass text-xl text-amber-500"></i>
+            <p class="text-xs font-bold" style="color: var(--text-main);">No matching official wanted records found.</p>
+            <p class="text-[11px]" style="color: var(--text-sub);">Try clearing the search box or switching agency filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const photoHtml = item.photo
+          ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" class="w-16 h-20 sm:w-20 sm:h-24 rounded-xl object-cover border flex-shrink-0" style="border-color: var(--border-color);"><div style="display:none; border-color: var(--border-color);" class="w-16 h-20 sm:w-20 sm:h-24 rounded-xl bg-red-500/10 text-red-500 border items-center justify-center flex-shrink-0"><i class="fa-solid fa-user-secret text-2xl"></i></div>`
+          : `<div class="w-16 h-20 sm:w-20 sm:h-24 rounded-xl bg-red-500/10 text-red-500 border flex items-center justify-center flex-shrink-0" style="border-color: var(--border-color);"><i class="fa-solid fa-user-secret text-2xl"></i></div>`;
+
+        const releaseDate = formatAgencyTimestamp(item.publishedAt);
+        const modifiedDate = item.updatedAt && item.updatedAt !== item.publishedAt ? formatAgencyTimestamp(item.updatedAt) : null;
+        const freshnessHtml = getWantedFreshnessBadge(item.publishedAt, item.updatedAt);
+
+        return `
+          <div class="p-4 rounded-2xl border transition-all hover:border-red-500/35" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+            <div class="flex items-start gap-3.5">
+              ${photoHtml}
+              <div class="min-w-0 flex-grow">
+                <div class="flex items-center justify-between gap-2 flex-wrap mb-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[9.5px] font-black px-2 py-0.5 rounded bg-red-600 text-white uppercase">${escapeHtml(item.noticeType || 'WANTED')}</span>
+                    ${freshnessHtml}
+                    ${item.rewardText ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-500 border border-amber-500/30"><i class="fa-solid fa-coins mr-1 text-[9px]"></i>${escapeHtml(item.rewardText)}</span>` : ''}
+                  </div>
+                </div>
+
+                <h4 class="text-sm font-extrabold leading-snug" style="color: var(--text-main);">${escapeHtml(item.name)}</h4>
+                ${item.aliases && item.aliases.length ? `<p class="text-[10.5px] truncate mt-0.5" style="color: var(--text-sub);"><b>Aliases:</b> ${escapeHtml(item.aliases.join(', '))}</p>` : ''}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2 text-[11px]" style="color: var(--text-sub);">
+                  <p class="truncate"><i class="fa-solid fa-building-shield mr-1.5 text-red-500"></i><b>Dept:</b> <span style="color: var(--text-main);">${escapeHtml(item.department)}</span></p>
+                  <p class="truncate"><i class="fa-solid fa-location-dot mr-1.5 text-blue-500"></i><b>Area/Location:</b> <span style="color: var(--text-main);">${escapeHtml(item.location)}</span></p>
+                </div>
+
+                <p class="text-[11px] mt-1.5 line-clamp-2" style="color: var(--text-sub);"><b>Offense / Subject:</b> ${escapeHtml(item.charges)}</p>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5" style="border-color: var(--border-color);">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]" style="color: var(--text-sub);">
+                <span><i class="fa-regular fa-clock mr-1 text-blue-500"></i><b>Released:</b> ${escapeHtml(releaseDate)}</span>
+                ${modifiedDate ? `<span><i class="fa-solid fa-rotate mr-1 text-green-500"></i><b>Updated:</b> ${escapeHtml(modifiedDate)}</span>` : ''}
+                ${item.dob ? `<span><i class="fa-regular fa-calendar mr-1"></i><b>DOB:</b> ${escapeHtml(item.dob)}</span>` : ''}
+              </div>
+
+              <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                <button onclick="openWantedDossier('${escapeHtml(item.id)}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);">
+                  <i class="fa-solid fa-file-lines mr-1 text-[10px]"></i> Full Dossier
+                </button>
+                <a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
+                  <i class="fa-solid fa-circle-check text-[10px]"></i> Verified by ${escapeHtml(item.verifiedBy)}
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openWantedDossier(id) {
+      const item = wantedDataset.find(x => x.id === id);
+      if (!item) return;
+
+      document.getElementById('dossier-modal-title').textContent = item.name;
+      document.getElementById('dossier-modal-dept').textContent = `${item.department} • ${item.noticeType || 'OFFICIAL NOTICE'}`;
+
+      const photoHtml = item.photo
+        ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" referrerpolicy="no-referrer" class="w-24 h-28 rounded-2xl object-cover border flex-shrink-0" style="border-color: var(--border-color);">`
+        : `<div class="w-24 h-28 rounded-2xl bg-red-500/10 text-red-500 border flex items-center justify-center flex-shrink-0" style="border-color: var(--border-color);"><i class="fa-solid fa-user-secret text-3xl"></i></div>`;
+
+      document.getElementById('dossier-modal-body').innerHTML = `
+        <div class="flex items-start gap-4 p-3.5 rounded-2xl border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          ${photoHtml}
+          <div class="space-y-1.5 min-w-0 flex-grow">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              ${getWantedFreshnessBadge(item.publishedAt, item.updatedAt)}
+              ${item.rewardText ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-500 border border-amber-500/30">${escapeHtml(item.rewardText)}</span>` : ''}
+            </div>
+            <p><b>Department:</b> ${escapeHtml(item.department)}</p>
+            <p><b>Location / Area:</b> ${escapeHtml(item.location)}</p>
+            <p><b>Nationality:</b> ${escapeHtml(item.nationality || 'Not Specified')}</p>
+            ${item.dob ? `<p><b>Date of Birth:</b> ${escapeHtml(item.dob)}</p>` : ''}
+            ${item.aliases && item.aliases.length ? `<p><b>Known Aliases:</b> ${escapeHtml(item.aliases.join(', '))}</p>` : ''}
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl border space-y-1.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <p class="font-bold text-red-500"><i class="fa-solid fa-scale-balanced mr-1.5"></i>Charges &amp; Official Details</p>
+          <p class="leading-relaxed" style="color: var(--text-main);">${escapeHtml(item.charges)}</p>
+          ${item.description && item.description !== item.charges ? `<p class="leading-relaxed pt-1" style="color: var(--text-sub);">${escapeHtml(item.description)}</p>` : ''}
+          ${item.caution ? `<p class="leading-relaxed pt-1 text-amber-500 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Caution: ${escapeHtml(item.caution)}</p>` : ''}
+        </div>
+
+        <div class="p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]" style="background-color: var(--bg-sub); border-color: var(--border-color);">
+          <div>
+            <p><i class="fa-regular fa-clock mr-1 text-blue-500"></i><b>Department Released:</b> ${escapeHtml(formatAgencyTimestamp(item.publishedAt))}</p>
+            ${item.updatedAt ? `<p><i class="fa-solid fa-rotate mr-1 text-green-500"></i><b>Last Updated:</b> ${escapeHtml(formatAgencyTimestamp(item.updatedAt))}</p>` : ''}
+          </div>
+          <a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <i class="fa-solid fa-circle-check"></i> Verified by ${escapeHtml(item.verifiedBy)}
+          </a>
+        </div>
+      `;
+
+      document.getElementById('wanted-dossier-modal').classList.remove('hidden');
+    }
+
+    function closeWantedDossier() {
+      document.getElementById('wanted-dossier-modal').classList.add('hidden');
     }
 
     function setNewsScope(scope) {
@@ -2011,7 +2233,7 @@
       fetchPortalNews();
     }
 
-    /* 🚀 PRECISION HEADLINES ENGINE WITH CALENDAR RESTORATION */
+    /* PRECISION HEADLINES ENGINE */
     async function fetchPortalNews() {
       const feedContainer = document.getElementById('news-feed-container');
       const badge = document.getElementById('news-status-badge');
@@ -2036,14 +2258,12 @@
           return dateB - dateA;
         });
 
-        // Match local date string properly
         let filteredItems = items.filter(item => {
           const pubDate = item.querySelector("pubDate")?.textContent;
           if (!pubDate) return false;
           return getLocalDateStr(new Date(pubDate)) === selectedDateStr;
         });
 
-        // Graceful fallback for today's dynamic feed
         if (filteredItems.length === 0 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) {
           filteredItems = items.slice(0, 15);
         }
@@ -2082,22 +2302,12 @@
             const dateObj = new Date(pubDateStr);
             const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const day = dateObj.getDate();
-            
             const getOrdinal = (n) => {
               if (n > 3 && n < 21) return 'th';
-              switch (n % 10) {
-                case 1:  return "st";
-                case 2:  return "nd";
-                case 3:  return "rd";
-                default: return "th";
-              }
+              switch (n % 10) { case 1: return "st"; case 2: return "nd"; case 3: return "rd"; default: return "th"; }
             };
-            
             const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const monthPart = monthNames[dateObj.getMonth()];
-            const yearPart = dateObj.getFullYear();
-
-            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthPart} ${yearPart}`;
+            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
           }
 
           const title = await translateText(rawTitle, currentLanguage);
@@ -2110,14 +2320,14 @@
             <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
               <div class="flex-grow">
                 <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
-                  ${title}
+                  ${escapeHtml(title)}
                 </h4>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
                   <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
                   <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
                 </div>
               </div>
-              <a href="${link}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
+              <a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
                 <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
               </a>
             </div>
@@ -2149,7 +2359,7 @@
           const rawTitle = item.querySelector("title")?.textContent || "";
           const link = item.querySelector("link")?.textContent || "#";
           const title = await translateText(rawTitle, currentLanguage);
-          html += `<a href="${link}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${title}</a>`;
+          html += `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${escapeHtml(title)}</a>`;
         }
         container.innerHTML = html;
       } catch (e) {
@@ -2169,7 +2379,7 @@
       } catch (e) {}
     }
 
-    /* ==================== UNIFIED RADAR MAP SWITCHER ==================== */
+    /* UNIFIED RADAR MAP SWITCHER */
     function switchRadarMap(mode) {
       const btnWeather = document.getElementById('btn-radar-weather');
       const btnFlight = document.getElementById('btn-radar-flight');
@@ -2190,42 +2400,30 @@
       if (mode === 'weather') {
         frameWeather.style.display = 'block';
         frameFlight.style.display = 'none';
-
         btnWeather.classList.add('active-tab');
         btnWeather.style.backgroundColor = '#0071e3';
         btnWeather.style.color = '#ffffff';
         btnWeather.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
-
         titleEl.textContent = 'Live Weather Radar';
         iconEl.className = 'fa-solid fa-cloud-sun-rain text-blue-500 text-lg';
       } else {
         frameWeather.style.display = 'none';
         frameFlight.style.display = 'block';
-
         btnFlight.classList.add('active-tab');
         btnFlight.style.backgroundColor = '#0071e3';
         btnFlight.style.color = '#ffffff';
         btnFlight.style.boxShadow = '0 2px 8px rgba(0, 113, 227, 0.35)';
-
         titleEl.textContent = 'Live Flight & ISS Tracker';
         iconEl.className = 'fa-solid fa-plane-departure text-blue-500 text-lg';
-
-        setTimeout(() => {
-          if (leafletMap) leafletMap.invalidateSize();
-        }, 150);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 150);
       }
     }
     
-    /* ==================== REAL-TIME CRICKET ENGINE & MODAL ==================== */
+    /* REAL-TIME CRICKET ENGINE & MODAL */
     let currentLiveMatchData = null;
 
-    function openCricketModal() {
-      document.getElementById('cricket-modal').classList.remove('hidden');
-    }
-
-    function closeCricketModal() {
-      document.getElementById('cricket-modal').classList.add('hidden');
-    }
+    function openCricketModal() { document.getElementById('cricket-modal').classList.remove('hidden'); }
+    function closeCricketModal() { document.getElementById('cricket-modal').classList.add('hidden'); }
 
     async function fetchLiveCricketTicker(isManualRefresh = false) {
       const tickerEl = document.getElementById('ticker-cricket');
@@ -2238,11 +2436,8 @@
         const data = await res.json();
 
         let allMatches = [];
-        if (data && data.scores && Array.isArray(data.scores)) {
-          allMatches = data.scores;
-        } else if (data && data.events && Array.isArray(data.events)) {
-          allMatches = data.events;
-        }
+        if (data && data.scores && Array.isArray(data.scores)) allMatches = data.scores;
+        else if (data && data.events && Array.isArray(data.events)) allMatches = data.events;
 
         if (allMatches.length > 0) {
           const activeMatch = allMatches.find(m => m.status && (m.status.type?.state === 'in' || m.status.state === 'in')) || allMatches[0];
@@ -2250,20 +2445,17 @@
 
           const team1 = activeMatch.competitors?.[0];
           const team2 = activeMatch.competitors?.[1];
-
           const t1Name = team1?.team?.abbreviation || team1?.team?.shortDisplayName || 'Team 1';
           const t2Name = team2?.team?.abbreviation || team2?.team?.shortDisplayName || 'Team 2';
-
           const t1Score = team1?.score || (team1?.linescores?.[0]?.displayValue) || 'Yet to Bat';
           const t2Score = team2?.score || (team2?.linescores?.[0]?.displayValue) || '';
-
           const statusSummary = activeMatch.status?.summary || activeMatch.status?.type?.detail || activeMatch.summary || 'Live Match in Progress';
           const isLive = activeMatch.status?.type?.state === 'in' || activeMatch.status?.state === 'in';
 
           tickerEl.innerHTML = `
             <span class="${isLive ? 'text-green-400 font-extrabold' : 'text-amber-400 font-bold'}">
               <span class="${isLive ? 'live-dot' : ''}" style="width:6px;height:6px;display:inline-block;margin-right:4px;"></span>
-              ${t1Name} ${t1Score} vs ${t2Name} ${t2Score} • ${statusSummary}
+              ${escapeHtml(t1Name)} ${escapeHtml(t1Score)} vs ${escapeHtml(t2Name)} ${escapeHtml(t2Score)} • ${escapeHtml(statusSummary)}
             </span>
           `;
 
@@ -2291,7 +2483,7 @@
       if (icon) icon.classList.remove('fa-spin');
     }
     
-    /* 🚀 CHANNEL SWITCHER */
+    /* CHANNEL SWITCHER */
     function setMode(mode, element) {
       document.querySelectorAll('.channel-card').forEach(btn => btn.classList.remove('active-mode'));
       if (element) element.classList.add('active-mode');
@@ -2329,7 +2521,6 @@
         isVideoPlaying = true;
       } else {
         if (dot) dot.style.display = "inline-block";
-
         let streamUrl = "";
         let channelName = "TV9 Live";
 
@@ -2361,43 +2552,31 @@
         }
 
         if (title) title.innerText = channelName;
-        
-        if (masterPlayer.src !== streamUrl) {
-          masterPlayer.src = streamUrl;
-        }
+        if (masterPlayer.src !== streamUrl) masterPlayer.src = streamUrl;
         isVideoPlaying = true;
       }
     }
 
-    /* 🚀 PRECISION PiP ENGINE (POSITION MEMORY + NO-JUMP DRAG + CORNER RESIZE) */
+    /* PRECISION PiP ENGINE */
     function initPrecisionPiPEngine() {
       const container = document.getElementById('active-video-container');
       const barrier = document.getElementById('pip-touch-barrier');
       if (!container || !barrier) return;
 
-      let isDragging = false;
-      let isPinching = false;
-      let isCornerResizing = false;
+      let isDragging = false, isPinching = false, isCornerResizing = false;
       let resizeDirection = '';
-
       let offsetX = 0, offsetY = 0;
-      let startW = 320, startH = 180;
-      let startX = 0, startY = 0;
-      let initialPinchDist = 0;
-      let initialPinchW = 320, initialPinchH = 180;
+      let startW = 320, startH = 180, startX = 0, startY = 0;
+      let initialPinchDist = 0, initialPinchW = 320, initialPinchH = 180;
 
       function savePipBounds() {
         if (!isMiniPlayerActive) return;
         const rect = container.getBoundingClientRect();
         localStorage.setItem('tc_pip_coords', JSON.stringify({
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height
+          left: rect.left, top: rect.top, width: rect.width, height: rect.height
         }));
       }
 
-      // 1. FREE-FORM CORNER RESIZE (LAPTOP / DESKTOP / TOUCH)
       document.querySelectorAll('.pip-resize-handle').forEach(handle => {
         handle.addEventListener('pointerdown', (e) => {
           if (!isMiniPlayerActive) return;
@@ -2413,10 +2592,8 @@
         });
       });
 
-      // 2. TOUCH-ANYWHERE DRAG & TWO-FINGER FREE PINCH (MOBILE)
       barrier.addEventListener('touchstart', (e) => {
         if (!isMiniPlayerActive || !isPiPMoveMode) return;
-
         if (e.touches.length === 2) {
           isPinching = true;
           isDragging = false;
@@ -2438,7 +2615,6 @@
       barrier.addEventListener('touchmove', (e) => {
         if (!isMiniPlayerActive || !isPiPMoveMode) return;
         e.preventDefault();
-
         if (isPinching && e.touches.length === 2) {
           const currentDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -2447,32 +2623,26 @@
           const scale = currentDist / initialPinchDist;
           const newW = Math.min(Math.max(initialPinchW * scale, 170), window.innerWidth * 0.95);
           const newH = Math.min(Math.max(initialPinchH * scale, 95), window.innerHeight * 0.85);
-
           container.style.width = `${newW}px`;
           container.style.height = `${newH}px`;
         } else if (isDragging && e.touches.length === 1) {
           let newLeft = e.touches[0].clientX - offsetX;
           let newTop = e.touches[0].clientY - offsetY;
-
           newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - container.offsetWidth - 10));
           newTop = Math.max(50, Math.min(newTop, window.innerHeight - container.offsetHeight - 10));
-
           container.style.left = `${newLeft}px`;
           container.style.top = `${newTop}px`;
         }
       }, { passive: false });
 
       const onTouchEnd = () => {
-        if (isDragging || isPinching) {
-          savePipBounds();
-        }
+        if (isDragging || isPinching) savePipBounds();
         isDragging = false;
         isPinching = false;
       };
       barrier.addEventListener('touchend', onTouchEnd);
       barrier.addEventListener('touchcancel', onTouchEnd);
 
-      // 3. MOUSE-DRAG ANYWHERE (LAPTOP / DESKTOP)
       barrier.addEventListener('mousedown', (e) => {
         if (!isMiniPlayerActive || !isPiPMoveMode) return;
         isDragging = true;
@@ -2487,39 +2657,29 @@
         if (isCornerResizing && isMiniPlayerActive) {
           const dx = e.clientX - startX;
           const dy = e.clientY - startY;
-
-          let newW = startW;
-          let newH = startH;
-
+          let newW = startW, newH = startH;
           if (resizeDirection.includes('e')) newW = startW + dx;
           if (resizeDirection.includes('w')) newW = startW - dx;
           if (resizeDirection.includes('s')) newH = startH + dy;
           if (resizeDirection.includes('n')) newH = startH - dy;
-
           newW = Math.min(Math.max(newW, 170), window.innerWidth * 0.95);
           newH = Math.min(Math.max(newH, 95), window.innerHeight * 0.85);
-
           container.style.width = `${newW}px`;
           container.style.height = `${newH}px`;
           return;
         }
-
         if (isDragging && isMiniPlayerActive && isPiPMoveMode) {
           let newLeft = e.clientX - offsetX;
           let newTop = e.clientY - offsetY;
-
           newLeft = Math.max(10, Math.min(newLeft, window.innerWidth - container.offsetWidth - 10));
           newTop = Math.max(50, Math.min(newTop, window.innerHeight - container.offsetHeight - 10));
-
           container.style.left = `${newLeft}px`;
           container.style.top = `${newTop}px`;
         }
       });
 
       window.addEventListener('pointerup', () => {
-        if (isCornerResizing || isDragging) {
-          savePipBounds();
-        }
+        if (isCornerResizing || isDragging) savePipBounds();
         isCornerResizing = false;
         isDragging = false;
         document.body.style.userSelect = '';
@@ -2527,7 +2687,7 @@
       });
     }
 
-    /* MAP INITIALIZATION WITH ZOOM CONTROL & COLLAPSIBLE LEGEND */
+    /* MAP INITIALIZATION */
     function initOSINTMap() {
       leafletMap = L.map('osint-map', { zoomControl: true }).setView([20.5937, 78.9629], 3);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(leafletMap);
@@ -2536,7 +2696,7 @@
       flightPolylineGroup = L.layerGroup().addTo(leafletMap);
 
       const legend = L.control({ position: 'bottomright' });
-      legend.onAdd = function (map) {
+      legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'leaflet-apple-legend');
         div.innerHTML = `
           <div onclick="toggleLegendContent()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 11px;">
@@ -2568,17 +2728,14 @@
             const time = new Date(quake.properties.time).toLocaleString();
 
             const marker = L.circleMarker([lat, lon], {
-              radius: mag * 1.5,
-              color: '#ff3b30',
-              fillColor: '#ff3b30',
-              fillOpacity: 0.7
+              radius: mag * 1.5, color: '#ff3b30', fillColor: '#ff3b30', fillOpacity: 0.7
             });
 
             marker.bindPopup(`
               <div style="font-family: inherit; font-size: 12px;">
                 <b style="color: #ff3b30;">🔴 USGS Earthquake Event</b><br>
                 <b>Magnitude:</b> ${mag}<br>
-                <b>Location:</b> ${place}<br>
+                <b>Location:</b> ${escapeHtml(place)}<br>
                 <b>Time:</b> ${time}<br>
                 <b>Coordinates:</b> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°
               </div>
@@ -2600,7 +2757,6 @@
       }
     }
 
-    /* REAL FLIGHT TRAFFIC FETCH & ROUTING POLYLINES */
     async function fetchLiveAirTraffic() {
       try {
         const res = await fetch('https://news-39tq.vercel.app/api/flights');
@@ -2631,7 +2787,7 @@
 
               marker.bindPopup(`
                 <div style="font-size: 12px; min-width: 150px;">
-                  <b style="color: #0071e3;">✈️ ${cleanCall}</b><br>
+                  <b style="color: #0071e3;">✈️ ${escapeHtml(cleanCall)}</b><br>
                   <b>Altitude:</b> ${Math.round(altMeters)} m<br>
                   <b>Speed:</b> ${speedKmh} km/h<br>
                   <b>Heading:</b> ${Math.round(heading)}°
@@ -2644,7 +2800,6 @@
       } catch (e) {}
     }
 
-    /* ISS SATELLITE ORBIT TRACKER */
     function initISSTracker() {
       async function updateISS() {
         try {
@@ -2665,11 +2820,8 @@
             const issHtml = `<div style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-satellite text-green-400 text-lg"></i></div>`;
             const issIcon = L.divIcon({ html: issHtml, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
 
-            if (!issMarker) {
-              issMarker = L.marker(currentPos, { icon: issIcon }).addTo(leafletMap);
-            } else {
-              issMarker.setLatLng(currentPos);
-            }
+            if (!issMarker) issMarker = L.marker(currentPos, { icon: issIcon }).addTo(leafletMap);
+            else issMarker.setLatLng(currentPos);
 
             if (issPolyline) leafletMap.removeLayer(issPolyline);
             if (issHistoryCoords.length > 1) {
@@ -2696,13 +2848,13 @@
         const data = await res.json();
         const issPeople = data.people ? data.people.filter(p => p.craft === 'ISS') : [];
         document.getElementById('osint-iss-crew').textContent = `${issPeople.length} Crew Members`;
-        container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${p.name}</div>`).join('') || '<div class="italic">Offline</div>';
+        container.innerHTML = issPeople.map(p => `<div class="p-1.5 rounded border mb-1" style="background-color: var(--bg-sub); border-color: var(--border-color);">• ${escapeHtml(p.name)}</div>`).join('') || '<div class="italic">Offline</div>';
       } catch(e) {
         container.innerHTML = '<div class="italic text-[11px]">Manifest offline</div>';
       }
     }
 
-    /* ==================== 💼 LIVE JOB VACANCIES ENGINE ==================== */
+    /* LIVE JOB VACANCIES ENGINE */
     const sampleVerifiedJobs = [
       {
         id: 'tc-job-1',
@@ -2740,26 +2892,19 @@
       container.innerHTML = '<div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div>';
 
       let jobsList = [];
-
       try {
         if (typeof db !== 'undefined') {
           const snapshot = await db.collection('live_jobs').where('status', '==', 'active').get();
-          if (!snapshot.empty) {
-            jobsList = snapshot.docs.map(doc => doc.data());
-          }
+          if (!snapshot.empty) jobsList = snapshot.docs.map(doc => doc.data());
         }
       } catch (e) {
         console.warn('Firestore jobs fetch fallback:', e);
       }
 
-      if (jobsList.length === 0) {
-        jobsList = sampleVerifiedJobs;
-      }
+      if (jobsList.length === 0) jobsList = sampleVerifiedJobs;
 
       let filtered = jobsList;
-      if (currentJobSector !== 'all') {
-        filtered = jobsList.filter(j => j.sector === currentJobSector);
-      }
+      if (currentJobSector !== 'all') filtered = jobsList.filter(j => j.sector === currentJobSector);
 
       countBadge.textContent = `${filtered.length} Openings Active`;
 
@@ -2773,29 +2918,27 @@
         };
 
         const contactBtn = job.contact && job.contact.startsWith('+') ? 
-          `<a href="tel:${job.contact}" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[11px] shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-phone text-[9px]"></i> Call: ${job.contact}</a>` :
-          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${job.contact || 'Portal Verified'}</span>`;
+          `<a href="tel:${escapeHtml(job.contact)}" class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[11px] shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-phone text-[9px]"></i> Call: ${escapeHtml(job.contact)}</a>` :
+          `<span class="text-[11px] font-semibold text-amber-500"><i class="fa-solid fa-circle-info mr-1"></i>${escapeHtml(job.contact || 'Portal Verified')}</span>`;
 
         html += `
           <div class="p-4 rounded-2xl border transition-all hover:border-blue-500/30" style="background-color: var(--bg-sub); border-color: var(--border-color);">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
               <div class="flex items-center gap-2 flex-wrap">
-                <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${job.title}</h4>
+                <h4 class="text-xs sm:text-sm font-bold" style="color: var(--text-main);">${escapeHtml(job.title)}</h4>
                 ${sectorBadges[job.sector] || ''}
               </div>
-              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${job.date || 'Active'}</span>
+              <span class="text-[10px] font-semibold text-blue-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${escapeHtml(job.date || 'Active')}</span>
             </div>
 
             <div class="text-[11px] space-y-1 mb-3" style="color: var(--text-sub);">
-              <p><i class="fa-regular fa-building mr-1.5 text-blue-500"></i><b>${job.company}</b> • <i class="fa-solid fa-location-dot mx-1 text-red-500"></i>${job.location}</p>
-              <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${job.eligibility} | <b>Salary:</b> ${job.salary}</p>
+              <p><i class="fa-regular fa-building mr-1.5 text-blue-500"></i><b>${escapeHtml(job.company)}</b> • <i class="fa-solid fa-location-dot mx-1 text-red-500"></i>${escapeHtml(job.location)}</p>
+              <p><i class="fa-solid fa-graduation-cap mr-1.5 text-amber-500"></i><b>Eligibility:</b> ${escapeHtml(job.eligibility)} | <b>Salary:</b> ${escapeHtml(job.salary)}</p>
             </div>
 
             <div class="flex items-center justify-between gap-3 pt-2 border-t border-black/5 dark:border-white/5 flex-wrap">
-              <div class="flex items-center gap-2">
-                ${contactBtn}
-              </div>
-              <a href="${job.applyUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-md flex items-center gap-1.5">
+              <div class="flex items-center gap-2">${contactBtn}</div>
+              <a href="${escapeHtml(job.applyUrl)}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-md flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Official Apply Portal
               </a>
             </div>
@@ -2813,7 +2956,7 @@
       fetchLiveJobs();
     }
 
-    /* ==================== 🔔 NOTIFICATION PREFERENCES MODAL LOGIC ==================== */
+    /* NOTIFICATION PREFERENCES MODAL LOGIC */
     function openNotificationPreferences() {
       document.getElementById('notification-prefs-modal').classList.remove('hidden');
       loadSavedPreferencesUI();
@@ -2827,11 +2970,8 @@
       const isChecked = document.getElementById(`topic-${topic}`).checked;
       const subContainer = document.getElementById(`sub-q-${topic}`);
       if (subContainer) {
-        if (isChecked) {
-          subContainer.classList.remove('hidden');
-        } else {
-          subContainer.classList.add('hidden');
-        }
+        if (isChecked) subContainer.classList.remove('hidden');
+        else subContainer.classList.add('hidden');
       }
       checkMasterToggleState();
     }
@@ -2845,8 +2985,7 @@
     }
 
     function toggleSelectAllTopics(masterChecked) {
-      const topics = ['news', 'weather', 'jobs', 'iss'];
-      topics.forEach(t => {
+      ['news', 'weather', 'jobs', 'iss'].forEach(t => {
         const checkbox = document.getElementById(`topic-${t}`);
         if (checkbox) {
           checkbox.checked = masterChecked;
@@ -2872,7 +3011,7 @@
             localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4));
             selectChoicePill('weather-city', 'GPS_Auto', btnEl);
           },
-          (err) => {
+          () => {
             btnEl.innerHTML = '📍 GPS Unavailable';
             setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000);
           },
@@ -2883,7 +3022,6 @@
 
     function loadSavedPreferencesUI() {
       const savedTopics = JSON.parse(localStorage.getItem('tc_user_topics') || '{"news":true,"weather":true,"jobs":true,"iss":false,"platform":true}');
-      
       ['news', 'weather', 'jobs', 'iss'].forEach(t => {
         const el = document.getElementById(`topic-${t}`);
         if (el) {
@@ -2891,7 +3029,6 @@
           onTopicToggle(t);
         }
       });
-
       checkMasterToggleState();
 
       const savedCity = localStorage.getItem('tc_pref_weather-city') || 'Hyderabad';
@@ -2919,13 +3056,9 @@
 
       const realLat = localStorage.getItem('tc_gps_lat');
       const realLon = localStorage.getItem('tc_gps_lon');
-      
       const preferences = {
         weatherCity: localStorage.getItem('tc_pref_weather-city') || 'Hyderabad',
-        gpsCoords: (realLat && realLon) ? {
-          lat: parseFloat(realLat),
-          lon: parseFloat(realLon)
-        } : null,
+        gpsCoords: (realLat && realLon) ? { lat: parseFloat(realLat), lon: parseFloat(realLon) } : null,
         jobSector: localStorage.getItem('tc_pref_job-sector') || 'Freshers & Any Degree',
         issPref: localStorage.getItem('tc_pref_iss-pref') || 'Night Passes Only'
       };
@@ -2941,9 +3074,7 @@
 
         if (typeof db !== 'undefined') {
           await db.collection('fcm_tokens').doc(deviceId).set({
-            topics: topics,
-            preferences: preferences,
-            updatedAt: new Date()
+            topics: topics, preferences: preferences, updatedAt: new Date()
           }, { merge: true });
         }
       } catch (err) {
@@ -2968,7 +3099,6 @@
     <span>Install App</span>
   </button>
 
-  <!-- Apple Styling -->
   <style>
     .apple-btn {
       position: fixed;
@@ -2993,14 +3123,9 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                  box-shadow 0.2s ease, 
-                  background 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
     }
-    .apple-btn:active {
-      transform: scale(0.93);
-      background: rgba(235, 235, 235, 0.9);
-    }
+    .apple-btn:active { transform: scale(0.93); background: rgba(235, 235, 235, 0.9); }
     @media (prefers-color-scheme: dark) {
       .apple-btn {
         background: rgba(30, 30, 32, 0.82);
@@ -3008,17 +3133,13 @@
         border: 0.5px solid rgba(255, 255, 255, 0.18);
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
       }
-      .apple-btn:active {
-        background: rgba(50, 50, 54, 0.9);
-      }
+      .apple-btn:active { background: rgba(50, 50, 54, 0.9); }
     }
   </style>
 
-  <!-- Script for Android & iPhone Handling -->
   <script>
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
-
     const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
 
@@ -3028,26 +3149,20 @@
       installBtn.style.display = 'inline-flex';
     });
 
-    if (isIos && !isInStandaloneMode) {
-      installBtn.style.display = 'inline-flex';
-    }
+    if (isIos && !isInStandaloneMode) installBtn.style.display = 'inline-flex';
 
     installBtn.addEventListener('click', async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBtn.style.display = 'none';
-        }
+        if (outcome === 'accepted') installBtn.style.display = 'none';
         deferredPrompt = null;
       } else if (isIos) {
         alert("To install on your iPhone:\n\n1. Tap the Share button (square with arrow ⬆) at the bottom.\n2. Scroll down and tap 'Add to Home Screen' (+).");
       }
     });
 
-    window.addEventListener('appinstalled', () => {
-      installBtn.style.display = 'none';
-    });
+    window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
   </script>
 
   <!-- Firebase Core, Messaging, and Firestore SDKs -->
@@ -3074,13 +3189,10 @@
 
       try {
         let permission = Notification.permission;
-        if (permission === 'default') {
-          permission = await Notification.requestPermission();
-        }
+        if (permission === 'default') permission = await Notification.requestPermission();
 
         if (permission === 'granted') {
           const reg = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js');
-          
           const token = await messaging.getToken({
             vapidKey: 'BCQlANkQquqwoMg8Uxj55rM9mcQWZLAA5dJCR2AeaUflTKqdYRGcULRVrtYy9Rr4qsRxn8T-IfLKuDav2TUnD0g',
             serviceWorkerRegistration: reg
@@ -3101,11 +3213,7 @@
             };
 
             await db.collection('fcm_tokens').doc(deviceId).set({
-              token: token,
-              device: navigator.userAgent,
-              topics: initialTopics,
-              preferences: initialPrefs,
-              updatedAt: new Date()
+              token: token, device: navigator.userAgent, topics: initialTopics, preferences: initialPrefs, updatedAt: new Date()
             }, { merge: true });
           }
         } else if (permission === 'denied') {
@@ -3114,11 +3222,8 @@
             deviceId = 'dev_' + Math.random().toString(36).substring(2, 12);
             localStorage.setItem('tc_device_id', deviceId);
           }
-
           await db.collection('denied_stats').doc(deviceId).set({
-            status: 'denied',
-            device: navigator.userAgent,
-            lastSeen: new Date()
+            status: 'denied', device: navigator.userAgent, lastSeen: new Date()
           }, { merge: true });
         }
       } catch (err) {
@@ -3128,18 +3233,13 @@
 
     window.addEventListener('load', initPushRegistration);
 
-
-
-// Safe Festive Theme Loader
-(function loadFestivalTheme() {
-  const festiveLink = document.createElement('link');
-  festiveLink.rel = 'stylesheet';
-  festiveLink.href = 'festival.css?t=' + new Date().getTime();
-  document.head.appendChild(festiveLink);
-})();
-
-    
-    
+    // Safe Festive Theme Loader
+    (function loadFestivalTheme() {
+      const festiveLink = document.createElement('link');
+      festiveLink.rel = 'stylesheet';
+      festiveLink.href = 'festival.css?t=' + new Date().getTime();
+      document.head.appendChild(festiveLink);
+    })();
   </script>
 </body>
 </html>
