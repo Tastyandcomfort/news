@@ -22,7 +22,7 @@ jobs:
           node-version: "20"
 
       - name: Fetch NIA, INTERPOL & FBI Wanted Data
-        run: node scripts/update-wanted.mjs
+       run: node update-wanted.mjs
 
       - name: Commit updated wanted-data.json
         run: |
