@@ -1,9 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
 
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-  'Accept': 'application/json, text/html, application/xhtml+xml;q=0.9, */*;q=0.8',
+  'Accept': 'application/json, text/plain, */*',
   'Accept-Language': 'en-US,en;q=0.9'
 };
 
@@ -43,16 +47,31 @@ async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 18000) {
   }
 }
 
+async function curlHtml(url) {
+  const { stdout } = await execFileAsync('curl', [
+    '-sS', '-L', '--max-time', '20',
+    '-w', '\n__HTTP_STATUS__:%{http_code}',
+    '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    '-H', 'Accept-Language: en-IN,en-US;q=0.9,en;q=0.8',
+    '-H', 'Upgrade-Insecure-Requests: 1',
+    url
+  ], { maxBuffer: 10 * 1024 * 1024 });
+
+  const marker = '\n__HTTP_STATUS__:';
+  const idx = stdout.lastIndexOf(marker);
+  const status = idx !== -1 ? parseInt(stdout.slice(idx + marker.length).trim(), 10) : 0;
+  const body = idx !== -1 ? stdout.slice(0, idx) : stdout;
+  return { status, body };
+}
+
 // 1. DIRECT OFFICIAL US GOVT: FBI Wanted API (api.fbi.gov)
 async function fetchFbiWanted() {
   const records = [];
   for (const page of [1, 2]) {
     try {
       const res = await fetchWithTimeout(`https://api.fbi.gov/wanted/v1/list?page=${page}`);
-      if (!res.ok) {
-        console.warn(`FBI page ${page} HTTP ${res.status}`);
-        continue;
-      }
+      if (!res.ok) continue;
       const data = await res.json();
       for (const item of data.items || []) {
         const offices = Array.isArray(item.field_offices) && item.field_offices.length > 0
@@ -91,7 +110,7 @@ async function fetchFbiWanted() {
   return records.slice(0, 40);
 }
 
-// 2. DIRECT OFFICIAL INTERPOL API (ws-public.interpol.int) with polite retry on 502
+// 2. DIRECT OFFICIAL INTERPOL API (ws-public.interpol.int)
 async function fetchInterpolWanted() {
   const seen = new Map();
   const queries = [
@@ -114,13 +133,8 @@ async function fetchInterpolWanted() {
           }
           break;
         }
-        console.warn(`INTERPOL query HTTP ${res.status} (attempt ${attempt}): ${q}`);
-        if ((res.status === 502 || res.status === 503) && attempt === 1) {
-          await sleep(1200);
-        }
-      } catch (err) {
-        console.warn(`INTERPOL fetch error (attempt ${attempt}):`, err.message);
-      }
+        if ((res.status === 502 || res.status === 503) && attempt === 1) await sleep(1200);
+      } catch {}
     }
     await sleep(400);
   }
@@ -148,9 +162,7 @@ async function fetchInterpolWanted() {
           }
         }
       }
-    } catch {
-      // Proceed with verified summary fields
-    }
+    } catch {}
 
     const natList = (n.nationalities || []).map(countryName).filter(Boolean);
     const wantedBy = [...new Set(issuingCountries)].join(', ') || 'INTERPOL Member State';
@@ -185,12 +197,11 @@ async function fetchInterpolWanted() {
   return records;
 }
 
-// 3. DIRECT OFFICIAL GOVT OF INDIA: NIA Most Wanted (nia.mha.gov.in/wanted.htm)
+// 3. DIRECT OFFICIAL GOVT OF INDIA: NIA Most Wanted via curl
 async function fetchNiaIndiaWanted() {
   const niaPages = [
     'https://nia.mha.gov.in/wanted.htm',
-    'https://nia.mha.gov.in/wanted.htm?page=1',
-    'https://nia.mha.gov.in/most-wanted-photos.htm'
+    'https://nia.mha.gov.in/wanted.htm?page=1'
   ];
 
   const seenNames = new Set();
@@ -198,20 +209,15 @@ async function fetchNiaIndiaWanted() {
 
   for (const pageUrl of niaPages) {
     try {
-      const res = await fetchWithTimeout(pageUrl, {
-        'Referer': 'https://nia.mha.gov.in/'
-      }, 20000);
-
-      if (!res.ok) {
-        console.warn(`NIA HTTP ${res.status}: ${pageUrl}`);
+      const { status, body: html } = await curlHtml(pageUrl);
+      if (status !== 200 || !html) {
+        console.warn(`NIA curl HTTP ${status}: ${pageUrl}`);
         continue;
       }
 
-      const html = await res.text();
       const baseOrigin = new URL(pageUrl).origin;
       console.log(`NIA fetched ${pageUrl} (${html.length} bytes)`);
 
-      // Parse structured NIA dossier blocks (Name : ... Wanted in : ...)
       const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
       for (let i = 0; i < chunks.length; i++) {
         const block = chunks[i];
@@ -275,7 +281,7 @@ async function fetchNiaIndiaWanted() {
         });
       }
     } catch (err) {
-      console.warn(`NIA fetch error (${pageUrl}):`, err.message);
+      console.warn(`NIA curl error (${pageUrl}):`, err.message);
     }
   }
 
