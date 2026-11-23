@@ -28,6 +28,8 @@ function stripTags(html) {
     .trim();
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 18000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -89,7 +91,7 @@ async function fetchFbiWanted() {
   return records.slice(0, 40);
 }
 
-// 2. DIRECT OFFICIAL INTERPOL API (ws-public.interpol.int)
+// 2. DIRECT OFFICIAL INTERPOL API (ws-public.interpol.int) with polite retry on 502
 async function fetchInterpolWanted() {
   const seen = new Map();
   const queries = [
@@ -99,22 +101,28 @@ async function fetchInterpolWanted() {
   ];
 
   for (const q of queries) {
-    try {
-      const res = await fetchWithTimeout(q, {
-        'Origin': 'https://www.interpol.int',
-        'Referer': 'https://www.interpol.int/'
-      });
-      if (!res.ok) {
-        console.warn(`INTERPOL query HTTP ${res.status}: ${q}`);
-        continue;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const res = await fetchWithTimeout(q, {
+          'Origin': 'https://www.interpol.int',
+          'Referer': 'https://www.interpol.int/'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          for (const n of data?._embedded?.notices || []) {
+            if (!seen.has(n.entity_id)) seen.set(n.entity_id, n);
+          }
+          break;
+        }
+        console.warn(`INTERPOL query HTTP ${res.status} (attempt ${attempt}): ${q}`);
+        if ((res.status === 502 || res.status === 503) && attempt === 1) {
+          await sleep(1200);
+        }
+      } catch (err) {
+        console.warn(`INTERPOL fetch error (attempt ${attempt}):`, err.message);
       }
-      const data = await res.json();
-      for (const n of data?._embedded?.notices || []) {
-        if (!seen.has(n.entity_id)) seen.set(n.entity_id, n);
-      }
-    } catch (err) {
-      console.warn('INTERPOL fetch error:', err.message);
     }
+    await sleep(400);
   }
 
   const records = [];
@@ -141,7 +149,7 @@ async function fetchInterpolWanted() {
         }
       }
     } catch {
-      // Proceed with verified summary fields from INTERPOL
+      // Proceed with verified summary fields
     }
 
     const natList = (n.nationalities || []).map(countryName).filter(Boolean);
@@ -177,11 +185,12 @@ async function fetchInterpolWanted() {
   return records;
 }
 
-// 3. DIRECT OFFICIAL GOVT OF INDIA: NIA Most Wanted (nia.mha.gov.in)
+// 3. DIRECT OFFICIAL GOVT OF INDIA: NIA Most Wanted (nia.mha.gov.in/wanted.htm)
 async function fetchNiaIndiaWanted() {
   const niaPages = [
-    'https://nia.mha.gov.in/most-wanted.htm',
-    'https://nia.mha.gov.in/most-wanted.htm?page=1'
+    'https://nia.mha.gov.in/wanted.htm',
+    'https://nia.mha.gov.in/wanted.htm?page=1',
+    'https://nia.mha.gov.in/most-wanted-photos.htm'
   ];
 
   const seenNames = new Set();
@@ -200,37 +209,47 @@ async function fetchNiaIndiaWanted() {
 
       const html = await res.text();
       const baseOrigin = new URL(pageUrl).origin;
+      console.log(`NIA fetched ${pageUrl} (${html.length} bytes)`);
 
-      // Split into official modal/dossier blocks around "Wanted in :"
-      const blocks = html.split(/(?=Name\s*:)/gi);
-      for (const block of blocks) {
-        if (!/Wanted in\s*:/i.test(block)) continue;
-
+      // Parse structured NIA dossier blocks (Name : ... Wanted in : ...)
+      const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
+      for (let i = 0; i < chunks.length; i++) {
+        const block = chunks[i];
+        const prevTail = i > 0 ? stripTags(chunks[i - 1].slice(-300)) : '';
         const clean = stripTags(block);
-        const nameMatch = clean.match(/Name\s*:\s*([^:]+?)(?=\s*(?:Aliases|Parentage|Address|Wanted in|Accused Status|$))/i);
-        const aliasMatch = clean.match(/Aliases\s*:\s*([^:]*?)(?=\s*(?:Parentage|Address|Wanted in|Accused Status|$))/i);
-        const addressMatch = clean.match(/Address\s*:\s*([^:]*?)(?=\s*(?:Wanted in|Accused Status|Age\/DOB|$))/i);
-        const wantedInMatch = clean.match(/Wanted in\s*:\s*([^:]*?)(?=\s*(?:Accused Status|Age\/DOB|Organization|For any information|$))/i);
-        const dobMatch = clean.match(/Age\/DOB\s*\(Approx\)\s*:\s*([^:]*?)(?=\s*(?:Organization|For any information|$))/i);
-        const orgMatch = clean.match(/Organization\s*:\s*([^:]*?)(?=\s*(?:For any information|E-mail|Close|$))/i);
-        const rewardMatch = clean.match(/Reward\s*:\s*([^:]*?)(?=\s*Name\s*:)/i);
+
+        if (!/Name\s*:/i.test(clean) || !/Wanted\s+in\s*:/i.test(clean)) continue;
+
+        const nameMatch = clean.match(/Name\s*:\s*([^:]+?)(?=\s*(?:Aliases|Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+        const aliasMatch = clean.match(/Aliases\s*:\s*([^:]*?)(?=\s*(?:Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+        const addressMatch = clean.match(/Address\s*:\s*([^:]*?)(?=\s*(?:Wanted\s+in|Accused\s+Status|Age\/DOB|$))/i);
+        const wantedInMatch = clean.match(/Wanted\s+in\s*:\s*([^:]*?)(?=\s*(?:Accused\s+Status|Age\/DOB|Organization|Reward|For\s+any\s+information|$))/i);
+        const dobMatch = clean.match(/Age\/DOB\s*\(Approx\)\s*:\s*([^:]*?)(?=\s*(?:Organization|Reward|For\s+any\s+information|$))/i);
+        const orgMatch = clean.match(/Organization\s*:\s*([^:]*?)(?=\s*(?:Reward|For\s+any\s+information|E-mail|Close|$))/i);
+
+        const rewardInBlock = clean.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40}?)(?=\s*(?:For\s+any|E-mail|Close|Name|$))/i);
+        const rewardInPrev = prevTail.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40})$/i);
+        const rewardRaw = ((rewardInBlock?.[1] || rewardInPrev?.[1]) || '').trim();
 
         const name = (nameMatch?.[1] || '').replace(/[.\s]+$/, '').trim();
         if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
         seenNames.add(name.toLowerCase());
 
-        const imgMatch = block.match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i);
-        const photoUrl = imgMatch ? new URL(imgMatch[1], baseOrigin).href : '';
+        const imgMatch = block.match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i)
+          || (i > 0 ? chunks[i - 1].slice(-600).match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) : null);
+        const rawPhoto = imgMatch?.[1] || '';
+        const photoUrl = rawPhoto && !/photo_not_available/i.test(rawPhoto)
+          ? new URL(rawPhoto, baseOrigin).href
+          : '';
 
         const aliasesRaw = (aliasMatch?.[1] || '').trim();
         const aliases = aliasesRaw
-          ? aliasesRaw.split('@').map(a => a.trim()).filter(a => a.length > 1).slice(0, 4)
+          ? aliasesRaw.split('@').map(a => a.replace(/[.\s]+$/, '').trim()).filter(a => a.length > 1).slice(0, 4)
           : [];
 
         const address = (addressMatch?.[1] || '').trim();
         const wantedIn = (wantedInMatch?.[1] || '').trim();
         const org = (orgMatch?.[1] || '').trim();
-        const rewardRaw = (rewardMatch?.[1] || '').trim();
         const caseYearMatch = wantedIn.match(/\/(\d{4})\//);
 
         records.push({
@@ -252,7 +271,7 @@ async function fetchNiaIndiaWanted() {
           dob: (dobMatch?.[1] || '').trim(),
           nationality: 'India',
           noticeType: 'NIA WANTED',
-          sourceUrl: 'https://nia.mha.gov.in/most-wanted.htm'
+          sourceUrl: 'https://nia.mha.gov.in/wanted.htm'
         });
       }
     } catch (err) {
@@ -260,7 +279,7 @@ async function fetchNiaIndiaWanted() {
     }
   }
 
-  return records;
+  return records.slice(0, 40);
 }
 
 async function main() {
