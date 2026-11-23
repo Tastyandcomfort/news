@@ -1,0 +1,13 @@
+name: Auto-Update Official Most Wanted Feed
+
+on:
+  schedule:
+    # Runs automatically every 12 hours
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wanted
