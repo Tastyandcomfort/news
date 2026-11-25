@@ -405,6 +405,30 @@
       opacity: 1 !important;
     }
 
+    /* LIVE SCROLLING BREAKING NEWS RIBBON */
+    .flash-ticker-viewport {
+      overflow: hidden;
+      position: relative;
+      flex: 1;
+      mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+    }
+    .flash-ticker-track {
+      display: flex;
+      width: max-content;
+      align-items: center;
+      will-change: transform;
+      animation: tcFlashScroll var(--ticker-duration, 55s) linear infinite;
+    }
+    .flash-ticker-viewport:hover .flash-ticker-track,
+    .flash-ticker-track.ticker-paused {
+      animation-play-state: paused !important;
+    }
+    @keyframes tcFlashScroll {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+
     .desktop-scrollbar::-webkit-scrollbar { height: 5px; display: block; }
     .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
     .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
@@ -935,6 +959,25 @@
       </div>
     </div>
 
+    <!-- LIVE SCROLLING BREAKING NEWS & ALERT RIBBON -->
+    <div class="relative z-10 border-b px-3 sm:px-4 h-8 flex items-center gap-2.5" style="background-color: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: var(--border-color);">
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-600 text-white text-[10px] font-black tracking-wider uppercase shadow-sm">
+          <span class="live-dot-red" style="width: 5px; height: 5px;"></span>
+          <span>FLASH</span>
+        </span>
+        <button onclick="toggleLiveScroller()" id="flash-pause-btn" class="w-6 h-6 rounded-md flex items-center justify-center text-[10px] transition-all active:scale-90" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);" title="Pause / Play live scrolling">
+          <i id="flash-pause-icon" class="fa-solid fa-pause"></i>
+        </button>
+      </div>
+
+      <div class="flash-ticker-viewport" id="flash-ticker-viewport">
+        <div class="flash-ticker-track" id="live-flash-track">
+          <span class="text-[11px] font-medium px-4" style="color: var(--text-sub);">Syncing live breaking headlines &amp; official alerts...</span>
+        </div>
+      </div>
+    </div>
+
   </div> <!-- END STICKY HEADER CONTAINER -->
 
   <!-- LIVE CRICKET SCORE & COMMENTARY MODAL -->
@@ -1452,6 +1495,8 @@
     let isMiniPlayerActive = false;
     let isPiPMoveMode = true;
     let autoLockTimer = null;
+    let flashNewsEntries = [];
+    let isFlashPaused = false;
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
@@ -1562,7 +1607,7 @@
         mostWantedTitle: "ಅಧಿಕೃತ ಮೋಸ್ಟ್ ವಾಂಟೆಡ್ ಪಟ್ಟಿ",
         officialSourceNoteTitle: "ಅಧಿಕೃತ ಸರ್ಕಾರಿ & ಕಾನೂನು ಸಂಸ್ಥೆಗಳ ಪ್ರಕಟಣೆ",
         officialSourceNoteBody: "ಇಲ್ಲಿ ತೋರಿಸಿರುವ ಮಾಹಿತಿಯನ್ನು NIA India, INTERPOL ಮತ್ತು FBI ಅಧಿಕೃತವಾಗಿ ಪ್ರಕಟಿಸಿವೆ. ಪ್ರತಿ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಇಲಾಖೆ, ಸ್ಥಳ/ದೇಶ, ಬಿಡುಗಡೆ ಸಮಯ ಮತ್ತು 'Verified by' ಅಧಿಕೃತ ಲಿಂಕ್ ಇರುತ್ತದೆ.",
-        usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ",
+        usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾంశಗಳು", latest: "ಇತ್ತೀಚಿನ",
         connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ",
         indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
         networks: "ನೆಟ್‌ವರ್ಕ್‌ಗಳು", selectChannelPrompt: "ಲೈವ್ ಪ್ರಸಾರ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಯಾವುದೇ ಚಾನೆಲ್ ಆಯ್ಕೆಮಾಡಿ.",
@@ -1634,6 +1679,7 @@
       fetchPinnedWorldNews();
       fetchPortalNews();
       fetchWantedAlerts();
+      refreshLiveFlashTicker();
       fetchRealTimeForex();
       fetchLiveCricketTicker();
       initOSINTMap();
@@ -1645,6 +1691,7 @@
       setInterval(fetchLiveAirTraffic, 20000);
       setInterval(fetchLiveCricketTicker, 25000);
       setInterval(fetchWantedAlerts, 1800000); // Auto-checks every 30 minutes
+      setInterval(refreshLiveFlashTicker, 300000); // Auto-refreshes flash ticker every 5 minutes
 
       checkNetworkStatus();
       window.addEventListener('online', checkNetworkStatus);
@@ -1653,6 +1700,19 @@
         navigator.connection.addEventListener('change', checkNetworkStatus);
       }
       setInterval(checkNetworkStatus, 15000);
+
+      // Touch hold pauses flash scroller cleanly on mobile
+      const vp = document.getElementById('flash-ticker-viewport');
+      const track = document.getElementById('live-flash-track');
+      if (vp && track) {
+        vp.addEventListener('touchstart', () => track.classList.add('ticker-paused'), { passive: true });
+        vp.addEventListener('touchend', () => {
+          if (!isFlashPaused) track.classList.remove('ticker-paused');
+        }, { passive: true });
+        vp.addEventListener('touchcancel', () => {
+          if (!isFlashPaused) track.classList.remove('ticker-paused');
+        }, { passive: true });
+      }
       
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
@@ -1732,6 +1792,7 @@
           fetchPinnedWorldNews(),
           fetchPortalNews(),
           fetchWantedAlerts(),
+          refreshLiveFlashTicker(),
           fetchRealTimeForex(),
           fetchLiveCricketTicker(true),
           fetchLiveAirTraffic(),
@@ -1740,6 +1801,91 @@
       }
 
       if (icon) icon.classList.remove('fa-spin');
+    }
+
+    function toggleLiveScroller() {
+      isFlashPaused = !isFlashPaused;
+      const track = document.getElementById('live-flash-track');
+      const icon = document.getElementById('flash-pause-icon');
+      if (track) track.classList.toggle('ticker-paused', isFlashPaused);
+      if (icon) icon.className = isFlashPaused ? 'fa-solid fa-play' : 'fa-solid fa-pause';
+    }
+
+    async function refreshLiveFlashTicker() {
+      const scopes = [
+        { key: 'local', label: 'TELANGANA', badgeClass: 'bg-blue-500/15 text-blue-500 border-blue-500/30' },
+        { key: 'national', label: 'INDIA', badgeClass: 'bg-amber-500/15 text-amber-500 border-amber-500/30' },
+        { key: 'world', label: 'WORLD', badgeClass: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' }
+      ];
+
+      const collected = [];
+      await Promise.allSettled(
+        scopes.map(async (s) => {
+          try {
+            const res = await fetch(`https://news-lemon-two.vercel.app/api/news?scope=${s.key}`);
+            if (!res.ok) return;
+            const xmlText = await res.text();
+            const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+            const items = Array.from(xml.querySelectorAll('item')).slice(0, 4);
+
+            for (const item of items) {
+              const rawTitle = item.querySelector('title')?.textContent?.trim();
+              const link = item.querySelector('link')?.textContent?.trim() || '#';
+              if (!rawTitle) continue;
+              const title = await translateText(rawTitle, currentLanguage);
+              collected.push({ type: 'news', label: s.label, badgeClass: s.badgeClass, text: title, link });
+            }
+          } catch {}
+        })
+      );
+
+      if (collected.length > 0) {
+        flashNewsEntries = collected;
+      }
+      renderLiveFlashTrack();
+    }
+
+    function renderLiveFlashTrack() {
+      const track = document.getElementById('live-flash-track');
+      if (!track) return;
+
+      const alertEntries = (wantedDataset || []).slice(0, 3).map((item) => ({
+        type: 'wanted',
+        id: item.id,
+        label: 'ALERT',
+        badgeClass: 'bg-red-500/15 text-red-500 border-red-500/30',
+        text: `${item.name} • ${item.department}`
+      }));
+
+      const combined = [...flashNewsEntries, ...alertEntries];
+      if (combined.length === 0) return;
+
+      const buildItemHtml = (entry) => {
+        if (entry.type === 'wanted') {
+          return `
+            <button type="button" onclick="openWantedDossier('${escapeHtml(entry.id)}')" class="inline-flex items-center gap-2 px-4 text-[11.5px] font-semibold hover:text-red-500 transition-colors whitespace-nowrap" style="color: var(--text-main);">
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-black border ${entry.badgeClass}">${entry.label}</span>
+              <span>${escapeHtml(entry.text)}</span>
+              <span class="opacity-30 pl-2">•</span>
+            </button>
+          `;
+        }
+        return `
+          <a href="${escapeHtml(entry.link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 text-[11.5px] font-semibold hover:text-blue-500 transition-colors whitespace-nowrap" style="color: var(--text-main);">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-black border ${entry.badgeClass}">${entry.label}</span>
+            <span>${escapeHtml(entry.text)}</span>
+            <span class="opacity-30 pl-2">•</span>
+          </a>
+        `;
+      };
+
+      const singlePassHtml = combined.map(buildItemHtml).join('');
+      track.innerHTML = singlePassHtml + singlePassHtml;
+
+      const totalChars = combined.reduce((sum, e) => sum + e.text.length + 14, 0);
+      const durationSec = Math.max(30, Math.min(120, Math.round(totalChars * 0.14)));
+      track.style.setProperty('--ticker-duration', `${durationSec}s`);
+      track.classList.toggle('ticker-paused', isFlashPaused);
     }
 
     function openAnnouncementModal() {
@@ -1781,6 +1927,7 @@
       };
       document.getElementById('active-scope-title').textContent = titleMap[currentScope];
       fetchPortalNews();
+      refreshLiveFlashTicker();
     }
 
     async function translateText(text, targetLang) {
@@ -2114,6 +2261,7 @@
             if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${wantedDataset.length} Official Records`;
             renderWantedHomeStrip();
             renderWantedDirectory();
+            renderLiveFlashTrack();
             return;
           }
         }
@@ -2134,6 +2282,7 @@
           if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${wantedDataset.length} Official Records`;
           renderWantedHomeStrip();
           renderWantedDirectory();
+          renderLiveFlashTrack();
           return;
         }
       } catch (e) {
@@ -2260,7 +2409,7 @@
               <i class="fa-solid fa-globe text-2xl text-amber-500"></i>
               <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">INTERPOL Data Not Available Today</h4>
               <p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">
-                INTERPOL's official portal temporarily unavailable. T&amp;C-NEWS will automatically display them once access resumes. Meanwhile, view directly on INTERPOL's official site:
+                INTERPOL's official portal is temporarily unavailable. T&amp;C-NEWS will automatically display them once access resumes. Meanwhile, view directly on INTERPOL's official site:
               </p>
               <a href="https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official INTERPOL Red Notices
@@ -3436,3 +3585,4 @@
   </script>
 </body>
 </html>
+
