@@ -44,6 +44,52 @@
       });
     }
   </script>
+
+  <!-- Auto-Update Checker for Installed PWA -->
+  <script>
+    (function setupPwaAutoUpdate() {
+      let currentBuildTag = null;
+      let reloading = false;
+
+      async function checkForNewBuild(isInitial = false) {
+        if (!navigator.onLine || reloading) return;
+        try {
+          const res = await fetch(`/news/index.html?vcheck=${Date.now()}`, {
+            method: 'HEAD',
+            cache: 'no-store'
+          });
+          if (!res.ok) return;
+
+          const tag = res.headers.get('etag') || res.headers.get('last-modified');
+          if (!tag) return;
+
+          if (isInitial || !currentBuildTag) {
+            currentBuildTag = tag;
+            return;
+          }
+
+          if (tag !== currentBuildTag) {
+            const lastReload = Number(sessionStorage.getItem('tc_last_auto_reload') || 0);
+            if (Date.now() - lastReload < 30000) return;
+
+            reloading = true;
+            sessionStorage.setItem('tc_last_auto_reload', String(Date.now()));
+            window.location.reload();
+          }
+        } catch {}
+      }
+
+      window.addEventListener('load', () => checkForNewBuild(true));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForNewBuild(false);
+      });
+      setInterval(() => checkForNewBuild(false), 300000); // Also checks every 5 mins
+    })();
+  </script>
+
+  
+
+
   
   <!-- Fast Network Preconnects -->
   <link rel="preconnect" href="https://news-lemon-two.vercel.app" crossorigin>
