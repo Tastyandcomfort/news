@@ -47,17 +47,18 @@ async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 18000) {
   }
 }
 
-async function curlHtml(url) {
-  const { stdout } = await execFileAsync('curl', [
+async function curlRequest(url, acceptHeader, referer = '') {
+  const args = [
     '-sS', '-L', '--max-time', '20',
     '-w', '\n__HTTP_STATUS__:%{http_code}',
     '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-    '-H', 'Accept-Language: en-IN,en-US;q=0.9,en;q=0.8',
-    '-H', 'Upgrade-Insecure-Requests: 1',
-    url
-  ], { maxBuffer: 10 * 1024 * 1024 });
+    '-H', `Accept: ${acceptHeader}`,
+    '-H', 'Accept-Language: en-IN,en-US;q=0.9,en;q=0.8'
+  ];
+  if (referer) args.push('-H', `Referer: ${referer}`);
+  args.push(url);
 
+  const { stdout } = await execFileAsync('curl', args, { maxBuffer: 10 * 1024 * 1024 });
   const marker = '\n__HTTP_STATUS__:';
   const idx = stdout.lastIndexOf(marker);
   const status = idx !== -1 ? parseInt(stdout.slice(idx + marker.length).trim(), 10) : 0;
@@ -110,7 +111,7 @@ async function fetchFbiWanted() {
   return records.slice(0, 40);
 }
 
-// 2. DIRECT OFFICIAL INTERPOL API (ws-public.interpol.int)
+// 2. DIRECT OFFICIAL INTERPOL API (via curl + polite retry)
 async function fetchInterpolWanted() {
   const seen = new Map();
   const queries = [
@@ -122,21 +123,21 @@ async function fetchInterpolWanted() {
   for (const q of queries) {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const res = await fetchWithTimeout(q, {
-          'Origin': 'https://www.interpol.int',
-          'Referer': 'https://www.interpol.int/'
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const { status, body } = await curlRequest(q, 'application/json, text/plain, */*', 'https://www.interpol.int/');
+        if (status === 200 && body) {
+          const data = JSON.parse(body);
           for (const n of data?._embedded?.notices || []) {
             if (!seen.has(n.entity_id)) seen.set(n.entity_id, n);
           }
           break;
         }
-        if ((res.status === 502 || res.status === 503) && attempt === 1) await sleep(1200);
-      } catch {}
+        console.warn(`INTERPOL curl HTTP ${status} (attempt ${attempt}): ${q}`);
+        if ((status === 502 || status === 503 || status === 403) && attempt === 1) await sleep(1500);
+      } catch (err) {
+        console.warn(`INTERPOL curl error (attempt ${attempt}):`, err.message);
+      }
     }
-    await sleep(400);
+    await sleep(500);
   }
 
   const records = [];
@@ -147,12 +148,9 @@ async function fetchInterpolWanted() {
 
     try {
       if (n._links?.self?.href) {
-        const dRes = await fetchWithTimeout(n._links.self.href, {
-          'Origin': 'https://www.interpol.int',
-          'Referer': 'https://www.interpol.int/'
-        }, 10000);
-        if (dRes.ok) {
-          const detail = await dRes.json();
+        const { status, body } = await curlRequest(n._links.self.href, 'application/json, text/plain, */*', 'https://www.interpol.int/');
+        if (status === 200 && body) {
+          const detail = JSON.parse(body);
           for (const w of detail.arrest_warrants || []) {
             if (w.issuing_country_id) issuingCountries.push(countryName(w.issuing_country_id));
             if (w.charge_translation || w.charge) charges.push(w.charge_translation || w.charge);
@@ -209,7 +207,7 @@ async function fetchNiaIndiaWanted() {
 
   for (const pageUrl of niaPages) {
     try {
-      const { status, body: html } = await curlHtml(pageUrl);
+      const { status, body: html } = await curlRequest(pageUrl, 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'https://nia.mha.gov.in/');
       if (status !== 200 || !html) {
         console.warn(`NIA curl HTTP ${status}: ${pageUrl}`);
         continue;
@@ -291,12 +289,23 @@ async function fetchNiaIndiaWanted() {
 async function main() {
   const outputPath = path.resolve(process.cwd(), 'wanted-data.json');
 
+  let previousItems = [];
+  try {
+    const existingRaw = await fs.readFile(outputPath, 'utf8');
+    previousItems = JSON.parse(existingRaw)?.items || [];
+  } catch {}
+
   console.log('Fetching strictly from official government portals...');
-  const [nia, interpol, fbi] = await Promise.all([
+  const [niaFresh, interpolFresh, fbiFresh] = await Promise.all([
     fetchNiaIndiaWanted(),
     fetchInterpolWanted(),
     fetchFbiWanted()
   ]);
+
+  // Preserve last verified records only if an agency temporarily returned 0 due to 403/502
+  const nia = niaFresh.length ? niaFresh : previousItems.filter(i => i.agency === 'NIA');
+  const interpol = interpolFresh.length ? interpolFresh : previousItems.filter(i => i.agency === 'INTERPOL');
+  const fbi = fbiFresh.length ? fbiFresh : previousItems.filter(i => i.agency === 'FBI');
 
   const combined = [...nia, ...interpol, ...fbi];
   const activeSources = [];
@@ -312,7 +321,7 @@ async function main() {
   };
 
   await fs.writeFile(outputPath, JSON.stringify(payload, null, 2), 'utf8');
-  console.log(`Sync complete -> Total: ${combined.length} (NIA: ${nia.length}, INTERPOL: ${interpol.length}, FBI: ${fbi.length})`);
+  console.log(`Sync complete -> Total: ${combined.length} (NIA: ${nia.length} [live:${niaFresh.length}], INTERPOL: ${interpol.length} [live:${interpolFresh.length}], FBI: ${fbi.length} [live:${fbiFresh.length}])`);
 }
 
 main().catch((err) => {
