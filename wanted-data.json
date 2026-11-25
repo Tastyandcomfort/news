@@ -1,10 +1,57 @@
 {
-  "updatedAt": "2026-11-24T22:00:10.985Z",
+  "updatedAt": "2026-11-25T03:11:33.301Z",
   "total": 40,
   "sources": [
     "FBI"
   ],
   "items": [
+    {
+      "id": "fbi-a2e45434e25048c789c3a4d76070c3d7",
+      "agency": "FBI",
+      "verifiedBy": "FBI Official",
+      "department": "FBI (Billings)",
+      "location": "Billings Field Office • Birthplace: Wetaskiwin, Alberta, Canada",
+      "name": "MATTHEW LEROY GRANT",
+      "aliases": [
+        "Matthew Grant",
+        "Matthew R. Grant",
+        "Matthew Rattlesnake",
+        "Matthew Leroy Lee Ray Rattlesnake"
+      ],
+      "photo": "https://www.fbi.gov/wanted/seeking-info/matthew-leroy-grant/@@images/image/thumb",
+      "charges": "Seeking Information, Indian Country",
+      "description": "Murder Victim\r\nBrowning, Montana\r\nDecember 2016",
+      "caution": "",
+      "rewardText": "The FBI is offering a reward of up to $25,000 for information that leads to an arrest in the investigation of the murder of Matthew Leroy Grant.",
+      "rewardValue": 0,
+      "publishedAt": "2017-11-20T09:06:00",
+      "updatedAt": "2026-11-24T21:13:27+00:00",
+      "dob": "October 31, 1995",
+      "nationality": "Not Specified",
+      "noticeType": "FBI WANTED",
+      "sourceUrl": "https://www.fbi.gov/wanted/seeking-info/matthew-leroy-grant"
+    },
+    {
+      "id": "fbi-978230978230435d9d9ef81516606ce6",
+      "agency": "FBI",
+      "verifiedBy": "FBI Official",
+      "department": "FBI (Billings)",
+      "location": "Billings Field Office • Birthplace: Browning, Montana • Nationality: American",
+      "name": "ASHLEY LORING HEAVYRUNNER",
+      "aliases": [],
+      "photo": "https://www.fbi.gov/wanted/kidnap/ashley-loring-heavyrunner/@@images/image/thumb",
+      "charges": "Kidnappings and Missing Persons, Indian Country",
+      "description": "June of 2017\r\nBrowning, Montana",
+      "caution": "",
+      "rewardText": "The FBI is offering a reward of up to $25,000 for information on the disappearance of Ashley Loring Heavyrunner.",
+      "rewardValue": 0,
+      "publishedAt": "2022-04-29T12:22:00",
+      "updatedAt": "2026-11-24T21:00:25+00:00",
+      "dob": "November 23, 1996",
+      "nationality": "American",
+      "noticeType": "FBI WANTED",
+      "sourceUrl": "https://www.fbi.gov/wanted/kidnap/ashley-loring-heavyrunner"
+    },
     {
       "id": "fbi-56f0ce374e374620a90a585810fade85",
       "agency": "FBI",
@@ -866,51 +913,6 @@
       "nationality": "Not Specified",
       "noticeType": "FBI WANTED",
       "sourceUrl": "https://www.fbi.gov/wanted/seeking-info/attempted-arson---atlanta-georgia"
-    },
-    {
-      "id": "fbi-a1d5eec49628415bbfbdb9cc5c9479d1",
-      "agency": "FBI",
-      "verifiedBy": "FBI Official",
-      "department": "FBI (Baltimore)",
-      "location": "Baltimore Field Office",
-      "name": "MASS SHOOTING - BALTIMORE, MARYLAND",
-      "aliases": [],
-      "photo": "https://www.fbi.gov/wanted/seeking-info/mass-shooting-baltimore-maryland/@@images/image/thumb",
-      "charges": "Seeking Information",
-      "description": "Unknown Suspect(s)\r\nSeptember 16, 2026\r\nBaltimore, Maryland",
-      "caution": "",
-      "rewardText": "The FBI is offering a reward of up to $10,000 for information leading to the identification and arrest of the individual(s) responsible for this incident.",
-      "rewardValue": 0,
-      "publishedAt": "2026-10-22T11:49:00",
-      "updatedAt": "2026-10-22T21:18:17+00:00",
-      "dob": "",
-      "nationality": "Not Specified",
-      "noticeType": "FBI WANTED",
-      "sourceUrl": "https://www.fbi.gov/wanted/seeking-info/mass-shooting-baltimore-maryland"
-    },
-    {
-      "id": "fbi-8020a28b1746429a994f4435d1d60259",
-      "agency": "FBI",
-      "verifiedBy": "FBI Official",
-      "department": "FBI (Newyork)",
-      "location": "Newyork Field Office",
-      "name": "GORDON MONTANEZ",
-      "aliases": [
-        "\"Shooter\"",
-        "\"Loco\""
-      ],
-      "photo": "https://www.fbi.gov/wanted/additional/gordon-montanez/@@images/image/thumb",
-      "charges": "Additional Violent Crimes",
-      "description": "Hobbs Act Robbery; Conspiracy to Commit Hobbs Act Robbery",
-      "caution": "<p>Gordon Montanez is wanted for his alleged involvement in a violent Hobbs Act Robbery that occurred in February of 2026 in New York City, New York. On September 23, 2026, a federal arrest warrant was issued for Montanez in the United States District Court, Eastern District of New York, Brooklyn, New York, after he was charged with Hobbs Act Robbery and Conspiracy to Commit Hobbs Act Robbery.</p>",
-      "rewardText": "The FBI is offering a reward of up to $25,000 for information leading to the location and apprehension of Gordon Montanez.",
-      "rewardValue": 0,
-      "publishedAt": "2026-10-02T09:39:00",
-      "updatedAt": "2026-10-22T21:10:59+00:00",
-      "dob": "December 9, 1999",
-      "nationality": "Not Specified",
-      "noticeType": "FBI WANTED",
-      "sourceUrl": "https://www.fbi.gov/wanted/additional/gordon-montanez"
     }
   ]
 }
