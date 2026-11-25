@@ -2606,7 +2606,7 @@
           return getLocalDateStr(new Date(pubDate)) === selectedDateStr;
         });
 
-        if (filteredItems.length === 0 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) {
+        if (filteredItems.length === 10 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) {
           filteredItems = items.slice(0, 15);
         }
 
@@ -2657,6 +2657,8 @@
           if (link.includes("tv9")) sourceName = "TV9 Telugu";
           else if (link.includes("france24")) sourceName = "France24";
           else if (link.includes("hindu")) sourceName = "The Hindu";
+          else if (link.includes("indiatimes")) sourceName = "Times of India";
+          else if (link.includes("news.google")) sourceName = "Google News";
 
           html += `
             <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
