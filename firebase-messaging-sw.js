@@ -1,14 +1,3 @@
-
-// Force the new version to take over immediately
-self.addEventListener('install', () => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -24,64 +13,63 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-const CACHE_NAME = 'tc-news-cache-v3';
+const CACHE_NAME = 'tc-news-cache-v4';
+const CORE_ASSETS = [
+  '/news/',
+  '/news/index.html',
+  '/news/manifest.json'
+];
 
-// Pre-cache core shell for instant launch
+// Install: pre-cache core shell safely & take over immediately
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        '/news/',
-        '/news/index.html',
-        '/news/manifest.json',
-        '/news/android-chrome.v1-192x192.png'
-      ]);
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(CORE_ASSETS.map((url) => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });
 
+// Activate: remove old v3 cache & control open tabs immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Stale-While-Revalidate: Instant offline/cache load + silent background refresh
+// Network-First for your app shell & live JSON (always gets latest updates when online)
 self.addEventListener('fetch', (event) => {
-  // Always fetch real-time news API freshly from network
-  if (event.request.url.includes('news-lemon-two.vercel.app') || event.request.url.includes('firestore')) {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // Only handle same-origin /news/ files; let external APIs & version pings go straight to network
+  if (url.origin !== self.location.origin) return;
+  if (url.searchParams.has('ping') || url.searchParams.has('vcheck')) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request).then((response) => {
-        if (response && response.status === 200 && event.request.method === 'GET') {
+    fetch(event.request, { cache: 'no-cache' })
+      .then((response) => {
+        if (response && response.status === 200) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));  
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached);
-
-      return cached || networkFetch;
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
 
-// Background Push Alert
+// Background Push Alert (Unchanged)
 messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || payload.data?.title || "T&C News";
-  
+
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || "New breaking story available.",
     icon: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
     badge: "https://tastyandcomfort.github.io/news/android-chrome.v1-192x192.png",
-    // 🎯 DYNAMIC TAG: Merges alerts into EXACTLY ONE banner matching the server tag!
     tag: payload.notification?.tag || payload.data?.tag || "tc-alert",
     renotify: true,
     requireInteraction: true,
@@ -95,20 +83,18 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 🚀 HIGH-SPEED INSTANT APP LAUNCH ON TAP
+// High-Speed Instant App Launch On Tap (Unchanged)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = 'https://tastyandcomfort.github.io/news/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 1. If app is already open in background, focus it instantly (NO cold reload delay)
       for (let client of windowClients) {
         if (client.url.includes('/news/') && 'focus' in client) {
           return client.focus();
         }
       }
-      // 2. Cold launch: Opens the standalone app immediately
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
