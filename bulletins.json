@@ -32,26 +32,31 @@
     "dateBadge": "25 NOV 26",
     "city": "HYDERABAD",
     "category": "PUBLIC SAFETY | CITIZEN AWARENESS",
-    "title": "SECURITY IS A SHARED RESPONSIBILITY",
+    "title": "CIVIC ADVISORY | CITIZEN AWARENESS",
     "dateText": "25 November 2026",
     "paragraphs": [
       "The bulletin (dated November 25, 2026) highlights an upcoming water scarcity Zero Day alert in Hyderabad starting December 15, urging residents to stay calm, conserve water, fix leaks, store supplies responsibly, and rely on verified updates rather than rumors.",
-      "It notes that this is an independent public-awareness bulletin by T&C News rather than an official government or HMWSSB notification."
+      "It notes that this is an independent public-awareness bulletin by T&C News rather than an official government or HMWSSB notification.",
+      "IMPORTANT: An advisory projecting a critical threshold on 15 December 2026 is an early-warning conservation alert, not a confirmation of total supply shutdown. Timely citizen cooperation and demand reduction can significantly delay and mitigate acute shortages.",
     ],
     "checklistTitle": "A RESPONSIBLE REQUEST TO EVERY CITIZEN",
     "checklist": [
-      "Stay Alert: Remain aware of unusual activities around you.",
-      "Stay Calm: Do not create or spread unnecessary panic.",
-      "Do Not Touch: Never approach or handle unattended suspicious objects.",
-      "Report Immediately: Inform the nearest police station about suspicious activity.",
-      "Avoid Rumours: Verify information before sharing it with others."
+      "Stay Calm: Do not engage in panic hoarding or excessive water storage that drains local distribution pressure.",
+      "Fix Leaks Promptly: Repair dripping taps, overflowing overhead tanks, and faulty plumbing fixtures without delay.",
+      "Report Wastage & Leaks: Inform civic water authorities immediately about pipeline bursts, illegal tapping, or major public leaks.",
+      "Avoid Rumours: Verify water supply schedules and official announcements before forwarding unverified messages."
+      
     ],
-    "contacts": "For emergencies, dial 112.",
-    "closingNote": "T&C NEWS: We do not encourage panic. We encourage awareness. Police departments and security agencies have their own established procedures to assess threats and take precautionary action. As citizens, our responsibility is to remain vigilant, cooperate with authorities and report anything genuinely suspicious.",
-    "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official police or government notification. The circulating Special Branch document has not been independently authenticated by T&C News.",
+    "contacts": "HMWSSB / GHMC",
+    "closingNote": "T&C NEWS: We do not encourage panic. We encourage awareness. Municipal water boards and civic agencies have established contingency plans to manage reservoir reserves and regulate equitable distribution. As citizens, our responsibility is to use water judiciously, cooperate with authorities.",
+    "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official government or municipal water board bulletin. Citizens are advised to follow verified updates issued by local civic authorities.",
     "pdfUrl": ""
 
 }
 
 
 ]
+
+
+
+
