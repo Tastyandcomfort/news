@@ -358,6 +358,53 @@
     .live-dot-red { width: 7px; height: 7px; background-color: #ff3b30; border-radius: 50%; display: inline-block; animation: pulseRed 1.5s infinite ease-in-out; }
     .live-dot-blue { width: 7px; height: 7px; background-color: #0071e3; border-radius: 50%; display: inline-block; animation: pulseBlue 1.5s infinite ease-in-out; }
 
+    /* NETWORK-AWARE PULSING LIGHTS (RED / AMBER / BLUE) */
+    @keyframes pulseNetBlue {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.85); }
+      50% { transform: scale(1.25); box-shadow: 0 0 10px 4px rgba(0, 113, 227, 0.5); }
+    }
+    @keyframes pulseNetAmber {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.85); }
+      50% { transform: scale(1.22); box-shadow: 0 0 10px 4px rgba(245, 158, 11, 0.45); }
+    }
+
+    body.net-offline .pulse-gold,
+    body.net-offline .live-dot,
+    body.net-offline .live-dot-red,
+    body.net-offline .live-dot-blue {
+      animation: none !important;
+      background-color: #ff3b30 !important;
+      box-shadow: 0 0 8px rgba(255, 59, 48, 0.55) !important;
+      opacity: 1 !important;
+    }
+
+    body.net-slow .pulse-gold,
+    body.net-slow .live-dot,
+    body.net-slow .live-dot-red,
+    body.net-slow .live-dot-blue {
+      background-color: #f59e0b !important;
+      animation: pulseNetAmber 3.2s infinite ease-in-out !important;
+      opacity: 1 !important;
+    }
+
+    body.net-normal .pulse-gold,
+    body.net-normal .live-dot,
+    body.net-normal .live-dot-red,
+    body.net-normal .live-dot-blue {
+      background-color: #0071e3 !important;
+      animation: pulseNetBlue 1.8s infinite ease-in-out !important;
+      opacity: 1 !important;
+    }
+
+    body.net-fast .pulse-gold,
+    body.net-fast .live-dot,
+    body.net-fast .live-dot-red,
+    body.net-fast .live-dot-blue {
+      background-color: #0071e3 !important;
+      animation: pulseNetBlue 0.95s infinite ease-in-out !important;
+      opacity: 1 !important;
+    }
+
     .desktop-scrollbar::-webkit-scrollbar { height: 5px; display: block; }
     .desktop-scrollbar::-webkit-scrollbar-track { background: var(--bg-sub); border-radius: 10px; }
     .desktop-scrollbar::-webkit-scrollbar-thumb { background: #0071e3; border-radius: 10px; }
@@ -803,6 +850,14 @@
           </div>
 
           <div class="flex items-center gap-1.5 p-1 rounded-full backdrop-blur-md shadow-sm relative z-50" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+            <!-- Global Refresh & Network Speed Button -->
+            <button onclick="manualHubRefresh()" id="global-refresh-btn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all active:scale-90" style="color: var(--text-main);" title="Refresh all live feeds & check connection">
+              <i id="global-refresh-icon" class="fa-solid fa-arrows-rotate text-xs text-blue-500"></i>
+              <span id="net-speed-label" class="text-[10px]">Syncing</span>
+            </button>
+
+            <div class="h-3.5 w-[1px] opacity-25 bg-current" style="color: var(--border-color);"></div>
+
             <div class="relative" id="lang-menu-wrapper">
               <button onclick="toggleLangDropdown(event)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all" style="color: var(--text-main);">
                 <i class="fa-solid fa-globe text-blue-500 text-xs"></i>
@@ -1030,7 +1085,7 @@
               </span>
             </div>
 
-            <!-- Official Announcement & Legal Attribution Note (Requested by User) -->
+            <!-- Official Announcement & Legal Attribution Note -->
             <div class="p-3.5 rounded-2xl border border-red-500/25 bg-red-500/5 mb-4 space-y-1.5">
               <div class="flex items-center gap-2 text-xs font-extrabold text-red-500">
                 <i class="fa-solid fa-bullhorn"></i>
@@ -1048,11 +1103,11 @@
               </div>
             </div>
 
-            <!-- Agency Filter Pills (Matching Job Pills Style) -->
+            <!-- Agency Filter Pills -->
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
               <button onclick="setWantedFilter('all', this)" class="choice-pill selected-red">All Official Agencies</button>
               <button onclick="setWantedFilter('NIA', this)" class="choice-pill">🇮🇳 India (NIA)</button>
-              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill"> INTERPOL Red Notices</button>
+              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill">🌐 INTERPOL Red Notices</button>
               <button onclick="setWantedFilter('FBI', this)" class="choice-pill">🇺🇸 FBI Most Wanted</button>
             </div>
 
@@ -1407,6 +1462,7 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
     }
+
     function cleanAgencyText(str, allowBreaks = true) {
       if (!str) return '';
       const plain = String(str)
@@ -1589,6 +1645,14 @@
       setInterval(fetchLiveAirTraffic, 20000);
       setInterval(fetchLiveCricketTicker, 25000);
       setInterval(fetchWantedAlerts, 1800000); // Auto-checks every 30 minutes
+
+      checkNetworkStatus();
+      window.addEventListener('online', checkNetworkStatus);
+      window.addEventListener('offline', checkNetworkStatus);
+      if (navigator.connection) {
+        navigator.connection.addEventListener('change', checkNetworkStatus);
+      }
+      setInterval(checkNetworkStatus, 15000);
       
       document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('lang-menu-wrapper');
@@ -1600,6 +1664,83 @@
       loadSavedPreferencesUI();
       initPrecisionPiPEngine();
     });
+
+    async function checkNetworkStatus() {
+      const label = document.getElementById('net-speed-label');
+      const icon = document.getElementById('global-refresh-icon');
+      const body = document.body;
+
+      const setNetState = (state, text, colorClass) => {
+        body.classList.remove('net-offline', 'net-slow', 'net-normal', 'net-fast');
+        body.classList.add(`net-${state}`);
+        if (label) {
+          label.textContent = text;
+          label.className = `text-[10px] font-bold ${colorClass}`;
+        }
+        if (icon && !icon.classList.contains('fa-spin')) {
+          icon.className = `fa-solid fa-arrows-rotate text-xs ${colorClass}`;
+        }
+      };
+
+      if (!navigator.onLine) {
+        setNetState('offline', 'Offline', 'text-red-500');
+        return 'offline';
+      }
+
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const start = performance.now();
+
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`./wanted-data.json?ping=${Date.now()}`, {
+          method: 'HEAD',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) throw new Error('Ping failed');
+
+        const rtt = Math.round(performance.now() - start);
+        const eff = conn?.effectiveType || '';
+        const downlink = conn?.downlink;
+
+        if (eff === 'slow-2g' || eff === '2g' || eff === '3g' || (typeof downlink === 'number' && downlink < 1.5) || rtt > 1200) {
+          setNetState('slow', 'Slow', 'text-amber-500');
+          return 'slow';
+        }
+        if ((typeof downlink === 'number' && downlink >= 5 && rtt < 450) || rtt < 300) {
+          setNetState('fast', 'Speed', 'text-blue-500');
+          return 'fast';
+        }
+        setNetState('normal', 'Normal', 'text-blue-500');
+        return 'normal';
+      } catch {
+        setNetState('offline', 'Offline', 'text-red-500');
+        return 'offline';
+      }
+    }
+
+    async function manualHubRefresh() {
+      const icon = document.getElementById('global-refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      const state = await checkNetworkStatus();
+      if (state !== 'offline') {
+        await Promise.allSettled([
+          fetchSolarSchedule(),
+          fetchPinnedWorldNews(),
+          fetchPortalNews(),
+          fetchWantedAlerts(),
+          fetchRealTimeForex(),
+          fetchLiveCricketTicker(true),
+          fetchLiveAirTraffic(),
+          fetchLiveJobs()
+        ]);
+      }
+
+      if (icon) icon.classList.remove('fa-spin');
+    }
 
     function openAnnouncementModal() {
       document.getElementById('announcement-modal').classList.remove('hidden');
@@ -1873,7 +2014,7 @@
     }
 
     /* ==================== OFFICIAL MOST WANTED ENGINE ==================== */
- function formatAgencyTimestamp(isoStr) {
+    function formatAgencyTimestamp(isoStr) {
       if (!isoStr) return 'Not Published by Agency';
       if (typeof isoStr === 'string' && (isoStr.startsWith('Notice Year:') || isoStr.startsWith('Case Year:'))) {
         return isoStr;
@@ -1959,7 +2100,6 @@
       const stripPill = document.getElementById('wanted-strip-sync-pill');
 
       try {
-        // 1. Primary: Auto-updated JSON generated by GitHub Actions (NIA + INTERPOL + FBI)
         const res = await fetch(`./wanted-data.json?t=${Date.now()}`);
         if (res.ok) {
           const payload = await res.json();
@@ -1981,7 +2121,6 @@
         console.warn('Local wanted-data.json not found yet, using live FBI official fallback:', err);
       }
 
-      // 2. Day-1 Fallback: Direct official FBI API (works immediately before first GitHub Action runs)
       try {
         const fbiRes = await fetch('https://api.fbi.gov/wanted/v1/list?page=1');
         if (fbiRes.ok) {
@@ -1989,7 +2128,7 @@
           wantedDataset = (fbiData.items || []).slice(0, 24).map(normalizeFbiDirectItem);
           wantedMeta.updatedAt = new Date().toISOString();
           if (syncLabel) {
-            syncLabel.textContent = `Live Official API Sync: ${formatAgencyTimestamp(wantedMeta.updatedAt)} (Run GitHub Action for NIA + INTERPOL + FBI combined)`;
+            syncLabel.textContent = `Live Official API Sync: ${formatAgencyTimestamp(wantedMeta.updatedAt)}`;
           }
           if (stripPill) stripPill.textContent = 'Live Official Feed';
           if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${wantedDataset.length} Official Records`;
@@ -2023,7 +2162,6 @@
         return;
       }
 
-      // Pick top 4 varied alerts (prioritizing NIA / INTERPOL India / high reward / newest)
       const niaItems = wantedDataset.filter(i => i.agency === 'NIA');
       const interpolItems = wantedDataset.filter(i => i.agency === 'INTERPOL');
       const fbiItems = wantedDataset.filter(i => i.agency === 'FBI');
@@ -2107,12 +2245,25 @@
           container.innerHTML = `
             <div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);">
               <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
-              <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">NIA India Data Not-Avilable Today</h4>
+              <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">NIA India Data Not Available Today</h4>
               <p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">
-                Live NIA records are temporarily unavailable. T&C-NEWS will automatically display them once access resumes. In the meantime, please use the link below to view the records on the official site.
+                Live NIA records are temporarily unavailable. T&amp;C-NEWS will automatically display them once access resumes. In the meantime, please use the link below to view the records on the official site.
               </p>
               <a href="https://nia.mha.gov.in/wanted.htm" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official NIA India Website
+              </a>
+            </div>
+          `;
+        } else if (currentWantedAgency === 'INTERPOL' && !query) {
+          container.innerHTML = `
+            <div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);">
+              <i class="fa-solid fa-globe text-2xl text-amber-500"></i>
+              <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">INTERPOL Feed Temporarily Unavailable</h4>
+              <p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">
+                INTERPOL's official portal temporarily blocked the automated sync. T&amp;C-NEWS keeps checking automatically and will restore records on the next sync. Meanwhile, view directly on INTERPOL's official site:
+              </p>
+              <a href="https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official INTERPOL Red Notices
               </a>
             </div>
           `;
@@ -2127,7 +2278,6 @@
         }
         return;
       }
-    
 
       container.innerHTML = list.map(item => {
         const photoHtml = item.photo
@@ -2159,7 +2309,7 @@
                   <p class="truncate"><i class="fa-solid fa-location-dot mr-1.5 text-blue-500"></i><b>Area/Location:</b> <span style="color: var(--text-main);">${escapeHtml(item.location)}</span></p>
                 </div>
 
-                <p class="text-[11px] mt-1.5 line-clamp-2" style="color: var(--text-sub);"><b>Offense / Subject:</b> ${escapeHtml(item.charges)}</p>
+                <p class="text-[11px] mt-1.5 line-clamp-2" style="color: var(--text-sub);"><b>Offense / Subject:</b> ${cleanAgencyText(item.charges, false)}</p>
               </div>
             </div>
 
@@ -2184,22 +2334,9 @@
       }).join('');
     }
 
-function openWantedDossier(id) {
+    function openWantedDossier(id) {
       const item = wantedDataset.find(x => x.id === id);
       if (!item) return;
-
-      const cleanAgencyText = (str) => {
-        if (!str) return '';
-        const plain = String(str)
-          .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
-          .replace(/<br\s*\/?>/gi, '\n')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/&nbsp;/gi, ' ')
-          .replace(/[ \t]+/g, ' ')
-          .replace(/\n{3,}/g, '\n\n')
-          .trim();
-        return escapeHtml(plain).replace(/\n/g, '<br>');
-      };
 
       document.getElementById('dossier-modal-title').textContent = item.name;
       document.getElementById('dossier-modal-dept').textContent = `${item.department} • ${item.noticeType || 'OFFICIAL NOTICE'}`;
