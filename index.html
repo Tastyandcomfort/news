@@ -14,28 +14,45 @@
   <link rel="apple-touch-icon" href="/news/icon-v2-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
-  <!-- Service Worker Registration -->
+ <!-- Service Worker Registration & Video-Safe Auto-Updater -->
   <script>
+    window.tcPendingReload = false;
+
+    function isMediaCurrentlyPlaying() {
+      if (typeof isVideoPlaying !== 'undefined' && isVideoPlaying) return true;
+      const iframe = document.getElementById('master-video-player');
+      const filePlayer = document.getElementById('file-video-player');
+      return Boolean(
+        (iframe && iframe.src && iframe.src !== 'about:blank' && iframe.style.display !== 'none') ||
+        (filePlayer && !filePlayer.paused)
+      );
+    }
+
+    function safeAppReload() {
+      if (isMediaCurrentlyPlaying()) {
+        window.tcPendingReload = true;
+        return;
+      }
+      window.location.reload();
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
           const registration = await navigator.serviceWorker.register('/news/firebase-messaging-sw.js', {
             updateViaCache: 'none'
           });
-
           registration.update();
 
           document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-              registration.update();
-            }
+            if (document.visibilityState === 'visible') registration.update();
           });
 
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
               refreshing = true;
-              window.location.reload();
+              safeAppReload();
             }
           });
         } catch (err) {
@@ -43,8 +60,46 @@
         }
       });
     }
-  </script>
 
+    (function setupPwaAutoUpdate() {
+      let currentBuildTag = null;
+
+      async function checkForNewBuild(isInitial = false) {
+        if (!navigator.onLine || isMediaCurrentlyPlaying()) return;
+        try {
+          const res = await fetch(`/news/index.html?vcheck=${Date.now()}`, {
+            method: 'HEAD',
+            cache: 'no-store'
+          });
+          if (!res.ok) return;
+
+          const rawTag = res.headers.get('etag') || res.headers.get('last-modified');
+          if (!rawTag) return;
+          const tag = rawTag.replace(/^W\//, '');
+
+          if (isInitial || !currentBuildTag) {
+            currentBuildTag = tag;
+            return;
+          }
+
+          if (tag !== currentBuildTag) {
+            const lastReload = Number(sessionStorage.getItem('tc_last_auto_reload') || 0);
+            if (Date.now() - lastReload < 60000) return;
+
+            sessionStorage.setItem('tc_last_auto_reload', String(Date.now()));
+            safeAppReload();
+          }
+        } catch {}
+      }
+
+      window.addEventListener('load', () => checkForNewBuild(true));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForNewBuild(false);
+      });
+      setInterval(() => checkForNewBuild(false), 600000); // Checks every 10 mins (only if no video playing)
+    })();
+  </script>
+  
   <!-- Auto-Update Checker for Installed PWA -->
   <script>
     (function setupPwaAutoUpdate() {
@@ -466,7 +521,11 @@
       will-change: transform;
       animation: tcFlashScroll var(--ticker-duration, 55s) linear infinite;
     }
-    .flash-ticker-viewport:hover .flash-ticker-track,
+    @media (hover: hover) and (pointer: fine) {
+      .flash-ticker-viewport:hover .flash-ticker-track {
+        animation-play-state: paused !important;
+      }
+    }
     .flash-ticker-track.ticker-paused {
       animation-play-state: paused !important;
     }
@@ -865,6 +924,48 @@
     </div>
   </div>
 
+
+  <!-- APPLE-STYLE IN-APP NEWS READER POP-UP -->
+  <div id="news-reader-modal" class="hidden fixed inset-0 z-[124] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md transition-all overflow-y-auto">
+    <div class="apple-card max-w-xl w-full p-5 sm:p-6 shadow-2xl relative border border-blue-500/25 my-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="reader-modal-scope" class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-500/15 text-blue-500 border border-blue-500/30">NEWS</span>
+          <span id="reader-modal-source" class="text-xs font-bold" style="color: var(--text-main);">T&amp;C News Hub</span>
+        </div>
+        <button onclick="closeNewsReader()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">
+        <img id="reader-modal-img" src="" alt="" referrerpolicy="no-referrer" class="hidden w-full max-h-56 object-cover rounded-2xl border" style="border-color: var(--border-color);" onerror="this.classList.add('hidden')">
+
+        <h3 id="reader-modal-title" class="text-base sm:text-lg font-extrabold leading-snug" style="color: var(--text-main);">Headline</h3>
+
+        <p id="reader-modal-time" class="text-[11px] flex items-center gap-1.5" style="color: var(--text-sub);">
+          <i class="fa-regular fa-clock text-blue-500"></i> <span>Live Feed</span>
+        </p>
+
+        <div class="p-3.5 rounded-2xl border text-xs sm:text-[13px] leading-relaxed" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-main);">
+          <p id="reader-modal-summary">Loading story brief...</p>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5" style="border-color: var(--border-color);">
+        <button onclick="shareCurrentReaderStory()" id="reader-share-btn" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);">
+          <i class="fa-solid fa-share-nodes text-blue-500"></i> <span>Share via T&amp;C News</span>
+        </button>
+        <a id="reader-modal-origin-link" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
+          <span>Open Original Story</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+  
+  
   <!-- STICKY UNIFIED HEADER & REAL-TIME TICKER CONTAINER -->
   <div class="sticky top-0 z-50 shadow-sm">
     
@@ -1767,6 +1868,34 @@
         }
       });
 
+
+      const ensureFlashPlaying = () => {
+        const t = document.getElementById('live-flash-track');
+        if (t && !isFlashPaused) t.classList.remove('ticker-paused');
+      };
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') ensureFlashPlaying();
+      });
+      window.addEventListener('pageshow', ensureFlashPlaying);
+      window.addEventListener('focus', ensureFlashPlaying);
+
+      const sharedStoryParam = new URLSearchParams(window.location.search).get('story');
+      if (sharedStoryParam) {
+        const decoded = decodeStoryPayload(sharedStoryParam);
+        if (decoded && decoded.t) {
+          openNewsReader({
+            scope: decoded.c || 'NEWS',
+            source: decoded.s || 'T&C News Hub',
+            title: decoded.t,
+            summary: decoded.d || '',
+            time: decoded.p || 'Shared via T&C News Hub',
+            link: decoded.u || 'https://tastyandcomfort.github.io/news/',
+            image: decoded.i || ''
+          });
+        }
+      }
+      
+      
       loadSavedPreferencesUI();
       initPrecisionPiPEngine();
     });
@@ -1849,6 +1978,163 @@
       if (icon) icon.classList.remove('fa-spin');
     }
 
+
+    window.tcNewsRegistry = {};
+    let currentReaderStory = null;
+
+    function encodeStoryPayload(obj) {
+      const bytes = new TextEncoder().encode(JSON.stringify(obj));
+      let bin = '';
+      bytes.forEach((b) => { bin += String.fromCharCode(b); });
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function decodeStoryPayload(str) {
+      try {
+        let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        while (b64.length % 4) b64 += '=';
+        const bin = atob(b64);
+        const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch {
+        return null;
+      }
+    }
+
+    function extractRssMeta(item, scopeLabel) {
+      const rawTitle = item.querySelector('title')?.textContent?.trim() || 'News Story';
+      const link = item.querySelector('link')?.textContent?.trim() || '#';
+      const pubDateStr = item.querySelector('pubDate')?.textContent || '';
+      const rawDesc = item.querySelector('description')?.textContent || '';
+
+      let sourceName = 'Trusted by T&C';
+      if (link.includes('tv9')) sourceName = 'TV9 Telugu';
+      else if (link.includes('france24')) sourceName = 'France24';
+      else if (link.includes('hindu')) sourceName = 'The Hindu';
+      else if (link.includes('indiatimes')) sourceName = 'Times of India';
+      else if (link.includes('news.google')) sourceName = 'Google News';
+
+      let formattedTime = 'Live Feed';
+      if (pubDateStr) {
+        const d = new Date(pubDateStr);
+        if (!isNaN(d.getTime())) {
+          const timePart = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const day = d.getDate();
+          const ord = (day > 3 && day < 21) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th');
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          formattedTime = `Published at ${timePart}, ${day}${ord} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+      }
+
+      const imgMatch = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i);
+      const mediaEl = item.getElementsByTagName('media:content')[0] || item.querySelector('enclosure');
+      const image = mediaEl?.getAttribute('url') || imgMatch?.[1] || '';
+
+      const cleanDesc = rawDesc
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#039;|&apos;/gi, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      return { rawTitle, link, sourceName, formattedTime, cleanDesc, image, scope: scopeLabel };
+    }
+
+    function registerNewsStory(story) {
+      const id = 'st_' + Math.random().toString(36).slice(2, 10);
+      window.tcNewsRegistry[id] = story;
+      return id;
+    }
+
+    function openNewsReaderById(id) {
+      const story = window.tcNewsRegistry[id];
+      if (story) openNewsReader(story);
+    }
+
+    async function openNewsReader(story) {
+      const title = await translateText(story.title, currentLanguage);
+      let summary = story.summary ? await translateText(story.summary, currentLanguage) : '';
+      if (!summary || summary.toLowerCase() === title.toLowerCase()) {
+        summary = `Read the full report directly from ${story.source || 'the official publisher'} using the button below.`;
+      }
+
+      currentReaderStory = { ...story, title, summary };
+
+      document.getElementById('reader-modal-scope').textContent = (story.scope || 'NEWS').toUpperCase();
+      document.getElementById('reader-modal-source').textContent = story.source || 'T&C News Hub';
+      document.getElementById('reader-modal-title').textContent = title;
+      document.getElementById('reader-modal-time').querySelector('span').textContent = story.time || 'Live Feed';
+      document.getElementById('reader-modal-summary').textContent = summary;
+      document.getElementById('reader-modal-origin-link').href = story.link || 'https://tastyandcomfort.github.io/news/';
+
+      const imgEl = document.getElementById('reader-modal-img');
+      if (story.image && story.image.startsWith('http')) {
+        imgEl.src = story.image;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+      }
+
+      document.getElementById('news-reader-modal').classList.remove('hidden');
+    }
+
+    function closeNewsReader() {
+      document.getElementById('news-reader-modal').classList.add('hidden');
+      if (window.location.search.includes('story=')) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    function buildTcShareUrl(story) {
+      const token = encodeStoryPayload({
+        t: String(story.title || '').slice(0, 180),
+        d: String(story.summary || '').slice(0, 260),
+        u: story.link || 'https://tastyandcomfort.github.io/news/',
+        s: story.source || 'T&C News Hub',
+        c: story.scope || 'NEWS',
+        p: story.time || ''
+      });
+      return `https://tastyandcomfort.github.io/news/?story=${token}`;
+    }
+
+    async function shareStoryObject(story, btnEl) {
+      const shareUrl = buildTcShareUrl(story);
+      const shareText = `📰 T&C News Hub — ${story.title}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: `T&C News Hub: ${story.title}`, text: shareText, url: shareUrl });
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+        if (btnEl) {
+          const oldHtml = btnEl.innerHTML;
+          btnEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> <span>T&amp;C Link Copied!</span>';
+          setTimeout(() => { btnEl.innerHTML = oldHtml; }, 1800);
+        }
+      } catch {
+        prompt('Copy this T&C News link:', shareUrl);
+      }
+    }
+
+    function shareCurrentReaderStory() {
+      if (currentReaderStory) {
+        shareStoryObject(currentReaderStory, document.getElementById('reader-share-btn'));
+      }
+    }
+
+    function shareNewsCardById(id, btnEl) {
+      const story = window.tcNewsRegistry[id];
+      if (story) shareStoryObject(story, btnEl);
+    }
+    
     function toggleLiveScroller() {
       isFlashPaused = !isFlashPaused;
       const track = document.getElementById('live-flash-track');
@@ -1875,19 +2161,24 @@
             const items = Array.from(xml.querySelectorAll('item')).slice(0, 4);
 
             for (const item of items) {
-              const rawTitle = item.querySelector('title')?.textContent?.trim();
-              const link = item.querySelector('link')?.textContent?.trim() || '#';
-              if (!rawTitle) continue;
-              const title = await translateText(rawTitle, currentLanguage);
-              collected.push({ type: 'news', label: s.label, badgeClass: s.badgeClass, text: title, link });
+              const meta = extractRssMeta(item, s.label);
+              const title = await translateText(meta.rawTitle, currentLanguage);
+              const storyId = registerNewsStory({
+                scope: s.label,
+                source: meta.sourceName,
+                title,
+                summary: meta.cleanDesc,
+                time: meta.formattedTime,
+                link: meta.link,
+                image: meta.image
+              });
+              collected.push({ type: 'news', storyId, label: s.label, badgeClass: s.badgeClass, text: title });
             }
           } catch {}
         })
       );
 
-      if (collected.length > 0) {
-        flashNewsEntries = collected;
-      }
+      if (collected.length > 0) flashNewsEntries = collected;
       renderLiveFlashTrack();
     }
 
@@ -1917,11 +2208,11 @@
           `;
         }
         return `
-          <a href="${escapeHtml(entry.link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 text-[11.5px] font-semibold hover:text-blue-500 transition-colors whitespace-nowrap" style="color: var(--text-main);">
+          <button type="button" onclick="openNewsReaderById('${escapeHtml(entry.storyId)}')" class="inline-flex items-center gap-2 px-4 text-[11.5px] font-semibold hover:text-blue-500 transition-colors whitespace-nowrap" style="color: var(--text-main);">
             <span class="px-1.5 py-0.5 rounded text-[9px] font-black border ${entry.badgeClass}">${entry.label}</span>
             <span>${escapeHtml(entry.text)}</span>
             <span class="opacity-30 pl-2">•</span>
-          </a>
+          </button>
         `;
       };
 
@@ -1931,9 +2222,9 @@
       const totalChars = combined.reduce((sum, e) => sum + e.text.length + 14, 0);
       const durationSec = Math.max(30, Math.min(120, Math.round(totalChars * 0.14)));
       track.style.setProperty('--ticker-duration', `${durationSec}s`);
-      track.classList.toggle('ticker-paused', isFlashPaused);
+      if (!isFlashPaused) track.classList.remove('ticker-paused');
     }
-
+    
     function openAnnouncementModal() {
       document.getElementById('announcement-modal').classList.remove('hidden');
     }
@@ -2206,6 +2497,11 @@
       }
     }
 
+    if (window.tcPendingReload) {
+        window.tcPendingReload = false;
+        window.location.reload();
+      }
+    
     /* ==================== OFFICIAL MOST WANTED ENGINE ==================== */
     function formatAgencyTimestamp(isoStr) {
       if (!isoStr) return 'Not Published by Agency';
@@ -2678,54 +2974,43 @@
         }
 
         let html = '';
-        const displayList = filteredItems;
-
-        for (const item of displayList) {
-          const rawTitle = item.querySelector("title")?.textContent || "News Story";
-          const link = item.querySelector("link")?.textContent || "#";
-          const pubDateStr = item.querySelector("pubDate")?.textContent || "";
-          
-          let formattedDateTime = "Live Feed";
-          if (pubDateStr) {
-            const dateObj = new Date(pubDateStr);
-            const timePart = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const day = dateObj.getDate();
-            const getOrdinal = (n) => {
-              if (n > 3 && n < 21) return 'th';
-              switch (n % 10) { case 1: return "st"; case 2: return "nd"; case 3: return "rd"; default: return "th"; }
-            };
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            formattedDateTime = `Published at ${timePart}, ${day}${getOrdinal(day)} ${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
-          }
-
-          const title = await translateText(rawTitle, currentLanguage);
-          let sourceName = "Trusted by T&C";
-          if (link.includes("tv9")) sourceName = "TV9 Telugu";
-          else if (link.includes("france24")) sourceName = "France24";
-          else if (link.includes("hindu")) sourceName = "The Hindu";
-          else if (link.includes("indiatimes")) sourceName = "Times of India";
-          else if (link.includes("news.google")) sourceName = "Google News";
+        for (const item of filteredItems) {
+          const meta = extractRssMeta(item, currentScope);
+          const title = await translateText(meta.rawTitle, currentLanguage);
+          const storyId = registerNewsStory({
+            scope: currentScope,
+            source: meta.sourceName,
+            title,
+            summary: meta.cleanDesc,
+            time: meta.formattedTime,
+            link: meta.link,
+            image: meta.image
+          });
 
           html += `
-            <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-              <div class="flex-grow">
-                <h4 class="text-xs md:text-sm font-semibold line-clamp-2" style="color: var(--text-main);">
+            <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-blue-500/35" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
+              <div class="flex-grow cursor-pointer" onclick="openNewsReaderById('${storyId}')">
+                <h4 class="text-xs md:text-sm font-semibold line-clamp-2 hover:text-blue-500 transition-colors" style="color: var(--text-main);">
                   ${escapeHtml(title)}
                 </h4>
                 <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
                   <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${currentScope} • ${currentLanguage.toUpperCase()}</span>
-                  <span><i class="fa-regular fa-clock mr-1"></i>${formattedDateTime}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${meta.formattedTime}</span>
                 </div>
               </div>
-              <a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="self-end md:self-center px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
-                <i class="fa-solid fa-circle-check text-[10px]"></i> ${sourceName}
-              </a>
+              <div class="flex items-center gap-2 self-end md:self-center flex-shrink-0">
+                <button type="button" onclick="shareNewsCardById('${storyId}', this)" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);" title="Share via T&C News">
+                  <i class="fa-solid fa-share-nodes text-blue-500 text-[10px]"></i>
+                </button>
+                <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30">
+                  <i class="fa-solid fa-circle-check text-[10px]"></i> ${meta.sourceName}
+                </a>
+              </div>
             </div>
           `;
         }
         feedContainer.innerHTML = html;
-        badge.textContent = `Live (${displayList.length} Stories)`;
-      } catch (err) {
+        badge.textContent = `Live (${filteredItems.length} Stories)`;
         feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
         badge.textContent = "Error";
       } finally {
@@ -2746,12 +3031,21 @@
 
         let html = '';
         for (const item of topItems) {
-          const rawTitle = item.querySelector("title")?.textContent || "";
-          const link = item.querySelector("link")?.textContent || "#";
-          const title = await translateText(rawTitle, currentLanguage);
-          html += `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="p-2.5 rounded-xl text-xs transition-all line-clamp-2" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${escapeHtml(title)}</a>`;
+          const meta = extractRssMeta(item, 'world');
+          const title = await translateText(meta.rawTitle, currentLanguage);
+          const storyId = registerNewsStory({
+            scope: 'world',
+            source: meta.sourceName,
+            title,
+            summary: meta.cleanDesc,
+            time: meta.formattedTime,
+            link: meta.link,
+            image: meta.image
+          });
+          html += `<button type="button" onclick="openNewsReaderById('${storyId}')" class="text-left p-2.5 rounded-xl text-xs transition-all line-clamp-2 hover:border-amber-500/40" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${escapeHtml(title)}</button>`;
         }
         container.innerHTML = html;
+    
       } catch (e) {
         container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">Highlights loading...</div>';
       }
