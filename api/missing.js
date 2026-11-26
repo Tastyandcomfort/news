@@ -22,7 +22,10 @@ function decodeEntities(str) {
 }
 
 function stripTags(html) {
-  return decodeEntities(String(html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  return decodeEntities(String(html || '').replace(/<[^>]+>/g, ' '))
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function parseDmyToIso(dmy) {
@@ -33,12 +36,14 @@ function parseDmyToIso(dmy) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 14000) {
+async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 14000, method = 'GET', body = undefined) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(url, {
+      method,
       headers: { ...BROWSER_HEADERS, ...extraHeaders },
+      body,
       redirect: 'follow',
       signal: controller.signal
     });
@@ -47,64 +52,150 @@ async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 14000) {
   }
 }
 
-async function fetchZipnetMissing(stateFilter = 'ALL') {
+async function fetchZipnetMissing(stateFilter = 'ALL', debug = false) {
   const url = 'https://zipnet.delhipolice.gov.in/victims/missingpersons/';
   try {
     const res = await fetchWithTimeout(url, {}, 15000);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const html = await res.text();
+    const setCookie = res.headers.get('set-cookie') || '';
+    const cookieHeader = setCookie ? setCookie.split(',').map((c) => c.split(';')[0]).join('; ') : '';
 
-    const tbodyMatch = html.match(/<tbody[\s>][\s\S]*?<\/tbody>/i);
-    const scanHtml = tbodyMatch ? tbodyMatch[0] : html;
-    const trMatches = scanHtml.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
-
+    let items = [];
     const totalMatch = html.match(/Showing\s+\d+\s+to\s+\d+\s+of\s+([\d,]+)\s+entries/i);
-    const totalDatabaseEntries = totalMatch?.[1] || null;
+    let totalDatabaseEntries = totalMatch?.[1] || null;
 
-    const items = [];
-    for (const tr of trMatches) {
-      const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
-      if (tds.length < 9) continue;
+    // 1. Parse initial SSR table rows if present
+    const tbodyMatch = html.match(/<tbody[\s>][\s\S]*?<\/tbody>/i);
+    if (tbodyMatch) {
+      const trMatches = tbodyMatch[0].match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+      for (const tr of trMatches) {
+        const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
+        if (tds.length < 9) continue;
+        const state = stripTags(tds[0]);
+        const district = stripTags(tds[1]);
+        const policeStation = stripTags(tds[2]);
+        const firNo = stripTags(tds[3]);
+        const ddDate = stripTags(tds[4]);
+        const serialNo = stripTags(tds[5]);
+        const missingPlace = stripTags(tds[6]);
+        const tracingStatus = stripTags(tds[7]);
+        const reportDate = stripTags(tds[8]);
+        if (!state || !serialNo || /District/i.test(district)) continue;
+        if (stateFilter !== 'ALL' && state.toUpperCase() !== stateFilter.toUpperCase()) continue;
 
-      const state = stripTags(tds[0]);
-      const district = stripTags(tds[1]);
-      const policeStation = stripTags(tds[2]);
-      const firNo = stripTags(tds[3]);
-      const ddDate = stripTags(tds[4]);
-      const serialNo = stripTags(tds[5]);
-      const missingPlace = stripTags(tds[6]);
-      const tracingStatus = stripTags(tds[7]);
-      const reportDate = stripTags(tds[8]);
-
-      if (!state || !serialNo || /District/i.test(district)) continue;
-      if (stateFilter !== 'ALL' && state.toUpperCase() !== stateFilter.toUpperCase()) continue;
-
-      items.push({
-        id: `zipnet-${serialNo.replace(/[^a-zA-Z0-9-]/g, '-')}`,
-        agency: 'MISSING',
-        missingSource: 'ZIPNET',
-        stateName: state,
-        verifiedBy: 'ZIPNET Police Official',
-        department: `${state} Police • PS ${policeStation} (${district})`,
-        location: `${missingPlace || district}, ${district}, ${state}`,
-        name: `Missing Case ${serialNo} (${district}, ${state})`,
-        aliases: firNo ? [`FIR/DD: ${firNo}`] : [],
-        photo: '',
-        charges: `Tracing Status: ${tracingStatus} • Missing From: ${missingPlace || 'Not specified'} • Police Station: ${policeStation}, ${district}`,
-        description: `Official ZIPNET Missing Person Entry. Serial No: ${serialNo} | FIR/DD No: ${firNo} | DD Date: ${ddDate} | Reported on ZIPNET: ${reportDate}`,
-        caution: 'If you have any information, immediately call Emergency 112, Missing Persons Helpline 1094, Childline 1098, or the local Police Station.',
-        rewardText: tracingStatus,
-        rewardValue: 0,
-        publishedAt: parseDmyToIso(reportDate) || parseDmyToIso(ddDate),
-        updatedAt: parseDmyToIso(reportDate),
-        dob: '',
-        nationality: 'India',
-        noticeType: `MISSING • ${tracingStatus.toUpperCase()}`,
-        sourceUrl: url
-      });
+        items.push({
+          id: `zipnet-${serialNo.replace(/[^a-zA-Z0-9-]/g, '-')}`,
+          agency: 'MISSING',
+          missingSource: 'ZIPNET',
+          stateName: state,
+          verifiedBy: 'ZIPNET Police Official',
+          department: `${state} Police • PS ${policeStation} (${district})`,
+          location: `${missingPlace || district}, ${district}, ${state}`,
+          name: `Missing Case ${serialNo} (${district}, ${state})`,
+          aliases: firNo ? [`FIR/DD: ${firNo}`] : [],
+          photo: '',
+          charges: `Tracing Status: ${tracingStatus} • Missing From: ${missingPlace || 'Not specified'} • Police Station: ${policeStation}, ${district}`,
+          description: `Official ZIPNET Missing Person Entry. Serial No: ${serialNo} | FIR/DD No: ${firNo} | DD Date: ${ddDate} | Reported on ZIPNET: ${reportDate}`,
+          caution: 'If you have any information, immediately call Emergency 112, Missing Persons Helpline 1094, Childline 1098, or the local Police Station.',
+          rewardText: tracingStatus,
+          rewardValue: 0,
+          publishedAt: parseDmyToIso(reportDate) || parseDmyToIso(ddDate),
+          updatedAt: parseDmyToIso(reportDate),
+          dob: '',
+          nationality: 'India',
+          noticeType: `MISSING • ${tracingStatus.toUpperCase()}`,
+          sourceUrl: url
+        });
+      }
     }
 
-    return { ok: items.length > 0, count: items.length, totalDatabaseEntries, sourceUrl: url, items, error: items.length ? null : 'No matching live rows in current ZIPNET page' };
+    // 2. Discover DataTables / AJAX endpoint embedded in page scripts if tbody was empty
+    const ajaxMatches = [];
+    const scriptRegex = /(?:url|ajax)\s*:\s*["']([^"']+)["']/gi;
+    let sm;
+    while ((sm = scriptRegex.exec(html)) !== null) {
+      if (sm[1] && !/\.(css|png|jpg|svg|ico)$/i.test(sm[1])) {
+        ajaxMatches.push(sm[1]);
+      }
+    }
+
+    const debugAjaxResults = [];
+    if (items.length === 0 && ajaxMatches.length > 0) {
+      for (const rel of ajaxMatches.slice(0, 4)) {
+        const ajaxUrl = new URL(rel, url).href;
+        for (const method of ['POST', 'GET']) {
+          try {
+            const aRes = await fetchWithTimeout(
+              ajaxUrl,
+              {
+                'Accept': 'application/json, text/javascript, */*; q=0.01',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Referer': url,
+                ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+                ...(method === 'POST' ? { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } : {})
+              },
+              10000,
+              method,
+              method === 'POST' ? 'draw=1&start=0&length=25' : undefined
+            );
+            const raw = await aRes.text();
+            debugAjaxResults.push({ ajaxUrl, method, status: aRes.status, sample: raw.slice(0, 300) });
+            if (aRes.ok && raw.trim().startsWith('{')) {
+              const json = JSON.parse(raw);
+              const rows = json.data || json.aaData || json.rows || [];
+              if (json.recordsTotal) totalDatabaseEntries = String(json.recordsTotal);
+              if (Array.isArray(rows) && rows.length > 0) {
+                for (const r of rows) {
+                  const arr = Array.isArray(r) ? r.map(stripTags) : Object.values(r).map(stripTags);
+                  if (arr.length < 8) continue;
+                  const [state, district, policeStation, firNo, ddDate, serialNo, missingPlace, tracingStatus, reportDate] = arr;
+                  if (!state || !serialNo) continue;
+                  if (stateFilter !== 'ALL' && state.toUpperCase() !== stateFilter.toUpperCase()) continue;
+                  items.push({
+                    id: `zipnet-${serialNo.replace(/[^a-zA-Z0-9-]/g, '-')}`,
+                    agency: 'MISSING',
+                    missingSource: 'ZIPNET',
+                    stateName: state,
+                    verifiedBy: 'ZIPNET Police Official',
+                    department: `${state} Police • PS ${policeStation} (${district})`,
+                    location: `${missingPlace || district}, ${district}, ${state}`,
+                    name: `Missing Case ${serialNo} (${district}, ${state})`,
+                    aliases: firNo ? [`FIR/DD: ${firNo}`] : [],
+                    photo: '',
+                    charges: `Tracing Status: ${tracingStatus || 'Untraced'} • Missing From: ${missingPlace || 'Not specified'} • Police Station: ${policeStation}, ${district}`,
+                    description: `Official ZIPNET Missing Person Entry. Serial No: ${serialNo} | FIR/DD No: ${firNo} | DD Date: ${ddDate} | Reported on ZIPNET: ${reportDate || ''}`,
+                    caution: 'If you have any information, immediately call Emergency 112, Missing Persons Helpline 1094, Childline 1098, or the local Police Station.',
+                    rewardText: tracingStatus || 'Untraced',
+                    rewardValue: 0,
+                    publishedAt: parseDmyToIso(reportDate || ddDate),
+                    updatedAt: parseDmyToIso(reportDate || ddDate),
+                    dob: '',
+                    nationality: 'India',
+                    noticeType: `MISSING • ${(tracingStatus || 'UNTRACED').toUpperCase()}`,
+                    sourceUrl: url
+                  });
+                }
+                if (items.length > 0) break;
+              }
+            }
+          } catch (e) {
+            debugAjaxResults.push({ ajaxUrl, method, error: e.message });
+          }
+        }
+        if (items.length > 0) break;
+      }
+    }
+
+    return {
+      ok: items.length > 0,
+      count: items.length,
+      totalDatabaseEntries,
+      sourceUrl: url,
+      items,
+      error: items.length ? null : 'ZIPNET table requires interactive session/browser search',
+      ...(debug ? { debugAjaxMatches: ajaxMatches, debugAjaxResults } : {})
+    };
   } catch (err) {
     return { ok: false, count: 0, totalDatabaseEntries: null, sourceUrl: url, items: [], error: `ZIPNET unreachable (${err.message})` };
   }
@@ -120,6 +211,8 @@ async function fetchFbiMissing() {
       const offices = Array.isArray(item.field_offices) && item.field_offices.length
         ? item.field_offices.map((o) => o.charAt(0).toUpperCase() + o.slice(1)).join(', ')
         : 'Federal HQ';
+      const cleanDesc = stripTags(item.details || item.description || '');
+      const cleanCharges = stripTags(item.description || (Array.isArray(item.subjects) ? item.subjects.join(', ') : 'Missing Person Case'));
       return {
         id: `fbi-miss-${item.uid}`,
         agency: 'MISSING',
@@ -128,13 +221,13 @@ async function fetchFbiMissing() {
         verifiedBy: 'FBI Official',
         department: `FBI Kidnappings & Missing Persons (${offices})`,
         location: [offices + ' Field Office', item.place_of_birth ? `Origin: ${item.place_of_birth}` : ''].filter(Boolean).join(' • '),
-        name: item.title || 'Unknown Missing Person',
+        name: stripTags(item.title || 'Unknown Missing Person'),
         aliases: Array.isArray(item.aliases) ? item.aliases.slice(0, 4) : [],
         photo: item.images?.[0]?.thumb || item.images?.[0]?.large || item.images?.[0]?.original || '',
-        charges: item.description || (Array.isArray(item.subjects) ? item.subjects.join(', ') : 'Missing Person Case'),
-        description: item.details || item.description || '',
-        caution: item.caution || 'Report verified tips to FBI / local authorities via the official link.',
-        rewardText: item.reward_text || '',
+        charges: cleanCharges,
+        description: cleanDesc,
+        caution: stripTags(item.caution || 'Report verified tips to FBI / local authorities via the official link.'),
+        rewardText: stripTags(item.reward_text || ''),
         rewardValue: Number(item.reward_max || item.reward_min || 0),
         publishedAt: item.publication || null,
         updatedAt: item.modified || item.publication || null,
@@ -203,12 +296,13 @@ export default async function handler(req, res) {
 
   const source = String(req.query.source || 'all').toLowerCase();
   const state = String(req.query.state || 'ALL').trim();
+  const debug = req.query.debug === '1';
 
   const out = { updatedAt: new Date().toISOString(), sources: {} };
   const tasks = [];
 
   if (source === 'all' || source.includes('zipnet')) {
-    tasks.push(fetchZipnetMissing(state).then((d) => { out.sources.zipnet = d; }));
+    tasks.push(fetchZipnetMissing(state, debug).then((d) => { out.sources.zipnet = d; }));
   }
   if (source === 'all' || source.includes('fbi')) {
     tasks.push(fetchFbiMissing().then((d) => { out.sources.fbi_missing = d; }));
