@@ -8,40 +8,22 @@
   let currentBulletin = null;
   let isBulletinArchiveView = false;
 
-  // Govt Releases State (PIB A-Z, ED, CBI)
   let currentGovAgency = 'all';
-  let currentPibRegid = '1'; // '1' = All India HQ English
+  let currentPibRegid = '3';
   let pibRegionsList = [
-    { regid: '1', name: 'All India HQ — English (PIB Delhi)' },
-    { regid: '3', name: 'All India HQ — Multilingual / Hindi (National)' },
-    { regid: '2', name: 'PIB Mumbai' },
-    { regid: '5', name: 'PIB Hyderabad' },
-    { regid: '6', name: 'PIB Chennai' },
-    { regid: '7', name: 'PIB Chandigarh' },
-    { regid: '8', name: 'PIB Kolkata' },
-    { regid: '12', name: 'PIB Guwahati' },
-    { regid: '14', name: 'PIB Bhubaneswar' },
-    { regid: '20', name: 'PIB Bengaluru' },
-    { regid: '22', name: 'PIB Ahmedabad' },
-    { regid: '24', name: 'PIB Thiruvananthapuram' }
+    { regid: '3', name: 'All India (National HQ — All Ministries A–Z)' },
+    { regid: '1', name: 'PIB Delhi' }, { regid: '2', name: 'PIB Mumbai' }, { regid: '5', name: 'PIB Hyderabad' },
+    { regid: '6', name: 'PIB Chennai' }, { regid: '7', name: 'PIB Chandigarh' }, { regid: '8', name: 'PIB Kolkata' },
+    { regid: '12', name: 'PIB Guwahati' }, { regid: '14', name: 'PIB Bhubaneswar' }, { regid: '20', name: 'PIB Bengaluru' },
+    { regid: '22', name: 'PIB Ahmedabad' }, { regid: '24', name: 'PIB Thiruvananthapuram' }
   ];
   let liveGovCache = { pib: null, ed_press: null, cbi: null };
 
-  // Live ED Proclamations, CBI, & Missing Persons State (Zero Hardcoded/Fake Data)
   let liveEdProclamations = [];
   let liveEdStatus = { ok: false, error: '' };
-  let liveCbiData = {
-    ok: false,
-    directAccessible: false,
-    items: [],
-    redNotices: [],
-    error: '',
-    sourceUrl: 'https://cbi.gov.in/press-releases',
-    wantedUrl: 'https://cbi.gov.in/interpol-red-notice'
-  };
+  let liveCbiData = { ok: false, directAccessible: false, items: [], redNotices: [], error: '' };
   let missingDataset = [];
   let missingSourcesMeta = {};
-  let currentMissingStateFilter = 'ALL';
 
   const INDIA_OFFICIAL_MISSING_PORTALS = [
     { state: 'National — TrackChild (Missing Children, All States)', url: 'https://trackthemissingchild.gov.in/trackchild/index.php' },
@@ -53,40 +35,39 @@
     { state: 'Arunachal Pradesh Police', url: 'https://arunpol.nic.in/' },
     { state: 'Assam Police (Citizen Portal)', url: 'https://assampolice.gov.in/' },
     { state: 'Bihar Police', url: 'https://police.bihar.gov.in/' },
-    { state: 'Chandigarh Police (ZIPNET + Portal)', url: 'https://chandigarhpolice.gov.in/' },
+    { state: 'Chandigarh Police', url: 'https://chandigarhpolice.gov.in/' },
     { state: 'Chhattisgarh Police (Citizen Portal)', url: 'https://cgpolice.gov.in/' },
     { state: 'Dadra & Nagar Haveli and Daman & Diu Police', url: 'https://dnhddpolice.gov.in/' },
-    { state: 'Delhi Police (ZIPNET + Citizen Services)', url: 'https://delhipolice.gov.in/' },
+    { state: 'Delhi Police', url: 'https://delhipolice.gov.in/' },
     { state: 'Goa Police', url: 'https://citizen.goapolice.gov.in/' },
     { state: 'Gujarat Police (Citizen Portal)', url: 'https://gujhome.gujarat.gov.in/portal/' },
-    { state: 'Haryana Police (ZIPNET + HarSamay)', url: 'https://haryanapolice.gov.in/' },
-    { state: 'Himachal Pradesh Police (ZIPNET + Citizen)', url: 'https://citizenportal.hppolice.gov.in/' },
+    { state: 'Haryana Police', url: 'https://haryanapolice.gov.in/' },
+    { state: 'Himachal Pradesh Police', url: 'https://citizenportal.hppolice.gov.in/' },
     { state: 'Jammu & Kashmir Police', url: 'https://jkpolice.gov.in/' },
     { state: 'Jharkhand Police', url: 'https://jhpolice.gov.in/' },
-    { state: 'Karnataka State Police (KSP Citizen Portal)', url: 'https://ksp.karnataka.gov.in/' },
-    { state: 'Kerala Police (Thuna Citizen Portal)', url: 'https://thuna.keralapolice.gov.in/' },
+    { state: 'Karnataka State Police (KSP)', url: 'https://ksp.karnataka.gov.in/' },
+    { state: 'Kerala Police (Thuna)', url: 'https://thuna.keralapolice.gov.in/' },
     { state: 'Ladakh Police', url: 'https://police.ladakh.gov.in/' },
     { state: 'Lakshadweep Police', url: 'https://lakshadweeppolice.gov.in/' },
-    { state: 'Madhya Pradesh Police (Citizen Portal)', url: 'https://citizen.mppolice.gov.in/' },
-    { state: 'Maharashtra Police (Citizen Portal)', url: 'https://citizen.mahapolice.gov.in/' },
+    { state: 'Madhya Pradesh Police', url: 'https://citizen.mppolice.gov.in/' },
+    { state: 'Maharashtra Police', url: 'https://citizen.mahapolice.gov.in/' },
     { state: 'Manipur Police', url: 'https://manipurpolice.gov.in/' },
     { state: 'Meghalaya Police', url: 'https://megpolice.gov.in/' },
     { state: 'Mizoram Police', url: 'https://police.mizoram.gov.in/' },
     { state: 'Nagaland Police', url: 'https://police.nagaland.gov.in/' },
-    { state: 'Odisha Police (Citizen Portal)', url: 'https://citizenportal-op.gov.in/' },
+    { state: 'Odisha Police', url: 'https://citizenportal-op.gov.in/' },
     { state: 'Puducherry Police', url: 'https://police.py.gov.in/' },
-    { state: 'Punjab Police (ZIPNET + Saanjh)', url: 'https://punjabpolice.gov.in/' },
-    { state: 'Rajasthan Police (ZIPNET + Citizen)', url: 'https://police.rajasthan.gov.in/' },
+    { state: 'Punjab Police', url: 'https://punjabpolice.gov.in/' },
+    { state: 'Rajasthan Police', url: 'https://police.rajasthan.gov.in/' },
     { state: 'Sikkim Police', url: 'https://police.sikkim.gov.in/' },
-    { state: 'Tamil Nadu Police (Citizen Services)', url: 'https://eservices.tnpolice.gov.in/' },
-    { state: 'Telangana Police (Citizen Services & CID)', url: 'https://www.tspolice.gov.in/' },
+    { state: 'Tamil Nadu Police', url: 'https://eservices.tnpolice.gov.in/' },
+    { state: 'Telangana Police', url: 'https://www.tspolice.gov.in/' },
     { state: 'Tripura Police', url: 'https://tripurapolice.gov.in/' },
-    { state: 'Uttar Pradesh Police (ZIPNET + UPCOP)', url: 'https://uppolice.gov.in/' },
-    { state: 'Uttarakhand Police (ZIPNET + Citizen)', url: 'https://uttarakhandpolice.uk.gov.in/' },
+    { state: 'Uttar Pradesh Police', url: 'https://uppolice.gov.in/' },
+    { state: 'Uttarakhand Police', url: 'https://uttarakhandpolice.uk.gov.in/' },
     { state: 'West Bengal Police', url: 'https://wbpolice.gov.in/' }
   ];
 
-  // 1. Mobile-safe hover CSS & modal containers
   const addonStyle = document.createElement('style');
   addonStyle.textContent = `
     .flash-ticker-viewport:hover .flash-ticker-track { animation-play-state: running !important; }
@@ -192,8 +173,8 @@
           <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1">
             <button type="button" onclick="setGovAgencyFilter('all', this)" class="choice-pill selected">All Govt Releases</button>
             <button type="button" onclick="setGovAgencyFilter('pib', this)" class="choice-pill">🇮🇳 PIB India (A–Z)</button>
-            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill"> ED Press Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill"> CBI Official</button>
+            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill">⚖️ ED Press Releases</button>
+            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill">🕵️ CBI Official</button>
           </div>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <select id="pib-region-select" onchange="onPibRegionChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);"></select>
@@ -212,40 +193,17 @@
     if (wantedDir && !document.getElementById('missing-controls-bar')) {
       wantedDir.insertAdjacentHTML('beforebegin', `
         <div id="missing-controls-bar" class="hidden mb-4 p-3.5 rounded-2xl border border-blue-500/25 space-y-3" style="background-color: var(--bg-sub);">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h4 class="text-xs font-extrabold text-blue-500 flex items-center gap-1.5"><i class="fa-solid fa-person-circle-question"></i> Open Missing Persons Directory (All India A–Z &amp; Global)</h4>
-              <p class="text-[10.5px]" style="color: var(--text-sub);">Live missing person feeds + All 36 Indian States/UTs official citizen portals.</p>
-            </div>
+          <div>
+            <h4 class="text-xs font-extrabold text-blue-500 flex items-center gap-1.5"><i class="fa-solid fa-landmark"></i> Search Indian Missing Persons on Official Govt Portals (All 36 States &amp; UTs A–Z)</h4>
+            <p class="text-[10.5px] mt-0.5" style="color: var(--text-sub);">Indian state police &amp; TrackChild missing-person searches open on official .gov.in portals. Pick any state below and tap <b>Open</b>:</p>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] font-bold mb-1" style="color: var(--text-sub);">Filter Live Missing Feed:</label>
-              <select id="missing-live-filter" onchange="onMissingFilterChange(this.value)" class="w-full px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
-                <option value="ALL">All Live Missing Sources (ZIPNET + FBI + INTERPOL)</option>
-                <option value="CHANDIGARH">ZIPNET: Chandigarh</option>
-                <option value="DELHI">ZIPNET: Delhi</option>
-                <option value="HARYANA">ZIPNET: Haryana</option>
-                <option value="HIMACHAL PRADESH">ZIPNET: Himachal Pradesh</option>
-                <option value="PUNJAB">ZIPNET: Punjab</option>
-                <option value="RAJASTHAN">ZIPNET: Rajasthan</option>
-                <option value="UTTAR PRADESH">ZIPNET: Uttar Pradesh</option>
-                <option value="UTTRAKHAND">ZIPNET: Uttarakhand</option>
-                <option value="FBI_MISSING">Global Live: FBI Kidnappings &amp; Missing</option>
-                <option value="INTERPOL_YELLOW">Global: INTERPOL Yellow Notices</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold mb-1" style="color: var(--text-sub);">All-India State Citizen Portal Finder (A–Z):</label>
-              <div class="flex items-center gap-1.5">
-                <select id="india-state-portal-select" class="w-full px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
-                  ${INDIA_OFFICIAL_MISSING_PORTALS.map((p, idx) => `<option value="${idx}">${escapeHtml(p.state)}</option>`).join('')}
-                </select>
-                <button type="button" onclick="openSelectedStatePortal()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold whitespace-nowrap shadow-sm">Open ↗</button>
-              </div>
-            </div>
+          <div class="flex items-center gap-2">
+            <select id="india-state-portal-select" class="w-full px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+              ${INDIA_OFFICIAL_MISSING_PORTALS.map((p, idx) => `<option value="${idx}">${escapeHtml(p.state)}</option>`).join('')}
+            </select>
+            <button type="button" onclick="openSelectedStatePortal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold whitespace-nowrap shadow-sm">Open ↗</button>
           </div>
-          <div id="missing-source-status" class="text-[10.5px] leading-relaxed" style="color: var(--text-sub);"></div>
+          <div id="missing-source-status" class="text-[10.5px] pt-1 border-t leading-relaxed" style="border-color: var(--border-color); color: var(--text-sub);"></div>
         </div>
       `);
     }
@@ -286,20 +244,44 @@
   };
 
   window.onPibRegionChange = function (regid) {
-    currentPibRegid = regid || '1';
+    currentPibRegid = regid || '3';
     if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
       window.fetchPortalNews();
     }
   };
 
-  window.onMissingFilterChange = function (val) {
-    currentMissingStateFilter = val || 'ALL';
-    if (['CHANDIGARH', 'DELHI', 'HARYANA', 'HIMACHAL PRADESH', 'PUNJAB', 'RAJASTHAN', 'UTTAR PRADESH', 'UTTRAKHAND'].includes(currentMissingStateFilter)) {
-      fetchLiveMissingPersons(currentMissingStateFilter);
-    } else {
-      window.renderWantedDirectory();
+  // Auto-translate non-English PIB text when user's app is set to English
+  async function smartTranslate(text, targetLang) {
+    if (!text) return '';
+    if (targetLang === 'en') {
+      if (!/[\u0900-\u0D7F]/.test(text)) return text;
+      const key = `auto-en:${text}`;
+      if (typeof translationCache !== 'undefined' && translationCache[key]) return translationCache[key];
+      try {
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
+        const data = await res.json();
+        if (data && data[0]) {
+          const out = data[0].map(s => s[0]).join('');
+          if (typeof translationCache !== 'undefined') translationCache[key] = out;
+          return out;
+        }
+      } catch {}
+      return text;
     }
-  };
+    return typeof translateText === 'function' ? await translateText(text, targetLang) : text;
+  }
+
+  function resolveBulletinPdfUrl(raw) {
+    if (!raw) return '';
+    const val = String(raw).trim();
+    if (/^https?:\/\//i.test(val)) return val;
+    if (val.includes('/')) {
+      const parts = val.split('/');
+      const file = parts.pop();
+      return `${parts.join('/')}/${encodeURIComponent(file)}`;
+    }
+    return `./Bulletin-files/${encodeURIComponent(val)}`;
+  }
 
   // 2. Bulletins Engine
   window.fetchBulletins = async function () {
@@ -394,8 +376,9 @@
     toggleBtn.textContent = 'All Bulletins';
     footer.classList.remove('hidden');
 
-    if (b.pdfUrl) {
-      pdfLink.href = b.pdfUrl;
+    const resolvedPdf = resolveBulletinPdfUrl(b.pdfUrl);
+    if (resolvedPdf) {
+      pdfLink.href = resolvedPdf;
       pdfLink.classList.remove('hidden'); pdfLink.classList.add('inline-flex');
     } else {
       pdfLink.classList.add('hidden'); pdfLink.classList.remove('inline-flex');
@@ -461,7 +444,7 @@
   }
 
   function formatPrettyDate(isoOrStr) {
-    if (!isoOrStr) return 'Live Official Feed';
+    if (!isoOrStr) return 'Latest Official Release';
     const d = new Date(isoOrStr);
     if (isNaN(d.getTime())) return String(isoOrStr);
     const day = d.getDate();
@@ -508,8 +491,8 @@
 
   window.openNewsReader = async function (story) {
     const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
-    const title = typeof translateText === 'function' ? await translateText(story.title, lang) : story.title;
-    let summary = (story.summary && typeof translateText === 'function') ? await translateText(story.summary, lang) : (story.summary || '');
+    const title = await smartTranslate(story.title, lang);
+    let summary = story.summary ? await smartTranslate(story.summary, lang) : '';
     if (!summary || summary.toLowerCase() === title.toLowerCase()) {
       summary = `Read the full report directly from ${story.source || 'the official publisher'} using the button below.`;
     }
@@ -569,7 +552,7 @@
     if (story) shareStoryObject(story, btnEl);
   };
 
-  // 4. Govt Releases Engine (PIB A-Z, ED Press Releases, CBI)
+  // 4. Govt Releases Engine (PIB A-Z, ED Press Releases, CBI Press Releases)
   async function fetchLiveGovReleases() {
     const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
     const feedContainer = document.getElementById('news-feed-container');
@@ -612,38 +595,28 @@
     if (currentGovAgency === 'all' || currentGovAgency === 'ed_press') combined.push(...(liveGovCache.ed_press?.items || []));
     if (currentGovAgency === 'all' || currentGovAgency === 'cbi') combined.push(...(liveGovCache.cbi?.items || []));
 
-    if (query) {
-      combined = combined.filter(it => `${it.title} ${it.summary} ${it.department} ${it.verifiedBy}`.toLowerCase().includes(query));
-    }
-    if (isDateFiltered) {
-      combined = combined.filter(it => it.publishedAt && getLocalDateStr(new Date(it.publishedAt)) === selectedDateStr);
-    }
+    if (query) combined = combined.filter(it => `${it.title} ${it.summary} ${it.department} ${it.verifiedBy}`.toLowerCase().includes(query));
+    if (isDateFiltered) combined = combined.filter(it => it.publishedAt && getLocalDateStr(new Date(it.publishedAt)) === selectedDateStr);
 
     combined.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
 
     if (banner) {
       const notes = [];
       if ((currentGovAgency === 'all' || currentGovAgency === 'cbi') && liveGovCache.cbi && !liveGovCache.cbi.directAccessible) {
-        notes.push(`<span><i class="fa-solid fa-circle-info text-amber-500 mr-1"></i><b>CBI Direct Server:</b> Restricted by portal WAF. <a href="https://cbi.gov.in/press-releases" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">cbi.gov.in ↗</a></span>`);
+        notes.push(`<span><i class="fa-solid fa-circle-info text-amber-500 mr-1"></i><b>CBI Portal:</b> Restricted. <a href="https://cbi.gov.in/press-releases" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">cbi.gov.in ↗</a></span>`);
       }
       if ((currentGovAgency === 'all' || currentGovAgency === 'ed_press') && liveGovCache.ed_press && !liveGovCache.ed_press.ok) {
-        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>ED Portal:</b> ${escapeHtml(liveGovCache.ed_press.error || 'Temporarily unavailable')}. <a href="https://www.enforcementdirectorate.gov.in/press-release" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">ED Press Releases ↗</a></span>`);
+        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>ED Portal:</b> ${escapeHtml(liveGovCache.ed_press.error || 'Unavailable')}. <a href="https://enforcementdirectorate.gov.in/media/press-release/" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">ED Press Releases ↗</a></span>`);
       }
       if ((currentGovAgency === 'all' || currentGovAgency === 'pib') && liveGovCache.pib && !liveGovCache.pib.ok) {
-        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>PIB Portal:</b> ${escapeHtml(liveGovCache.pib.error || 'Temporarily unavailable')}. <a href="https://pib.gov.in" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">pib.gov.in ↗</a></span>`);
+        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>PIB Portal:</b> ${escapeHtml(liveGovCache.pib.error || 'Unavailable')}. <a href="https://pib.gov.in" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">pib.gov.in ↗</a></span>`);
       }
       banner.innerHTML = notes.join(' • ');
       banner.classList.toggle('hidden', notes.length === 0);
     }
 
     if (combined.length === 0) {
-      feedContainer.innerHTML = `
-        <div class="p-6 rounded-xl text-center space-y-2" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <i class="fa-solid fa-landmark text-2xl text-amber-500"></i>
-          <p class="text-xs font-bold" style="color: var(--text-main);">No matching live official releases found.</p>
-          <p class="text-[11px]" style="color: var(--text-sub);">Try switching PIB region/agency filters, clearing the search box, or resetting the date to Today.</p>
-        </div>
-      `;
+      feedContainer.innerHTML = `<div class="p-6 rounded-xl text-center space-y-2" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-amber-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">No matching live official releases found.</p><p class="text-[11px]" style="color: var(--text-sub);">Try switching PIB region/agency filters, clearing the search box, or resetting the date to Today.</p></div>`;
       badge.textContent = '0 Releases';
       return;
     }
@@ -654,21 +627,14 @@
       CBI: 'bg-red-500/15 text-red-500 border-red-500/30'
     };
 
-    let html = '';
-    for (const item of combined.slice(0, 50)) {
-      const title = typeof translateText === 'function' ? await translateText(item.title, lang) : item.title;
-      const timeStr = item.publishedAt ? formatPrettyDate(item.publishedAt) : (item.dateText || 'Official Release');
+    const rendered = await Promise.all(combined.slice(0, 45).map(async (item) => {
+      const title = await smartTranslate(item.title, lang);
+      const timeStr = item.publishedAt ? formatPrettyDate(item.publishedAt) : (item.dateText || 'Latest Official Release');
       const storyId = registerNewsStory({
-        scope: `${item.agency} OFFICIAL`,
-        source: item.verifiedBy || item.department,
-        title,
-        summary: item.summary || title,
-        time: timeStr,
-        link: item.link,
-        image: ''
+        scope: `${item.agency} OFFICIAL`, source: item.verifiedBy || item.department,
+        title, summary: item.summary || title, time: timeStr, link: item.link, image: ''
       });
-
-      html += `
+      return `
         <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-blue-500/35" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="flex-grow cursor-pointer" onclick="openNewsReaderById('${storyId}')">
             <div class="flex items-center gap-2 flex-wrap mb-1.5">
@@ -686,8 +652,9 @@
           </div>
         </div>
       `;
-    }
-    feedContainer.innerHTML = html;
+    }));
+
+    feedContainer.innerHTML = rendered.join('');
     badge.textContent = `Live (${combined.length} Official Releases)`;
   };
 
@@ -710,7 +677,7 @@
           const items = Array.from(xml.querySelectorAll('item')).slice(0, 4);
           for (const item of items) {
             const meta = extractRssMeta(item, s.label);
-            const title = typeof translateText === 'function' ? await translateText(meta.rawTitle, lang) : meta.rawTitle;
+            const title = await smartTranslate(meta.rawTitle, lang);
             const storyId = registerNewsStory({
               scope: s.label, source: meta.sourceName, title,
               summary: meta.cleanDesc, time: meta.formattedTime, link: meta.link, image: meta.image
@@ -721,20 +688,23 @@
       }),
       (async () => {
         try {
-          const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib,cbi&regid=1&lang=${encodeURIComponent(lang)}`);
+          const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib,ed_press,cbi&regid=3&lang=${encodeURIComponent(lang)}`);
           if (!res.ok) return;
           const data = await res.json();
-          const pibItems = (data?.sources?.pib?.items || []).slice(0, 2);
-          const cbiItems = (data?.sources?.cbi?.items || []).slice(0, 2);
-          for (const g of [...pibItems, ...cbiItems]) {
-            const title = typeof translateText === 'function' ? await translateText(g.title, lang) : g.title;
+          const govSlice = [
+            ...(data?.sources?.pib?.items || []).slice(0, 2),
+            ...(data?.sources?.ed_press?.items || []).slice(0, 2),
+            ...(data?.sources?.cbi?.items || []).slice(0, 2)
+          ];
+          for (const g of govSlice) {
+            const title = await smartTranslate(g.title, lang);
             const storyId = registerNewsStory({
               scope: g.agency, source: g.verifiedBy, title,
               summary: g.summary, time: g.publishedAt ? formatPrettyDate(g.publishedAt) : g.dateText, link: g.link, image: ''
             });
             collected.push({
               type: 'news', storyId, label: g.agency,
-              badgeClass: g.agency === 'CBI' ? 'bg-red-500/15 text-red-500 border-red-500/30' : 'bg-amber-500/15 text-amber-500 border-amber-500/30',
+              badgeClass: g.agency === 'CBI' ? 'bg-red-500/15 text-red-500 border-red-500/30' : (g.agency === 'ED' ? 'bg-purple-500/15 text-purple-400 border-purple-500/30' : 'bg-amber-500/15 text-amber-500 border-amber-500/30'),
               text: title
             });
           }
@@ -781,10 +751,7 @@
     const govBar = document.getElementById('gov-controls-bar');
     if (govBar) govBar.classList.toggle('hidden', scope !== 'gov');
 
-    if (scope === 'gov') {
-      await fetchLiveGovReleases();
-      return;
-    }
+    if (scope === 'gov') { await fetchLiveGovReleases(); return; }
 
     const feedContainer = document.getElementById('news-feed-container');
     const badge = document.getElementById('news-status-badge');
@@ -807,21 +774,12 @@
         const pubDate = item.querySelector("pubDate")?.textContent;
         return pubDate ? getLocalDateStr(new Date(pubDate)) === selectedDateStr : false;
       });
-
-      if (filteredItems.length < 10 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) {
-        filteredItems = items.slice(0, 15);
-      }
+      if (filteredItems.length < 10 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) filteredItems = items.slice(0, 15);
 
       if (filteredItems.length === 0) {
         const scopeLabel = scope === 'local' ? 'Telangana State' : (scope === 'national' ? 'India' : 'World');
         const googleArchiveUrl = `https://www.google.com/search?q=${encodeURIComponent(scopeLabel + ' news ' + selectedDateStr)}&tbm=nws`;
-        feedContainer.innerHTML = `
-          <div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-            <i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i>
-            <div><h4 class="text-xs font-bold" style="color: var(--text-main);">No Stories Found for ${selectedDateStr}</h4><p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct RSS records matched this exact date. Check the official news archive source below:</p></div>
-            <a href="${googleArchiveUrl}" target="_blank" rel="noopener" class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Source Archive (${selectedDateStr})</a>
-          </div>
-        `;
+        feedContainer.innerHTML = `<div class="p-6 rounded-xl text-center flex flex-col items-center gap-3" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-calendar-xmark text-2xl text-amber-500"></i><div><h4 class="text-xs font-bold" style="color: var(--text-main);">No Stories Found for ${selectedDateStr}</h4><p class="text-[11px] mt-1" style="color: var(--text-sub);">No direct RSS records matched this exact date. Check the official news archive source below:</p></div><a href="${googleArchiveUrl}" target="_blank" rel="noopener" class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl shadow-md hover:bg-blue-500 transition-all flex items-center gap-1.5"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open News Source Archive (${selectedDateStr})</a></div>`;
         badge.textContent = "No Records for Date";
         return;
       }
@@ -829,7 +787,7 @@
       let html = '';
       for (const item of filteredItems) {
         const meta = extractRssMeta(item, scope);
-        const title = typeof translateText === 'function' ? await translateText(meta.rawTitle, lang) : meta.rawTitle;
+        const title = await smartTranslate(meta.rawTitle, lang);
         const storyId = registerNewsStory({
           scope, source: meta.sourceName, title,
           summary: meta.cleanDesc, time: meta.formattedTime, link: meta.link, image: meta.image
@@ -873,7 +831,7 @@
       let html = '';
       for (const item of items.slice(0, 3)) {
         const meta = extractRssMeta(item, 'world');
-        const title = typeof translateText === 'function' ? await translateText(meta.rawTitle, lang) : meta.rawTitle;
+        const title = await smartTranslate(meta.rawTitle, lang);
         const storyId = registerNewsStory({
           scope: 'world', source: meta.sourceName, title,
           summary: meta.cleanDesc, time: meta.formattedTime, link: meta.link, image: meta.image
@@ -886,7 +844,7 @@
     }
   };
 
-  // 6. Live ED Proclamations, CBI & Missing Persons inside Most Wanted Tab
+  // 6. Live ED Proclamations, CBI Red Notices & Missing Persons inside Most Wanted Tab
   async function fetchLiveWantedExtras() {
     await Promise.allSettled([
       (async () => {
@@ -899,22 +857,27 @@
             liveEdStatus = { ok: !!edData.ok, error: edData.error || '' };
             liveEdProclamations = Array.isArray(edData.items) ? edData.items : [];
             if (liveEdProclamations.length > 0 && typeof wantedDataset !== 'undefined') {
-              const nonEd = wantedDataset.filter(i => i.agency !== 'ED');
-              wantedDataset = [...nonEd, ...liveEdProclamations];
+              wantedDataset = [...wantedDataset.filter(i => i.agency !== 'ED'), ...liveEdProclamations];
             }
           }
-          if (data?.sources?.cbi) liveCbiData = data.sources.cbi;
+          if (data?.sources?.cbi) {
+            liveCbiData = data.sources.cbi;
+            const rn = Array.isArray(liveCbiData.redNotices) ? liveCbiData.redNotices : [];
+            if (rn.length > 0 && typeof wantedDataset !== 'undefined') {
+              wantedDataset = [...wantedDataset.filter(i => i.agency !== 'CBI'), ...rn];
+            }
+          }
         } catch {}
       })(),
-      fetchLiveMissingPersons('ALL')
+      fetchLiveMissingPersons()
     ]);
     if (typeof window.renderWantedHomeStrip === 'function') window.renderWantedHomeStrip();
     window.renderWantedDirectory();
   }
 
-  async function fetchLiveMissingPersons(state = 'ALL') {
+  async function fetchLiveMissingPersons() {
     try {
-      const res = await fetch(`${GOV_API_BASE}/api/missing?source=all&state=${encodeURIComponent(state)}`);
+      const res = await fetch(`${GOV_API_BASE}/api/missing?source=all`);
       if (!res.ok) return;
       const data = await res.json();
       missingSourcesMeta = data?.sources || {};
@@ -946,63 +909,17 @@
       return;
     }
 
-    if (agency === 'CBI') {
-      renderCbiWantedView();
-      return;
-    }
-
     if (typeof origRenderWantedDir === 'function') origRenderWantedDir();
 
     const container = document.getElementById('wanted-directory-container');
-    if (agency === 'ED' && liveEdProclamations.length === 0 && container) {
-      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-scale-balanced text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">ED Proclamation Data Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">${escapeHtml(liveEdStatus.error || 'Could not reach ED server in real time. Check the official ED portal directly:')}</p><a href="https://www.enforcementdirectorate.gov.in/notice-for-proclamation" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official ED Proclamation Notices</a></div>`;
-    }
-  };
-
-  function renderCbiWantedView() {
-    const container = document.getElementById('wanted-directory-container');
-    const countBadge = document.getElementById('wanted-count-badge');
     if (!container) return;
 
-    const query = (document.getElementById('wanted-search-input')?.value || '').trim().toLowerCase();
-    const combined = [...(liveCbiData.redNotices || []), ...(liveCbiData.items || [])];
-    const items = combined.filter(i => !query || `${i.title || i.name} ${i.summary || i.charges || ''} ${i.department}`.toLowerCase().includes(query));
-    if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${items.length} CBI Live Records`;
-
-    const noticeHtml = `
-      <div class="p-4 rounded-2xl border border-amber-500/30 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5" style="background-color: var(--bg-sub);">
-        <div class="text-[11px] leading-relaxed" style="color: var(--text-sub);">
-          <b class="text-green-500"><i class="fa-solid fa-shield-halved mr-1"></i>CBI Official Portal Status:</b>
-          ${liveCbiData.directAccessible
-            ? 'Connected live directly to CBI Official Portal (cbi.gov.in).'
-            : `${escapeHtml(liveCbiData.error || 'Direct cbi.gov.in server restricted.')}`}
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <a href="https://cbi.gov.in/interpol-red-notice" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[10.5px] font-bold whitespace-nowrap">CBI Red Notices ↗</a>
-          <a href="https://cbi.gov.in/press-releases" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10.5px] font-bold whitespace-nowrap">CBI Press Portal ↗</a>
-        </div>
-      </div>
-    `;
-
-    if (items.length === 0) {
-      container.innerHTML = noticeHtml + `<div class="p-6 rounded-2xl text-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);">No live CBI entries returned right now. Please use the official CBI portal links above.</div>`;
-      return;
+    if (agency === 'ED' && liveEdProclamations.length === 0) {
+      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-scale-balanced text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">ED Proclamation Data Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">${escapeHtml(liveEdStatus.error || 'Could not load ED proclamations right now. Check the official ED portal directly:')}</p><a href="https://enforcementdirectorate.gov.in/wanted/notice-for-proclamation/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official ED Proclamation Notices</a></div>`;
+    } else if (agency === 'CBI' && (!liveCbiData.redNotices || liveCbiData.redNotices.length === 0)) {
+      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">CBI Red Notices Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">Could not load CBI's Red Notice table right now. View directly on CBI's official portal:</p><a href="https://cbi.gov.in/interpol-red-notice" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official CBI Red Notices</a></div>`;
     }
-
-    container.innerHTML = noticeHtml + items.map(it => `
-      <div class="p-4 rounded-2xl border transition-all hover:border-red-500/35" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-        <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
-          <span class="text-[9.5px] font-black px-2 py-0.5 rounded bg-red-600 text-white uppercase">${escapeHtml(it.noticeType || 'CBI OFFICIAL')}</span>
-          <span class="text-[10px]" style="color: var(--text-sub);">${escapeHtml(it.publishedAt ? formatPrettyDate(it.publishedAt) : (it.dateText || 'Official CBI Release'))}</span>
-        </div>
-        <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">${escapeHtml(it.title || it.name)}</h4>
-        <p class="text-[11px] mt-1 line-clamp-2" style="color: var(--text-sub);">${escapeHtml(it.department)}</p>
-        <div class="mt-3 pt-2 border-t flex justify-end" style="border-color: var(--border-color);">
-          <a href="${escapeHtml(it.link || it.sourceUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold border border-blue-500/30 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-[10px]"></i> Verified by ${escapeHtml(it.verifiedBy)}</a>
-        </div>
-      </div>
-    `).join('');
-  }
+  };
 
   function renderMissingDirectoryView() {
     const container = document.getElementById('wanted-directory-container');
@@ -1013,14 +930,9 @@
     const query = (document.getElementById('wanted-search-input')?.value || '').trim().toLowerCase();
     const sortMode = document.getElementById('wanted-sort-select')?.value || 'latest';
 
-    let list = missingDataset.filter(item => {
-      const matchFilter =
-        currentMissingStateFilter === 'ALL' ||
-        item.missingSource === currentMissingStateFilter ||
-        (item.stateName || '').toUpperCase() === currentMissingStateFilter.toUpperCase();
-      const matchQuery = !query || [item.name, ...(item.aliases || []), item.department, item.location, item.charges, item.stateName].join(' ').toLowerCase().includes(query);
-      return matchFilter && matchQuery;
-    });
+    let list = missingDataset.filter(item =>
+      !query || [item.name, ...(item.aliases || []), item.department, item.location, item.charges, item.stateName].join(' ').toLowerCase().includes(query)
+    );
 
     if (sortMode === 'latest') list.sort((a, b) => new Date(b.updatedAt || b.publishedAt || 0) - new Date(a.updatedAt || a.publishedAt || 0));
     else if (sortMode === 'name') list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -1028,25 +940,16 @@
     if (countBadge) countBadge.innerHTML = `<span class="live-dot-red" style="width:6px;height:6px;"></span> ${list.length} Live Missing Records`;
 
     if (statusBox) {
-      const zipMeta = missingSourcesMeta.zipnet;
       const fbiMeta = missingSourcesMeta.fbi_missing;
       const intMeta = missingSourcesMeta.interpol_yellow;
-      const parts = [];
-      parts.push(`<b>ZIPNET (8 States):</b> ${zipMeta?.ok ? `${zipMeta.count} live` : `Interactive portal — <a href="https://zipnet.delhipolice.gov.in/victims/missingpersons/" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open ZIPNET ↗</a>`}`);
-      parts.push(`<b>FBI Missing:</b> ${fbiMeta?.ok ? `${fbiMeta.count} live` : escapeHtml(fbiMeta?.error || 'Unavailable')}`);
-      parts.push(`<b>INTERPOL Yellow:</b> ${intMeta?.ok ? `${intMeta.count} live` : `Restricted by server — <a href="https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open INTERPOL ↗</a>`}`);
-      statusBox.innerHTML = parts.join(' • ');
+      statusBox.innerHTML = [
+        `<b>Live Feed — FBI Missing:</b> ${fbiMeta?.ok ? `${fbiMeta.count} live records` : escapeHtml(fbiMeta?.error || 'Unavailable')}`,
+        `<b>INTERPOL Yellow:</b> ${intMeta?.ok ? `${intMeta.count} live` : `Restricted by server — <a href="https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open INTERPOL ↗</a>`}`
+      ].join(' • ');
     }
 
     if (list.length === 0) {
-      container.innerHTML = `
-        <div class="p-6 rounded-2xl text-center space-y-3 border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-          <i class="fa-solid fa-person-circle-question text-2xl text-blue-500"></i>
-          <h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">No Live Entries Matched This Filter</h4>
-          <p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">Use the All-India State Citizen Portal Finder above to search directly on your State Police, TrackChild, Khoya-Paya, or ZIPNET portal.</p>
-          <a href="https://zipnet.delhipolice.gov.in/victims/missingpersons/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md">Search ZIPNET Portal Directly ↗</a>
-        </div>
-      `;
+      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-magnifying-glass text-xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">No matching missing person records found.</p><p class="text-[11px]" style="color: var(--text-sub);">Clear your search box or use the All-India State Portal selector above.</p></div>`;
       return;
     }
 
@@ -1065,7 +968,6 @@
                 ${item.stateName ? `<span class="text-[9.5px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-500 border border-amber-500/30">${escapeHtml(item.stateName)}</span>` : ''}
               </div>
               <h4 class="text-sm font-extrabold leading-snug" style="color: var(--text-main);">${escapeHtml(item.name)}</h4>
-              ${item.aliases && item.aliases.length ? `<p class="text-[10.5px] truncate mt-0.5" style="color: var(--text-sub);"><b>Ref:</b> ${escapeHtml(item.aliases.join(', '))}</p>` : ''}
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2 text-[11px]" style="color: var(--text-sub);">
                 <p class="truncate"><i class="fa-solid fa-building-shield mr-1.5 text-blue-500"></i><b>Dept:</b> <span style="color: var(--text-main);">${escapeHtml(item.department)}</span></p>
                 <p class="truncate"><i class="fa-solid fa-location-dot mr-1.5 text-red-500"></i><b>Area:</b> <span style="color: var(--text-main);">${escapeHtml(item.location)}</span></p>
@@ -1076,7 +978,7 @@
           <div class="mt-3 pt-2.5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2.5" style="border-color: var(--border-color);">
             <span class="text-[10px]" style="color: var(--text-sub);"><i class="fa-regular fa-clock mr-1 text-blue-500"></i><b>Reported:</b> ${escapeHtml(formatAgencyTimestamp(item.publishedAt || item.updatedAt))}</span>
             <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-              <button onclick="openWantedDossier('${escapeHtml(item.id)}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);"><i class="fa-solid fa-file-lines mr-1 text-[10px]"></i> Full Details</button>
+              <button onclick="openWantedDossier('${escapeHtml(item.id)}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);"><i class="fa-solid fa-file-lines mr-1 text-[10px]"></i> Full Dossier</button>
               <a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30"><i class="fa-solid fa-circle-check text-[10px]"></i> Verified by ${escapeHtml(item.verifiedBy)}</a>
             </div>
           </div>
@@ -1085,7 +987,6 @@
     }).join('');
   }
 
-  // Lifecycle hooks
   const origCloseActivePlayer = window.closeActivePlayer;
   window.closeActivePlayer = function () {
     if (typeof origCloseActivePlayer === 'function') origCloseActivePlayer();
@@ -1096,7 +997,7 @@
   window.changeLanguage = function (langCode) {
     if (typeof origChangeLanguage === 'function') origChangeLanguage(langCode);
     if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
-      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB · ED · CBI)';
+      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB A–Z · ED · CBI)';
     }
     window.fetchPinnedWorldNews();
     window.refreshLiveFlashTicker();
@@ -1108,7 +1009,6 @@
     await Promise.allSettled([window.fetchBulletins(), window.refreshLiveFlashTicker(), fetchLiveWantedExtras()]);
   };
 
-  // 7. DOM Ready Hooks
   document.addEventListener('DOMContentLoaded', () => {
     injectAddonUI();
     window.fetchBulletins();
@@ -1137,8 +1037,6 @@
       }
     }
     const sharedBulletinId = urlParams.get('bulletin');
-    if (sharedBulletinId) {
-      setTimeout(() => window.openBulletinById(sharedBulletinId), 400);
-    }
+    if (sharedBulletinId) setTimeout(() => window.openBulletinById(sharedBulletinId), 400);
   });
 })();
