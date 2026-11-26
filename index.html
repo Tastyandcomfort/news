@@ -441,7 +441,7 @@
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
           <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-wave-square text-[11px]"></i><span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
           <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
-            <i class="fa-solid fa-baseball-bat-ball text-[11px]"></i><span class="font-bold">Live Cricket:</span> <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b>
+           <i id="ticker-sports-icon" class="fa-solid fa-baseball-bat-ball text-[11px]"></i><span id="ticker-sports-label" class="font-bold">Live Cricket:</span> <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b>
             <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score"><i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i></button>
           </span>
         </div>
@@ -1094,67 +1094,153 @@
       return '';
     }
 
+    function updateSportsUi(sportLabel, iconClass, title, series, badgeText, isLive, t1Short, t1Full, t1Score, t2Short, t2Full, t2Score, summary) {
+      const tickerEl = document.getElementById('ticker-cricket');
+      const labelEl = document.getElementById('ticker-sports-label') || tickerEl?.previousElementSibling;
+      const iconEl = document.getElementById('ticker-sports-icon') || labelEl?.previousElementSibling;
+      const headingEl = document.querySelector('#cricket-modal h3');
+
+      if (labelEl) labelEl.textContent = `${sportLabel}:`;
+      if (iconEl && iconEl.tagName === 'I') iconEl.className = `${iconClass} text-[11px]`;
+      if (headingEl) headingEl.textContent = `${sportLabel} Match Center`;
+
+      const scorePart = `${t1Short}${t1Score ? ' ' + t1Score : ''} vs ${t2Short}${t2Score ? ' ' + t2Score : ''}`;
+      if (tickerEl) tickerEl.innerHTML = `<span class="${isLive ? 'text-green-500 font-extrabold' : 'text-amber-500 font-bold'}">${escapeHtml(scorePart)} • ${escapeHtml(summary)}</span>`;
+
+      document.getElementById('modal-match-title').textContent = title || `${t1Full} vs ${t2Full}`;
+      document.getElementById('modal-match-series').textContent = series || 'ESPN Live Feed';
+      document.getElementById('modal-match-state').textContent = badgeText;
+      document.getElementById('modal-match-state').className = `text-[10px] ${isLive ? 'bg-green-500' : 'bg-blue-600'} text-white font-black px-2 py-0.5 rounded-full uppercase`;
+      document.getElementById('modal-team1-name').textContent = t1Full || t1Short;
+      document.getElementById('modal-team1-score').textContent = t1Score || 'Yet to start';
+      document.getElementById('modal-team2-name').textContent = t2Full || t2Short;
+      document.getElementById('modal-team2-score').textContent = t2Score || 'Yet to start';
+      document.getElementById('modal-match-summary').textContent = summary;
+    }
+
     async function fetchLiveCricketTicker(isManualRefresh = false) {
       const tickerEl = document.getElementById('ticker-cricket'), icon = document.getElementById('cricket-refresh-icon');
       if (icon) icon.classList.add('fa-spin');
+
+      const isActiveCricketPlay = (m) => {
+        const comp = m?.competitions?.[0] || m;
+        const st = comp?.status || m?.status || {};
+        if ((st.type?.state || st.state) !== 'in') return false;
+        const txt = `${st.type?.description || ''} ${st.type?.detail || ''} ${st.type?.shortDetail || ''} ${st.summary || ''}`;
+        return !/\b(stumps|end of day|lunch|tea|innings break|delay|rain|abandoned|postponed|complete|final)\b/i.test(txt);
+      };
+
+      const cricketPriority = (m) => {
+        let p = isActiveCricketPlay(m) ? 100 : 0;
+        const st = (m?.competitions?.[0]?.status || m?.status)?.type?.state || m?.status?.state;
+        if (st === 'in') p += 20;
+        const meta = `${m?.name || ''} ${m?.series?.name || ''} ${m?.league?.name || ''}`;
+        if (/\b(India|ICC|T20|ODI|World Cup|IPL|WPL|BBL|Ashes|Test)\b/i.test(meta)) p += 40;
+        return p;
+      };
+
+      let bestCricket = null;
       try {
         const res = await fetch('https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel');
-        if (!res.ok) throw new Error('ESPN API unreachable');
-        const data = await res.json();
-
-        const candidates = [];
-        if (Array.isArray(data?.scores)) {
-          for (const s of data.scores) {
+        if (res.ok) {
+          const data = await res.json();
+          const candidates = [];
+          for (const s of (data?.scores || [])) {
             if (Array.isArray(s?.events)) candidates.push(...s.events);
             else candidates.push(s);
           }
-        }
-        if (Array.isArray(data?.events)) candidates.push(...data.events);
+          if (Array.isArray(data?.events)) candidates.push(...data.events);
 
-        const validMatches = candidates.filter(m => {
-          const comp = m?.competitions?.[0] || m;
-          const teams = comp?.competitors || [];
-          return teams.length >= 2 && (teams[0]?.team?.shortDisplayName || teams[0]?.team?.abbreviation || teams[0]?.team?.displayName);
-        });
+          const valid = candidates.filter(m => {
+            const teams = (m?.competitions?.[0] || m)?.competitors || [];
+            return teams.length >= 2 && (teams[0]?.team?.shortDisplayName || teams[0]?.team?.abbreviation || teams[0]?.team?.displayName);
+          }).sort((a, b) => cricketPriority(b) - cricketPriority(a));
 
-        if (validMatches.length > 0) {
-          const activeMatch = validMatches.find(m => {
-            const st = (m?.competitions?.[0]?.status || m?.status)?.type?.state || m?.status?.state;
-            return st === 'in';
-          }) || validMatches[0];
-
-          const comp = activeMatch.competitions?.[0] || activeMatch;
-          const team1 = comp.competitors?.[0], team2 = comp.competitors?.[1];
-          const t1Name = team1?.team?.abbreviation || team1?.team?.shortDisplayName || team1?.team?.displayName || '';
-          const t2Name = team2?.team?.abbreviation || team2?.team?.shortDisplayName || team2?.team?.displayName || '';
-          const t1Score = extractCricketScore(team1);
-          const t2Score = extractCricketScore(team2);
-          const statusObj = comp.status || activeMatch.status || {};
-          const statusSummary = statusObj.summary || statusObj.type?.detail || statusObj.type?.shortDetail || activeMatch.summary || 'Match Update';
-          const stateStr = statusObj.type?.state || statusObj.state || '';
-          const isLive = stateStr === 'in';
-
-          const scorePart = `${t1Name}${t1Score ? ' ' + t1Score : ''} vs ${t2Name}${t2Score ? ' ' + t2Score : ''}`;
-          tickerEl.innerHTML = `<span class="${isLive ? 'text-green-500 font-extrabold' : 'text-amber-500 font-bold'}">${escapeHtml(scorePart)} • ${escapeHtml(statusSummary)}</span>`;
-
-          document.getElementById('modal-match-title').textContent = activeMatch.name || `${t1Name} vs ${t2Name}`;
-          document.getElementById('modal-match-series').textContent = activeMatch.series?.name || activeMatch.league?.name || 'International Cricket';
-          document.getElementById('modal-match-state').textContent = isLive ? 'LIVE' : (statusObj.type?.shortDetail || 'RESULT');
-          document.getElementById('modal-match-state').className = `text-[10px] ${isLive ? 'bg-green-500' : 'bg-blue-600'} text-white font-black px-2 py-0.5 rounded-full uppercase`;
-          document.getElementById('modal-team1-name').textContent = team1?.team?.displayName || t1Name;
-          document.getElementById('modal-team1-score').textContent = t1Score || 'Yet to bat';
-          document.getElementById('modal-team2-name').textContent = team2?.team?.displayName || t2Name;
-          document.getElementById('modal-team2-score').textContent = t2Score || 'Yet to bat';
-          document.getElementById('modal-match-summary').textContent = statusSummary;
-          if (icon) icon.classList.remove('fa-spin');
-          return;
+          if (valid.length > 0) bestCricket = valid[0];
         }
       } catch {}
-      tickerEl.innerHTML = `<span class="text-amber-500 font-medium">No live match right now • Checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-      document.getElementById('modal-match-summary').textContent = 'No international match is currently in play on ESPN scorepanel.';
+
+      // 1. If a cricket match is actively in live play right now, show it
+      if (bestCricket && isActiveCricketPlay(bestCricket)) {
+        const comp = bestCricket.competitions?.[0] || bestCricket;
+        const t1 = comp.competitors?.[0], t2 = comp.competitors?.[1];
+        const st = comp.status || bestCricket.status || {};
+        updateSportsUi(
+          'Live Cricket', 'fa-solid fa-baseball-bat-ball',
+          bestCricket.name, bestCricket.series?.name || bestCricket.league?.name || 'International Cricket',
+          'LIVE', true,
+          t1?.team?.abbreviation || t1?.team?.shortDisplayName || t1?.team?.displayName || '',
+          t1?.team?.displayName || t1?.team?.shortDisplayName || '',
+          extractCricketScore(t1),
+          t2?.team?.abbreviation || t2?.team?.shortDisplayName || t2?.team?.displayName || '',
+          t2?.team?.displayName || t2?.team?.shortDisplayName || '',
+          extractCricketScore(t2),
+          st.summary || st.type?.detail || st.type?.shortDetail || 'Live Match in Progress'
+        );
+        if (icon) icon.classList.remove('fa-spin');
+        return;
+      }
+
+      // 2. Otherwise check other live sports on ESPN (Football/Soccer, NBA, NHL)
+      const otherFeeds = [
+        { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard', label: 'Live Football', icon: 'fa-solid fa-futbol' },
+        { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', label: 'Live NBA', icon: 'fa-solid fa-basketball' },
+        { url: 'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard', label: 'Live Hockey', icon: 'fa-solid fa-hockey-puck' }
+      ];
+      for (const feed of otherFeeds) {
+        try {
+          const r = await fetch(feed.url);
+          if (!r.ok) continue;
+          const d = await r.json();
+          const liveEv = (d?.events || []).find(ev => ev?.status?.type?.state === 'in' || ev?.competitions?.[0]?.status?.type?.state === 'in');
+          if (liveEv) {
+            const comp = liveEv.competitions?.[0] || liveEv;
+            const t1 = comp.competitors?.[0], t2 = comp.competitors?.[1];
+            const st = comp.status || liveEv.status || {};
+            updateSportsUi(
+              feed.label, feed.icon,
+              liveEv.name, d?.leagues?.[0]?.name || feed.label,
+              'LIVE', true,
+              t1?.team?.abbreviation || t1?.team?.shortDisplayName || t1?.team?.displayName || '',
+              t1?.team?.displayName || t1?.team?.shortDisplayName || '',
+              extractCricketScore(t1),
+              t2?.team?.abbreviation || t2?.team?.shortDisplayName || t2?.team?.displayName || '',
+              t2?.team?.displayName || t2?.team?.shortDisplayName || '',
+              extractCricketScore(t2),
+              st.type?.shortDetail || st.type?.detail || 'Live'
+            );
+            if (icon) icon.classList.remove('fa-spin');
+            return;
+          }
+        } catch {}
+      }
+
+      // 3. Fallback to latest cricket update (Stumps / Result) if no sport is live right now
+      if (bestCricket) {
+        const comp = bestCricket.competitions?.[0] || bestCricket;
+        const t1 = comp.competitors?.[0], t2 = comp.competitors?.[1];
+        const st = comp.status || bestCricket.status || {};
+        updateSportsUi(
+          'Cricket', 'fa-solid fa-baseball-bat-ball',
+          bestCricket.name, bestCricket.series?.name || bestCricket.league?.name || 'Cricket',
+          st.type?.shortDetail || 'UPDATE', false,
+          t1?.team?.abbreviation || t1?.team?.shortDisplayName || t1?.team?.displayName || '',
+          t1?.team?.displayName || t1?.team?.shortDisplayName || '',
+          extractCricketScore(t1),
+          t2?.team?.abbreviation || t2?.team?.shortDisplayName || t2?.team?.displayName || '',
+          t2?.team?.displayName || t2?.team?.shortDisplayName || '',
+          extractCricketScore(t2),
+          st.summary || st.type?.detail || st.type?.shortDetail || 'Match Update'
+        );
+        if (icon) icon.classList.remove('fa-spin');
+        return;
+      }
+
+      if (tickerEl) tickerEl.innerHTML = `<span class="text-amber-500 font-medium">No live match right now • Checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+      document.getElementById('modal-match-summary').textContent = 'No live match is currently in play across Cricket, Football, NBA, or Hockey.';
       if (icon) icon.classList.remove('fa-spin');
     }
-
+    
     function setMode(mode, element) {
       document.querySelectorAll('.channel-card').forEach(btn => btn.classList.remove('active-mode')); if (element) element.classList.add('active-mode');
       const textView = document.getElementById('text-view'), activeVideoContainer = document.getElementById('active-video-container'), masterPlayer = document.getElementById('master-video-player'), fileView = document.getElementById('file-view'), filePlayer = document.getElementById('file-video-player'), title = document.getElementById('current-channel-title'), dot = document.getElementById('live-indicator');
