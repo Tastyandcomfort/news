@@ -1,5 +1,6 @@
 [
-{
+
+    {
     "id": "2026-11-26-hyd-safety",
     "dateBadge": "26 NOV 26",
     "city": "INDIA",
@@ -29,9 +30,9 @@
   {
     "id": "2026-11-26-hyd-safety",
     "dateBadge": "26 NOV 26",
-    "city": "INDIA",
+    "city": "HYDERABAD",
     "category": "URBAN MOBILITY | COMMUTER AWARENESS",
-    "title": "AI TRAFFIC SIGNAL SYSTEM (429 JUNCTIONS)",
+    "title": "AI TRAFFIC SIGNAL SYSTEM 429 JUNCTIONS",
     "dateText": "26 November 2026",
     "paragraphs": [
       "Civic and traffic authorities are advancing plans to deploy an AI-driven adaptive traffic signal system across 429 major junctions in Hyderabad under the Core Urban Region Economy (CURE) initiative to ease peak-hour congestion and improve junction flow.",
