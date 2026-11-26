@@ -1,4 +1,59 @@
 [
+{
+    "id": "2026-11-26-hyd-safety",
+    "dateBadge": "26 NOV 26",
+    "city": "INDIA",
+    "category": "PUBLIC HEALTH & SAFETY AWARENESS",
+    "title": "FOOD SAFETY, CYBERCRIME & ANTI-NARCOTICS DRIVE",
+    "dateText": "26 November 2026",
+    "paragraphs": [
+      "State enforcement, health, and police wings have intensified coordinated drives across Hyderabad and Telangana targeting food adulteration and hygiene violations, online financial and digital fraud, and illegal narcotics networks.",
+      "Inspections at eateries, warehouses, and retail outlets aim to curb expired or unsafe food items, while cybercrime and anti-narcotics units continue outreach and enforcement against fraudulent investment links, impersonation calls, and substance trafficking around campuses and residential neighbourhoods.",
+      "Timely citizen reporting and basic daily precautions play a vital role in preventing health hazards, financial loss, and community harm.",
+      "IMPORTANT: In cyber fraud cases, reporting within the first hour (the “golden hour”) significantly improves the chances of freezing suspicious bank transfers. Never share OTPs, bank credentials, or remote-access permissions with unknown callers."
+    ],
+    "checklistTitle": "A RESPONSIBLE REQUEST TO EVERY CITIZEN",
+    "checklist": [
+      "Verify Food Quality & Labels: Check FSSAI registration, manufacturing/expiry dates, and intact packaging before buying groceries or dining out.",
+      "Guard Against Cyber Scams: Ignore unknown APK links, fake courier/police video calls, and guaranteed return investment messages.",
+      "Stay Alert Against Narcotics: Report suspicious substance activity near schools, colleges, hostels, or commercial hubs immediately.",
+      "Report Violations Promptly: Use official helplines to flag unhygienic food outlets, online fraud attempts, or suspicious parcels.",
+      "Avoid Unverified Forwards: Do not circulate unconfirmed rumours or names; share verified helpline numbers instead."
+    ],
+    "contacts": "OFFICIAL HELPLINE & REPORTING CONTACTS Cybercrime Helpline: 1930 (cybercrime.gov.in)  |  Anti-Narcotics Helpline: 1908  |  Emergency & Police: 112  |  Food Safety Complaints: 1800-112-100 (FSSAI)",
+    "closingNote": "T&C NEWS:   We do not encourage panic. We encourage awareness. Enforcement agencies conduct regular inspections and crackdowns to safeguard public health and law and order. As citizens, staying informed, verifying before trusting, and reporting through official channels keeps our neighbourhoods safe.",
+    "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official police, FSSAI, or government notification. Citizens are advised to verify updates and register complaints through official portals and helplines.",
+    "pdfUrl": "T&C News Bulletin - Food Safety, Cybercrime & Narcotics Awareness.pdf"
+  },
+
+  {
+    "id": "2026-11-26-hyd-safety",
+    "dateBadge": "26 NOV 26",
+    "city": "INDIA",
+    "category": "URBAN MOBILITY | COMMUTER AWARENESS",
+    "title": "AI TRAFFIC SIGNAL SYSTEM (429 JUNCTIONS)",
+    "dateText": "26 November 2026",
+    "paragraphs": [
+      "Civic and traffic authorities are advancing plans to deploy an AI-driven adaptive traffic signal system across 429 major junctions in Hyderabad under the Core Urban Region Economy (CURE) initiative to ease peak-hour congestion and improve junction flow.",
+      "Unlike fixed-timer signals, adaptive AI signals use real-time traffic cameras and sensors to measure vehicle queues on each arm of a junction and dynamically adjust green-light durations—reducing unnecessary waiting on empty stretches and creating green corridors for emergency vehicles.",
+      "As installation, calibration, and corridor integration roll out in phases, commuters may notice temporary lane markings, camera poles, and signal timing adjustments at key intersections across the city.",
+      "IMPORTANT:   Adaptive AI signals adjust green durations based on live traffic density rather than a fixed countdown. Commuters should watch signal lights and stop lines carefully instead of anticipating old timer patterns or jumping red lights."
+    ],
+    "checklistTitle": "A RESPONSIBLE REQUEST TO EVERY COMMUTER",
+    "checklist": [
+      "Respect Stop Lines & Signals: Stop behind the painted stop line so overhead sensors and cameras can accurately detect waiting traffic queues.",
+      "Avoid Signal Jumping: Do not accelerate early or cross on amber/red; automated junction cameras actively record red-light and stop-line violations.",
+      "Maintain Lane Discipline: Stay within marked lanes at busy intersections to allow smooth turning movements and faster clearance cycles.",
+      "Give Way to Emergency Vehicles: Move aside safely when ambulances or fire tenders approach so emergency green-corridor clearance works smoothly.",
+      "Plan Around Roadworks: Expect minor calibration delays at junctions undergoing upgrades and follow official traffic police diversion updates."
+    ],
+    "contacts": "OFFICIAL TRAFFIC & EMERGENCY CONTACTS For traffic updates, signal malfunctions, or road emergencies, dial 112 or contact the Hyderabad / Cyberabad Traffic Police helpline.",
+    "closingNote": "T&C NEWS:   We do not encourage panic. We encourage awareness. Modern traffic technology works best when paired with disciplined road behaviour. As citizens and daily commuters, following lane rules and signal lights helps reduce travel time and prevents junction accidents for everyone.",
+    "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official police, GHMC, or government notification. Commuters are advised to follow official traffic advisories issued by local authorities.",
+    "pdfUrl": "T&C News Bulletin - AI Traffic Signals Rollout.pdf"
+  },
+  
+  
   {
     "id": "2026-11-26-hyd-safety",
     "dateBadge": "26 NOV 26",
