@@ -1,43 +1,60 @@
-// api/flights.js
-export default async function handler(req, res) {
-  // Querying open live ADS-B network centered over India (lat 22.5, lon 82.9, radius 1000 nautical miles)
-  const url = 'https://api.adsb.lol/v2/point/22.5/82.9/1000';
-  
+// api/flights.js — Real-time Live Flights (adsb.lol + adsb.fi + OpenSky India fallback)
+const HEADERS = {
+  'User-Agent': 'TAndCNewsHub-Radar/1.0 (https://tastyandcomfort.github.io/news/)',
+  'Accept': 'application/json'
+};
+
+async function fetchJsonWithTimeout(url, ms = 10000) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), ms);
   try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-      }
-    });
-    
-    if (!response.ok) {
-      return res.status(response.status).json({ states: [] });
-    }
-
-    const data = await response.json();
-    const aircrafts = data.ac || [];
-    
-    // Map real-time ADS-B records into structured flight vectors
-    const states = aircrafts.map(ac => [
-      ac.hex || 'unknown',
-      ac.flight ? ac.flight.trim() : 'N/A',
-      'India Region',
-      null,
-      null,
-      ac.lon || 0,
-      ac.lat || 0,
-      ac.alt_baro === 'ground' ? 0 : (typeof ac.alt_baro === 'number' ? ac.alt_baro * 0.3048 : 0), // feet to meters
-      ac.gnd || false,
-      typeof ac.gs === 'number' ? ac.gs * 0.514444 : 0, // knots to m/s
-      ac.track || 0
-    ]);
-
-    // Enable CORS for your frontend and caching
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate');
-    
-    return res.status(200).json({ states });
-  } catch (error) {
-    return res.status(500).json({ states: [] });
+    const r = await fetch(url, { headers: HEADERS, signal: c.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } finally {
+    clearTimeout(t);
   }
+}
+
+function mapAdsbToStates(acList) {
+  const states = [];
+  for (const a of acList || []) {
+    if (typeof a.lat !== 'number' || typeof a.lon !== 'number') continue;
+    const onGround = a.alt_baro === 'ground' || a.alt_baro === 0;
+    if (onGround) continue;
+    const altMeters = typeof a.alt_baro === 'number' ? Math.round(a.alt_baro * 0.3048) : (typeof a.alt_geom === 'number' ? Math.round(a.alt_geom * 0.3048) : 0);
+    const speedMs = typeof a.gs === 'number' ? +(a.gs * 0.514444).toFixed(1) : 0;
+    const callsign = String(a.flight || a.r || a.hex || 'FLIGHT').trim();
+    const trackDeg = typeof a.track === 'number' ? a.track : 0;
+    states.push([a.hex || '', callsign, a.ownOp || 'Live ADS-B', null, null, a.lon, a.lat, altMeters, false, speedMs, trackDeg]);
+  }
+  return states;
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=30');
+
+  // 1. Try adsb.lol (500 NM radius centered over India)
+  try {
+    const data = await fetchJsonWithTimeout('https://api.adsb.lol/v2/point/20.5937/78.9629/500');
+    const states = mapAdsbToStates(data?.ac);
+    if (states.length > 0) return res.status(200).json({ time: Math.floor(Date.now() / 1000), source: 'adsb.lol', states });
+  } catch {}
+
+  // 2. Try adsb.fi (250 NM radius centered over India)
+  try {
+    const data = await fetchJsonWithTimeout('https://opendata.adsb.fi/api/v2/lat/20.5937/lon/78.9629/dist/250');
+    const states = mapAdsbToStates(data?.ac || data?.aircraft);
+    if (states.length > 0) return res.status(200).json({ time: Math.floor(Date.now() / 1000), source: 'adsb.fi', states });
+  } catch {}
+
+  // 3. Try OpenSky Network (India bounding box)
+  try {
+    const data = await fetchJsonWithTimeout('https://opensky-network.org/api/states/all?lamin=6&lomin=67&lamax=37&lomax=98');
+    if (Array.isArray(data?.states) && data.states.length > 0) return res.status(200).json({ time: data.time, source: 'opensky', states: data.states });
+  } catch {}
+
+  return res.status(200).json({ time: Math.floor(Date.now() / 1000), source: 'unavailable', states: [] });
 }
