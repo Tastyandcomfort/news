@@ -354,7 +354,7 @@ async function fetchCbiOfficial() {
         redNotices.push({
           id: `cbi-rn-${i}-${subjectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
           agency: 'CBI',
-          verifiedBy: 'CBI Official',
+          verifiedBy: 'CBI/INTERPOL',
           department: 'Central Bureau of Investigation (INTERPOL India NCB)',
           location: 'India / INTERPOL Jurisdiction',
           name: subjectName,
