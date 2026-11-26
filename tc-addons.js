@@ -1,4 +1,4 @@
-/* T&C News Hub — Bulletins, Official Govt (PIB A-Z, ED, CBI), Missing Persons (All India & Global), Apple Reader & Flash Fix */
+/* T&C News Hub — Bulletins, Official Govt (PIB A-Z, ED, CBI), Missing Persons, News Card Photos, Apple Reader & Flash Fix */
 (function () {
   const GOV_API_BASE = 'https://news-lemon-two.vercel.app';
   window.tcNewsRegistry = window.tcNewsRegistry || {};
@@ -172,9 +172,9 @@
         <div id="gov-controls-bar" class="hidden mb-4 p-3 rounded-2xl border space-y-2.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
           <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1">
             <button type="button" onclick="setGovAgencyFilter('all', this)" class="choice-pill selected">All Govt Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('pib', this)" class="choice-pill"> PIB India </button>
-            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill"> ED Press Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill"> CBI </button>
+            <button type="button" onclick="setGovAgencyFilter('pib', this)" class="choice-pill">🇮🇳 PIB India (A–Z)</button>
+            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill">⚖️ ED Press Releases</button>
+            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill">🕵️ CBI Official</button>
           </div>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <select id="pib-region-select" onchange="onPibRegionChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);"></select>
@@ -457,18 +457,26 @@
     const link = item.querySelector('link')?.textContent?.trim() || '#';
     const pubDateStr = item.querySelector('pubDate')?.textContent || '';
     const rawDesc = item.querySelector('description')?.textContent || '';
+    const explicitSource = item.querySelector('source')?.textContent?.trim() || '';
 
-    let sourceName = 'Trusted by T&C';
-    if (link.includes('tv9')) sourceName = 'TV9 Telugu';
+    let sourceName = explicitSource || 'Official Feed';
+    if (link.includes('bbc.co') || link.includes('bbc.com')) sourceName = 'BBC News';
     else if (link.includes('france24')) sourceName = 'France24';
-    else if (link.includes('hindu')) sourceName = 'The Hindu';
+    else if (link.includes('skynews')) sourceName = 'Sky News';
+    else if (link.includes('aljazeera')) sourceName = 'Al Jazeera';
+    else if (link.includes('thehindu')) sourceName = 'The Hindu';
     else if (link.includes('indiatimes')) sourceName = 'Times of India';
+    else if (link.includes('ndtv')) sourceName = 'NDTV';
+    else if (link.includes('hindustantimes')) sourceName = 'Hindustan Times';
+    else if (link.includes('telanganatoday')) sourceName = 'Telangana Today';
+    else if (link.includes('tv9')) sourceName = 'TV9 Telugu';
     else if (link.includes('news.google')) sourceName = 'Google News';
 
     const formattedTime = pubDateStr ? formatPrettyDate(pubDateStr) : 'Live Feed';
     const imgMatch = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i);
-    const mediaEl = item.getElementsByTagName('media:content')[0] || item.querySelector('enclosure');
-    const image = mediaEl?.getAttribute('url') || imgMatch?.[1] || '';
+    const mediaEl = item.getElementsByTagName('media:content')[0] || item.getElementsByTagName('media:thumbnail')[0] || item.querySelector('enclosure');
+    let image = mediaEl?.getAttribute('url') || imgMatch?.[1] || '';
+    if (image && image.startsWith('http://')) image = image.replace(/^http:\/\//i, 'https://');
 
     const cleanDesc = rawDesc
       .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
@@ -657,7 +665,7 @@
     badge.textContent = `Live (${combined.length} Official Releases)`;
   };
 
-  // 5. Flash Scroller, Headlines & World Highlights
+  // 5. Flash Scroller, Headlines (with Photos) & World Highlights (with Photos)
   window.refreshLiveFlashTicker = async function () {
     const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
     const scopes = [
@@ -773,7 +781,7 @@
         const pubDate = item.querySelector("pubDate")?.textContent;
         return pubDate ? getLocalDateStr(new Date(pubDate)) === selectedDateStr : false;
       });
-      if (filteredItems.length < 10 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) filteredItems = items.slice(0, 15);
+      if (filteredItems.length < 10 && selectedDateStr === REAL_TODAY_DATE && items.length > 0) filteredItems = items.slice(0, 24);
 
       if (filteredItems.length === 0) {
         const scopeLabel = scope === 'local' ? 'Telangana State' : (scope === 'national' ? 'India' : 'World');
@@ -783,32 +791,38 @@
         return;
       }
 
-      let html = '';
-      for (const item of filteredItems) {
+      const cards = await Promise.all(filteredItems.map(async (item) => {
         const meta = extractRssMeta(item, scope);
         const title = await smartTranslate(meta.rawTitle, lang);
         const storyId = registerNewsStory({
           scope, source: meta.sourceName, title,
           summary: meta.cleanDesc, time: meta.formattedTime, link: meta.link, image: meta.image
         });
+        const thumbHtml = meta.image
+          ? `<img src="${escapeHtml(meta.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" class="w-16 h-14 sm:w-20 sm:h-16 rounded-xl object-cover border flex-shrink-0" style="border-color: var(--border-color);">`
+          : '';
 
-        html += `
+        return `
           <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-blue-500/35" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-            <div class="flex-grow cursor-pointer" onclick="openNewsReaderById('${storyId}')">
-              <h4 class="text-xs md:text-sm font-semibold line-clamp-2 hover:text-blue-500 transition-colors" style="color: var(--text-main);">${escapeHtml(title)}</h4>
-              <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
-                <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${scope} • ${lang.toUpperCase()}</span>
-                <span><i class="fa-regular fa-clock mr-1"></i>${meta.formattedTime}</span>
+            <div class="flex items-start gap-3 flex-grow min-w-0 cursor-pointer" onclick="openNewsReaderById('${storyId}')">
+              ${thumbHtml}
+              <div class="min-w-0 flex-grow">
+                <h4 class="text-xs md:text-sm font-semibold line-clamp-2 hover:text-blue-500 transition-colors" style="color: var(--text-main);">${escapeHtml(title)}</h4>
+                <div class="flex items-center gap-2.5 flex-wrap mt-2 text-[10px]" style="color: var(--text-sub);">
+                  <span class="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded font-bold uppercase">${scope} • ${lang.toUpperCase()}</span>
+                  <span><i class="fa-regular fa-clock mr-1"></i>${meta.formattedTime}</span>
+                </div>
               </div>
             </div>
             <div class="flex items-center gap-2 self-end md:self-center flex-shrink-0">
               <button type="button" onclick="shareNewsCardById('${storyId}', this)" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);" title="Share via T&C News"><i class="fa-solid fa-share-nodes text-blue-500 text-[10px]"></i></button>
-              <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30"><i class="fa-solid fa-circle-check text-[10px]"></i> ${meta.sourceName}</a>
+              <a href="${escapeHtml(meta.link)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30"><i class="fa-solid fa-circle-check text-[10px]"></i> ${escapeHtml(meta.sourceName)}</a>
             </div>
           </div>
         `;
-      }
-      feedContainer.innerHTML = html;
+      }));
+
+      feedContainer.innerHTML = cards.join('');
       badge.textContent = `Live (${filteredItems.length} Stories)`;
     } catch {
       feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">News feed temporarily unavailable.</div>`;
@@ -827,17 +841,19 @@
       let items = Array.from(xml.querySelectorAll("item"));
       items.sort((a, b) => new Date(b.querySelector("pubDate")?.textContent || 0) - new Date(a.querySelector("pubDate")?.textContent || 0));
 
-      let html = '';
-      for (const item of items.slice(0, 3)) {
+      const cards = await Promise.all(items.slice(0, 3).map(async (item) => {
         const meta = extractRssMeta(item, 'world');
         const title = await smartTranslate(meta.rawTitle, lang);
         const storyId = registerNewsStory({
           scope: 'world', source: meta.sourceName, title,
           summary: meta.cleanDesc, time: meta.formattedTime, link: meta.link, image: meta.image
         });
-        html += `<button type="button" onclick="openNewsReaderById('${storyId}')" class="text-left p-2.5 rounded-xl text-xs transition-all line-clamp-2 hover:border-amber-500/40" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">• ${escapeHtml(title)}</button>`;
-      }
-      container.innerHTML = html;
+        const thumbHtml = meta.image
+          ? `<img src="${escapeHtml(meta.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" class="w-12 h-10 rounded-lg object-cover border flex-shrink-0" style="border-color: var(--border-color);">`
+          : '';
+        return `<button type="button" onclick="openNewsReaderById('${storyId}')" class="text-left p-2.5 rounded-xl text-xs transition-all hover:border-amber-500/40 flex items-center gap-2.5" style="background-color: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color);">${thumbHtml}<span class="line-clamp-2 min-w-0">• ${escapeHtml(title)}</span></button>`;
+      }));
+      container.innerHTML = cards.join('');
     } catch {
       container.innerHTML = '<div class="text-xs" style="color: var(--text-sub);">Highlights loading...</div>';
     }
@@ -996,7 +1012,7 @@
   window.changeLanguage = function (langCode) {
     if (typeof origChangeLanguage === 'function') origChangeLanguage(langCode);
     if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
-      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB · ED · CBI)';
+      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB A–Z · ED · CBI)';
     }
     window.fetchPinnedWorldNews();
     window.refreshLiveFlashTicker();
