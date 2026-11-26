@@ -225,7 +225,13 @@ async function fetchEdPressReleases() {
     });
   }
 
-  return { ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25), error: items.length ? null : 'ED press release table unavailable' };
+  const apiHints = html.match(/(?:https?:\/\/[^"'\s]+|\/[a-z0-9_\/-]*(?:api|press|proclamation|notice|media|umbraco|wp-json)[^"'\s]*)/gi) || [];
+  return {
+    ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25),
+    error: items.length ? null : 'ED press release table unavailable',
+    debugApiHints: [...new Set(apiHints)].slice(0, 25),
+    debugSnippet: html.slice(html.length - 1800)
+  };
 }
 
 async function fetchEdProclamations() {
