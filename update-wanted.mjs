@@ -110,7 +110,7 @@ async function fetchFbiWanted() {
   return records.slice(0, 40);
 }
 
-// 2. DIRECT OFFICIAL INTERPOL API (using Node fetch + Origin header)
+// 2. DIRECT OFFICIAL INTERPOL API
 async function fetchInterpolWanted() {
   const seen = new Map();
   const queries = [
@@ -289,31 +289,80 @@ async function fetchNiaIndiaWanted() {
   return records.slice(0, 40);
 }
 
+// 4. DIRECT OFFICIAL GOVT OF INDIA: Directorate of Enforcement (Notice for Proclamation)
+async function fetchEdProclamations() {
+  const url = 'https://enforcementdirectorate.gov.in/notice-for-proclamation';
+  const records = [];
+  try {
+    const { status, body: html } = await curlHtml(url);
+    if (status !== 200 || !html) {
+      console.warn(`ED Proclamation curl HTTP ${status}`);
+      return records;
+    }
+
+    const trMatches = html.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+    for (const tr of trMatches) {
+      const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
+      if (tds.length < 2) continue;
+
+      const srNo = stripTags(tds[0]);
+      if (!/^\d+$/.test(srNo)) continue;
+
+      const description = stripTags(tds[1]);
+      if (!description) continue;
+
+      const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
+      const pdfUrl = hrefMatch?.[1] ? new URL(hrefMatch[1], 'https://enforcementdirectorate.gov.in').href : url;
+      const againstMatch = description.match(/against\s+([^,(.]+?)(?:\s+(?:to\s+appear|S\/o|W\/o|D\/o|alias|@|directing)|,|\(|$)/i);
+      const subjectName = (againstMatch?.[1] || '').trim() || `ED Proclamation Notice #${srNo}`;
+      const ecirMatch = description.match(/(ECIR\/[A-Z0-9\/-]+)/i);
+      const dateMatch = description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+
+      records.push({
+        id: `ed-proc-${srNo}-${(ecirMatch?.[1] || 'case').replace(/[^a-z0-9]/gi, '')}`,
+        agency: 'ED',
+        verifiedBy: 'ED Official',
+        department: 'Directorate of Enforcement (PMLA Court Proclamation)',
+        location: ecirMatch ? `Case Ref: ${ecirMatch[1]}` : 'Special PMLA Court, India',
+        name: subjectName,
+        aliases: [],
+        photo: '',
+        charges: description,
+        description,
+        caution: 'Official Court Proclamation Notice. Report verified information to the Directorate of Enforcement.',
+        rewardText: '',
+        rewardValue: 0,
+        publishedAt: dateMatch ? `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}T09:00:00+05:30` : null,
+        updatedAt: null,
+        dob: '',
+        nationality: 'India',
+        noticeType: 'ED PROCLAMATION',
+        sourceUrl: pdfUrl
+      });
+    }
+  } catch (err) {
+    console.warn('ED Proclamation error:', err.message);
+  }
+  return records;
+}
+
 async function main() {
   const outputPath = path.resolve(process.cwd(), 'wanted-data.json');
 
-  let previousItems = [];
-  try {
-    const existingRaw = await fs.readFile(outputPath, 'utf8');
-    previousItems = JSON.parse(existingRaw)?.items || [];
-  } catch {}
-
-  console.log('Fetching strictly from official government portals...');
-  const [niaFresh, interpolFresh, fbiFresh] = await Promise.all([
+  console.log('Fetching strictly live data from official government portals (zero stale fallback)...');
+  const [niaLive, edLive, interpolLive, fbiLive] = await Promise.all([
     fetchNiaIndiaWanted(),
+    fetchEdProclamations(),
     fetchInterpolWanted(),
     fetchFbiWanted()
   ]);
 
-  const nia = niaFresh.length ? niaFresh : previousItems.filter(i => i.agency === 'NIA');
-  const interpol = interpolFresh.length ? interpolFresh : previousItems.filter(i => i.agency === 'INTERPOL');
-  const fbi = fbiFresh.length ? fbiFresh : previousItems.filter(i => i.agency === 'FBI');
-
-  const combined = [...nia, ...interpol, ...fbi];
+  const combined = [...niaLive, ...edLive, ...interpolLive, ...fbiLive];
   const activeSources = [];
-  if (nia.length) activeSources.push('NIA India');
-  if (interpol.length) activeSources.push('INTERPOL');
-  if (fbi.length) activeSources.push('FBI');
+  if (niaLive.length) activeSources.push('NIA India');
+  if (edLive.length) activeSources.push('ED India');
+  if (interpolLive.length) activeSources.push('INTERPOL');
+  if (fbiLive.length) activeSources.push('FBI');
 
   const payload = {
     updatedAt: new Date().toISOString(),
@@ -323,7 +372,7 @@ async function main() {
   };
 
   await fs.writeFile(outputPath, JSON.stringify(payload, null, 2), 'utf8');
-  console.log(`Sync complete -> Total: ${combined.length} (NIA: ${nia.length} [live:${niaFresh.length}], INTERPOL: ${interpol.length} [live:${interpolFresh.length}], FBI: ${fbi.length} [live:${fbiFresh.length}])`);
+  console.log(`Live sync complete -> Total: ${combined.length} (NIA: ${niaLive.length}, ED: ${edLive.length}, INTERPOL: ${interpolLive.length}, FBI: ${fbiLive.length})`);
 }
 
 main().catch((err) => {
