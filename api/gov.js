@@ -129,7 +129,7 @@ async function fetchPibRegionsLive() {
   return { ok: false, regions: BASE_PIB_REGIONS };
 }
 
-async function fetchPibReleases(regid = '3', langCode = 'en', debug = false) {
+async function fetchPibReleases(regid = '3', langCode = 'en') {
   const pibLangId = PIB_LANG_MAP[langCode] || 1;
   const primaryUrl = `https://pib.gov.in/RssMain.aspx?ModId=6&Lang=${pibLangId}&Regid=${encodeURIComponent(regid)}`;
   try {
@@ -159,58 +159,41 @@ async function fetchPibReleases(regid = '3', langCode = 'en', debug = false) {
       title: it.title,
       summary: it.description || it.title,
       publishedAt: it.publishedAt,
-      dateText: it.pubDate || '',
+      dateText: it.pubDate || 'Live PIB Official Feed',
       link: it.link,
       pdfUrl: ''
     }));
 
-    const out = { ok: items.length > 0, count: items.length, sourceUrl: activeUrl, items, error: items.length ? null : 'No releases returned by PIB RSS' };
-    if (debug) {
-      const firstItem = (xml.match(/<(?:item|entry)[\s>][\s\S]*?<\/(?:item|entry)>/i) || [''])[0];
-      out.debugFirstItemXml = firstItem.slice(0, 700);
-    }
-    return out;
+    return { ok: items.length > 0, count: items.length, sourceUrl: activeUrl, items, error: items.length ? null : 'No releases returned by PIB RSS' };
   } catch (err) {
     return { ok: false, count: 0, sourceUrl: primaryUrl, items: [], error: `PIB server unreachable (${err.message})` };
   }
 }
 
-async function fetchEdPageHtml(pathSlug, debug = false) {
+async function fetchEdPageHtml(pathSlug) {
+  const cleanSlug = pathSlug.replace(/^\/+|\/+$/g, '');
   const candidates = [
-    `https://www.enforcementdirectorate.gov.in/${pathSlug}`,
-    `https://enforcementdirectorate.gov.in/${pathSlug}`
+    `https://enforcementdirectorate.gov.in/${cleanSlug}/`,
+    `https://www.enforcementdirectorate.gov.in/${cleanSlug}/`,
+    `https://enforcementdirectorate.gov.in/${cleanSlug}`,
+    `https://www.enforcementdirectorate.gov.in/${cleanSlug}`
   ];
   const errors = [];
   for (const url of candidates) {
     try {
-      const html = await fetchText(url, { Referer: 'https://www.enforcementdirectorate.gov.in/' }, 12000);
+      const html = await fetchText(url, { Referer: 'https://enforcementdirectorate.gov.in/' }, 12000);
       if (html && html.length > 500) return { url, html, errors };
     } catch (err) {
       errors.push(`${url} -> ${err.message}`);
     }
   }
-  let debugHomeLinks = [];
-  if (debug) {
-    try {
-      const homeHtml = await fetchText('https://enforcementdirectorate.gov.in/', {}, 10000);
-      const matches = homeHtml.match(/href=["'][^"']*(?:press|proclamation|notice|red-corner)[^"']*["']/gi) || [];
-      debugHomeLinks = [...new Set(matches)].slice(0, 20);
-      if (debugHomeLinks.length === 0) debugHomeLinks = [homeHtml.slice(0, 500)];
-    } catch (e) {
-      debugHomeLinks = [`Home error: ${e.message}`];
-    }
-  }
-  return { url: candidates[0], html: null, errors, debugHomeLinks };
+  return { url: candidates[0], html: null, errors };
 }
 
-async function fetchEdPressReleases(debug = false) {
-  const { url, html, errors, debugHomeLinks } = await fetchEdPageHtml('press-release', debug);
+async function fetchEdPressReleases() {
+  const { url, html, errors } = await fetchEdPageHtml('media/press-release');
   if (!html) {
-    return {
-      ok: false, count: 0, sourceUrl: 'https://www.enforcementdirectorate.gov.in/press-release', items: [],
-      error: `ED portal unreachable (${errors[0] || 'HTTP 404'})`,
-      ...(debug ? { debugErrors: errors, debugHomeLinks } : {})
-    };
+    return { ok: false, count: 0, sourceUrl: 'https://enforcementdirectorate.gov.in/media/press-release/', items: [], error: `ED portal unreachable (${errors[0] || 'HTTP 404'})` };
   }
 
   const items = [];
@@ -236,19 +219,19 @@ async function fetchEdPressReleases(debug = false) {
       title: description.length > 165 ? description.slice(0, 162) + '...' : description,
       summary: description,
       publishedAt: parseDmyDateToIso(dateStr),
-      dateText: dateStr,
+      dateText: dateStr || 'Official ED Release',
       link: pdfUrl,
       pdfUrl: pdfUrl !== url ? pdfUrl : ''
     });
   }
 
-  return { ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25), error: items.length ? null : 'ED table empty' };
+  return { ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25), error: items.length ? null : 'ED press release table unavailable' };
 }
 
-async function fetchEdProclamations(debug = false) {
-  const { url, html, errors } = await fetchEdPageHtml('notice-for-proclamation', debug);
+async function fetchEdProclamations() {
+  const { url, html, errors } = await fetchEdPageHtml('wanted/notice-for-proclamation');
   if (!html) {
-    return { ok: false, count: 0, sourceUrl: 'https://www.enforcementdirectorate.gov.in/notice-for-proclamation', items: [], error: `ED portal unreachable (${errors[0] || 'HTTP 404'})` };
+    return { ok: false, count: 0, sourceUrl: 'https://enforcementdirectorate.gov.in/wanted/notice-for-proclamation/', items: [], error: `ED portal unreachable (${errors[0] || 'HTTP 404'})` };
   }
 
   const items = [];
@@ -294,15 +277,13 @@ async function fetchEdProclamations(debug = false) {
   return { ok: items.length > 0, count: items.length, sourceUrl: url, items, error: items.length ? null : 'ED proclamation table unavailable' };
 }
 
-async function fetchCbiOfficial(debug = false) {
+async function fetchCbiOfficial() {
   const cbiPressUrl = 'https://cbi.gov.in/press-releases';
   const cbiWantedUrl = 'https://cbi.gov.in/interpol-red-notice';
   const directItems = [];
   const redNotices = [];
   let directAccessible = false;
   let directError = null;
-  let debugPressBlock = '';
-  let debugWantedSnippet = '';
 
   try {
     const html = await fetchText(cbiPressUrl, {}, 10000);
@@ -317,16 +298,9 @@ async function fetchCbiOfficial(debug = false) {
         if (!title || title.length < 10 || seen.has(href)) continue;
         seen.add(href);
 
-        // Look around the link (450 chars before & after) for a date like DD-MM-YYYY, DD/MM/YYYY, or 25 Nov 2026
         const ctx = stripTags(html.slice(Math.max(0, m.index - 250), m.index + m[0].length + 450));
-        if (!debugPressBlock) debugPressBlock = html.slice(Math.max(0, m.index - 200), m.index + m[0].length + 350);
         const dmyMatch = ctx.match(/(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})/);
-        const textDateMatch = ctx.match(/(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})/i);
-        let publishedAt = dmyMatch ? parseDmyDateToIso(dmyMatch[1]) : null;
-        if (!publishedAt && textDateMatch) {
-          const parsed = new Date(textDateMatch[1]);
-          if (!isNaN(parsed.getTime())) publishedAt = parsed.toISOString();
-        }
+        const publishedAt = dmyMatch ? parseDmyDateToIso(dmyMatch[1]) : null;
 
         directItems.push({
           id: `cbi-${Buffer.from(href).toString('base64url').slice(-12)}`,
@@ -336,7 +310,7 @@ async function fetchCbiOfficial(debug = false) {
           title,
           summary: title,
           publishedAt,
-          dateText: dmyMatch?.[1] || textDateMatch?.[1] || 'Official CBI Portal',
+          dateText: dmyMatch?.[1] || 'Official CBI Portal',
           link: href,
           pdfUrl: ''
         });
@@ -346,11 +320,9 @@ async function fetchCbiOfficial(debug = false) {
     directError = err.message;
   }
 
-  // Fetch CBI Red Notices / Wanted subjects separately for Most Wanted tab
   try {
     const wHtml = await fetchText(cbiWantedUrl, {}, 10000);
     if (wHtml && !/Access Denied|Request Rejected|Just a moment/i.test(wHtml)) {
-      if (debug) debugWantedSnippet = wHtml.slice(0, 1200);
       const trMatches = wHtml.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
       for (let i = 0; i < trMatches.length; i++) {
         const tds = trMatches[i].match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
@@ -360,32 +332,35 @@ async function fetchCbiOfficial(debug = false) {
         const imgMatch = trMatches[i].match(/<img[^>]+src=["']([^"']+)["']/i);
         const linkMatch = trMatches[i].match(/<a[^>]+href=["']([^"']+)["']/i);
         const subjectName = cols[1] || cols[0];
+        const sourceUrl = linkMatch?.[1] ? new URL(decodeEntities(linkMatch[1]), 'https://cbi.gov.in').href : cbiWantedUrl;
+        const yearMatch = sourceUrl.match(/#(\d{4})-/);
+
         redNotices.push({
           id: `cbi-rn-${i}-${subjectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
           agency: 'CBI',
           verifiedBy: 'CBI Official',
           department: 'Central Bureau of Investigation (INTERPOL India NCB)',
-          location: cols[2] || 'India / INTERPOL Jurisdiction',
+          location: 'India / INTERPOL Red Notice',
           name: subjectName,
           aliases: [],
           photo: imgMatch?.[1] ? new URL(decodeEntities(imgMatch[1]), 'https://cbi.gov.in').href : '',
-          charges: cols.slice(2).join(' • ') || 'CBI / INTERPOL Red Notice Subject',
-          description: cols.join(' | '),
+          charges: 'Active CBI / INTERPOL Red Notice Subject (Published by Central Bureau of Investigation India)',
+          description: `Official CBI / INTERPOL India Record #${cols[0]} — ${subjectName}`,
           caution: 'Report official information to CBI HQ / NCB India or Dial 112.',
           rewardText: '',
           rewardValue: 0,
-          publishedAt: null,
+          publishedAt: yearMatch ? `Notice Year: ${yearMatch[1]}` : null,
           updatedAt: null,
           dob: '',
           nationality: 'India / International',
           noticeType: 'CBI RED NOTICE',
-          sourceUrl: linkMatch?.[1] ? new URL(decodeEntities(linkMatch[1]), 'https://cbi.gov.in').href : cbiWantedUrl
+          sourceUrl
         });
       }
     }
   } catch {}
 
-  const out = {
+  return {
     ok: directItems.length > 0 || redNotices.length > 0,
     directAccessible,
     count: directItems.length,
@@ -393,14 +368,9 @@ async function fetchCbiOfficial(debug = false) {
     sourceUrl: cbiPressUrl,
     wantedUrl: cbiWantedUrl,
     items: directItems.slice(0, 25),
-    redNotices: redNotices.slice(0, 30),
+    redNotices: redNotices.slice(0, 40),
     error: !directAccessible ? `Direct cbi.gov.in server restricted (${directError || 'WAF/timeout'})` : null
   };
-  if (debug) {
-    out.debugPressBlock = debugPressBlock;
-    out.debugWantedSnippet = debugWantedSnippet;
-  }
-  return out;
 }
 
 export default async function handler(req, res) {
@@ -412,7 +382,6 @@ export default async function handler(req, res) {
   const sources = new Set(sourceParam.split(',').map((s) => s.trim()).filter(Boolean));
   const regid = String(req.query.regid || '3').replace(/[^\d]/g, '') || '3';
   const lang = String(req.query.lang || 'en').toLowerCase();
-  const debug = req.query.debug === '1';
 
   if (sources.has('pib_regions')) {
     const regData = await fetchPibRegionsLive();
@@ -423,16 +392,16 @@ export default async function handler(req, res) {
   const tasks = [];
 
   if (sources.has('all') || sources.has('pib')) {
-    tasks.push(fetchPibReleases(regid, lang, debug).then((d) => { result.sources.pib = d; }));
+    tasks.push(fetchPibReleases(regid, lang).then((d) => { result.sources.pib = d; }));
   }
   if (sources.has('all') || sources.has('ed_press')) {
-    tasks.push(fetchEdPressReleases(debug).then((d) => { result.sources.ed_press = d; }));
+    tasks.push(fetchEdPressReleases().then((d) => { result.sources.ed_press = d; }));
   }
   if (sources.has('all') || sources.has('ed_proclamation')) {
-    tasks.push(fetchEdProclamations(debug).then((d) => { result.sources.ed_proclamation = d; }));
+    tasks.push(fetchEdProclamations().then((d) => { result.sources.ed_proclamation = d; }));
   }
   if (sources.has('all') || sources.has('cbi')) {
-    tasks.push(fetchCbiOfficial(debug).then((d) => { result.sources.cbi = d; }));
+    tasks.push(fetchCbiOfficial().then((d) => { result.sources.cbi = d; }));
   }
 
   await Promise.allSettled(tasks);
