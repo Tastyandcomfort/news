@@ -291,7 +291,7 @@ async function fetchNiaIndiaWanted() {
 
 // 4. DIRECT OFFICIAL GOVT OF INDIA: Directorate of Enforcement (Notice for Proclamation)
 async function fetchEdProclamations() {
-  const url = 'https://enforcementdirectorate.gov.in/notice-for-proclamation';
+  const url = 'https://enforcementdirectorate.gov.in/wanted/notice-for-proclamation/';
   const records = [];
   try {
     const { status, body: html } = await curlHtml(url);
