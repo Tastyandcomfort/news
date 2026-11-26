@@ -52,7 +52,35 @@
     "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official government or municipal water board bulletin. Citizens are advised to follow verified updates issued by local civic authorities.",
     "pdfUrl": ""
 
-}
+},
+
+{
+    "id": "2026-11-26-hyd-safety",
+    "dateBadge": "26 NOV 26",
+    "city": "INDIA",
+    "category": "CIVIC AWARENESS | VOTER CLARIFICATION",
+    "title": "SIR VERIFY YOUR VOTE WITH CLARITY, NOT CONFUSION",
+    "dateText": "26 November 2026",
+    "paragraphs": [
+      "The ongoing Special Intensive Revision (SIR) of electoral rolls has raised widespread questions among households, newly married citizens, senior citizens, and out-of-station workers regarding enumeration forms, record matching, and voter eligibility",
+      "During house-to-house verification, Booth Level Officers (BLOs) distribute and collect enumeration forms to update electoral records accurately. Rumours circulating on messaging groups have falsely claimed that missing earlier roll mapping or not submitting Aadhaar leads to automatic deletion of names.",
+      "Under Election Commission procedures, eligible voters are given formal opportunities to verify records, respond to discrepancies, and file claims or corrections before the final electoral roll is published.",
+      "IMPORTANT:  Receiving a verification notice or finding an unmatched record does not mean your vote is automatically cancelled. No eligible voter's name is removed without due verification and prior notice under election rules."
+    ],
+    "checklistTitle": "KEY DOUBTS CLEARED & CITIZEN CHECKLIST",
+    "checklist": [
+      "Check Your Roll Status: Search your name and EPIC details online on the official Election Commission portal (voters.eci.gov.in) or the ECINET mobile app.",
+      "Aadhaar Is Voluntary: Providing Aadhaar during enumeration is optional; lack of Aadhaar does not disqualify an eligible citizen from being on the voter list.",
+      "Keep Your Signed Acknowledgement: When submitting the two-copy enumeration form to your BLO, always retain your signed receipt copy for future reference.",
+      "Use Official Forms for Updates: Submit Form 6 for new enrolment, Form 8 for address shift or name/photo corrections, and respond promptly if a BLO notice is issued",
+      "Ignore Unverified Rumours: Rely only on official Election Commission notices, your assigned BLO, or verified helpline channels before forwarding messages."
+    ],
+    "contacts": "OFFICIAL VOTER HELPLINE & VERIFICATION CHANNELS: Dial 1950 (Voter Helpline) or visit voters.eci.gov.in to check roll status, locate your Booth Level Officer (BLO), or track submitted forms",
+    "closingNote": "T&C NEWS:  We do not encourage panic. We encourage awareness. Electoral roll revision is a routine administrative exercise to keep voter lists accurate and inclusive. As citizens, our responsibility is to verify our details calmly, cooperate with Booth Level Officers, and avoid spreading misinformation.",
+    "disclaimer": "This is an independent public-awareness publication by T&C News. It is not an official Election Commission of India or government notification. Citizens are advised to verify dates and forms on official ECI portals.",
+    "pdfUrl": ""
+  }
+  
 
 
 ]
