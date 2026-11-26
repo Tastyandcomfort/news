@@ -192,8 +192,8 @@
           <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1">
             <button type="button" onclick="setGovAgencyFilter('all', this)" class="choice-pill selected">All Govt Releases</button>
             <button type="button" onclick="setGovAgencyFilter('pib', this)" class="choice-pill">🇮🇳 PIB India (A–Z)</button>
-            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill">⚖️ ED Press Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill">🕵️ CBI Official</button>
+            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill"> ED Press Releases</button>
+            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill"> CBI Official</button>
           </div>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <select id="pib-region-select" onchange="onPibRegionChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);"></select>
@@ -1096,7 +1096,7 @@
   window.changeLanguage = function (langCode) {
     if (typeof origChangeLanguage === 'function') origChangeLanguage(langCode);
     if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
-      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB A–Z · ED · CBI)';
+      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB · ED · CBI)';
     }
     window.fetchPinnedWorldNews();
     window.refreshLiveFlashTicker();
