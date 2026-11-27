@@ -1,4 +1,4 @@
-// api/gov.js — Real-time Official Indian Govt & Agency Feeds (PIB A-Z, ED, CBI)
+// api/gov.js — Real-time Official Indian Govt & Agency Feeds (PIB A-Z, ED, CBI) + Source Probe
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -121,10 +121,7 @@ async function fetchPibPostedDate(url) {
     const html = await fetchText(url, {}, 4500);
     const clean = stripTags(html);
     const m = clean.match(/Posted\s+On:\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i);
-    if (m) {
-      const iso = parseFlexibleDate(`${m[1]} GMT+0530`);
-      return { iso, raw: m[1] };
-    }
+    if (m) return { iso: parseFlexibleDate(`${m[1]} GMT+0530`), raw: m[1] };
   } catch {}
   return { iso: null, raw: '' };
 }
@@ -151,7 +148,6 @@ async function fetchPibReleases(regid = '3', langCode = 'en') {
     }
 
     const slice = parsed.slice(0, 25);
-    // Fetch real Posted On timestamps for the top 10 items if RSS omitted pubDate
     await Promise.allSettled(
       slice.slice(0, 10).map(async (it) => {
         if (!it.publishedAt && it.link) {
@@ -163,15 +159,11 @@ async function fetchPibReleases(regid = '3', langCode = 'en') {
 
     const items = slice.map((it, idx) => ({
       id: `pib-${regid}-${idx}-${Buffer.from(it.link).toString('base64url').slice(-10)}`,
-      agency: 'PIB',
-      verifiedBy: 'PIB India Official',
+      agency: 'PIB', verifiedBy: 'PIB India Official',
       department: regid === '3' ? 'Press Information Bureau (All India HQ)' : `Press Information Bureau (Region #${regid})`,
-      title: it.title,
-      summary: it.description || it.title,
-      publishedAt: it.publishedAt,
-      dateText: it.pubDate || 'Latest PIB Release',
-      link: it.link,
-      pdfUrl: ''
+      title: it.title, summary: it.description || it.title,
+      publishedAt: it.publishedAt, dateText: it.pubDate || 'Latest PIB Release',
+      link: it.link, pdfUrl: ''
     }));
 
     return { ok: items.length > 0, count: items.length, sourceUrl: activeUrl, items, error: items.length ? null : 'No releases returned by PIB RSS' };
@@ -211,15 +203,10 @@ async function fetchEdPressReleases() {
       const zone = zoneMatch?.[1]?.trim() ? `ED (${zoneMatch[1].trim()})` : 'Directorate of Enforcement (ED)';
       return {
         id: `ed-pr-${idx}-${rawDate.replace(/\D/g, '')}`,
-        agency: 'ED',
-        verifiedBy: 'ED Official',
-        department: zone,
-        title: desc.length > 165 ? desc.slice(0, 162) + '...' : desc,
-        summary: desc,
-        publishedAt: parseFlexibleDate(rawDate),
-        dateText: rawDate || 'Official ED Release',
-        link,
-        pdfUrl: link !== pageUrl ? link : ''
+        agency: 'ED', verifiedBy: 'ED Official', department: zone,
+        title: desc.length > 165 ? desc.slice(0, 162) + '...' : desc, summary: desc,
+        publishedAt: parseFlexibleDate(rawDate), dateText: rawDate || 'Official ED Release',
+        link, pdfUrl: link !== pageUrl ? link : ''
       };
     }).filter((x) => x.title);
 
@@ -255,7 +242,6 @@ async function fetchEdProclamations() {
           const rawDate = String(pickField(row, ['releaseDate', 'ReleaseDate', 'date', 'Date', 'createdDate', 'noticeDate'])).trim();
           const rawLink = String(pickField(row, ['pdfUrl', 'PdfUrl', 'documentUrl', 'DocumentUrl', 'fileUrl', 'FileUrl', 'attachment', 'url', 'Url', 'link', 'filePath'])).trim();
           const pdfUrl = rawLink ? new URL(rawLink, 'https://enforcementdirectorate.gov.in').href : pageUrl;
-
           const againstMatch = desc.match(/against\s+([^,(.]+?)(?:\s+(?:to\s+appear|S\/o|W\/o|D\/o|alias|@|directing)|,|\(|$)/i);
           const subjectName = stripTags(pickField(row, ['accusedName', 'AccusedName', 'personName'])) || (againstMatch?.[1] || '').trim() || `ED Proclamation Notice #${idx + 1}`;
           const ecirMatch = desc.match(/(ECIR\/[A-Z0-9\/-]+)/i);
@@ -263,31 +249,21 @@ async function fetchEdProclamations() {
 
           return {
             id: `ed-proc-${idx + 1}-${(ecirMatch?.[1] || 'case').replace(/[^a-z0-9]/gi, '')}`,
-            agency: 'ED',
-            verifiedBy: 'ED Official',
+            agency: 'ED', verifiedBy: 'ED Official',
             department: 'Directorate of Enforcement (PMLA Court Proclamation)',
             location: ecirMatch ? `Case Ref: ${ecirMatch[1]}` : 'Special PMLA Court, India',
-            name: subjectName,
-            aliases: [],
-            photo: '',
-            charges: desc || subjectName,
-            description: desc || subjectName,
+            name: subjectName, aliases: [], photo: '', charges: desc || subjectName, description: desc || subjectName,
             caution: 'Official Court Proclamation Notice. Report verified information to the Directorate of Enforcement.',
-            rewardText: '',
-            rewardValue: 0,
+            rewardText: '', rewardValue: 0,
             publishedAt: parseFlexibleDate(rawDate) || (dateInText ? parseDmyDateToIso(dateInText[1]) : null),
-            updatedAt: null,
-            dob: '',
-            nationality: 'India / Foreign (FEMA/PMLA)',
-            noticeType: 'ED PROCLAMATION',
-            sourceUrl: pdfUrl
+            updatedAt: null, dob: '', nationality: 'India / Foreign (FEMA/PMLA)',
+            noticeType: 'ED PROCLAMATION', sourceUrl: pdfUrl
           };
         }).filter((x) => x.charges);
 
         if (items.length > 0) return { ok: true, count: items.length, sourceUrl: pageUrl, items, error: null };
       } catch {}
     }
-
     return { ok: false, count: 0, sourceUrl: pageUrl, items: [], error: 'ED Proclamation API endpoint unavailable right now' };
   } catch (err) {
     return { ok: false, count: 0, sourceUrl: pageUrl, items: [], error: `ED Proclamation portal unreachable (${err.message})` };
@@ -314,21 +290,13 @@ async function fetchCbiOfficial() {
         const title = stripTags(m[2]);
         if (!title || title.length < 10 || seen.has(href)) continue;
         seen.add(href);
-
         const ctx = stripTags(html.slice(Math.max(0, m.index - 250), m.index + m[0].length + 450));
         const dmyMatch = ctx.match(/(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})/);
-
         directItems.push({
           id: `cbi-${Buffer.from(href).toString('base64url').slice(-12)}`,
-          agency: 'CBI',
-          verifiedBy: 'CBI Official',
-          department: 'Central Bureau of Investigation (CBI)',
-          title,
-          summary: title,
-          publishedAt: dmyMatch ? parseDmyDateToIso(dmyMatch[1]) : null,
-          dateText: dmyMatch?.[1] || 'Official CBI Portal',
-          link: href,
-          pdfUrl: ''
+          agency: 'CBI', verifiedBy: 'CBI Official', department: 'Central Bureau of Investigation (CBI)',
+          title, summary: title, publishedAt: dmyMatch ? parseDmyDateToIso(dmyMatch[1]) : null,
+          dateText: dmyMatch?.[1] || 'Official CBI Portal', link: href, pdfUrl: ''
         });
       }
     }
@@ -353,24 +321,17 @@ async function fetchCbiOfficial() {
 
         redNotices.push({
           id: `cbi-rn-${i}-${subjectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
-          agency: 'CBI',
-          verifiedBy: 'CBI/INTERPOL',
+          agency: 'CBI', verifiedBy: 'CBI / INTERPOL',
           department: 'Central Bureau of Investigation (INTERPOL India NCB)',
-          location: 'India / INTERPOL Jurisdiction',
-          name: subjectName,
-          aliases: [],
+          location: 'India / INTERPOL Jurisdiction', name: subjectName, aliases: [],
           photo: imgMatch?.[1] ? new URL(decodeEntities(imgMatch[1]), 'https://cbi.gov.in').href : '',
           charges: 'Active CBI / INTERPOL Red Notice Subject (Published by Central Bureau of Investigation India)',
-          description: `Official CBI / INTERPOL India Record #${cols[0]} — ${subjectName}. Click "Verified by CBI Official" to view the live INTERPOL Red Notice profile.`,
+          description: `Official CBI / INTERPOL India Record #${cols[0]} — ${subjectName}. Click "Verified by CBI / INTERPOL" to view the live INTERPOL Red Notice profile.`,
           caution: 'Report official information to CBI HQ / NCB India or Dial 112.',
-          rewardText: '',
-          rewardValue: 0,
+          rewardText: '', rewardValue: 0,
           publishedAt: yearMatch ? `Notice Year: ${yearMatch[1]}` : null,
-          updatedAt: null,
-          dob: '',
-          nationality: 'India / International',
-          noticeType: 'CBI RED NOTICE',
-          sourceUrl
+          updatedAt: null, dob: '', nationality: 'India / International',
+          noticeType: 'CBI RED NOTICE', sourceUrl
         });
       }
     }
@@ -378,15 +339,58 @@ async function fetchCbiOfficial() {
 
   return {
     ok: directItems.length > 0 || redNotices.length > 0,
-    directAccessible,
-    count: directItems.length,
-    redNoticeCount: redNotices.length,
-    sourceUrl: cbiPressUrl,
-    wantedUrl: cbiWantedUrl,
-    items: directItems.slice(0, 25),
-    redNotices: redNotices.slice(0, 40),
+    directAccessible, count: directItems.length, redNoticeCount: redNotices.length,
+    sourceUrl: cbiPressUrl, wantedUrl: cbiWantedUrl,
+    items: directItems.slice(0, 25), redNotices: redNotices.slice(0, 40),
     error: !directAccessible ? `Direct cbi.gov.in server restricted (${directError || 'WAF/timeout'})` : null
   };
+}
+
+async function probePressSources() {
+  const targets = {
+    pib_allrel: 'https://pib.gov.in/AllRel.aspx',
+    sci_wp_json: 'https://www.sci.gov.in/wp-json/wp/v2/posts?per_page=3',
+    sci_press: 'https://www.sci.gov.in/press-releases/',
+    sansad_rs: 'https://sansad.in/rs',
+    sansad_ls: 'https://sansad.in/ls',
+    eci_press: 'https://www.eci.gov.in/press-releases',
+    isro_press: 'https://www.isro.gov.in/Press.html',
+    nasa_rss: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
+    spacex: 'https://www.spacex.com/updates/',
+    delhi_police: 'https://delhipolice.gov.in/',
+    kerala_police: 'https://keralapolice.gov.in/'
+  };
+
+  const results = {};
+  await Promise.allSettled(
+    Object.entries(targets).map(async ([key, url]) => {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 7000);
+      try {
+        const r = await fetch(url, { headers: BROWSER_HEADERS, redirect: 'follow', signal: c.signal });
+        const txt = await r.text();
+        const hints = [];
+        if (key === 'pib_allrel') {
+          const mins = [...txt.matchAll(/<option[^>]+value=["'](\d+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
+            .map((m) => `${m[1]}:${stripTags(m[2])}`)
+            .slice(0, 25);
+          hints.push(...mins);
+        } else if (key.startsWith('sansad')) {
+          const apis = txt.match(/https?:\/\/[^"'\s]+(?:api|strapi|cms)[^"'\s]*/gi) || txt.match(/\/_next\/static\/[^"'\s]+/gi) || [];
+          hints.push(...[...new Set(apis)].slice(0, 10));
+        } else {
+          const links = txt.match(/(?:href|src)=["'][^"']*(?:press|api|wp-json|rss|bulletin)[^"']*["']/gi) || [];
+          hints.push(...[...new Set(links)].slice(0, 10));
+        }
+        results[key] = { status: r.status, ok: r.ok, len: txt.length, hints, sample: stripTags(txt).slice(0, 220) };
+      } catch (e) {
+        results[key] = { ok: false, error: e.message };
+      } finally {
+        clearTimeout(t);
+      }
+    })
+  );
+  return results;
 }
 
 export default async function handler(req, res) {
@@ -398,6 +402,11 @@ export default async function handler(req, res) {
   const sources = new Set(sourceParam.split(',').map((s) => s.trim()).filter(Boolean));
   const regid = String(req.query.regid || '3').replace(/[^\d]/g, '') || '3';
   const lang = String(req.query.lang || 'en').toLowerCase();
+
+  if (sources.has('probe_press')) {
+    const probe = await probePressSources();
+    return res.status(200).json({ updatedAt: new Date().toISOString(), probe });
+  }
 
   if (sources.has('pib_regions')) {
     const regData = await fetchPibRegionsLive();
