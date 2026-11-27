@@ -1,9 +1,20 @@
-// api/gov.js — Unified Official Press Releases Engine (PIB 97 Ministries, Parliament, Supreme Court, ECI, ED, CBI, Space, State Police)
+// api/gov.js — Unified Official Press Releases Engine + Safe Official Document Reader
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'Accept-Language': 'en-IN,en;q=0.9'
 };
+
+const ALLOWED_READER_HOSTS = new Set([
+  'pib.gov.in', 'www.pib.gov.in',
+  'sci.gov.in', 'www.sci.gov.in',
+  'cbi.gov.in', 'www.cbi.gov.in',
+  'isro.gov.in', 'www.isro.gov.in',
+  'nasa.gov', 'www.nasa.gov',
+  'delhipolice.gov.in', 'www.delhipolice.gov.in',
+  'keralapolice.gov.in', 'www.keralapolice.gov.in',
+  'enforcementdirectorate.gov.in', 'www.enforcementdirectorate.gov.in'
+]);
 
 function decodeEntities(str) {
   return String(str || '')
@@ -24,13 +35,26 @@ function stripTags(html) {
     .trim();
 }
 
-// Returns YYYY-MM-DD (date-only, never fake 09:00 AM) unless explicit HH:MM time is present
+function htmlToParagraphs(html) {
+  return decodeEntities(
+    String(html || '')
+      .replace(/<(script|style|noscript|nav|header|footer)[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<\/(p|div|li|tr|h1|h2|h3|h4|h5|h6|blockquote)>/gi, '\n\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+  )
+    .split(/\n{2,}/)
+    .map((p) => p.replace(/[ \t]+/g, ' ').replace(/\n+/g, ' ').trim())
+    .filter((p) => p.length > 25)
+    .slice(0, 30)
+    .join('\n\n');
+}
+
 function parseDateSmart(val) {
   if (!val) return null;
   const s = String(val).replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
   const hasClockTime = /\d{1,2}:\d{2}/.test(s);
 
-  // DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
   const dmy = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})(.*)$/);
   if (dmy) {
     const [, dd, mm, yyyy, rest] = dmy;
@@ -39,10 +63,8 @@ function parseDateSmart(val) {
     return isNaN(d.getTime()) ? `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` : d.toISOString();
   }
 
-  // ISO YYYY-MM-DD without time
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
 
-  // Month DD YYYY or DD Month YYYY (without clock time)
   if (!hasClockTime) {
     const months = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
     const mdy = s.match(/^([A-Za-z]{3,9})\s+(\d{1,2})\s+(\d{4})$/);
@@ -147,7 +169,9 @@ async function fetchPibRegionsLive() {
 
 async function fetchPibPostedDate(url) {
   try {
-    const html = await fetchText(url, {}, 4000);
+    const pridMatch = String(url || '').match(/PRID=(\d+)/i);
+    const targetUrl = pridMatch ? `https://pib.gov.in/PressReleaseIframePage.aspx?PRID=${pridMatch[1]}` : url;
+    const html = await fetchText(targetUrl, {}, 4500);
     const clean = stripTags(html);
     const m = clean.match(/Posted\s+On:\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i);
     if (m) return { iso: parseDateSmart(`${m[1]} GMT+0530`), raw: m[1] };
@@ -225,8 +249,10 @@ async function fetchPibMinistriesList() {
 }
 
 function parsePibAllRelSections(html, filterMinistryName = '') {
-  const contentArea = html.match(/class=["'][^"']*content-area[^"']*["'][^>]*>([\s\S]*?)(?:<\/div>\s*<\/div>\s*<div|<footer|$)/i)?.[1] || html;
-  // Split into sections starting at each <h3...>Ministry</h3>
+  const startIdx = html.search(/class=["'][^"']*content-area[^"']*["']/i);
+  const footerIdx = html.search(/<footer/i);
+  const contentArea = startIdx > -1 ? html.slice(startIdx, footerIdx > startIdx ? footerIdx : undefined) : html;
+
   const sections = contentArea.split(/<h3[^>]*>/i);
   const results = [];
   const seen = new Set();
@@ -256,27 +282,10 @@ function parsePibAllRelSections(html, filterMinistryName = '') {
       const ctx = stripTags(body.slice(m.index, m.index + m[0].length + 220));
       const dateMatch = ctx.match(/(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i);
       results.push({
-        prid,
-        ministry: secMinistry,
-        title,
-        link,
+        prid, ministry: secMinistry, title, link,
         publishedAt: dateMatch ? parseDateSmart(`${dateMatch[1]} GMT+0530`) : null,
         dateText: dateMatch?.[1] || ''
       });
-    }
-  }
-
-  // Fallback if no <h3> matched but single-ministry POST returned bare links
-  if (results.length === 0 && !filterMinistryName) {
-    const linkRe = /<a[^>]+href=["']([^"']*PressRelease(?:Detail|IframePage|Page)\.aspx\?PRID=(\d+)[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
-    let m;
-    while ((m = linkRe.exec(contentArea)) !== null) {
-      const link = new URL(decodeEntities(m[1]), 'https://pib.gov.in').href;
-      const prid = m[2];
-      const title = stripTags(m[3]);
-      if (!title || title.length < 6 || seen.has(prid)) continue;
-      seen.add(prid);
-      results.push({ prid, ministry: 'PIB Official', title, link, publishedAt: null, dateText: '' });
     }
   }
   return results;
@@ -293,55 +302,55 @@ async function fetchPibByMinistry(minid = '0', agencyLabel = 'MINISTRY', deptFal
     const minLabelMatch = html.match(new RegExp(`<option[^>]+value=["']${minid}["'][^>]*>([\\s\\S]*?)<\\/option>`, 'i'));
     const ministryName = minLabelMatch ? stripTags(minLabelMatch[1]) : deptFallback;
 
-    // First check if today's GET page already contains releases under that exact ministry
     let parsed = parsePibAllRelSections(html, ministryName);
 
-    // Always try ASP.NET WebForms POST with ddlday=0 (full month) using exact form field names from page
-    const selectName = (id, defName) => html.match(new RegExp(`<select[^>]+id=["']${id}["'][^>]+name=["']([^"']+)["']`, 'i'))?.[1]
-      || html.match(new RegExp(`<select[^>]+name=["']([^"']+)["'][^>]+id=["']${id}["']`, 'i'))?.[1]
-      || defName;
+    // If not in today's GET page, query full month (ddlday=0) via ASP.NET postback
+    if (parsed.length === 0) {
+      const selectName = (id, defName) => html.match(new RegExp(`<select[^>]+id=["']${id}["'][^>]+name=["']([^"']+)["']`, 'i'))?.[1]
+        || html.match(new RegExp(`<select[^>]+name=["']([^"']+)["'][^>]+id=["']${id}["']`, 'i'))?.[1]
+        || defName;
 
-    const form = new URLSearchParams();
-    for (const inp of html.matchAll(/<input[^>]+type=["']hidden["'][^>]*>/gi)) {
-      const name = inp[0].match(/name=["']([^"']+)["']/i)?.[1];
-      const val = inp[0].match(/value=["']([^"']*)["']/i)?.[1] || '';
-      if (name) form.set(name, val);
+      const form = new URLSearchParams();
+      for (const inp of html.matchAll(/<input[^>]+type=["']hidden["'][^>]*>/gi)) {
+        const name = inp[0].match(/name=["']([^"']+)["']/i)?.[1];
+        const val = inp[0].match(/value=["']([^"']*)["']/i)?.[1] || '';
+        if (name) form.set(name, val);
+      }
+
+      const minSelectName = selectName('ContentPlaceHolder1_ddlMinistry', 'ctl00$ContentPlaceHolder1$ddlMinistry');
+      const daySelectName = selectName('ContentPlaceHolder1_ddlday', 'ctl00$ContentPlaceHolder1$ddlday');
+      const monthSelectName = selectName('ContentPlaceHolder1_ddlMonth', 'ctl00$ContentPlaceHolder1$ddlMonth');
+      const yearSelectName = selectName('ContentPlaceHolder1_ddlYear', 'ctl00$ContentPlaceHolder1$ddlYear');
+      const regSelectName = selectName('Bar1_ddlregion', 'ctl00$Bar1$ddlregion');
+      const langSelectName = selectName('Bar1_ddlLang', 'ctl00$Bar1$ddlLang');
+
+      const now = new Date(Date.now() + 5.5 * 3600 * 1000);
+      form.set('__EVENTTARGET', daySelectName);
+      form.set('__EVENTARGUMENT', '');
+      form.set(regSelectName, '3');
+      form.set(langSelectName, '1');
+      form.set(minSelectName, String(minid));
+      form.set(daySelectName, '0');
+      form.set(monthSelectName, String(now.getUTCMonth() + 1));
+      form.set(yearSelectName, String(now.getUTCFullYear()));
+
+      try {
+        const postRes = await fetchResponse(pageUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Origin': 'https://pib.gov.in',
+            'Referer': pageUrl,
+            ...(cookieHeader ? { Cookie: cookieHeader } : {})
+          },
+          body: form.toString()
+        }, 11000);
+        const postHtml = await postRes.text();
+        const postParsed = parsePibAllRelSections(postHtml, ministryName);
+        if (postParsed.length > parsed.length) parsed = postParsed;
+      } catch {}
     }
 
-    const minSelectName = selectName('ContentPlaceHolder1_ddlMinistry', 'ctl00$ContentPlaceHolder1$ddlMinistry');
-    const daySelectName = selectName('ContentPlaceHolder1_ddlday', 'ctl00$ContentPlaceHolder1$ddlday');
-    const monthSelectName = selectName('ContentPlaceHolder1_ddlMonth', 'ctl00$ContentPlaceHolder1$ddlMonth');
-    const yearSelectName = selectName('ContentPlaceHolder1_ddlYear', 'ctl00$ContentPlaceHolder1$ddlYear');
-    const regSelectName = selectName('Bar1_ddlregion', 'ctl00$Bar1$ddlregion');
-    const langSelectName = selectName('Bar1_ddlLang', 'ctl00$Bar1$ddlLang');
-
-    const now = new Date(Date.now() + 5.5 * 3600 * 1000);
-    form.set('__EVENTTARGET', minSelectName);
-    form.set('__EVENTARGUMENT', '');
-    form.set(regSelectName, '3');
-    form.set(langSelectName, '1');
-    form.set(minSelectName, String(minid));
-    form.set(daySelectName, '0');
-    form.set(monthSelectName, String(now.getUTCMonth() + 1));
-    form.set(yearSelectName, String(now.getUTCFullYear()));
-
-    try {
-      const postRes = await fetchResponse(pageUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Origin': 'https://pib.gov.in',
-          'Referer': pageUrl,
-          ...(cookieHeader ? { Cookie: cookieHeader } : {})
-        },
-        body: form.toString()
-      }, 11000);
-      const postHtml = await postRes.text();
-      const postParsed = parsePibAllRelSections(postHtml, ministryName);
-      if (postParsed.length > parsed.length) parsed = postParsed;
-    } catch {}
-
-    // Fetch exact Posted On timestamps for top 10 releases
     await Promise.allSettled(
       parsed.slice(0, 10).map(async (it) => {
         if (!it.publishedAt) {
@@ -371,7 +380,7 @@ async function fetchPibByMinistry(minid = '0', agencyLabel = 'MINISTRY', deptFal
       ministryName,
       sourceUrl: pageUrl,
       items,
-      error: items.length ? null : `No recent releases found for ${ministryName} on PIB`
+      error: items.length ? null : `No recent releases found for ${ministryName} on PIB today/this month`
     };
   } catch (err) {
     return { ok: false, count: 0, sourceUrl: pageUrl, items: [], error: `PIB Ministry query failed (${err.message})` };
@@ -394,7 +403,7 @@ async function fetchSciArticleMeta(url) {
       publishedAt: rawDate ? parseDateSmart(rawDate) : null,
       dateText: rawDate,
       pdfUrl,
-      summary: clean.slice(0, 320)
+      summary: htmlToParagraphs(main).slice(0, 600)
     };
   } catch {
     return { publishedAt: null, dateText: '', pdfUrl: '', summary: '' };
@@ -421,9 +430,8 @@ async function fetchSupremeCourtPress() {
       candidates.push({ href, title: text });
     }
 
-    const top = candidates.slice(0, 15);
     const enriched = await Promise.all(
-      top.map(async (c) => {
+      candidates.slice(0, 15).map(async (c) => {
         const meta = await fetchSciArticleMeta(c.href);
         return {
           id: `sci-${Buffer.from(c.href).toString('base64url').slice(-12)}`,
@@ -435,6 +443,7 @@ async function fetchSupremeCourtPress() {
           publishedAt: meta.publishedAt,
           dateText: meta.dateText || 'Official SCI Release',
           link: meta.pdfUrl || c.href,
+          pageUrl: c.href,
           pdfUrl: meta.pdfUrl || '',
           image: ''
         };
@@ -498,23 +507,29 @@ async function fetchNasaPress() {
 }
 
 async function fetchSpaceXUpdates() {
-  const url = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=SpaceX&limit=10';
+  const url = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=SpaceX&limit=10&mode=detailed';
   try {
     const data = await fetchJson(url, {}, 10000);
-    const items = (data?.results || []).map((l) => ({
-      id: `spacex-${l.id}`,
-      agency: 'SPACEX', verifiedBy: 'Launch Library / SpaceX',
-      department: `SpaceX • ${l.pad?.location?.name || 'Launch Complex'}`,
-      title: `${l.name} (${l.status?.abbrev || l.status?.name || 'Scheduled'})`,
-      summary: l.mission?.description || `Target Launch: ${l.net || 'TBD'} • Pad: ${l.pad?.name || 'SpaceX Launch Pad'}`,
-      publishedAt: parseDateSmart(l.net),
-      dateText: l.net ? `Launch Window: ${l.net}` : 'Upcoming Mission',
-      link: l.url || 'https://www.spacex.com/launches/',
-      pdfUrl: '', image: l.image || ''
-    }));
-    return { ok: items.length > 0, count: items.length, sourceUrl: 'https://www.spacex.com/updates/', items, error: null };
+    const items = (data?.results || []).map((l) => {
+      const humanLink =
+        l.info_urls?.[0]?.url ||
+        l.vid_urls?.[0]?.url ||
+        (l.slug ? `https://spacelaunchnow.me/launch/${l.slug}` : 'https://www.spacex.com/launches/');
+      return {
+        id: `spacex-${l.id}`,
+        agency: 'SPACEX', verifiedBy: 'SpaceX Launch Info',
+        department: `SpaceX • ${l.pad?.location?.name || 'Launch Complex'}`,
+        title: `${l.name} (${l.status?.abbrev || l.status?.name || 'Scheduled'})`,
+        summary: l.mission?.description || `Target Launch: ${l.net || 'TBD'} • Pad: ${l.pad?.name || 'SpaceX Launch Pad'}`,
+        publishedAt: parseDateSmart(l.net),
+        dateText: l.net ? `Launch Window: ${l.net}` : 'Upcoming Mission',
+        link: humanLink,
+        pdfUrl: '', image: l.image || ''
+      };
+    });
+    return { ok: items.length > 0, count: items.length, sourceUrl: 'https://www.spacex.com/launches/', items, error: null };
   } catch (err) {
-    return { ok: false, count: 0, sourceUrl: 'https://www.spacex.com/updates/', items: [], error: `SpaceX feed unreachable (${err.message})` };
+    return { ok: false, count: 0, sourceUrl: 'https://www.spacex.com/launches/', items: [], error: `SpaceX feed unreachable (${err.message})` };
   }
 }
 
@@ -761,6 +776,49 @@ async function fetchCbiOfficial() {
   };
 }
 
+async function readOfficialDocument(rawUrl) {
+  try {
+    const parsedUrl = new URL(rawUrl);
+    if (!ALLOWED_READER_HOSTS.has(parsedUrl.hostname.toLowerCase())) {
+      return { ok: false, error: 'Host not on official allowlist' };
+    }
+    if (/\.pdf$/i.test(parsedUrl.pathname)) {
+      return { ok: true, pdfUrl: parsedUrl.href, text: 'This release is an official PDF document. Tap "Open Official Source / PDF" or "Save / Print" below.' };
+    }
+
+    let fetchTarget = parsedUrl.href;
+    const pridMatch = fetchTarget.match(/PRID=(\d+)/i);
+    if (parsedUrl.hostname.includes('pib.gov.in') && pridMatch) {
+      fetchTarget = `https://pib.gov.in/PressReleaseIframePage.aspx?PRID=${pridMatch[1]}`;
+    }
+
+    const html = await fetchText(fetchTarget, {}, 8500);
+    const body = html.split(/<body[^>]*>/i)[1] || html;
+    const main =
+      body.match(/<main[\s\S]*?<\/main>/i)?.[0] ||
+      body.match(/<article[\s\S]*?<\/article>/i)?.[0] ||
+      body.match(/class=["'][^"']*(?:innner-page-main-about-us-content|press-detail|entry-content|content-area)[^"']*["'][^>]*>([\s\S]*)/i)?.[1] ||
+      body;
+
+    const text = htmlToParagraphs(main);
+    const clean = stripTags(main);
+    const dateMatch =
+      clean.match(/Posted\s+On:\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i) ||
+      clean.match(/Publish\s+Date\s*:\s*([A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})/i);
+    const pdfHref = main.match(/<a[^>]+href=["']([^"']+\.pdf[^"']*)["']/i)?.[1] || '';
+    const pdfUrl = pdfHref ? new URL(decodeEntities(pdfHref), parsedUrl.origin).href : '';
+
+    return {
+      ok: text.length > 30,
+      text: text.slice(0, 8000),
+      publishedAt: dateMatch ? parseDateSmart(parsedUrl.hostname.includes('pib.gov.in') ? `${dateMatch[1]} GMT+0530` : dateMatch[1]) : null,
+      pdfUrl
+    };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -773,6 +831,9 @@ export default async function handler(req, res) {
   const lang = String(req.query.lang || 'en').toLowerCase();
   const policeState = String(req.query.state || 'ALL').toUpperCase();
 
+  if (sources.has('read_article') && req.query.url) {
+    return res.status(200).json(await readOfficialDocument(String(req.query.url)));
+  }
   if (sources.has('pib_regions')) return res.status(200).json({ updatedAt: new Date().toISOString(), ...(await fetchPibRegionsLive()) });
   if (sources.has('pib_ministries')) return res.status(200).json({ updatedAt: new Date().toISOString(), ...(await fetchPibMinistriesList()) });
 
