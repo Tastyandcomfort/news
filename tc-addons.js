@@ -612,7 +612,7 @@
           id: it.id || `custom-pr-${idx}`,
           agency: (it.agency || 'T&C RELEASE').toUpperCase(),
           verifiedBy: it.source || 'T&C Verified',
-          department: it.department || it.category || 'T&C Official Upload',
+          department: it.department || it.category || 'Posted by T&C',
           title: it.title || 'Press Release',
           summary: it.summary || it.text || it.title || '',
           publishedAt: it.publishedAt || null,
@@ -663,9 +663,9 @@
       extraHtml = `
         <div class="flex items-center gap-1.5 flex-wrap">
           <button type="button" onclick="onPressSpaceFilter('ALL', this)" class="choice-pill ${currentSpaceFilter === 'ALL' ? 'selected' : ''}">All Space</button>
-          <button type="button" onclick="onPressSpaceFilter('ISRO', this)" class="choice-pill ${currentSpaceFilter === 'ISRO' ? 'selected' : ''}">🇮🇳 ISRO</button>
-          <button type="button" onclick="onPressSpaceFilter('NASA', this)" class="choice-pill ${currentSpaceFilter === 'NASA' ? 'selected' : ''}">🇺🇸 NASA</button>
-          <button type="button" onclick="onPressSpaceFilter('SPACEX', this)" class="choice-pill ${currentSpaceFilter === 'SPACEX' ? 'selected' : ''}">🚀 SpaceX</button>
+          <button type="button" onclick="onPressSpaceFilter('ISRO', this)" class="choice-pill ${currentSpaceFilter === 'ISRO' ? 'selected' : ''}"> ISRO</button>
+          <button type="button" onclick="onPressSpaceFilter('NASA', this)" class="choice-pill ${currentSpaceFilter === 'NASA' ? 'selected' : ''}"> NASA</button>
+          <button type="button" onclick="onPressSpaceFilter('SPACEX', this)" class="choice-pill ${currentSpaceFilter === 'SPACEX' ? 'selected' : ''}"> SpaceX</button>
         </div>
       `;
     } else if (currentPressCategory === 'police') {
@@ -860,7 +860,7 @@
       if (currentPressCategory === 'custom') {
         container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-file-pdf text-2xl text-amber-500"></i><h4 class="text-xs font-bold" style="color: var(--text-main);">No T&amp;C Custom Press Releases Yet</h4><p class="text-[11px] max-w-md mx-auto" style="color: var(--text-sub);">Upload PDF files to the <b>press-release/</b> folder in your repo root and add entries to <b>press-releases.json</b> — your custom <b>source</b> name will appear automatically.</p></div>`;
       } else {
-        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">No live entries returned for this selection right now.</p><p class="text-[11px]" style="color: var(--text-sub);">Use the official portal links above or switch categories.</p></div>`;
+        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">Sorry data not available please try later</p><p class="text-[11px]" style="color: var(--text-sub);">The server connection was lost. Data will appear here automatically once the server is available</p></div>`;
       }
       return;
     }
