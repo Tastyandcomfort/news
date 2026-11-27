@@ -1,4 +1,4 @@
-/* T&C News Hub — Bulletins, Official Govt (PIB A-Z, ED, CBI), Missing Persons, News Card Photos, Apple Reader & Flash Fix */
+/* T&C News Hub — Bulletins, Press Releases Hub, Missing Persons, News Card Photos, Apple Reader & Flash Fix */
 (function () {
   const GOV_API_BASE = 'https://news-lemon-two.vercel.app';
   window.tcNewsRegistry = window.tcNewsRegistry || {};
@@ -8,64 +8,89 @@
   let currentBulletin = null;
   let isBulletinArchiveView = false;
 
-  let currentGovAgency = 'all';
+  // Press Releases Tab State
+  let pressInitialized = false;
+  let currentPressCategory = 'all';
   let currentPibRegid = '3';
-  let pibRegionsList = [
-    { regid: '3', name: 'All India (National HQ — All Ministries A–Z)' },
-    { regid: '1', name: 'PIB Delhi' }, { regid: '2', name: 'PIB Mumbai' }, { regid: '5', name: 'PIB Hyderabad' },
-    { regid: '6', name: 'PIB Chennai' }, { regid: '7', name: 'PIB Chandigarh' }, { regid: '8', name: 'PIB Kolkata' },
-    { regid: '12', name: 'PIB Guwahati' }, { regid: '14', name: 'PIB Bhubaneswar' }, { regid: '20', name: 'PIB Bengaluru' },
-    { regid: '22', name: 'PIB Ahmedabad' }, { regid: '24', name: 'PIB Thiruvananthapuram' }
-  ];
-  let liveGovCache = { pib: null, ed_press: null, cbi: null };
+  let currentMinistryId = '3';
+  let currentSpaceFilter = 'ALL';
+  let currentPoliceState = 'ALL';
+  let customPressReleases = [];
+  let pressItemsCache = {};
+  let pressStatusNotes = [];
 
+  let pibRegionsList = [
+    { regid: '3', name: 'All India (National HQ)' },
+    { regid: '1', name: 'PIB Mumbai' }, { regid: '5', name: 'PIB Hyderabad' },
+    { regid: '6', name: 'PIB Chennai' }, { regid: '17', name: 'PIB Chandigarh' },
+    { regid: '19', name: 'PIB Kolkata' }, { regid: '20', name: 'PIB Bengaluru' },
+    { regid: '21', name: 'PIB Bhubaneswar' }, { regid: '22', name: 'PIB Ahmedabad' },
+    { regid: '23', name: 'PIB Guwahati' }, { regid: '24', name: 'PIB Thiruvananthapuram' }
+  ];
+  let pibMinistriesList = [
+    { minid: '3', name: "Prime Minister's Office" },
+    { minid: '2934', name: 'Rajya Sabha Secretariat' },
+    { minid: '2608', name: 'Lok Sabha Secretariat' },
+    { minid: '35', name: 'Election Commission' },
+    { minid: '1', name: "President's Secretariat" },
+    { minid: '2', name: "Vice President's Secretariat" },
+    { minid: '61', name: 'Cabinet' },
+    { minid: '14', name: 'Department of Space' }
+  ];
+
+  // Most Wanted & Missing State
   let liveEdProclamations = [];
   let liveEdStatus = { ok: false, error: '' };
   let liveCbiData = { ok: false, directAccessible: false, items: [], redNotices: [], error: '' };
   let missingDataset = [];
   let missingSourcesMeta = {};
 
+  const STATE_POLICE_PORTALS = [
+    { key: 'ALL', name: 'All Live Police Feeds (Delhi & Kerala)', url: 'https://digitalpolice.gov.in/', live: true },
+    { key: 'DELHI', name: 'Delhi Police (Live Official Table)', url: 'https://delhipolice.gov.in/newpressrelease.aspx', live: true },
+    { key: 'KERALA', name: 'Kerala Police (Live Official Table)', url: 'https://keralapolice.gov.in/page/press-releases', live: true },
+    { key: 'ANDAMAN', name: 'Andaman & Nicobar Islands Police', url: 'https://police.andaman.gov.in/' },
+    { key: 'ANDHRA PRADESH', name: 'Andhra Pradesh Police', url: 'https://citizen.appolice.gov.in/' },
+    { key: 'ARUNACHAL PRADESH', name: 'Arunachal Pradesh Police', url: 'https://arunpol.nic.in/' },
+    { key: 'ASSAM', name: 'Assam Police', url: 'https://assampolice.gov.in/' },
+    { key: 'BIHAR', name: 'Bihar Police', url: 'https://police.bihar.gov.in/' },
+    { key: 'CHANDIGARH', name: 'Chandigarh Police', url: 'https://chandigarhpolice.gov.in/' },
+    { key: 'CHHATTISGARH', name: 'Chhattisgarh Police', url: 'https://cgpolice.gov.in/' },
+    { key: 'DNHDD', name: 'Dadra & Nagar Haveli and Daman & Diu Police', url: 'https://dnhddpolice.gov.in/' },
+    { key: 'GOA', name: 'Goa Police', url: 'https://citizen.goapolice.gov.in/' },
+    { key: 'GUJARAT', name: 'Gujarat Police', url: 'https://gujhome.gujarat.gov.in/portal/' },
+    { key: 'HARYANA', name: 'Haryana Police', url: 'https://haryanapolice.gov.in/' },
+    { key: 'HIMACHAL PRADESH', name: 'Himachal Pradesh Police', url: 'https://citizenportal.hppolice.gov.in/' },
+    { key: 'JAMMU & KASHMIR', name: 'Jammu & Kashmir Police', url: 'https://jkpolice.gov.in/' },
+    { key: 'JHARKHAND', name: 'Jharkhand Police', url: 'https://jhpolice.gov.in/' },
+    { key: 'KARNATAKA', name: 'Karnataka State Police', url: 'https://ksp.karnataka.gov.in/' },
+    { key: 'LADAKH', name: 'Ladakh Police', url: 'https://police.ladakh.gov.in/' },
+    { key: 'LAKSHADWEEP', name: 'Lakshadweep Police', url: 'https://lakshadweeppolice.gov.in/' },
+    { key: 'MADHYA PRADESH', name: 'Madhya Pradesh Police', url: 'https://citizen.mppolice.gov.in/' },
+    { key: 'MAHARASHTRA', name: 'Maharashtra Police', url: 'https://citizen.mahapolice.gov.in/' },
+    { key: 'MANIPUR', name: 'Manipur Police', url: 'https://manipurpolice.gov.in/' },
+    { key: 'MEGHALAYA', name: 'Meghalaya Police', url: 'https://megpolice.gov.in/' },
+    { key: 'MIZORAM', name: 'Mizoram Police', url: 'https://police.mizoram.gov.in/' },
+    { key: 'NAGALAND', name: 'Nagaland Police', url: 'https://police.nagaland.gov.in/' },
+    { key: 'ODISHA', name: 'Odisha Police', url: 'https://citizenportal-op.gov.in/' },
+    { key: 'PUDUCHERRY', name: 'Puducherry Police', url: 'https://police.py.gov.in/' },
+    { key: 'PUNJAB', name: 'Punjab Police', url: 'https://punjabpolice.gov.in/' },
+    { key: 'RAJASTHAN', name: 'Rajasthan Police', url: 'https://police.rajasthan.gov.in/' },
+    { key: 'SIKKIM', name: 'Sikkim Police', url: 'https://police.sikkim.gov.in/' },
+    { key: 'TAMIL NADU', name: 'Tamil Nadu Police', url: 'https://eservices.tnpolice.gov.in/' },
+    { key: 'TELANGANA', name: 'Telangana Police', url: 'https://www.tspolice.gov.in/' },
+    { key: 'TRIPURA', name: 'Tripura Police', url: 'https://tripurapolice.gov.in/' },
+    { key: 'UTTAR PRADESH', name: 'Uttar Pradesh Police', url: 'https://uppolice.gov.in/' },
+    { key: 'UTTARAKHAND', name: 'Uttarakhand Police', url: 'https://uttarakhandpolice.uk.gov.in/' },
+    { key: 'WEST BENGAL', name: 'West Bengal Police', url: 'https://wbpolice.gov.in/' }
+  ];
+
   const INDIA_OFFICIAL_MISSING_PORTALS = [
     { state: 'National — TrackChild (Missing Children, All States)', url: 'https://trackthemissingchild.gov.in/trackchild/index.php' },
     { state: 'National — Khoya-Paya (Citizen Missing Children Portal)', url: 'https://khoyapaya.gov.in/mpp/home' },
     { state: 'National — Digital Police (CCTNS Citizen Services)', url: 'https://digitalpolice.gov.in/' },
     { state: 'National — ZIPNET (8 North/Central States Live)', url: 'https://zipnet.delhipolice.gov.in/victims/missingpersons/' },
-    { state: 'Andaman & Nicobar Islands Police', url: 'https://police.andaman.gov.in/' },
-    { state: 'Andhra Pradesh Police (Citizen Portal)', url: 'https://citizen.appolice.gov.in/' },
-    { state: 'Arunachal Pradesh Police', url: 'https://arunpol.nic.in/' },
-    { state: 'Assam Police (Citizen Portal)', url: 'https://assampolice.gov.in/' },
-    { state: 'Bihar Police', url: 'https://police.bihar.gov.in/' },
-    { state: 'Chandigarh Police', url: 'https://chandigarhpolice.gov.in/' },
-    { state: 'Chhattisgarh Police (Citizen Portal)', url: 'https://cgpolice.gov.in/' },
-    { state: 'Dadra & Nagar Haveli and Daman & Diu Police', url: 'https://dnhddpolice.gov.in/' },
-    { state: 'Delhi Police', url: 'https://delhipolice.gov.in/' },
-    { state: 'Goa Police', url: 'https://citizen.goapolice.gov.in/' },
-    { state: 'Gujarat Police (Citizen Portal)', url: 'https://gujhome.gujarat.gov.in/portal/' },
-    { state: 'Haryana Police', url: 'https://haryanapolice.gov.in/' },
-    { state: 'Himachal Pradesh Police', url: 'https://citizenportal.hppolice.gov.in/' },
-    { state: 'Jammu & Kashmir Police', url: 'https://jkpolice.gov.in/' },
-    { state: 'Jharkhand Police', url: 'https://jhpolice.gov.in/' },
-    { state: 'Karnataka State Police (KSP)', url: 'https://ksp.karnataka.gov.in/' },
-    { state: 'Kerala Police (Thuna)', url: 'https://thuna.keralapolice.gov.in/' },
-    { state: 'Ladakh Police', url: 'https://police.ladakh.gov.in/' },
-    { state: 'Lakshadweep Police', url: 'https://lakshadweeppolice.gov.in/' },
-    { state: 'Madhya Pradesh Police (Citizen Portal)', url: 'https://citizen.mppolice.gov.in/' },
-    { state: 'Maharashtra Police (Citizen Portal)', url: 'https://citizen.mahapolice.gov.in/' },
-    { state: 'Manipur Police', url: 'https://manipurpolice.gov.in/' },
-    { state: 'Meghalaya Police', url: 'https://megpolice.gov.in/' },
-    { state: 'Mizoram Police', url: 'https://police.mizoram.gov.in/' },
-    { state: 'Nagaland Police', url: 'https://police.nagaland.gov.in/' },
-    { state: 'Odisha Police (Citizen Portal)', url: 'https://citizenportal-op.gov.in/' },
-    { state: 'Puducherry Police', url: 'https://police.py.gov.in/' },
-    { state: 'Punjab Police', url: 'https://punjabpolice.gov.in/' },
-    { state: 'Rajasthan Police', url: 'https://police.rajasthan.gov.in/' },
-    { state: 'Sikkim Police', url: 'https://police.sikkim.gov.in/' },
-    { state: 'Tamil Nadu Police', url: 'https://eservices.tnpolice.gov.in/' },
-    { state: 'Telangana Police', url: 'https://www.tspolice.gov.in/' },
-    { state: 'Tripura Police', url: 'https://tripurapolice.gov.in/' },
-    { state: 'Uttar Pradesh Police', url: 'https://uppolice.gov.in/' },
-    { state: 'Uttarakhand Police', url: 'https://uttarakhandpolice.uk.gov.in/' },
-    { state: 'West Bengal Police', url: 'https://wbpolice.gov.in/' }
+    ...STATE_POLICE_PORTALS.filter(s => s.key !== 'ALL').map(s => ({ state: s.name.replace(/\s*\(Live Official Table\)/i, ''), url: s.url }))
   ];
 
   const addonStyle = document.createElement('style');
@@ -166,29 +191,6 @@
       }
     }
 
-    const feedContainer = document.getElementById('news-feed-container');
-    if (feedContainer && !document.getElementById('gov-controls-bar')) {
-      feedContainer.insertAdjacentHTML('beforebegin', `
-        <div id="gov-controls-bar" class="hidden mb-4 p-3 rounded-2xl border space-y-2.5" style="background-color: var(--bg-sub); border-color: var(--border-color);">
-          <div class="flex items-center gap-1.5 overflow-x-auto desktop-scrollbar pb-1">
-            <button type="button" onclick="setGovAgencyFilter('all', this)" class="choice-pill selected">All Govt Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('pib', this)" class="choice-pill">🇮🇳 PIB India (A–Z)</button>
-            <button type="button" onclick="setGovAgencyFilter('ed_press', this)" class="choice-pill">⚖️ ED Press Releases</button>
-            <button type="button" onclick="setGovAgencyFilter('cbi', this)" class="choice-pill">🕵️ CBI Official</button>
-          </div>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <select id="pib-region-select" onchange="onPibRegionChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);"></select>
-            <div class="flex items-center gap-2 px-3 py-2 rounded-xl flex-1" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
-              <i class="fa-solid fa-magnifying-glass text-xs" style="color: var(--text-sub);"></i>
-              <input type="text" id="gov-search-input" oninput="renderGovFeedFromCache()" placeholder="Filter PIB ministries, ED zones, CBI..." class="bg-transparent text-xs focus:outline-none w-full" style="color: var(--text-main);">
-            </div>
-          </div>
-          <div id="gov-status-banner" class="hidden text-[10.5px] leading-relaxed" style="color: var(--text-sub);"></div>
-        </div>
-      `);
-      populatePibRegionDropdown();
-    }
-
     const wantedDir = document.getElementById('wanted-directory-container');
     if (wantedDir && !document.getElementById('missing-controls-bar')) {
       wantedDir.insertAdjacentHTML('beforebegin', `
@@ -209,45 +211,11 @@
     }
   }
 
-  function populatePibRegionDropdown() {
-    const sel = document.getElementById('pib-region-select');
-    if (!sel) return;
-    sel.innerHTML = pibRegionsList.map(r => `<option value="${escapeHtml(r.regid)}" ${r.regid === currentPibRegid ? 'selected' : ''}>${escapeHtml(r.name)}</option>`).join('');
-  }
-
-  async function loadPibRegionsFromServer() {
-    try {
-      const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib_regions`);
-      if (!res.ok) return;
-      const data = await res.json();
-      if (Array.isArray(data?.regions) && data.regions.length > 0) {
-        pibRegionsList = data.regions;
-        populatePibRegionDropdown();
-      }
-    } catch {}
-  }
-
   window.openSelectedStatePortal = function () {
     const sel = document.getElementById('india-state-portal-select');
     const idx = Number(sel?.value || 0);
     const entry = INDIA_OFFICIAL_MISSING_PORTALS[idx];
     if (entry?.url) window.open(entry.url, '_blank', 'noopener');
-  };
-
-  window.setGovAgencyFilter = function (agency, btnEl) {
-    currentGovAgency = agency;
-    document.querySelectorAll('#gov-controls-bar .choice-pill').forEach(b => b.classList.remove('selected'));
-    if (btnEl) btnEl.classList.add('selected');
-    const regSel = document.getElementById('pib-region-select');
-    if (regSel) regSel.classList.toggle('hidden', agency === 'ed_press' || agency === 'cbi');
-    renderGovFeedFromCache();
-  };
-
-  window.onPibRegionChange = function (regid) {
-    currentPibRegid = regid || '3';
-    if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
-      window.fetchPortalNews();
-    }
   };
 
   async function smartTranslate(text, targetLang) {
@@ -270,7 +238,7 @@
     return typeof translateText === 'function' ? await translateText(text, targetLang) : text;
   }
 
-  function resolveBulletinPdfUrl(raw) {
+  function resolveRelativePdf(folderName, raw) {
     if (!raw) return '';
     const val = String(raw).trim();
     if (/^https?:\/\//i.test(val)) return val;
@@ -279,7 +247,7 @@
       const file = parts.pop();
       return `${parts.join('/')}/${encodeURIComponent(file)}`;
     }
-    return `./Bulletin-files/${encodeURIComponent(val)}`;
+    return `./${folderName}/${encodeURIComponent(val)}`;
   }
 
   // 2. Bulletins Engine
@@ -375,7 +343,7 @@
     toggleBtn.textContent = 'All Bulletins';
     footer.classList.remove('hidden');
 
-    const resolvedPdf = resolveBulletinPdfUrl(b.pdfUrl);
+    const resolvedPdf = resolveRelativePdf('Bulletin-files', b.pdfUrl);
     if (resolvedPdf) {
       pdfLink.href = resolvedPdf;
       pdfLink.classList.remove('hidden'); pdfLink.classList.add('inline-flex');
@@ -512,6 +480,9 @@
     document.getElementById('reader-modal-summary').textContent = summary;
     document.getElementById('reader-modal-origin-link').href = story.link || 'https://tastyandcomfort.github.io/news/';
 
+    const originBtnText = document.getElementById('reader-modal-origin-link')?.querySelector('span');
+    if (originBtnText) originBtnText.textContent = story.isPdf ? 'Open Press Release PDF' : 'Open Original Source';
+
     const imgEl = document.getElementById('reader-modal-img');
     if (story.image && story.image.startsWith('http')) { imgEl.src = story.image; imgEl.classList.remove('hidden'); }
     else { imgEl.classList.add('hidden'); }
@@ -559,110 +530,334 @@
     if (story) shareStoryObject(story, btnEl);
   };
 
-  // 4. Govt Releases Engine (PIB A-Z, ED Press Releases, CBI Press Releases)
-  async function fetchLiveGovReleases() {
-    const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
-    const feedContainer = document.getElementById('news-feed-container');
-    const badge = document.getElementById('news-status-badge');
-    const refreshIcon = document.getElementById('refresh-icon');
-
-    if (refreshIcon) refreshIcon.classList.add('fa-spin');
-    badge.textContent = 'Syncing Govt Feeds...';
-    feedContainer.innerHTML = '<div class="text-center py-8 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Fetching live PIB (A–Z), ED &amp; CBI official releases...</div>';
-
+  // 4. DEDICATED PRESS RELEASES HUB ENGINE
+  async function loadCustomPressReleases() {
     try {
-      const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib,ed_press,cbi&regid=${encodeURIComponent(currentPibRegid)}&lang=${encodeURIComponent(lang)}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      liveGovCache.pib = data?.sources?.pib || { ok: false, items: [], error: 'PIB unavailable' };
-      liveGovCache.ed_press = data?.sources?.ed_press || { ok: false, items: [], error: 'ED unavailable' };
-      liveGovCache.cbi = data?.sources?.cbi || { ok: false, items: [], error: 'CBI unavailable' };
-      await window.renderGovFeedFromCache();
-    } catch (err) {
-      feedContainer.innerHTML = `<div class="p-4 text-center text-xs text-red-500 font-semibold">Official Government feed temporarily unreachable (${escapeHtml(err.message)}).</div>`;
-      badge.textContent = 'Error';
-    } finally {
-      if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+      const res = await fetch(`./press-releases.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const raw = await res.json();
+      const arr = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
+      customPressReleases = arr.map((it, idx) => {
+        const pdfLink = resolveRelativePdf('press-release', it.pdfUrl || it.pdf || '');
+        const link = pdfLink || it.link || 'https://tastyandcomfort.github.io/news/';
+        return {
+          id: it.id || `custom-pr-${idx}`,
+          agency: (it.agency || 'T&C RELEASE').toUpperCase(),
+          verifiedBy: it.source || 'T&C Verified',
+          department: it.department || it.category || 'T&C Official Upload',
+          title: it.title || 'Press Release',
+          summary: it.summary || it.text || it.title || '',
+          publishedAt: it.publishedAt || null,
+          dateText: it.dateText || it.date || 'T&C Press Release',
+          link,
+          pdfUrl: pdfLink,
+          image: it.image || '',
+          isCustom: true
+        };
+      });
+    } catch {
+      customPressReleases = [];
     }
   }
 
-  window.renderGovFeedFromCache = async function () {
-    const feedContainer = document.getElementById('news-feed-container');
-    const badge = document.getElementById('news-status-badge');
-    const banner = document.getElementById('gov-status-banner');
-    if (!feedContainer) return;
+  async function loadPibListsForPressHub() {
+    await Promise.allSettled([
+      fetch(`${GOV_API_BASE}/api/gov?source=pib_regions`).then(r => r.ok ? r.json() : null).then(d => {
+        if (Array.isArray(d?.regions) && d.regions.length > 0) pibRegionsList = d.regions;
+      }).catch(() => {}),
+      fetch(`${GOV_API_BASE}/api/gov?source=pib_ministries`).then(r => r.ok ? r.json() : null).then(d => {
+        if (Array.isArray(d?.ministries) && d.ministries.length > 0) {
+          pibMinistriesList = d.ministries.filter(m => m.minid !== '0');
+        }
+      }).catch(() => {})
+    ]);
+    renderPressSubcontrols();
+  }
+
+  function renderPressSubcontrols() {
+    const box = document.getElementById('press-subcontrols');
+    if (!box) return;
+
+    let extraHtml = '';
+    if (currentPressCategory === 'all') {
+      extraHtml = `
+        <select id="press-pib-region-select" onchange="onPressPibRegionChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+          ${pibRegionsList.map(r => `<option value="${escapeHtml(r.regid)}" ${r.regid === currentPibRegid ? 'selected' : ''}>PIB Region: ${escapeHtml(r.name)}</option>`).join('')}
+        </select>
+      `;
+    } else if (currentPressCategory === 'ministries') {
+      extraHtml = `
+        <select id="press-ministry-select" onchange="onPressMinistryChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer flex-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+          ${pibMinistriesList.map(m => `<option value="${escapeHtml(m.minid)}" ${m.minid === currentMinistryId ? 'selected' : ''}>${escapeHtml(m.name)}</option>`).join('')}
+        </select>
+      `;
+    } else if (currentPressCategory === 'space') {
+      extraHtml = `
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="onPressSpaceFilter('ALL', this)" class="choice-pill ${currentSpaceFilter === 'ALL' ? 'selected' : ''}">All Space</button>
+          <button type="button" onclick="onPressSpaceFilter('ISRO', this)" class="choice-pill ${currentSpaceFilter === 'ISRO' ? 'selected' : ''}">🇮🇳 ISRO</button>
+          <button type="button" onclick="onPressSpaceFilter('NASA', this)" class="choice-pill ${currentSpaceFilter === 'NASA' ? 'selected' : ''}">🇺🇸 NASA</button>
+          <button type="button" onclick="onPressSpaceFilter('SPACEX', this)" class="choice-pill ${currentSpaceFilter === 'SPACEX' ? 'selected' : ''}">🚀 SpaceX</button>
+        </div>
+      `;
+    } else if (currentPressCategory === 'police') {
+      const selStateObj = STATE_POLICE_PORTALS.find(s => s.key === currentPoliceState);
+      extraHtml = `
+        <div class="flex items-center gap-2 flex-1">
+          <select id="press-police-select" onchange="onPressPoliceStateChange(this.value)" class="px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none cursor-pointer w-full" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);">
+            ${STATE_POLICE_PORTALS.map(s => `<option value="${escapeHtml(s.key)}" ${s.key === currentPoliceState ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+          </select>
+          ${selStateObj ? `<a href="${escapeHtml(selStateObj.url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold whitespace-nowrap">Portal ↗</a>` : ''}
+        </div>
+      `;
+    }
+
+    const searchVal = document.getElementById('press-search-input')?.value || '';
+    box.innerHTML = `
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        ${extraHtml}
+        <div class="flex items-center gap-2 px-3 py-2 rounded-xl flex-1" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+          <i class="fa-solid fa-magnifying-glass text-xs" style="color: var(--text-sub);"></i>
+          <input type="text" id="press-search-input" value="${escapeHtml(searchVal)}" oninput="renderPressFeed()" placeholder="Search press releases, dates, departments..." class="bg-transparent text-xs focus:outline-none w-full" style="color: var(--text-main);">
+        </div>
+        <button type="button" onclick="fetchPressCategory(true)" class="px-3 py-2 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);">
+          <i id="press-refresh-icon" class="fa-solid fa-arrows-rotate text-blue-500"></i> <span>Refresh</span>
+        </button>
+      </div>
+    `;
+  }
+
+  window.initOrRefreshPressTab = async function () {
+    if (!pressInitialized) {
+      pressInitialized = true;
+      renderPressSubcontrols();
+      await Promise.allSettled([loadCustomPressReleases(), loadPibListsForPressHub()]);
+      await window.fetchPressCategory(false);
+    }
+  };
+
+  window.selectPressCategory = function (cat, btnEl) {
+    currentPressCategory = cat;
+    document.querySelectorAll('#press-category-pills .choice-pill').forEach(b => b.classList.remove('selected'));
+    if (btnEl) btnEl.classList.add('selected');
+    renderPressSubcontrols();
+    window.fetchPressCategory(false);
+  };
+
+  window.onPressPibRegionChange = function (val) { currentPibRegid = val || '3'; window.fetchPressCategory(true); };
+  window.onPressMinistryChange = function (val) { currentMinistryId = val || '3'; window.fetchPressCategory(true); };
+  window.onPressSpaceFilter = function (val, btnEl) { currentSpaceFilter = val; renderPressSubcontrols(); window.renderPressFeed(); };
+  window.onPressPoliceStateChange = function (val) {
+    currentPoliceState = val || 'ALL';
+    renderPressSubcontrols();
+    if (val === 'ALL' || val === 'DELHI' || val === 'KERALA') window.fetchPressCategory(true);
+    else window.renderPressFeed();
+  };
+
+  window.fetchPressCategory = async function (forceRefresh = false) {
+    const container = document.getElementById('press-feed-container');
+    const badge = document.getElementById('press-count-badge');
+    const icon = document.getElementById('press-refresh-icon');
+    const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
+
+    const cacheKey = `${currentPressCategory}:${currentPibRegid}:${currentMinistryId}:${currentPoliceState}:${lang}`;
+    if (!forceRefresh && pressItemsCache[cacheKey]) {
+      pressStatusNotes = pressItemsCache[cacheKey].notes || [];
+      await window.renderPressFeed();
+      return;
+    }
+
+    if (icon) icon.classList.add('fa-spin');
+    if (badge) badge.textContent = 'Syncing...';
+    if (container) container.innerHTML = '<div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Fetching live official press releases...</div>';
+
+    await loadCustomPressReleases();
+    const collected = [];
+    const notes = [];
+
+    try {
+      if (currentPressCategory === 'custom') {
+        collected.push(...customPressReleases);
+      } else if (currentPressCategory === 'all') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib,ed_press,cbi&regid=${encodeURIComponent(currentPibRegid)}&lang=${encodeURIComponent(lang)}`);
+        if (res.ok) {
+          const d = await res.json();
+          collected.push(...customPressReleases);
+          collected.push(...(d?.sources?.pib?.items || []));
+          collected.push(...(d?.sources?.ed_press?.items || []));
+          collected.push(...(d?.sources?.cbi?.items || []));
+        }
+      } else if (currentPressCategory === 'ministries') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=pib_ministry&minid=${encodeURIComponent(currentMinistryId)}`);
+        if (res.ok) {
+          const d = await res.json();
+          const mData = d?.sources?.pib_ministry;
+          collected.push(...(mData?.items || []));
+          if (mData && !mData.ok) notes.push(`<b>${escapeHtml(mData.ministryName || 'Ministry')}:</b> ${escapeHtml(mData.error || 'No releases found this month')}. <a href="https://pib.gov.in/AllRel.aspx?reg=3&lang=1" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open PIB Archive ↗</a>`);
+        }
+      } else if (currentPressCategory === 'parliament') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=parliament`);
+        if (res.ok) {
+          const d = await res.json();
+          collected.push(...customPressReleases.filter(x => /RAJYA|LOK|PARLIAMENT|SANSAD/i.test(`${x.agency} ${x.department}`)));
+          collected.push(...(d?.sources?.rajya_sabha?.items || []));
+          collected.push(...(d?.sources?.lok_sabha?.items || []));
+        }
+        notes.push(`<b>Parliament Portals:</b> <a href="https://sansad.in/rs" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Rajya Sabha (sansad.in/rs) ↗</a> • <a href="https://sansad.in/ls" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Lok Sabha (sansad.in/ls) ↗</a>`);
+      } else if (currentPressCategory === 'sci') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=sci`);
+        if (res.ok) {
+          const d = await res.json();
+          collected.push(...customPressReleases.filter(x => /SUPREME|COURT|SCI/i.test(`${x.agency} ${x.department}`)));
+          collected.push(...(d?.sources?.sci?.items || []));
+          if (!d?.sources?.sci?.ok) notes.push(`<b>Supreme Court:</b> ${escapeHtml(d?.sources?.sci?.error || 'Unavailable')} — <a href="https://www.sci.gov.in/press-release/" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">sci.gov.in ↗</a>`);
+        }
+      } else if (currentPressCategory === 'eci') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=eci`);
+        if (res.ok) {
+          const d = await res.json();
+          collected.push(...customPressReleases.filter(x => /ECI|ELECTION/i.test(`${x.agency} ${x.department}`)));
+          collected.push(...(d?.sources?.eci?.items || []));
+        }
+        notes.push(`<b>Election Commission Direct:</b> <a href="https://www.eci.gov.in/press-releases" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open ECI Press Releases (eci.gov.in) ↗</a>`);
+      } else if (currentPressCategory === 'ed') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=ed_press`);
+        if (res.ok) collected.push(...((await res.json())?.sources?.ed_press?.items || []));
+      } else if (currentPressCategory === 'cbi') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=cbi`);
+        if (res.ok) collected.push(...((await res.json())?.sources?.cbi?.items || []));
+      } else if (currentPressCategory === 'space') {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=space`);
+        if (res.ok) {
+          const d = await res.json();
+          collected.push(...(d?.sources?.isro?.items || []));
+          collected.push(...(d?.sources?.nasa?.items || []));
+          collected.push(...(d?.sources?.spacex?.items || []));
+        }
+      } else if (currentPressCategory === 'police') {
+        const st = (currentPoliceState === 'DELHI' || currentPoliceState === 'KERALA') ? currentPoliceState : 'ALL';
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=police&state=${encodeURIComponent(st)}`);
+        if (res.ok) collected.push(...((await res.json())?.sources?.police?.items || []));
+      }
+    } catch {}
+
+    pressItemsCache[cacheKey] = { items: collected, notes };
+    pressStatusNotes = notes;
+    if (icon) icon.classList.remove('fa-spin');
+    await window.renderPressFeed();
+  };
+
+  window.renderPressFeed = async function () {
+    const container = document.getElementById('press-feed-container');
+    const badge = document.getElementById('press-count-badge');
+    const banner = document.getElementById('press-status-banner');
+    if (!container) return;
 
     const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
-    const query = (document.getElementById('gov-search-input')?.value || '').trim().toLowerCase();
-    const selectedDateStr = document.getElementById('news-date-picker')?.value || REAL_TODAY_DATE;
-    const isDateFiltered = selectedDateStr && selectedDateStr !== REAL_TODAY_DATE;
+    const cacheKey = `${currentPressCategory}:${currentPibRegid}:${currentMinistryId}:${currentPoliceState}:${lang}`;
+    const cached = pressItemsCache[cacheKey]?.items || [];
+    const query = (document.getElementById('press-search-input')?.value || '').trim().toLowerCase();
 
-    let combined = [];
-    if (currentGovAgency === 'all' || currentGovAgency === 'pib') combined.push(...(liveGovCache.pib?.items || []));
-    if (currentGovAgency === 'all' || currentGovAgency === 'ed_press') combined.push(...(liveGovCache.ed_press?.items || []));
-    if (currentGovAgency === 'all' || currentGovAgency === 'cbi') combined.push(...(liveGovCache.cbi?.items || []));
+    let list = [...cached];
+    if (currentPressCategory === 'space' && currentSpaceFilter !== 'ALL') {
+      list = list.filter(it => it.agency === currentSpaceFilter);
+    }
+    if (currentPressCategory === 'police' && currentPoliceState !== 'ALL') {
+      const selObj = STATE_POLICE_PORTALS.find(s => s.key === currentPoliceState);
+      if (!selObj?.live) {
+        list = [];
+      } else {
+        list = list.filter(it => it.stateName === currentPoliceState);
+      }
+    }
+    if (query) {
+      list = list.filter(it => `${it.title} ${it.summary} ${it.department} ${it.agency} ${it.verifiedBy}`.toLowerCase().includes(query));
+    }
 
-    if (query) combined = combined.filter(it => `${it.title} ${it.summary} ${it.department} ${it.verifiedBy}`.toLowerCase().includes(query));
-    if (isDateFiltered) combined = combined.filter(it => it.publishedAt && getLocalDateStr(new Date(it.publishedAt)) === selectedDateStr);
-
-    combined.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+    if (currentPressCategory !== 'space') {
+      list.sort((a, b) => (b.isCustom ? 1 : 0) - (a.isCustom ? 1 : 0) || new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+    }
 
     if (banner) {
-      const notes = [];
-      if ((currentGovAgency === 'all' || currentGovAgency === 'cbi') && liveGovCache.cbi && !liveGovCache.cbi.directAccessible) {
-        notes.push(`<span><i class="fa-solid fa-circle-info text-amber-500 mr-1"></i><b>CBI Portal:</b> Restricted. <a href="https://cbi.gov.in/press-releases" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">cbi.gov.in ↗</a></span>`);
-      }
-      if ((currentGovAgency === 'all' || currentGovAgency === 'ed_press') && liveGovCache.ed_press && !liveGovCache.ed_press.ok) {
-        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>ED Portal:</b> ${escapeHtml(liveGovCache.ed_press.error || 'Unavailable')}. <a href="https://enforcementdirectorate.gov.in/media/press-release/" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">ED Press Releases ↗</a></span>`);
-      }
-      if ((currentGovAgency === 'all' || currentGovAgency === 'pib') && liveGovCache.pib && !liveGovCache.pib.ok) {
-        notes.push(`<span><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i><b>PIB Portal:</b> ${escapeHtml(liveGovCache.pib.error || 'Unavailable')}. <a href="https://pib.gov.in" target="_blank" rel="noopener" class="text-blue-500 font-bold underline">pib.gov.in ↗</a></span>`);
+      const notes = [...pressStatusNotes];
+      if (currentPressCategory === 'police') {
+        const selObj = STATE_POLICE_PORTALS.find(s => s.key === currentPoliceState);
+        if (selObj && !selObj.live) {
+          notes.push(`<b>${escapeHtml(selObj.name)}:</b> Direct automated scraping is not exposed by this state portal. <a href="${escapeHtml(selObj.url)}" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open Official ${escapeHtml(selObj.name)} Portal ↗</a>`);
+        }
       }
       banner.innerHTML = notes.join(' • ');
       banner.classList.toggle('hidden', notes.length === 0);
     }
 
-    if (combined.length === 0) {
-      feedContainer.innerHTML = `<div class="p-6 rounded-xl text-center space-y-2" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-amber-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">No matching live official releases found.</p><p class="text-[11px]" style="color: var(--text-sub);">Try switching PIB region/agency filters, clearing the search box, or resetting the date to Today.</p></div>`;
-      badge.textContent = '0 Releases';
+    if (badge) badge.textContent = `${list.length} Releases`;
+
+    if (list.length === 0) {
+      if (currentPressCategory === 'custom') {
+        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-file-pdf text-2xl text-amber-500"></i><h4 class="text-xs font-bold" style="color: var(--text-main);">No T&amp;C Custom Press Releases Yet</h4><p class="text-[11px] max-w-md mx-auto" style="color: var(--text-sub);">Upload PDF files to the <b>press-release/</b> folder in your repo root and add entries to <b>press-releases.json</b> — your custom <b>source</b> name will appear automatically.</p></div>`;
+      } else {
+        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">No live entries returned for this selection right now.</p><p class="text-[11px]" style="color: var(--text-sub);">Use the official portal links above or switch categories.</p></div>`;
+      }
       return;
     }
 
     const badgeColors = {
       PIB: 'bg-amber-500/15 text-amber-500 border-amber-500/30',
+      MINISTRY: 'bg-amber-500/15 text-amber-500 border-amber-500/30',
+      'RAJYA SABHA': 'bg-rose-500/15 text-rose-500 border-rose-500/30',
+      'LOK SABHA': 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30',
+      'SUPREME COURT': 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+      ECI: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
       ED: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-      CBI: 'bg-red-500/15 text-red-500 border-red-500/30'
+      CBI: 'bg-red-500/15 text-red-500 border-red-500/30',
+      ISRO: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+      NASA: 'bg-blue-500/15 text-blue-500 border-blue-500/30',
+      SPACEX: 'bg-slate-500/15 text-slate-400 border-slate-500/30',
+      POLICE: 'bg-sky-500/15 text-sky-400 border-sky-500/30'
     };
 
-    const rendered = await Promise.all(combined.slice(0, 45).map(async (item) => {
+    const cards = await Promise.all(list.slice(0, 45).map(async (item) => {
       const title = await smartTranslate(item.title, lang);
-      const timeStr = item.publishedAt ? formatPrettyDate(item.publishedAt) : (item.dateText || 'Latest Official Release');
+      const timeStr = item.publishedAt ? formatPrettyDate(item.publishedAt) : (item.dateText || 'Official Release');
+      const isPdf = Boolean(item.pdfUrl || /\.pdf$/i.test(item.link || ''));
       const storyId = registerNewsStory({
-        scope: `${item.agency} OFFICIAL`, source: item.verifiedBy || item.department,
-        title, summary: item.summary || title, time: timeStr, link: item.link, image: ''
+        scope: item.agency || 'OFFICIAL',
+        source: item.verifiedBy || item.department,
+        title,
+        summary: item.summary || title,
+        time: timeStr,
+        link: item.link,
+        image: item.image || '',
+        isPdf
       });
+      const thumbHtml = item.image
+        ? `<img src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" class="w-16 h-14 sm:w-20 sm:h-16 rounded-xl object-cover border flex-shrink-0" style="border-color: var(--border-color);">`
+        : '';
+
       return `
         <div class="p-3.5 rounded-xl transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-blue-500/35" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
-          <div class="flex-grow cursor-pointer" onclick="openNewsReaderById('${storyId}')">
-            <div class="flex items-center gap-2 flex-wrap mb-1.5">
-              <span class="px-2 py-0.5 rounded text-[9.5px] font-black border uppercase ${badgeColors[item.agency] || 'bg-blue-500/10 text-blue-500 border-blue-500/30'}">${escapeHtml(item.agency)}</span>
-              <span class="text-[10px] font-bold" style="color: var(--text-sub);">${escapeHtml(item.department)}</span>
-            </div>
-            <h4 class="text-xs md:text-sm font-semibold line-clamp-2 hover:text-blue-500 transition-colors" style="color: var(--text-main);">${escapeHtml(title)}</h4>
-            <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
-              <span><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(timeStr)}</span>
+          <div class="flex items-start gap-3 flex-grow min-w-0 cursor-pointer" onclick="openNewsReaderById('${storyId}')">
+            ${thumbHtml}
+            <div class="min-w-0 flex-grow">
+              <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                <span class="px-2 py-0.5 rounded text-[9.5px] font-black border uppercase ${badgeColors[item.agency] || 'bg-amber-500/15 text-amber-500 border-amber-500/30'}">${escapeHtml(item.agency)}</span>
+                <span class="text-[10px] font-bold" style="color: var(--text-sub);">${escapeHtml(item.department)}</span>
+              </div>
+              <h4 class="text-xs md:text-sm font-semibold line-clamp-2 hover:text-blue-500 transition-colors" style="color: var(--text-main);">${escapeHtml(title)}</h4>
+              <div class="flex items-center gap-3 mt-2 text-[10px]" style="color: var(--text-sub);">
+                <span><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(timeStr)}</span>
+              </div>
             </div>
           </div>
           <div class="flex items-center gap-2 self-end md:self-center flex-shrink-0">
             <button type="button" onclick="shareNewsCardById('${storyId}', this)" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border flex items-center gap-1" style="background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);" title="Share via T&C News"><i class="fa-solid fa-share-nodes text-blue-500 text-[10px]"></i></button>
-            <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30"><i class="fa-solid ${item.pdfUrl ? 'fa-file-pdf' : 'fa-circle-check'} text-[10px]"></i> ${escapeHtml(item.verifiedBy || 'Official')}</a>
+            <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener" class="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border border-blue-500/30"><i class="fa-solid ${isPdf ? 'fa-file-pdf' : 'fa-circle-check'} text-[10px]"></i> ${escapeHtml(item.verifiedBy || 'Official')}</a>
           </div>
         </div>
       `;
     }));
 
-    feedContainer.innerHTML = rendered.join('');
-    badge.textContent = `Live (${combined.length} Official Releases)`;
+    container.innerHTML = cards.join('');
   };
 
   // 5. Flash Scroller, Headlines (with Photos) & World Highlights (with Photos)
@@ -755,11 +950,6 @@
 
   window.fetchPortalNews = async function () {
     const scope = typeof currentScope !== 'undefined' ? currentScope : 'local';
-    const govBar = document.getElementById('gov-controls-bar');
-    if (govBar) govBar.classList.toggle('hidden', scope !== 'gov');
-
-    if (scope === 'gov') { await fetchLiveGovReleases(); return; }
-
     const feedContainer = document.getElementById('news-feed-container');
     const badge = document.getElementById('news-status-badge');
     const selectedDateStr = document.getElementById('news-date-picker')?.value || REAL_TODAY_DATE;
@@ -919,11 +1109,7 @@
     const missingBar = document.getElementById('missing-controls-bar');
     if (missingBar) missingBar.classList.toggle('hidden', agency !== 'MISSING');
 
-    if (agency === 'MISSING') {
-      renderMissingDirectoryView();
-      return;
-    }
-
+    if (agency === 'MISSING') { renderMissingDirectoryView(); return; }
     if (typeof origRenderWantedDir === 'function') origRenderWantedDir();
 
     const container = document.getElementById('wanted-directory-container');
@@ -1011,23 +1197,22 @@
   const origChangeLanguage = window.changeLanguage;
   window.changeLanguage = function (langCode) {
     if (typeof origChangeLanguage === 'function') origChangeLanguage(langCode);
-    if (typeof currentScope !== 'undefined' && currentScope === 'gov') {
-      document.getElementById('active-scope-title').textContent = 'Official Govt Releases (PIB A–Z · ED · CBI)';
-    }
     window.fetchPinnedWorldNews();
     window.refreshLiveFlashTicker();
+    if (pressInitialized) window.fetchPressCategory(true);
   };
 
   const origManualRefresh = window.manualHubRefresh;
   window.manualHubRefresh = async function () {
     if (typeof origManualRefresh === 'function') await origManualRefresh();
-    await Promise.allSettled([window.fetchBulletins(), window.refreshLiveFlashTicker(), fetchLiveWantedExtras()]);
+    const tasks = [window.fetchBulletins(), window.refreshLiveFlashTicker(), fetchLiveWantedExtras()];
+    if (pressInitialized) tasks.push(window.fetchPressCategory(true));
+    await Promise.allSettled(tasks);
   };
 
   document.addEventListener('DOMContentLoaded', () => {
     injectAddonUI();
     window.fetchBulletins();
-    loadPibRegionsFromServer();
     fetchLiveWantedExtras();
 
     const ensureFlashPlaying = () => {
