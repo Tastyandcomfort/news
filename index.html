@@ -1448,7 +1448,7 @@
     function detectGPSCity(btnEl) {
       if ('geolocation' in navigator) {
         btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
-        navigator.geolocation.getCurrentPosition((pos) => { btnEl.innerHTML = '📍 GPS Locked'; localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4)); localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4)); selectChoicePill('weather-city', 'GPS_Auto', btnEl); }, () => { btnEl.innerHTML = '📍 GPS Unavailable'; setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000); }, { enableHighAccuracy: true, timeout: 5000 });
+        navigator.geolocation.getCurrentPosition((pos) => { btnEl.innerHTML = ' GPS Locked'; localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4)); localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4)); selectChoicePill('weather-city', 'GPS_Auto', btnEl); }, () => { btnEl.innerHTML = '📍 GPS Unavailable'; setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000); }, { enableHighAccuracy: true, timeout: 5000 });
       }
     }
     function loadSavedPreferencesUI() {
