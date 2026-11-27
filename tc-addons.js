@@ -129,10 +129,10 @@
                   <i class="fa-solid fa-share-nodes text-blue-500"></i> <span>Share</span>
                 </button>
                
-                 
-                <button onclick="printCurrentReaderDoc()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);" title="Save as PDF or Print">
-                   <i class="fa-solid fa-print text-amber-500"></i> <span></span>
-                 </button>
+              // tried toremove save print button
+              //  <button onclick="printCurrentReaderDoc()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);" title="Save as PDF or Print">
+              //   <i class="fa-solid fa-print text-amber-500"></i> <span>Save / Print PDF</span>
+              //  </button>
               
                  
               </div>
