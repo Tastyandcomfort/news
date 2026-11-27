@@ -783,7 +783,7 @@ async function readOfficialDocument(rawUrl) {
       return { ok: false, error: 'Host not on official allowlist' };
     }
     if (/\.pdf$/i.test(parsedUrl.pathname)) {
-      return { ok: true, pdfUrl: parsedUrl.href, text: 'This release is an official PDF document. Tap "Open Official Source / PDF" or "Save / Print" below.' };
+      return { ok: true, pdfUrl: parsedUrl.href, text: 'T&C found official PDF document. Tap "Open Official" Source below. };
     }
 
     let fetchTarget = parsedUrl.href;
