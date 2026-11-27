@@ -412,14 +412,22 @@
 
   function formatPrettyDate(isoOrStr) {
     if (!isoOrStr) return 'Latest Official Release';
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ord = (day) => (day > 3 && day < 21) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th');
+    const dateOnly = String(isoOrStr).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnly) {
+      const y = Number(dateOnly[1]), m = Number(dateOnly[2]) - 1, d = Number(dateOnly[3]);
+      return `${d}${ord(d)} ${months[m]} ${y}`;
+    }
     const d = new Date(isoOrStr);
     if (isNaN(d.getTime())) return String(isoOrStr);
     const day = d.getDate();
-    const ord = (day > 3 && day < 21) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `Published at ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, ${day}${ord} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    if (!String(isoOrStr).includes('T') && !/\d{1,2}:\d{2}/.test(String(isoOrStr))) {
+      return `${day}${ord(day)} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+    return `Published at ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, ${day}${ord(day)} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
-
+  
   function extractRssMeta(item, scopeLabel) {
     const rawTitle = item.querySelector('title')?.textContent?.trim() || 'News Story';
     const link = item.querySelector('link')?.textContent?.trim() || '#';
