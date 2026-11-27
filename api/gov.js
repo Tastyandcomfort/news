@@ -688,6 +688,44 @@ export default async function handler(req, res) {
   const lang = String(req.query.lang || 'en').toLowerCase();
   const policeState = String(req.query.state || 'ALL').toUpperCase();
 
+  if (sources.has('probe_min')) {
+    const out = {};
+    try {
+      const getRes = await fetchResponse('https://pib.gov.in/AllRel.aspx?reg=3&lang=1', {}, 10000);
+      const cookie = (getRes.headers.get('set-cookie') || '').split(',').map(c => c.split(';')[0]).filter(Boolean).join('; ');
+      const gHtml = await getRes.text();
+      const hidden = (n) => gHtml.match(new RegExp(`name=["']${n}["'][^>]*value=["']([^"']*)["']`, 'i'))?.[1] || '';
+      const form = new URLSearchParams({
+        '__EVENTTARGET': 'ctl00$ContentPlaceHolder1$ddlMinistry',
+        '__EVENTARGUMENT': '',
+        '__VIEWSTATE': hidden('__VIEWSTATE'),
+        '__VIEWSTATEGENERATOR': hidden('__VIEWSTATEGENERATOR'),
+        '__EVENTVALIDATION': hidden('__EVENTVALIDATION'),
+        'ctl00$Bar1$ddlregion': '3',
+        'ctl00$Bar1$ddlLang': '1',
+        'ctl00$ContentPlaceHolder1$ddlMinistry': '2934',
+        'ctl00$ContentPlaceHolder1$ddlday': '0',
+        'ctl00$ContentPlaceHolder1$ddlMonth': String(new Date().getMonth() + 1),
+        'ctl00$ContentPlaceHolder1$ddlYear': String(new Date().getFullYear())
+      });
+      const pRes = await fetchResponse('https://pib.gov.in/AllRel.aspx?reg=3&lang=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://pib.gov.in', 'Referer': 'https://pib.gov.in/AllRel.aspx?reg=3&lang=1', ...(cookie ? { Cookie: cookie } : {}) },
+        body: form.toString()
+      }, 10000);
+      const pHtml = await pRes.text();
+      out.pibGetLinks = (gHtml.match(/href=["'][^"']*PRID=\d+[^"']*["']/gi) || []).slice(0, 8);
+      out.pibPostLinks = (pHtml.match(/href=["'][^"']*PRID=\d+[^"']*["']/gi) || []).slice(0, 8);
+      out.pibPostContentArea = stripTags(pHtml.match(/class=["'][^"']*content-area[^"']*["'][\s\S]{0,1800}/i)?.[0] || pHtml.slice(pHtml.indexOf('PRID') > -1 ? pHtml.indexOf('PRID') - 200 : 0, 1200));
+    } catch (e) { out.pibErr = e.message; }
+    try {
+      const sHtml = await fetchText('https://www.sci.gov.in/honble-the-chief-justice-of-india-meets-un-special-rapporteur-on-the-rights-of-persons-with-disabilities/', {}, 8000);
+      out.sciDateSnippet = stripTags(sHtml.split(/<body[^>]*>/i)[1] || sHtml).slice(0, 900);
+    } catch (e) { out.sciErr = e.message; }
+    return res.status(200).json(out);
+  }
+  
+  
   if (sources.has('pib_regions')) {
     return res.status(200).json({ updatedAt: new Date().toISOString(), ...(await fetchPibRegionsLive()) });
   }
