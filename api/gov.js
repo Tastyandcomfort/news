@@ -347,47 +347,36 @@ async function fetchCbiOfficial() {
 }
 
 async function probePressSources() {
-  const targets = {
-    pib_ministries: 'https://pib.gov.in/AllRel.aspx',
-    sci_press_real: 'https://www.sci.gov.in/press-release/',
-    sansad_ls_next: 'https://sansad.in/ls',
-    sansad_rs_cms: 'https://sansad.in/cms/rs-pp/api/press-releases?pagination[pageSize]=5',
-    sansad_ls_cms: 'https://sansad.in/cms/ls-pp/api/press-releases?pagination[pageSize]=5',
-    delhi_press: 'https://delhipolice.gov.in/newpressrelease.aspx',
-    kerala_press: 'https://keralapolice.gov.in/page/press-releases'
-  };
-
   const results = {};
-  await Promise.allSettled(
-    Object.entries(targets).map(async ([key, url]) => {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 8000);
-      try {
-        const r = await fetch(url, { headers: BROWSER_HEADERS, redirect: 'follow', signal: c.signal });
-        const txt = await r.text();
-        let extra = '';
-        if (key === 'pib_ministries') {
-          const selects = [...txt.matchAll(/<select[^>]+id=["']([^"']+)["'][^>]*>([\s\S]*?)<\/select>/gi)]
-            .map((m) => `${m[1]} => ` + [...m[2].matchAll(/<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
-              .slice(0, 12).map((o) => `${o[1]}:${stripTags(o[2])}`).join(', '));
-          extra = selects.join(' || ');
-        } else if (key === 'sansad_ls_next') {
-          const nextMatch = txt.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
-          extra = nextMatch ? nextMatch[1].slice(0, 900) : 'No __NEXT_DATA__';
-        } else if (key === 'sci_press_real' || key === 'delhi_press' || key === 'kerala_press') {
-          const tableMatch = txt.match(/<table[\s\S]*?<\/table>/i);
-          extra = tableMatch ? tableMatch[0].slice(0, 900) : txt.slice(0, 900);
-        } else {
-          extra = txt.slice(0, 900);
-        }
-        results[key] = { status: r.status, ok: r.ok, len: txt.length, extra };
-      } catch (e) {
-        results[key] = { ok: false, error: e.message };
-      } finally {
-        clearTimeout(t);
-      }
-    })
-  );
+  const tasks = [
+    // 1. Supreme Court body content (skip <head>)
+    fetchText('https://www.sci.gov.in/press-release/', {}, 8000).then((html) => {
+      const body = html.split(/<body[^>]*>/i)[1] || html;
+      const main = body.match(/<main[\s\S]*?<\/main>/i)?.[0] || body;
+      const pdfs = main.match(/<a[^>]+href=["'][^"']+["'][^>]*>[\s\S]*?<\/a>/gi) || [];
+      results.sci_body = { len: html.length, linksSample: pdfs.filter(l => /pdf|press|notice|circular/i.test(l)).slice(0, 8), textSample: stripTags(main).slice(0, 600) };
+    }).catch((e) => { results.sci_body = { error: e.message }; }),
+
+    // 2. PIB Ministries in English + test MinId query
+    fetchText('https://pib.gov.in/AllRel.aspx?reg=3&lang=1', {}, 8000).then((html) => {
+      const minSel = html.match(/<select[^>]+id=["']ContentPlaceHolder1_ddlMinistry["'][^>]*>([\s\S]*?)<\/select>/i)?.[1] || '';
+      const mins = [...minSel.matchAll(/<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
+        .map((o) => `${o[1]}:${stripTags(o[2])}`);
+      const relLinks = html.match(/PressReleasePage\.aspx\?PRID=\d+[^"']*/gi) || [];
+      results.pib_en = { ministryCount: mins.length, sampleMinistries: mins.slice(0, 20), relLinksSample: relLinks.slice(0, 6) };
+    }).catch((e) => { results.pib_en = { error: e.message }; }),
+
+    // 3. Test PIB RSS with Minid=2934 (Rajya Sabha)
+    fetchText('https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&Minid=2934', {}, 8000).then((xml) => {
+      results.pib_min_rss = { count: (xml.match(/<item/gi) || []).length, firstTitle: stripTags(xml.match(/<item[\s\S]*?<title>([\s\S]*?)<\/title>/i)?.[1] || '') };
+    }).catch((e) => { results.pib_min_rss = { error: e.message }; }),
+
+    // 4. SpaceX Launch Library 2 official open feed
+    fetchJson('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=SpaceX&limit=5', {}, 8000).then((d) => {
+      results.spacex_ll2 = { count: (d.results || []).length, first: d.results?.[0]?.name || '' };
+    }).catch((e) => { results.spacex_ll2 = { error: e.message }; })
+  ];
+  await Promise.allSettled(tasks);
   return results;
 }
 
