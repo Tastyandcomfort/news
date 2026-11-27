@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,7 +343,7 @@
         <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
-        <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i>  Hyderabad Water Crisis Alert</div>
+        <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert</div>
         <p class="leading-relaxed">Dear User, the <b>T&amp;C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.</p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
@@ -423,9 +424,10 @@
         </div>
       </div>
 
-      <div class="max-w-2xl mx-auto mt-2.5 px-1 sm:px-2">
+      <div class="max-w-3xl mx-auto mt-2.5 px-1 sm:px-2">
         <nav class="flex items-center gap-1 p-1 rounded-xl w-full justify-start sm:justify-center overflow-x-auto no-scrollbar shadow-sm" style="background-color: var(--bg-sub); border: 1px solid var(--border-color); -webkit-overflow-scrolling: touch;">
           <button id="tab-btn-news" onclick="switchMainTab('news')" class="tab-btn active-tab sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center"><i class="fa-solid fa-newspaper mr-1"></i><span data-i18n="headlines">Headlines</span></button>
+          <button id="tab-btn-press" onclick="switchMainTab('press')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-landmark mr-1"></i><span data-i18n="pressReleases">Press Releases</span></button>
           <button id="tab-btn-wanted" onclick="switchMainTab('wanted')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center inline-flex items-center justify-center gap-1.5" style="color: var(--text-sub);"><i class="fa-solid fa-shield-halved text-red-500 text-[11px]"></i><span data-i18n="mostWanted">Most Wanted</span></button>
           <button id="tab-btn-video" onclick="switchMainTab('video')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-tv mr-1"></i><span data-i18n="tvMedia">TV &amp; Media</span></button>
           <button id="tab-btn-osint" onclick="switchMainTab('osint')" class="tab-btn sm:flex-1 px-3 sm:px-2 py-1.5 rounded-lg text-xs font-semibold transition-all text-center" style="color: var(--text-sub);"><i class="fa-solid fa-wind mr-1"></i><span data-i18n="radar">Radar</span></button>
@@ -441,7 +443,7 @@
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-amber-500"></i> USD/INR: <b style="color: var(--text-main);" id="ticker-usdinr">Loading...</b></span>
           <span class="flex items-center gap-1.5 text-red-500"><i class="fa-solid fa-wave-square text-[11px]"></i><span data-i18n="usgsQuakes">USGS Quakes</span>: <b style="color: var(--text-main);" id="ticker-quake-count">Fetching...</b></span>
           <span class="flex items-center gap-1.5 text-green-500 cursor-pointer" onclick="openCricketModal()" title="Click to view live commentary">
-           <i id="ticker-sports-icon" class="fa-solid fa-baseball-bat-ball text-[11px]"></i><span id="ticker-sports-label" class="font-bold">Live Cricket:</span> <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b>
+            <i id="ticker-sports-icon" class="fa-solid fa-baseball-bat-ball text-[11px]"></i><span id="ticker-sports-label" class="font-bold">Live Cricket:</span> <b style="color: var(--text-main);" id="ticker-cricket">Connecting...</b>
             <button onclick="event.stopPropagation(); fetchLiveCricketTicker()" class="p-1 rounded-lg transition-all ml-1" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);" title="Refresh Score"><i id="cricket-refresh-icon" class="fa-solid fa-arrows-rotate text-[10px]"></i></button>
           </span>
         </div>
@@ -464,11 +466,11 @@
     </div>
   </div>
 
-  <!-- LIVE CRICKET MODAL -->
+  <!-- LIVE SPORTS / CRICKET MODAL -->
   <div id="cricket-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-all">
     <div class="apple-card max-w-lg w-full p-6 shadow-2xl relative border border-green-500/30 animate-in fade-in zoom-in duration-200">
       <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
-        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold"><i class="fa-solid fa-baseball-bat-ball"></i></div><div><h3 class="text-sm font-extrabold text-green-500">Live Cricket Match Center</h3><p class="text-[10px]" id="modal-match-series" style="color: var(--text-sub);">Global ESPN Match Feed</p></div></div>
+        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-bold"><i class="fa-solid fa-trophy"></i></div><div><h3 id="modal-sports-heading" class="text-sm font-extrabold text-green-500">Live Cricket Match Center</h3><p class="text-[10px]" id="modal-match-series" style="color: var(--text-sub);">Global ESPN Match Feed</p></div></div>
         <button onclick="closeCricketModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 rounded-2xl mb-4 border" style="background-color: var(--bg-sub); border-color: var(--border-color);">
@@ -491,7 +493,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-8 flex flex-col gap-6">
 
-        <!-- TAB 1: NEWS FEEDS -->
+        <!-- TAB 1: HEADLINES -->
         <section id="view-news" class="flex flex-col gap-6">
           <div class="apple-card p-4">
             <div class="flex items-center justify-between border-b pb-3 mb-3" style="border-color: var(--border-color);">
@@ -518,7 +520,6 @@
               <button id="scope-btn-local" onclick="setNewsScope('local')" class="scope-btn active-scope px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"><i class="fa-solid fa-location-dot mr-1.5"></i><span data-i18n="telanganaScope">Telangana</span></button>
               <button id="scope-btn-national" onclick="setNewsScope('national')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-flag mr-1.5"></i><span data-i18n="indiaScope">India</span></button>
               <button id="scope-btn-world" onclick="setNewsScope('world')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-globe mr-1.5"></i><span data-i18n="worldScope">World</span></button>
-              <button id="scope-btn-gov" onclick="setNewsScope('gov')" class="scope-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" style="background-color: var(--bg-sub); color: var(--text-sub); border: 1px solid var(--border-color);"><i class="fa-solid fa-landmark mr-1.5"></i><span data-i18n="govScope">Govt (PIB · ED · CBI)</span></button>
             </div>
             <div class="flex items-center gap-2">
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl w-full sm:w-auto" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);"><i class="fa-regular fa-calendar text-blue-500 text-xs"></i><input type="date" id="news-date-picker" onchange="onDateFilterChange()" class="bg-transparent text-xs focus:outline-none cursor-pointer w-full" style="color: var(--text-main);"></div>
@@ -536,7 +537,40 @@
           </div>
         </section>
 
-        <!-- TAB 2: MOST WANTED -->
+        <!-- TAB 2: PRESS RELEASES -->
+        <section id="view-press" class="hidden flex-col gap-6">
+          <div class="apple-card p-4 sm:p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm font-bold shadow-sm border border-blue-500/20"><i class="fa-solid fa-landmark"></i></div>
+                <div>
+                  <h2 class="text-base font-extrabold" style="color: var(--text-main);" data-i18n="pressReleasesHubTitle">Official Press Releases Hub</h2>
+                  <p class="text-[10.5px]" style="color: var(--text-sub);">Ministries, Parliament (RS &amp; LS), Supreme Court, ECI, ED, CBI, ISRO, NASA, SpaceX &amp; State Police</p>
+                </div>
+              </div>
+              <span id="press-count-badge" class="text-xs bg-blue-500/10 text-blue-500 border border-blue-500/30 px-3 py-1 rounded-full font-bold self-start sm:self-auto">Select Source</span>
+            </div>
+
+            <div id="press-category-pills" class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
+              <button type="button" onclick="selectPressCategory('all', this)" class="choice-pill selected">All Govt &amp; T&amp;C</button>
+              <button type="button" onclick="selectPressCategory('ministries', this)" class="choice-pill">🇮🇳 Ministries (A–Z)</button>
+              <button type="button" onclick="selectPressCategory('parliament', this)" class="choice-pill">🏛️ Parliament (RS &amp; LS)</button>
+              <button type="button" onclick="selectPressCategory('sci', this)" class="choice-pill">⚖️ Supreme Court</button>
+              <button type="button" onclick="selectPressCategory('eci', this)" class="choice-pill">🗳️ Election Commission</button>
+              <button type="button" onclick="selectPressCategory('ed', this)" class="choice-pill">⚖️ ED</button>
+              <button type="button" onclick="selectPressCategory('cbi', this)" class="choice-pill">🕵️ CBI</button>
+              <button type="button" onclick="selectPressCategory('space', this)" class="choice-pill">🚀 Space (ISRO · NASA · SpaceX)</button>
+              <button type="button" onclick="selectPressCategory('police', this)" class="choice-pill">🚓 State Police (A–Z)</button>
+              <button type="button" onclick="selectPressCategory('custom', this)" class="choice-pill">📄 T&amp;C Uploaded</button>
+            </div>
+
+            <div id="press-subcontrols" class="mb-4 p-3 rounded-2xl border space-y-2.5" style="background-color: var(--bg-sub); border-color: var(--border-color);"></div>
+            <div id="press-status-banner" class="hidden mb-3 p-3 rounded-xl border border-amber-500/30 text-[11px] leading-relaxed" style="background-color: var(--bg-sub); color: var(--text-sub);"></div>
+            <div id="press-feed-container" class="space-y-3 max-h-[680px] overflow-y-auto pr-1"><div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading official press releases...</div></div>
+          </div>
+        </section>
+
+        <!-- TAB 3: MOST WANTED -->
         <section id="view-wanted" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
@@ -559,12 +593,12 @@
 
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
               <button onclick="setWantedFilter('all', this)" class="choice-pill selected-red">All Official</button>
-              <button onclick="setWantedFilter('NIA', this)" class="choice-pill">🇮🇳 India-NIA</button>
-              <button onclick="setWantedFilter('ED', this)" class="choice-pill"> ED Proclamations</button>
-              <button onclick="setWantedFilter('CBI', this)" class="choice-pill"> CBI/Red Notices</button>
-              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill"> INTERPOL</button>
-              <button onclick="setWantedFilter('FBI', this)" class="choice-pill">🇺🇸 FBI-Wanted</button>
-              <button onclick="setWantedFilter('MISSING', this)" class="choice-pill"> Missing Persons-Global)</button>
+              <button onclick="setWantedFilter('NIA', this)" class="choice-pill">🇮🇳 India (NIA)</button>
+              <button onclick="setWantedFilter('ED', this)" class="choice-pill">⚖️ ED Proclamations</button>
+              <button onclick="setWantedFilter('CBI', this)" class="choice-pill">🕵️ CBI / Red Notices</button>
+              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill">🌐 INTERPOL</button>
+              <button onclick="setWantedFilter('FBI', this)" class="choice-pill">🇺🇸 FBI Most Wanted</button>
+              <button onclick="setWantedFilter('MISSING', this)" class="choice-pill">🔍 Missing Persons (All India &amp; Global)</button>
             </div>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 mb-4">
@@ -576,7 +610,7 @@
           </div>
         </section>
 
-        <!-- TAB 3: TV & MEDIA -->
+        <!-- TAB 4: TV & MEDIA -->
         <section id="view-video" class="hidden flex-col gap-6">
           <div id="tv-main-card" class="apple-card p-4 sm:p-5 relative">
             <div class="mb-4">
@@ -630,7 +664,7 @@
           </div>
         </section>
 
-        <!-- TAB 4: RADAR -->
+        <!-- TAB 5: RADAR -->
         <section id="view-osint" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b" style="border-color: var(--border-color);">
@@ -653,7 +687,7 @@
           </div>
         </section>
 
-        <!-- TAB 5: FIND JOBS -->
+        <!-- TAB 6: FIND JOBS -->
         <section id="view-jobs" class="hidden flex-col gap-6">
           <div class="apple-card p-4 sm:p-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 mb-4" style="border-color: var(--border-color);">
@@ -662,10 +696,10 @@
             </div>
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2.5 mb-4 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
-              <button onclick="filterJobs('freshers', this)" class="choice-pill"> Freshers / Any Degree</button>
-              <button onclick="filterJobs('it', this)" class="choice-pill"> IT &amp; Tech</button>
-              <button onclick="filterJobs('govt', this)" class="choice-pill"> Govt &amp; Banking</button>
-              <button onclick="filterJobs('healthcare', this)" class="choice-pill"> Healthcare</button>
+              <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
+              <button onclick="filterJobs('it', this)" class="choice-pill">💻 IT &amp; Tech</button>
+              <button onclick="filterJobs('govt', this)" class="choice-pill">🏛️ Govt &amp; Banking</button>
+              <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
             </div>
             <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1"><div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div></div>
           </div>
@@ -737,12 +771,12 @@
     const translationCache = {};
 
     const i18n = {
-      en: { newsHub: "NEWS HUB", headlines: "Headlines", mostWanted: "Most Wanted", tvMedia: "TV & Media", radar: "Radar", findJobs: "Find Jobs", publicAlertStrip: "Public Safety & Most Wanted Alerts", viewAllWanted: "View All Wanted", mostWantedTitle: "Official Most Wanted Alerts", officialSourceNoteTitle: "Official Government & Law-Enforcement Notice", officialSourceNoteBody: "The Most Wanted & Missing Persons records shown here are officially announced and published by NIA India, Directorate of Enforcement (ED), CBI, INTERPOL, and FBI. Every card displays the exact issuing department, location/jurisdiction, official release timestamp, and a clickable \"Verified by\" link to the original government record.", usgsQuakes: "USGS Quakes", worldHighlights: "World Highlights", latest: "Latest", connectingRss: "Connecting to live RSS feed...", telanganaScope: "Telangana", indiaScope: "India", worldScope: "World", govScope: "Govt (PIB · ED · CBI)", syncing: "Syncing...", queryingRss: "Querying real-time RSS API...", networks: "Networks", selectChannelPrompt: "Select any live broadcast channel above to watch the stream.", weatherRadar: "Weather Radar", usgsTracker: "USGS Earthquakes Tracker (24h)", issAlt: "ISS Altitude", issVel: "ISS Velocity", spaceCrew: "Space Crew Active", usgsQuakesStat: "USGS M4.5+ Quakes", liveExchange: "Live Exchange Rates", factCheck: "Fact-Check Portal", usgsDirect: "USGS Earthquakes Direct", issManifest: "ISS Crew Manifest", queryingManifest: "Querying space manifest...", footerBrand: "Tasty & Comfort • T&C News Hub", footerCopy: "© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •", scopeLocalTitle: "Telangana State Live Headlines", scopeNatTitle: "India National News Bulletins", scopeWorldTitle: "Global Worldwide News Stream", scopeGovTitle: "Official Govt Releases (PIB A–Z · ED · CBI)" },
-      te: { newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", mostWanted: "మోస్ట్ వాంటెడ్", tvMedia: "టీవీ & మీడియా", radar: "రాడార్", findJobs: "ఉద్యోగాలు", publicAlertStrip: "ప్రజా భద్రత & మోస్ట్ వాంటెడ్ హెచ్చరికలు", viewAllWanted: "అన్నీ చూడండి", mostWantedTitle: "అధికారిక మోస్ట్ వాంటెడ్ జాబితా", officialSourceNoteTitle: "అధికారిక ప్రభుత్వ & పోలీసు సంస్థల ప్రకటన", officialSourceNoteBody: "ఇక్కడ చూపబడిన మోస్ట్ వాంటెడ్ వివరాలు NIA India, ED, CBI, ఇంటర్‌పోల్ (INTERPOL), మరియు FBI ద్వారా అధికారికంగా విడుదల చేయబడినవి.", usgsQuakes: "భూకంపాలు", worldHighlights: "ప్రపంచ ముఖ్యాంశాలు", latest: "తాజా", connectingRss: "లైవ్ ఫీడ్‌కి కనెక్ట్ అవుతోంది...", telanganaScope: "తెలంగాణ", indiaScope: "భారత్", worldScope: "ప్రపంచం", govScope: "ప్రభుత్వ ప్రకటనలు (PIB · ED · CBI)", syncing: "సింక్ అవుతోంది...", queryingRss: "రియల్ టైమ్ వార్తలు లోడ్ అవుతున్నాయి...", networks: "నెట్‌వర్క్స్", selectChannelPrompt: "ప్రత్యక్ష ప్రసారాన్ని వీక్షించడానికి పైన ఏదైనా ఛానెల్‌ని ఎంచుకోండి.", weatherRadar: "వాతావరణ రాడార్", usgsTracker: "భూకంపాల ట్రాకర్ (24గం)", issAlt: "ISS ఎత్తు", issVel: "ISS వేగం", spaceCrew: "వ్యోమగాములు", usgsQuakesStat: "భూకంప తీవ్రత", liveExchange: "కరెన్సీ మార్పిడి రేట్లు", factCheck: "ఫాక్ట్-చెక్ పోర్టల్", usgsDirect: "USGS భూకంపాలు", issManifest: "ISS సిబ్బంది జాబితా", queryingManifest: "సమాచారం సేకరిస్తోంది...", footerBrand: "టేస్టీ & కంఫర్ట్ • T&C న్యూస్ హబ్", footerCopy: "© 2026 T&C న్యూ మోడరన్ మిషన్ • మురళి మనోహర్ చేత రూపకల్పన చేయబడింది •", scopeLocalTitle: "తెలంగాణ రాష్ట్ర లైవ్ ముఖ్యాంశాలు", scopeNatTitle: "భారత జాతీయ వార్తలు", scopeWorldTitle: "అంతర్జాతీయ వార్తల ప్రవాహం", scopeGovTitle: "అధికారిక ప్రభుత్వ ప్రకటనలు (PIB A–Z · ED · CBI)" },
-      hi: { newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", mostWanted: "मोस्ट वांटेड", tvMedia: "टीवी और मीडिया", radar: "रडार", findJobs: "नौकरियां", publicAlertStrip: "जन सुरक्षा और मोस्ट वांटेड अलर्ट", viewAllWanted: "सभी देखें", mostWantedTitle: "आधिकारिक मोस्ट वांटेड अलर्ट", officialSourceNoteTitle: "आधिकारिक सरकारी और कानून-प्रवर्तन सूचना", officialSourceNoteBody: "यहाँ दिखाए गए मोस्ट वांटेड रिकॉर्ड NIA India, ED, CBI, इंटरपोल (INTERPOL) और FBI द्वारा आधिकारिक रूप से घोषित किए गए हैं।", usgsQuakes: "भूकंप", worldHighlights: "विश्व मुख्य समाचार", latest: "नवीनतम", connectingRss: "लाइव फ़ीड से कनेक्ट हो रहा है...", telanganaScope: "तेलंगाना", indiaScope: "भारत", worldScope: "विश्व", govScope: "सरकारी (PIB · ED · CBI)", syncing: "सिंक हो रहा है...", queryingRss: "रीयल-टाइम आरएसएस एपीआई लोड हो रहा है...", networks: "नेटवर्क", selectChannelPrompt: "लाइव प्रसारण देखने के लिए ऊपर दिए गए किसी भी चैनल का चयन करें।", weatherRadar: "मौसम रडार", usgsTracker: "भूकंप ट्रैकर (24घं)", issAlt: "आईएसएस ऊंचाई", issVel: "आईएसएस वेग", spaceCrew: "सक्रिय अंतरिक्ष यात्री", usgsQuakesStat: "भूकंप तीव्रता", liveExchange: "विनिमय दर", factCheck: "फैक्ट-चेक पोर्टल", usgsDirect: "यूएसजीएस भूकंप डायरेक्ट", issManifest: "आईएसएस क्रू मेनिफेस्ट", queryingManifest: "अंतरिक्ष डेटा लोड हो रहा है...", footerBrand: "टेस्टी एंड कम्फर्ट • T&C न्यूज़ हब", footerCopy: "© 2026 T&C न्यू मॉडर्न मिशन • मुरली मनोहर द्वारा निर्मित •", scopeLocalTitle: "तेलंगाना राज्य लाइव मुख्य समाचार", scopeNatTitle: "भारत राष्ट्रीय समाचार बुलेटिन", scopeWorldTitle: "वैश्विक समाचार स्ट्रीम", scopeGovTitle: "आधिकारिक सरकारी विज्ञप्तियाँ (PIB A–Z · ED · CBI)" },
-      kn: { newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", mostWanted: "ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್", findJobs: "ಉದ್ಯೋಗಗಳು", publicAlertStrip: "ಸಾರ್ವಜನಿಕ ಸುರಕ್ಷತೆ & ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", viewAllWanted: "ಎಲ್ಲಾ ನೋಡಿ", mostWantedTitle: "ಅಧಿಕೃತ ಮೋಸ್ಟ್ ವಾಂಟಡ್ ಪಟ್ಟಿ", officialSourceNoteTitle: "ಅಧಿಕೃತ ಸರ್ಕಾರಿ & ಕಾನೂನು ಸಂಸ್ಥೆಗಳ ಪ್ರಕಟಣೆ", officialSourceNoteBody: "ಇಲ್ಲಿ ತೋರಿಸಿರುವ ಮಾಹಿತಿಯನ್ನು NIA India, ED, CBI, INTERPOL ಮತ್ತು FBI ಅಧಿಕೃತವಾಗಿ ಪ್ರಕಟಿಸಿವೆ.", usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ", connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ", indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", govScope: "ಸರ್ಕಾರಿ (PIB · ED · CBI)", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...", networks: "ನೆಟ್‌ವರ್ಕ್‌ಗಳು", selectChannelPrompt: "ಲೈವ್ ಪ್ರಸಾರ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಯಾವುದೇ ಚಾನೆಲ್ ಆಯ್ಕೆಮಾಡಿ.", weatherRadar: "ಹವಾಮಾನ ರೇಡಾರ್", usgsTracker: "ಭೂಕಂಪ ಟ್ರ್ಯಾಕರ್ (24ಗಂಟೆ)", issAlt: "ISS ಎತ್ತರ", issVel: "ISS ವೇಗ", spaceCrew: "ಗಗನಯಾತ್ರಿಗಳು", usgsQuakesStat: "ಭೂಕಂಪಗಳ ತೀವ್ರತೆ", liveExchange: "ವಿನಿಮಯ ದರಗಳು", factCheck: "ಫ್ಯಾಕ್ಟ್-ಚೆಕ್ ಪೋರ್ಟಲ್", usgsDirect: "USGS ಭೂಕಂಪಗಳು", issManifest: "ISS ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ", queryingManifest: "ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...", footerBrand: "ಟೇಸ್ಟಿ & ಕಂಫರ್ಟ್ • T&C ನ್ಯೂಸ್ ಹಬ್", footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮನೋಹರ್ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •", scopeLocalTitle: "ತೆಲಂಗಾಣ ರಾಜ್ಯ ಲೈವ್ ಮುಖ್ಯಾಂಶಗಳು", scopeNatTitle: "ಭಾರತ ರಾಷ್ಟ್ರೀಯ ಸುದ್ದಿ ಬುಲೆಟಿನ್‌ಗಳು", scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್", scopeGovTitle: "ಅಧಿಕೃತ ಸರ್ಕಾರಿ ಪ್ರಕಟಣೆಗಳು (PIB A–Z · ED · CBI)" },
-      ta: { newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", mostWanted: "தேடப்படுவோர்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்", findJobs: "வேலைவாய்ப்பு", publicAlertStrip: "பொது பாதுகாப்பு & தேடப்படுவோர்", viewAllWanted: "அனைத்தையும் காண்க", mostWantedTitle: "அதிகாரப்பூர்வ தேடப்படுவோர் பட்டியல்", officialSourceNoteTitle: "அதிகாரப்பூர்வ அரசு & காவல்துறை அறிவிப்பு", officialSourceNoteBody: "இங்கு காட்டப்படும் தகவல்கள் NIA India, ED, CBI, INTERPOL மற்றும் FBI ஆகியவற்றால் அதிகாரப்பூர்வமாக வெளியிடப்பட்டவை.", usgsQuakes: "நிலநடுக்கங்கள்", worldHighlights: "உலக முக்கியச் செய்திகள்", latest: "சமீபத்திய", connectingRss: "நேரலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா", indiaScope: "இந்தியா", worldScope: "உலகம்", govScope: "அரசு (PIB · ED · CBI)", syncing: "ஒத்திசைக்கிறது...", queryingRss: "செய்திகள் ஏற்றப்படுகின்றன...", networks: "வலைப்பின்னல்கள்", selectChannelPrompt: "நேரலை ஒளிபரப்பைக் காண மேலே உள்ள எந்தவொரு சேனலையும் தேர்ந்தெடுக்கவும்.", weatherRadar: "வானிலை ரேடார்", usgsTracker: "நிலநடுக்க கண்காணிப்பு (24மணி)", issAlt: "ISS உயரம்", issVel: "ISS வேகம்", spaceCrew: "விண்வெளி வீரர்கள்", usgsQuakesStat: "நிலநடுக்க அளவீடு", liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்", issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...", footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்", footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •", scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்", scopeNatTitle: "இந்திய தேசிய செய்தி புல்லட்டின்கள்", scopeWorldTitle: "உலகளாவிய செய்தி ஓடை", scopeGovTitle: "அதிகாரப்பூர்வ அரசு வெளியீடுகள் (PIB A–Z · ED · CBI)" },
-      ml: { newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", mostWanted: "മോസ്റ്റ് വാണ്ടഡ്", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ", findJobs: "ജോലികൾ", publicAlertStrip: "പൊതു സുരക്ഷ & മോസ്റ്റ് വാണ്ടഡ്", viewAllWanted: "എല്ലാം കാണുക", mostWantedTitle: "ഔദ്യോഗിക മോസ്റ്റ് വാണ്ടഡ് പട്ടിക", officialSourceNoteTitle: "ഔദ്യോഗിക സർക്കാർ & നിയമപാലന അറിയിപ്പ്", officialSourceNoteBody: "ഇവിടെ കാണിക്കുന്ന വിവരങ്ങൾ NIA India, ED, CBI, INTERPOL, FBI എന്നിവ ഔദ്യോഗികമായി പുറത്തുവിട്ടതാണ്.", usgsQuakes: "ഭൂകമ്പങ്ങൾ", worldHighlights: "ലോക വാർത്തകൾ", latest: "ഏറ്റവും പുതിയത്", connectingRss: "ലൈവ് ഫീഡുമായി ബന്ധിപ്പിക്കുന്നു...", telanganaScope: "തെലങ്കാന", indiaScope: "ഇന്ത്യ", worldScope: "ലോകം", govScope: "സർക്കാർ (PIB · ED · CBI)", syncing: "സിങ്ക് ചെയ്യുന്നു...", queryingRss: "വാർത്തകൾ ലഭ്യമാക്കുന്നു...", networks: "നെറ്റ്‌വർക്കുകൾ", selectChannelPrompt: "തത്സമയ സംപ്രേക്ഷണം കാണാൻ മുകളിലുള്ള ഏതെങ്കിലും ചാനൽ തിരഞ്ഞെടുക്കുക.", weatherRadar: "കാലാവസ്ഥാ റഡാർ", usgsTracker: "ഭൂകമ്പ ട്രാക്കർ (24മ)", issAlt: "ISS ഉയരം", issVel: "ISS വേഗത", spaceCrew: "ബഹിരാകാശ സഞ്ചാരികൾ", usgsQuakesStat: "ഭൂകമ്പ തീവ്രത", liveExchange: "നാണയ വിനിമയ നിരക്കുകൾ", factCheck: "ഫാക്റ്റ് ചെക്ക് പോർട്ടൽ", usgsDirect: "USGS ഭൂകമ്പങ്ങൾ", issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...", footerBrand: "ടേസ്റ്റി & കംഫർട്ട് • T&C ന്യൂസ് ഹബ്", footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിషన్ • മുരളി മനോഹർ നിർമ്മിച്ചത് •", scopeLocalTitle: "തെലങ്കാന സംസ്ഥാന ലൈവ് വാർത്തകൾ", scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ", scopeWorldTitle: "ആഗോള വാർത്താ പ്രവാഹം", scopeGovTitle: "ഔദ്യോഗിക സർക്കാർ വാർത്താക്കുറിപ്പുകൾ (PIB A–Z · ED · CBI)" }
+      en: { newsHub: "NEWS HUB", headlines: "Headlines", pressReleases: "Press Releases", pressReleasesHubTitle: "Official Press Releases Hub", mostWanted: "Most Wanted", tvMedia: "TV & Media", radar: "Radar", findJobs: "Find Jobs", publicAlertStrip: "Public Safety & Most Wanted Alerts", viewAllWanted: "View All Wanted", mostWantedTitle: "Official Most Wanted Alerts", officialSourceNoteTitle: "Official Government & Law-Enforcement Notice", officialSourceNoteBody: "The Most Wanted & Missing Persons records shown here are officially announced and published by NIA India, Directorate of Enforcement (ED), CBI, INTERPOL, and FBI. Every card displays the exact issuing department, location/jurisdiction, official release timestamp, and a clickable \"Verified by\" link to the original government record.", usgsQuakes: "USGS Quakes", worldHighlights: "World Highlights", latest: "Latest", connectingRss: "Connecting to live RSS feed...", telanganaScope: "Telangana", indiaScope: "India", worldScope: "World", syncing: "Syncing...", queryingRss: "Querying real-time RSS API...", networks: "Networks", selectChannelPrompt: "Select any live broadcast channel above to watch the stream.", weatherRadar: "Weather Radar", usgsTracker: "USGS Earthquakes Tracker (24h)", issAlt: "ISS Altitude", issVel: "ISS Velocity", spaceCrew: "Space Crew Active", usgsQuakesStat: "USGS M4.5+ Quakes", liveExchange: "Live Exchange Rates", factCheck: "Fact-Check Portal", usgsDirect: "USGS Earthquakes Direct", issManifest: "ISS Crew Manifest", queryingManifest: "Querying space manifest...", footerBrand: "Tasty & Comfort • T&C News Hub", footerCopy: "© 2026 T&C From New Modern Mission • Build & Developed by Murali Manohar •", scopeLocalTitle: "Telangana State Live Headlines", scopeNatTitle: "India National News Bulletins", scopeWorldTitle: "Global Worldwide News Stream" },
+      te: { newsHub: "న్యూస్ హబ్", headlines: "ముఖ్యాంశాలు", pressReleases: "ప్రెస్ రిలీజులు", pressReleasesHubTitle: "అధికారిక ప్రెస్ రిలీజుల కేంద్రం", mostWanted: "మోస్ట్ వాంటెడ్", tvMedia: "టీవీ & మీడియా", radar: "రాడార్", findJobs: "ఉద్యోగాలు", publicAlertStrip: "ప్రజా భద్రత & మోస్ట్ వాంటెడ్ హెచ్చరికలు", viewAllWanted: "అన్నీ చూడండి", mostWantedTitle: "అధికారిక మోస్ట్ వాంటెడ్ జాబితా", officialSourceNoteTitle: "అధికారిక ప్రభుత్వ & పోలీసు సంస్థల ప్రకటన", officialSourceNoteBody: "ఇక్కడ చూపబడిన మోస్ట్ వాంటెడ్ వివరాలు NIA India, ED, CBI, ఇంటర్‌పోల్ (INTERPOL), మరియు FBI ద్వారా అధికారికంగా విడుదల చేయబడినవి.", usgsQuakes: "భూకంపాలు", worldHighlights: "ప్రపంచ ముఖ్యాంశాలు", latest: "తాజా", connectingRss: "లైవ్ ఫీడ్‌కి కనెక్ట్ అవుతోంది...", telanganaScope: "తెలంగాణ", indiaScope: "భారత్", worldScope: "ప్రపంచం", syncing: "సింక్ అవుతోంది...", queryingRss: "రియల్ టైమ్ వార్తలు లోడ్ అవుతున్నాయి...", networks: "నెట్‌వర్క్స్", selectChannelPrompt: "ప్రత్యక్ష ప్రసారాన్ని వీక్షించడానికి పైన ఏదైనా ఛానెల్‌ని ఎంచుకోండి.", weatherRadar: "వాతావరణ రాడార్", usgsTracker: "భూకంపాల ట్రాకర్ (24గం)", issAlt: "ISS ఎత్తు", issVel: "ISS వేగం", spaceCrew: "వ్యోమగాములు", usgsQuakesStat: "భూకంప తీవ్రత", liveExchange: "కరెన్సీ మార్పిడి రేట్లు", factCheck: "ఫాక్ట్-చెక్ పోర్టల్", usgsDirect: "USGS భూకంపాలు", issManifest: "ISS సిబ్బంది జాబితా", queryingManifest: "సమాచారం సేకరిస్తోంది...", footerBrand: "టేస్టీ & కంఫర్ట్ • T&C న్యూస్ హబ్", footerCopy: "© 2026 T&C న్యూ మోడరన్ మిషన్ • మురళి మనోహర్ చేత రూపకల్పన చేయబడింది •", scopeLocalTitle: "తెలంగాణ రాష్ట్ర లైవ్ ముఖ్యాంశాలు", scopeNatTitle: "భారత జాతీయ వార్తలు", scopeWorldTitle: "అంతర్జాతీయ వార్తల ప్రవాహం" },
+      hi: { newsHub: "न्यूज़ हब", headlines: "मुख्य समाचार", pressReleases: "प्रेस विज्ञप्ति", pressReleasesHubTitle: "आधिकारिक प्रेस विज्ञप्ति केंद्र", mostWanted: "मोस्ट वांटेड", tvMedia: "टीवी और मीडिया", radar: "रडार", findJobs: "नौकरियां", publicAlertStrip: "जन सुरक्षा और मोस्ट वांटेड अलर्ट", viewAllWanted: "सभी देखें", mostWantedTitle: "आधिकारिक मोस्ट वांटेड अलर्ट", officialSourceNoteTitle: "आधिकारिक सरकारी और कानून-प्रवर्तन सूचना", officialSourceNoteBody: "यहाँ दिखाए गए मोस्ट वांटेड रिकॉर्ड NIA India, ED, CBI, इंटरपोल (INTERPOL) और FBI द्वारा आधिकारिक रूप से घोषित किए गए हैं।", usgsQuakes: "भूकंप", worldHighlights: "विश्व मुख्य समाचार", latest: "नवीनतम", connectingRss: "लाइव फ़ीड से कनेक्ट हो रहा है...", telanganaScope: "तेलंगाना", indiaScope: "भारत", worldScope: "विश्व", syncing: "सिंक हो रहा है...", queryingRss: "रीयल-टाइम आरएसएस एपीआई लोड हो रहा है...", networks: "नेटवर्क", selectChannelPrompt: "लाइव प्रसारण देखने के लिए ऊपर दिए गए किसी भी चैनल का चयन करें।", weatherRadar: "मौसम रडार", usgsTracker: "भूकंप ट्रैकर (24घं)", issAlt: "आईएसएस ऊंचाई", issVel: "आईएसएस वेग", spaceCrew: "सक्रिय अंतरिक्ष यात्री", usgsQuakesStat: "भूकंप तीव्रता", liveExchange: "विनिमय दर", factCheck: "फैक्ट-चेक पोर्टल", usgsDirect: "यूएसजीएस भूकंप डायरेक्ट", issManifest: "आईएसएस क्रू मेनिफेस्ट", queryingManifest: "अंतरिक्ष डेटा लोड हो रहा है...", footerBrand: "टेस्टी एंड कम्फर्ट • T&C न्यूज़ हब", footerCopy: "© 2026 T&C न्यू मॉडर्न मिशन • मुरली मनोहर द्वारा निर्मित •", scopeLocalTitle: "तेलंगाना राज्य लाइव मुख्य समाचार", scopeNatTitle: "भारत राष्ट्रीय समाचार बुलेटिन", scopeWorldTitle: "वैश्विक समाचार स्ट्रीम" },
+      kn: { newsHub: "ನ್ಯೂಸ್ ಹಬ್", headlines: "ಮುಖ್ಯಾಂಶಗಳು", pressReleases: "ಪತ್ರಿಕಾ ಪ್ರಕಟಣೆ", pressReleasesHubTitle: "ಅಧಿಕೃತ ಪತ್ರಿಕಾ ಪ್ರಕಟಣೆಗಳ ಕೇಂದ್ರ", mostWanted: "ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", tvMedia: "ಟಿವಿ & ಮಾಧ್ಯಮ", radar: "ರೇಡಾರ್", findJobs: "ಉದ್ಯೋಗಗಳು", publicAlertStrip: "ಸಾರ್ವಜನಿಕ ಸುರಕ್ಷತೆ & ಮೋಸ್ಟ್ ವಾಂಟೆಡ್", viewAllWanted: "ಎಲ್ಲಾ ನೋಡಿ", mostWantedTitle: "ಅಧಿಕೃತ ಮೋಸ್ಟ್ ವಾಂಟಡ್ ಪಟ್ಟಿ", officialSourceNoteTitle: "ಅಧಿಕೃತ ಸರ್ಕಾರಿ & ಕಾನೂನು ಸಂಸ್ಥೆಗಳ ಪ್ರಕಟಣೆ", officialSourceNoteBody: "ಇಲ್ಲಿ ತೋರಿಸಿರುವ ಮಾಹಿತಿಯನ್ನು NIA India, ED, CBI, INTERPOL ಮತ್ತು FBI ಅಧಿಕೃತವಾಗಿ ಪ್ರಕಟಿಸಿವೆ.", usgsQuakes: "ಭೂಕಂಪಗಳು", worldHighlights: "ವಿಶ್ವ ಮುಖ್ಯಾಂಶಗಳು", latest: "ಇತ್ತೀಚಿನ", connectingRss: "ಲೈವ್ ಫೀಡ್ ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ...", telanganaScope: "ತೆಲಂಗಾಣ", indiaScope: "ಭಾರತ", worldScope: "ವಿಶ್ವ", syncing: "ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...", queryingRss: "ಸುದ್ದಿಗಳನ್ನು ಪಡೆಯಲಾಗುತ್ತಿದೆ...", networks: "ನೆಟ್‌ವರ್ಕ್‌ಗಳು", selectChannelPrompt: "ಲೈವ್ ಪ್ರಸಾರ ವೀಕ್ಷಿಸಲು ಮೇಲಿನ ಯಾವುದೇ ಚಾನೆಲ್ ಆಯ್ಕೆಮಾಡಿ.", weatherRadar: "ಹವಾಮಾನ ರೇಡಾರ್", usgsTracker: "ಭೂಕಂಪ ಟ್ರ್ಯಾಕರ್ (24ಗಂಟೆ)", issAlt: "ISS ಎತ್ತರ", issVel: "ISS ವೇಗ", spaceCrew: "ಗಗನಯಾತ್ರಿಗಳು", usgsQuakesStat: "ಭೂಕಂಪಗಳ ತೀವ್ರತೆ", liveExchange: "ವಿನಿಮಯ ದರಗಳು", factCheck: "ಫ್ಯಾಕ್ಟ್-ಚೆಕ್ ಪೋರ್ಟಲ್", usgsDirect: "USGS ಭೂಕಂಪಗಳು", issManifest: "ISS ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ", queryingManifest: "ಮಾಹಿತಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ...", footerBrand: "ಟೇಸ್ಟಿ & ಕಂಫರ್ಟ್ • T&C ನ್ಯೂಸ್ ಹಬ್", footerCopy: "© 2026 T&C ನ್ಯೂ ಮಾಡರ್ನ್ ಮಿಷನ್ • ಮುರಳಿ ಮನೋಹರ್ ಅವರಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ •", scopeLocalTitle: "ತೆಲಂಗಾಣ ರಾಜ್ಯ ಲೈವ್ ಮುಖ್ಯಾಂಶಗಳು", scopeNatTitle: "ಭಾರತ ರಾಷ್ಟ್ರೀಯ ಸುದ್ದಿ ಬುಲೆಟಿನ್‌ಗಳು", scopeWorldTitle: "ಜಾಗತಿಕ ಸುದ್ದಿ ಸ್ಟ್ರೀಮ್" },
+      ta: { newsHub: "செய்தி மையம்", headlines: "தலைப்புச் செய்திகள்", pressReleases: "செய்தி வெளியீடுகள்", pressReleasesHubTitle: "அதிகாரப்பூர்வ செய்தி வெளியீட்டு மையம்", mostWanted: "தேடப்படுவோர்", tvMedia: "தொலைக்காட்சி & ஊடகம்", radar: "ரேடார்", findJobs: "வேலைவாய்ப்பு", publicAlertStrip: "பொது பாதுகாப்பு & தேடப்படுவோர்", viewAllWanted: "அனைத்தையும் காண்க", mostWantedTitle: "அதிகாரப்பூர்வ தேடப்படுவோர் பட்டியல்", officialSourceNoteTitle: "அதிகாரப்பூர்வ அரசு & காவல்துறை அறிவிப்பு", officialSourceNoteBody: "இங்கு காட்டப்படும் தகவல்கள் NIA India, ED, CBI, INTERPOL மற்றும் FBI ஆகியவற்றால் அதிகாரப்பூர்வமாக வெளியிடப்பட்டவை.", usgsQuakes: "நிலநடுக்கங்கள்", worldHighlights: "உலக முக்கியச் செய்திகள்", latest: "சமீபத்திய", connectingRss: "நேரலை ஊடகத்துடன் இணைக்கிறது...", telanganaScope: "தெலங்கானா", indiaScope: "இந்தியா", worldScope: "உலகம்", syncing: "ஒத்திசைக்கிறது...", queryingRss: "செய்திகள் ஏற்றப்படுகின்றன...", networks: "வலைப்பின்னல்கள்", selectChannelPrompt: "நேரலை ஒளிபரப்பைக் காண மேலே உள்ள எந்தவொரு சேனலையும் தேர்ந்தெடுக்கவும்.", weatherRadar: "வானிலை ரேடார்", usgsTracker: "நிலநடுக்க கண்காணிப்பு (24மணி)", issAlt: "ISS உயரம்", issVel: "ISS வேகம்", spaceCrew: "விண்வெளி வீரர்கள்", usgsQuakesStat: "நிலநடுக்க அளவீடு", liveExchange: "நாணய மாற்று விகிதங்கள்", factCheck: "உண்மை கண்டறியும் தளம்", usgsDirect: "USGS நிலநடுக்கங்கள்", issManifest: "ISS பணியாளர் பட்டியல்", queryingManifest: "விவரங்கள் பெறப்படுகின்றன...", footerBrand: "டேஸ்டி & கம்பர்ட் • T&C செய்தி மையம்", footerCopy: "© 2026 T&C நியூ மாடர்ன் மிஷன் • முரளி மனோகர் அவர்களால் உருவாக்கப்பட்டது •", scopeLocalTitle: "தெலங்கானா மாநில நேரலை தலைப்புச் செய்திகள்", scopeNatTitle: "இந்திய தேசிய செய்தி புல்லட்டின்கள்", scopeWorldTitle: "உலகளாவிய செய்தி ஓடை" },
+      ml: { newsHub: "ന്യൂസ് ഹബ്", headlines: "പ്രധാന വാർത്തകൾ", pressReleases: "പ്രസ് റിലീസുകൾ", pressReleasesHubTitle: "ഔദ്യോഗിക പ്രസ് റിലീസ് ഹബ്", mostWanted: "മോസ്റ്റ് വാണ്ടഡ്", tvMedia: "ടിവി & മീഡിയ", radar: "റഡാർ", findJobs: "ജോലികൾ", publicAlertStrip: "പൊതു സുരക്ഷ & മോസ്റ്റ് വാണ്ടഡ്", viewAllWanted: "എല്ലാം കാണുക", mostWantedTitle: "ഔദ്യോഗിക മോസ്റ്റ് വാണ്ടഡ് പട്ടിക", officialSourceNoteTitle: "ഔദ്യോഗിക സർക്കാർ & നിയമപാലന അറിയിപ്പ്", officialSourceNoteBody: "ഇവിടെ കാണിക്കുന്ന വിവരങ്ങൾ NIA India, ED, CBI, INTERPOL, FBI എന്നിവ ഔദ്യോഗികമായി പുറത്തുവിട്ടതാണ്.", usgsQuakes: "ഭൂകമ്പങ്ങൾ", worldHighlights: "ലോക വാർത്തകൾ", latest: "ഏറ്റവും പുതിയത്", connectingRss: "ലൈവ് ഫീഡുമായി ബന്ധിപ്പിക്കുന്നു...", telanganaScope: "തെലങ്കാന", indiaScope: "ഇന്ത്യ", worldScope: "ലോകം", syncing: "സിങ്ക് ചെയ്യുന്നു...", queryingRss: "വാർത്തകൾ ലഭ്യമാക്കുന്നു...", networks: "നെറ്റ്‌വർക്കുകൾ", selectChannelPrompt: "തത്സമയ സംപ്രേക്ഷണം കാണാൻ മുകളിലുള്ള ഏതെങ്കിലും ചാനൽ തിരഞ്ഞെടുക്കുക.", weatherRadar: "കാലാവസ്ഥാ റഡാർ", usgsTracker: "ഭൂകമ്പ ട്രാക്കർ (24മ)", issAlt: "ISS ഉയരം", issVel: "ISS വേഗത", spaceCrew: "ബഹിരാകാശ സഞ്ചാരികൾ", usgsQuakesStat: "ഭൂകമ്പ തീവ്രത", liveExchange: "നാണയ വിനിമയ നിരക്കുകൾ", factCheck: "ഫാക്റ്റ് ചെക്ക് പോർട്ടൽ", usgsDirect: "USGS ഭൂകമ്പങ്ങൾ", issManifest: "ISS ക്രൂ ലിസ്റ്റ്", queryingManifest: "വിവരങ്ങൾ ശേഖരിക്കുന്നു...", footerBrand: "ടേസ്റ്റി & കംഫർട്ട് • T&C ന്യൂസ് ഹബ്", footerCopy: "© 2026 T&C ന്യൂ മോഡർൻ മിషన్ • മുരളി മനോഹർ നിർമ്മിച്ചത് •", scopeLocalTitle: "തെലങ്കാന സംസ്ഥാന ലൈവ് വാർത്തകൾ", scopeNatTitle: "ഇന്ത്യ ദേശീയ വാർത്തകൾ", scopeWorldTitle: "ആഗോള വാർത്താ പ്രവാഹം" }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -810,8 +844,8 @@
         const rtt = Math.round(performance.now() - start), eff = conn?.effectiveType || '', downlink = conn?.downlink;
         if (eff === 'slow-2g' || eff === '2g' || eff === '3g' || (typeof downlink === 'number' && downlink < 1.5) || rtt > 1200) { setNetState('slow', 'Slow', 'text-amber-500'); return 'slow'; }
         if ((typeof downlink === 'number' && downlink >= 5 && rtt < 450) || rtt < 300) { setNetState('fast', 'Speed', 'text-blue-500'); return 'fast'; }
-        setNetState('normal', 'Norma', 'text-blue-500'); return 'normal';
-      } catch { setNetState('offline', 'Offli', 'text-red-500'); return 'offline'; }
+        setNetState('normal', 'Normal', 'text-blue-500'); return 'normal';
+      } catch { setNetState('offline', 'Offline', 'text-red-500'); return 'offline'; }
     }
 
     async function manualHubRefresh() {
@@ -846,7 +880,7 @@
       document.getElementById('lang-dropdown').classList.add('hidden');
       const dict = i18n[langCode] || i18n.en;
       document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (dict[key]) el.textContent = dict[key]; });
-      document.getElementById('active-scope-title').textContent = { 'local': dict.scopeLocalTitle, 'national': dict.scopeNatTitle, 'world': dict.scopeWorldTitle, 'gov': dict.scopeGovTitle }[currentScope] || dict.scopeLocalTitle;
+      document.getElementById('active-scope-title').textContent = { 'local': dict.scopeLocalTitle, 'national': dict.scopeNatTitle, 'world': dict.scopeWorldTitle }[currentScope] || dict.scopeLocalTitle;
       fetchPortalNews();
     }
 
@@ -883,14 +917,16 @@
 
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
+      document.getElementById('view-press').classList.add('hidden');
       document.getElementById('view-wanted').classList.add('hidden');
       document.getElementById('view-osint').classList.add('hidden');
       document.getElementById('view-jobs').classList.add('hidden');
-      const btnNews = document.getElementById('tab-btn-news'), btnWanted = document.getElementById('tab-btn-wanted'), btnVideo = document.getElementById('tab-btn-video'), btnOsint = document.getElementById('tab-btn-osint'), btnJobs = document.getElementById('tab-btn-jobs');
-      [btnNews, btnWanted, btnVideo, btnOsint, btnJobs].forEach(b => { b.classList.remove('active-tab', 'active-tab-red'); b.style.backgroundColor = 'transparent'; b.style.color = 'var(--text-sub)'; b.style.boxShadow = 'none'; });
+      const btnNews = document.getElementById('tab-btn-news'), btnPress = document.getElementById('tab-btn-press'), btnWanted = document.getElementById('tab-btn-wanted'), btnVideo = document.getElementById('tab-btn-video'), btnOsint = document.getElementById('tab-btn-osint'), btnJobs = document.getElementById('tab-btn-jobs');
+      [btnNews, btnPress, btnWanted, btnVideo, btnOsint, btnJobs].forEach(b => { b.classList.remove('active-tab', 'active-tab-red'); b.style.backgroundColor = 'transparent'; b.style.color = 'var(--text-sub)'; b.style.boxShadow = 'none'; });
 
       let activeBtn = btnNews;
       if (tab === 'news') { document.getElementById('view-news').classList.remove('hidden'); activeBtn = btnNews; }
+      else if (tab === 'press') { document.getElementById('view-press').classList.remove('hidden'); activeBtn = btnPress; window.scrollTo({ top: 0, behavior: 'smooth' }); if (typeof window.initOrRefreshPressTab === 'function') window.initOrRefreshPressTab(); }
       else if (tab === 'wanted') { document.getElementById('view-wanted').classList.remove('hidden'); activeBtn = btnWanted; window.scrollTo({ top: 0, behavior: 'smooth' }); }
       else if (tab === 'video') { activeBtn = btnVideo; }
       else if (tab === 'osint') { document.getElementById('view-osint').classList.remove('hidden'); activeBtn = btnOsint; if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 150); }
@@ -1059,11 +1095,11 @@
       document.querySelectorAll('.scope-btn').forEach(btn => { btn.classList.remove('active-scope'); btn.style.backgroundColor = "var(--bg-sub)"; btn.style.color = "var(--text-sub)"; btn.style.border = "1px solid var(--border-color)"; });
       const activeBtn = document.getElementById(`scope-btn-${scope}`); if (activeBtn) { activeBtn.classList.add('active-scope'); activeBtn.style.border = "none"; }
       const dict = i18n[currentLanguage] || i18n.en;
-      document.getElementById('active-scope-title').textContent = { 'local': dict.scopeLocalTitle, 'national': dict.scopeNatTitle, 'world': dict.scopeWorldTitle, 'gov': dict.scopeGovTitle }[scope] || dict.scopeLocalTitle;
+      document.getElementById('active-scope-title').textContent = { 'local': dict.scopeLocalTitle, 'national': dict.scopeNatTitle, 'world': dict.scopeWorldTitle }[scope] || dict.scopeLocalTitle;
       fetchPortalNews();
     }
     function resetNewsToToday() { document.getElementById('news-date-picker').value = REAL_TODAY_DATE; fetchPortalNews(); }
-    function onDateFilterChange() { const p = document.getElementById('news-date-picker'); if (p.value > REAL_TODAY_DATE) { alert(" Future Date Warning: Cannot select future dates."); p.value = REAL_TODAY_DATE; } fetchPortalNews(); }
+    function onDateFilterChange() { const p = document.getElementById('news-date-picker'); if (p.value > REAL_TODAY_DATE) { alert("🗓️ Future Date Warning: Cannot select future dates."); p.value = REAL_TODAY_DATE; } fetchPortalNews(); }
 
     async function fetchPortalNews() {}
     async function fetchPinnedWorldNews() {}
@@ -1160,7 +1196,6 @@
         }
       } catch {}
 
-      // 1. If a cricket match is actively in live play right now, show it
       if (bestCricket && isActiveCricketPlay(bestCricket)) {
         const comp = bestCricket.competitions?.[0] || bestCricket;
         const t1 = comp.competitors?.[0], t2 = comp.competitors?.[1];
@@ -1181,7 +1216,6 @@
         return;
       }
 
-      // 2. Otherwise check other live sports on ESPN (Football/Soccer, NBA, NHL)
       const otherFeeds = [
         { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard', label: 'Live Football', icon: 'fa-solid fa-futbol' },
         { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', label: 'Live NBA', icon: 'fa-solid fa-basketball' },
@@ -1215,7 +1249,6 @@
         } catch {}
       }
 
-      // 3. Fallback to latest cricket update (Stumps / Result) if no sport is live right now
       if (bestCricket) {
         const comp = bestCricket.competitions?.[0] || bestCricket;
         const t1 = comp.competitors?.[0], t2 = comp.competitors?.[1];
@@ -1240,7 +1273,7 @@
       document.getElementById('modal-match-summary').textContent = 'No live match is currently in play across Cricket, Football, NBA, or Hockey.';
       if (icon) icon.classList.remove('fa-spin');
     }
-    
+
     function setMode(mode, element) {
       document.querySelectorAll('.channel-card').forEach(btn => btn.classList.remove('active-mode')); if (element) element.classList.add('active-mode');
       const textView = document.getElementById('text-view'), activeVideoContainer = document.getElementById('active-video-container'), masterPlayer = document.getElementById('master-video-player'), fileView = document.getElementById('file-view'), filePlayer = document.getElementById('file-video-player'), title = document.getElementById('current-channel-title'), dot = document.getElementById('live-indicator');
@@ -1367,7 +1400,7 @@
             if (!issMarker) issMarker = L.marker(pos, { icon: issIcon }).addTo(leafletMap); else issMarker.setLatLng(pos);
             if (issPolyline) leafletMap.removeLayer(issPolyline);
             if (issHistoryCoords.length > 1) issPolyline = L.polyline(issHistoryCoords, { color: '#34c759', weight: 3, opacity: 0.85 }).addTo(leafletMap);
-            issMarker.bindPopup(`<div style="font-size: 12px;"><b style="color: #34c759;"> ISS Satellite</b><br><b>Alt:</b> ${Math.round(data.altitude)} km | <b>Speed:</b> ${Math.round(data.velocity)} km/h</div>`);
+            issMarker.bindPopup(`<div style="font-size: 12px;"><b style="color: #34c759;">🛰️ ISS Satellite</b><br><b>Alt:</b> ${Math.round(data.altitude)} km | <b>Speed:</b> ${Math.round(data.velocity)} km/h</div>`);
           }
         } catch {}
       }
@@ -1414,7 +1447,7 @@
     function detectGPSCity(btnEl) {
       if ('geolocation' in navigator) {
         btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Locating...';
-        navigator.geolocation.getCurrentPosition((pos) => { btnEl.innerHTML = ' GPS Locked'; localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4)); localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4)); selectChoicePill('weather-city', 'GPS_Auto', btnEl); }, () => { btnEl.innerHTML = '📍 GPS Unavailable'; setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000); }, { enableHighAccuracy: true, timeout: 5000 });
+        navigator.geolocation.getCurrentPosition((pos) => { btnEl.innerHTML = '📍 GPS Locked'; localStorage.setItem('tc_gps_lat', pos.coords.latitude.toFixed(4)); localStorage.setItem('tc_gps_lon', pos.coords.longitude.toFixed(4)); selectChoicePill('weather-city', 'GPS_Auto', btnEl); }, () => { btnEl.innerHTML = '📍 GPS Unavailable'; setTimeout(() => { btnEl.innerHTML = '<i class="fa-solid fa-crosshairs text-[9px] mr-1"></i> Auto GPS'; }, 2000); }, { enableHighAccuracy: true, timeout: 5000 });
       }
     }
     function loadSavedPreferencesUI() {
@@ -1514,7 +1547,7 @@
     })();
   </script>
 
-  <!-- T&C Addons (Bulletins, Apple Reader Pop-Up, Share Links, Flash Scroller & Fixes) -->
+  <!-- T&C Addons (Bulletins, Press Releases Hub, Apple Reader Pop-Up, Share Links, Flash Scroller & Fixes) -->
   <script src="./tc-addons.js"></script>
 </body>
 </html>
