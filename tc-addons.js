@@ -128,9 +128,7 @@
                 <button onclick="shareCurrentReaderStory()" id="reader-share-btn" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);">
                   <i class="fa-solid fa-share-nodes text-blue-500"></i> <span>Share</span>
                 </button>
-                <button onclick="printCurrentReaderDoc()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);" title="Save as PDF or Print">
-                  <i class="fa-solid fa-print text-amber-500"></i> <span>Save / Print PDF</span>
-                </button>
+      
               </div>
               <a id="reader-modal-origin-link" href="#" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
                 <span>Open Original Source</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
