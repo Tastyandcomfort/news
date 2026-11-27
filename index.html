@@ -844,8 +844,8 @@
         const rtt = Math.round(performance.now() - start), eff = conn?.effectiveType || '', downlink = conn?.downlink;
         if (eff === 'slow-2g' || eff === '2g' || eff === '3g' || (typeof downlink === 'number' && downlink < 1.5) || rtt > 1200) { setNetState('slow', 'Slow', 'text-amber-500'); return 'slow'; }
         if ((typeof downlink === 'number' && downlink >= 5 && rtt < 450) || rtt < 300) { setNetState('fast', 'Speed', 'text-blue-500'); return 'fast'; }
-        setNetState('normal', 'Normal', 'text-blue-500'); return 'normal';
-      } catch { setNetState('offline', 'Offline', 'text-red-500'); return 'offline'; }
+        setNetState('normal', 'Norma', 'text-blue-500'); return 'normal';
+      } catch { setNetState('offline', 'Offli', 'text-red-500'); return 'offline'; }
     }
 
     async function manualHubRefresh() {
