@@ -348,41 +348,39 @@ async function fetchCbiOfficial() {
 
 async function probePressSources() {
   const targets = {
-    pib_allrel: 'https://pib.gov.in/AllRel.aspx',
-    sci_wp_json: 'https://www.sci.gov.in/wp-json/wp/v2/posts?per_page=3',
-    sci_press: 'https://www.sci.gov.in/press-releases/',
-    sansad_rs: 'https://sansad.in/rs',
-    sansad_ls: 'https://sansad.in/ls',
-    eci_press: 'https://www.eci.gov.in/press-releases',
-    isro_press: 'https://www.isro.gov.in/Press.html',
-    nasa_rss: 'https://www.nasa.gov/rss/dyn/breaking_news.rss',
-    spacex: 'https://www.spacex.com/updates/',
-    delhi_police: 'https://delhipolice.gov.in/',
-    kerala_police: 'https://keralapolice.gov.in/'
+    pib_ministries: 'https://pib.gov.in/AllRel.aspx',
+    sci_press_real: 'https://www.sci.gov.in/press-release/',
+    sansad_ls_next: 'https://sansad.in/ls',
+    sansad_rs_cms: 'https://sansad.in/cms/rs-pp/api/press-releases?pagination[pageSize]=5',
+    sansad_ls_cms: 'https://sansad.in/cms/ls-pp/api/press-releases?pagination[pageSize]=5',
+    delhi_press: 'https://delhipolice.gov.in/newpressrelease.aspx',
+    kerala_press: 'https://keralapolice.gov.in/page/press-releases'
   };
 
   const results = {};
   await Promise.allSettled(
     Object.entries(targets).map(async ([key, url]) => {
       const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 7000);
+      const t = setTimeout(() => c.abort(), 8000);
       try {
         const r = await fetch(url, { headers: BROWSER_HEADERS, redirect: 'follow', signal: c.signal });
         const txt = await r.text();
-        const hints = [];
-        if (key === 'pib_allrel') {
-          const mins = [...txt.matchAll(/<option[^>]+value=["'](\d+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
-            .map((m) => `${m[1]}:${stripTags(m[2])}`)
-            .slice(0, 25);
-          hints.push(...mins);
-        } else if (key.startsWith('sansad')) {
-          const apis = txt.match(/https?:\/\/[^"'\s]+(?:api|strapi|cms)[^"'\s]*/gi) || txt.match(/\/_next\/static\/[^"'\s]+/gi) || [];
-          hints.push(...[...new Set(apis)].slice(0, 10));
+        let extra = '';
+        if (key === 'pib_ministries') {
+          const selects = [...txt.matchAll(/<select[^>]+id=["']([^"']+)["'][^>]*>([\s\S]*?)<\/select>/gi)]
+            .map((m) => `${m[1]} => ` + [...m[2].matchAll(/<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
+              .slice(0, 12).map((o) => `${o[1]}:${stripTags(o[2])}`).join(', '));
+          extra = selects.join(' || ');
+        } else if (key === 'sansad_ls_next') {
+          const nextMatch = txt.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
+          extra = nextMatch ? nextMatch[1].slice(0, 900) : 'No __NEXT_DATA__';
+        } else if (key === 'sci_press_real' || key === 'delhi_press' || key === 'kerala_press') {
+          const tableMatch = txt.match(/<table[\s\S]*?<\/table>/i);
+          extra = tableMatch ? tableMatch[0].slice(0, 900) : txt.slice(0, 900);
         } else {
-          const links = txt.match(/(?:href|src)=["'][^"']*(?:press|api|wp-json|rss|bulletin)[^"']*["']/gi) || [];
-          hints.push(...[...new Set(links)].slice(0, 10));
+          extra = txt.slice(0, 900);
         }
-        results[key] = { status: r.status, ok: r.ok, len: txt.length, hints, sample: stripTags(txt).slice(0, 220) };
+        results[key] = { status: r.status, ok: r.ok, len: txt.length, extra };
       } catch (e) {
         results[key] = { ok: false, error: e.message };
       } finally {
