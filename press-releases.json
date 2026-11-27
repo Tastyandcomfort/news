@@ -1,6 +1,16 @@
 
 [
   {
+    "id": "2026-Nov-20-POLICE RECRUITMENT",
+    "agency": "TELANGANA STATE LEVEL POLICE",
+    "title": "TELANGANA STATE POLICE RECRUITMENT",
+    "summary": "As per our announcement dated 17th September 2026, the Preliminary Written Test of the recruitment process of 275  SCT SI Civil and / or equivalent posts concerning the Notification issued on 29th July 2026 will be held on 29th November 2026 (Sunday) from 10 am to 1 pm for 1,60,712 Candidates in nearly 335 Test Centers across the State.",
+    "source": "TELANGANA STATE POLICE",
+    "dateText": "20 Nov 2026",
+    "pdfUrl": "Press Note dated 20-11-2026.pdf"
+  },
+  
+  {
     "id": "2026-Nov-18-Rights of Persons with Disabilities ",
     "agency": "SUPREME COURT OF INDIA",
     "title": "SUPREME COURT OF INDIA",
@@ -10,7 +20,18 @@
     "pdfUrl": "Press Release_ Hon’ble the Chief Justice of India Meets UN Special Rapporteur on the Rights of Persons with Disabilities _ Supreme Court of India _ India.pdf"
   },
 
-   {
+  
+  {
+    "id": "2026-Oct-22-Bye Election to the Council of States from Madhya Pradesh- reg ",
+    "agency": "Election Commission of India",
+    "title": "Bye Election to the Council of States from Madhya Pradesh",
+    "summary": "Bye Election to the Council of States from Madhya Pradesh- reg. There is a casual vacancy in the Council of States from Madhya Pradesh as per following details: Name of Member Dr. Murugan Reason Resignation Date of vacancy 14.10.2026 Term Up to 02.04.2030",
+    "source": "Election Commission of India",
+    "dateText": "22 Oct 2026",
+    "pdfUrl": "lM4LsEhp8b.pdf"
+  },
+   
+  {
     "id": "2026-Oct-09-PARLIAMENTARY STANDING COMMITTEE ",
     "agency": "PARLIAMENT OF INDIA",
     "title": "STANDING COMMITTEE ON EDUCATION, WOMEN, CHILDREN, YOUTH AND SPORTS",
@@ -18,5 +39,7 @@
     "source": "PARLIAMENT OF INDIA",
     "dateText": "09 Oct 2026",
     "pdfUrl": "2026_10_09_committee_949_4474_6ac8e145232d5.pdf"
-  }
+  },
+
+  
 ]
