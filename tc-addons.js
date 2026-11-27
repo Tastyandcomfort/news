@@ -860,7 +860,7 @@
       if (currentPressCategory === 'custom') {
         container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-file-pdf text-2xl text-amber-500"></i><h4 class="text-xs font-bold" style="color: var(--text-main);">No T&amp;C Custom Press Releases Yet</h4><p class="text-[11px] max-w-md mx-auto" style="color: var(--text-sub);">Upload PDF files to the <b>press-release/</b> folder in your repo root and add entries to <b>press-releases.json</b> — your custom <b>source</b> name will appear automatically.</p></div>`;
       } else {
-        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">Sorry data not available please try later</p><p class="text-[11px]" style="color: var(--text-sub);">The server connection was lost. Data will appear here automatically once the server is available</p></div>`;
+        container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-2 border" style="background-color: var(--bg-sub); border-color: var(--border-color);"><i class="fa-solid fa-landmark text-2xl text-blue-500"></i><p class="text-xs font-bold" style="color: var(--text-main);">Sorry data not available please try later or check "Listed by T&C"</p><p class="text-[11px]" style="color: var(--text-sub);">The server connection was lost. Data will appear here automatically once the server is available. Check "Listed by T&C"</p></div>`;
       }
       return;
     }
