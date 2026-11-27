@@ -1,4 +1,4 @@
-/* T&C News Hub — Bulletins, Press Releases Hub, Missing Persons, News Card Photos, Apple Reader & Flash Fix */
+/* T&C News Hub — Bulletins, Press Releases Hub, Full Official Document Reader, Missing Persons, Photos & Flash Fix */
 (function () {
   const GOV_API_BASE = 'https://news-lemon-two.vercel.app';
   window.tcNewsRegistry = window.tcNewsRegistry || {};
@@ -107,7 +107,7 @@
     if (!document.getElementById('news-reader-modal')) {
       document.body.insertAdjacentHTML('beforeend', `
         <div id="news-reader-modal" class="hidden fixed inset-0 z-[124] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md transition-all overflow-y-auto">
-          <div class="apple-card max-w-xl w-full p-5 sm:p-6 shadow-2xl relative border border-blue-500/25 my-auto">
+          <div class="apple-card max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative border border-blue-500/25 my-auto">
             <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--border-color);">
               <div class="flex items-center gap-2 flex-wrap">
                 <span id="reader-modal-scope" class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-500/15 text-blue-500 border border-blue-500/30">NEWS</span>
@@ -120,14 +120,19 @@
               <h3 id="reader-modal-title" class="text-base sm:text-lg font-extrabold leading-snug" style="color: var(--text-main);">Headline</h3>
               <p id="reader-modal-time" class="text-[11px] flex items-center gap-1.5" style="color: var(--text-sub);"><i class="fa-regular fa-clock text-blue-500"></i> <span>Live Feed</span></p>
               <div class="p-3.5 rounded-2xl border text-xs sm:text-[13px] leading-relaxed" style="background-color: var(--bg-sub); border-color: var(--border-color); color: var(--text-main);">
-                <p id="reader-modal-summary">Loading story brief...</p>
+                <div id="reader-modal-summary" class="space-y-2.5 whitespace-pre-line">Loading story brief...</div>
               </div>
             </div>
-            <div class="mt-4 pt-3 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5" style="border-color: var(--border-color);">
-              <button onclick="shareCurrentReaderStory()" id="reader-share-btn" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);">
-                <i class="fa-solid fa-share-nodes text-blue-500"></i> <span>Share via T&amp;C News</span>
-              </button>
-              <a id="reader-modal-origin-link" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
+            <div class="mt-4 pt-3 border-t flex flex-wrap items-center justify-between gap-2" style="border-color: var(--border-color);">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="shareCurrentReaderStory()" id="reader-share-btn" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);">
+                  <i class="fa-solid fa-share-nodes text-blue-500"></i> <span>Share</span>
+                </button>
+                <button onclick="printCurrentReaderDoc()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border" style="background-color: var(--bg-sub); color: var(--text-main); border-color: var(--border-color);" title="Save as PDF or Print">
+                  <i class="fa-solid fa-print text-amber-500"></i> <span>Save / Print PDF</span>
+                </button>
+              </div>
+              <a id="reader-modal-origin-link" href="#" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
                 <span>Open Original Source</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
               </a>
             </div>
@@ -222,10 +227,10 @@
     if (!text) return '';
     if (targetLang === 'en') {
       if (!/[\u0900-\u0D7F]/.test(text)) return text;
-      const key = `auto-en:${text}`;
+      const key = `auto-en:${text.slice(0, 120)}`;
       if (typeof translationCache !== 'undefined' && translationCache[key]) return translationCache[key];
       try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text.slice(0, 1800))}`);
         const data = await res.json();
         if (data && data[0]) {
           const out = data[0].map(s => s[0]).join('');
@@ -235,7 +240,7 @@
       } catch {}
       return text;
     }
-    return typeof translateText === 'function' ? await translateText(text, targetLang) : text;
+    return typeof translateText === 'function' ? await translateText(text.slice(0, 1800), targetLang) : text;
   }
 
   function resolveRelativePdf(folderName, raw) {
@@ -392,7 +397,7 @@
     } catch { prompt('Copy Bulletin link:', url); }
   };
 
-  // 3. Apple In-App News Reader & Deep-Link Sharing
+  // 3. Apple In-App News & Official Document Reader + Deep-Link Share + Print/Save PDF
   function encodeStoryPayload(obj) {
     const bytes = new TextEncoder().encode(JSON.stringify(obj));
     let bin = '';
@@ -427,7 +432,7 @@
     }
     return `Published at ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}, ${day}${ord(day)} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
-  
+
   function extractRssMeta(item, scopeLabel) {
     const rawTitle = item.querySelector('title')?.textContent?.trim() || 'News Story';
     const link = item.querySelector('link')?.textContent?.trim() || '#';
@@ -477,7 +482,7 @@
     const title = await smartTranslate(story.title, lang);
     let summary = story.summary ? await smartTranslate(story.summary, lang) : '';
     if (!summary || summary.toLowerCase() === title.toLowerCase()) {
-      summary = `Read the full report directly from ${story.source || 'the official publisher'} using the button below.`;
+      summary = `Official release from ${story.source || 'the publisher'}. Tap "Open Original Source" below to view the source page.`;
     }
 
     currentReaderStory = { ...story, title, summary };
@@ -486,16 +491,73 @@
     document.getElementById('reader-modal-title').textContent = title;
     document.getElementById('reader-modal-time').querySelector('span').textContent = story.time || 'Live Feed';
     document.getElementById('reader-modal-summary').textContent = summary;
-    document.getElementById('reader-modal-origin-link').href = story.link || 'https://tastyandcomfort.github.io/news/';
 
-    const originBtnText = document.getElementById('reader-modal-origin-link')?.querySelector('span');
-    if (originBtnText) originBtnText.textContent = story.isPdf ? 'Open Press Release PDF' : 'Open Original Source';
+    const originLink = document.getElementById('reader-modal-origin-link');
+    originLink.href = story.link || 'https://tastyandcomfort.github.io/news/';
+    const originBtnText = originLink.querySelector('span');
+    if (originBtnText) originBtnText.textContent = story.isPdf ? 'Open Official PDF' : `Verified: ${story.source || 'Original'}`;
 
     const imgEl = document.getElementById('reader-modal-img');
     if (story.image && story.image.startsWith('http')) { imgEl.src = story.image; imgEl.classList.remove('hidden'); }
     else { imgEl.classList.add('hidden'); }
 
     document.getElementById('news-reader-modal').classList.remove('hidden');
+
+    // Fetch full official document text in-app for official press releases
+    const docTarget = story.pageUrl || story.link;
+    if (story.isOfficialDoc && docTarget && /^https?:\/\//i.test(docTarget)) {
+      const summaryBox = document.getElementById('reader-modal-summary');
+      const loadingNote = document.createElement('p');
+      loadingNote.className = 'text-[11px] italic opacity-75 pt-2';
+      loadingNote.textContent = 'Loading full official release document...';
+      summaryBox.appendChild(loadingNote);
+
+      try {
+        const res = await fetch(`${GOV_API_BASE}/api/gov?source=read_article&url=${encodeURIComponent(docTarget)}`);
+        if (res.ok) {
+          const doc = await res.json();
+          if (currentReaderStory?.link !== story.link) return;
+          if (doc?.publishedAt) {
+            const pretty = formatPrettyDate(doc.publishedAt);
+            document.getElementById('reader-modal-time').querySelector('span').textContent = pretty;
+            currentReaderStory.time = pretty;
+          }
+          if (doc?.pdfUrl) {
+            originLink.href = doc.pdfUrl;
+            if (originBtnText) originBtnText.textContent = 'Open Official PDF';
+            currentReaderStory.link = doc.pdfUrl;
+          }
+          if (doc?.ok && doc.text) {
+            const fullText = await smartTranslate(doc.text, lang);
+            summaryBox.textContent = fullText;
+            currentReaderStory.summary = fullText;
+          } else {
+            loadingNote.remove();
+          }
+        } else {
+          loadingNote.remove();
+        }
+      } catch {
+        loadingNote.remove();
+      }
+    }
+  };
+
+  window.printCurrentReaderDoc = function () {
+    if (!currentReaderStory) return;
+    const w = window.open('', '_blank', 'width=800,height=900');
+    if (!w) { window.print(); return; }
+    const doc = w.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html><head><title>T&C News Hub — Official Document</title><style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:740px;margin:32px auto;padding:0 20px;line-height:1.6;color:#111} .meta{color:#555;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:10px;margin-bottom:18px} h1{font-size:20px;margin:0 0 8px} .body{white-space:pre-line;font-size:14px} .foot{margin-top:24px;padding-top:12px;border-top:1px solid #ddd;font-size:12px;color:#555}</style></head><body></body></html>');
+    doc.close();
+    const h1 = doc.createElement('h1'); h1.textContent = currentReaderStory.title || '';
+    const meta = doc.createElement('div'); meta.className = 'meta'; meta.textContent = `${currentReaderStory.scope || 'OFFICIAL'} • ${currentReaderStory.source || ''} • ${currentReaderStory.time || ''}`;
+    const body = doc.createElement('div'); body.className = 'body'; body.textContent = currentReaderStory.summary || '';
+    const foot = doc.createElement('div'); foot.className = 'foot'; foot.textContent = `Source: ${currentReaderStory.link || ''} — Printed via T&C News Hub`;
+    doc.body.append(h1, meta, body, foot);
+    w.focus();
+    setTimeout(() => w.print(), 250);
   };
 
   window.closeNewsReader = function () {
@@ -523,7 +585,7 @@
       await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
       if (btnEl) {
         const oldHtml = btnEl.innerHTML;
-        btnEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> <span>T&amp;C Link Copied!</span>';
+        btnEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> <span>Link Copied!</span>';
         setTimeout(() => { btnEl.innerHTML = oldHtml; }, 1800);
       }
     } catch { prompt('Copy this T&C News link:', shareUrl); }
@@ -603,9 +665,9 @@
       extraHtml = `
         <div class="flex items-center gap-1.5 flex-wrap">
           <button type="button" onclick="onPressSpaceFilter('ALL', this)" class="choice-pill ${currentSpaceFilter === 'ALL' ? 'selected' : ''}">All Space</button>
-          <button type="button" onclick="onPressSpaceFilter('ISRO', this)" class="choice-pill ${currentSpaceFilter === 'ISRO' ? 'selected' : ''}">🇮🇳 ISRO</button>
-          <button type="button" onclick="onPressSpaceFilter('NASA', this)" class="choice-pill ${currentSpaceFilter === 'NASA' ? 'selected' : ''}">🇺🇸 NASA</button>
-          <button type="button" onclick="onPressSpaceFilter('SPACEX', this)" class="choice-pill ${currentSpaceFilter === 'SPACEX' ? 'selected' : ''}">🚀 SpaceX</button>
+          <button type="button" onclick="onPressSpaceFilter('ISRO', this)" class="choice-pill ${currentSpaceFilter === 'ISRO' ? 'selected' : ''}"> ISRO</button>
+          <button type="button" onclick="onPressSpaceFilter('NASA', this)" class="choice-pill ${currentSpaceFilter === 'NASA' ? 'selected' : ''}"> NASA</button>
+          <button type="button" onclick="onPressSpaceFilter('SPACEX', this)" class="choice-pill ${currentSpaceFilter === 'SPACEX' ? 'selected' : ''}"> SpaceX</button>
         </div>
       `;
     } else if (currentPressCategory === 'police') {
@@ -654,7 +716,7 @@
 
   window.onPressPibRegionChange = function (val) { currentPibRegid = val || '3'; window.fetchPressCategory(true); };
   window.onPressMinistryChange = function (val) { currentMinistryId = val || '3'; window.fetchPressCategory(true); };
-  window.onPressSpaceFilter = function (val, btnEl) { currentSpaceFilter = val; renderPressSubcontrols(); window.renderPressFeed(); };
+  window.onPressSpaceFilter = function (val) { currentSpaceFilter = val; renderPressSubcontrols(); window.renderPressFeed(); };
   window.onPressPoliceStateChange = function (val) {
     currentPoliceState = val || 'ALL';
     renderPressSubcontrols();
@@ -701,7 +763,7 @@
           const d = await res.json();
           const mData = d?.sources?.pib_ministry;
           collected.push(...(mData?.items || []));
-          if (mData && !mData.ok) notes.push(`<b>${escapeHtml(mData.ministryName || 'Ministry')}:</b> ${escapeHtml(mData.error || 'No releases found this month')}. <a href="https://pib.gov.in/AllRel.aspx?reg=3&lang=1" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open PIB Archive ↗</a>`);
+          if (mData && !mData.ok) notes.push(`<b>${escapeHtml(mData.ministryName || 'Ministry')}:</b> ${escapeHtml(mData.error || 'No releases found today/this month')}. <a href="https://pib.gov.in/AllRel.aspx?reg=3&lang=1" target="_blank" rel="noopener" class="text-blue-500 underline font-bold">Open PIB Archive ↗</a>`);
         }
       } else if (currentPressCategory === 'parliament') {
         const res = await fetch(`${GOV_API_BASE}/api/gov?source=parliament`);
@@ -772,11 +834,7 @@
     }
     if (currentPressCategory === 'police' && currentPoliceState !== 'ALL') {
       const selObj = STATE_POLICE_PORTALS.find(s => s.key === currentPoliceState);
-      if (!selObj?.live) {
-        list = [];
-      } else {
-        list = list.filter(it => it.stateName === currentPoliceState);
-      }
+      list = selObj?.live ? list.filter(it => it.stateName === currentPoliceState) : [];
     }
     if (query) {
       list = list.filter(it => `${it.title} ${it.summary} ${it.department} ${it.agency} ${it.verifiedBy}`.toLowerCase().includes(query));
@@ -835,8 +893,10 @@
         summary: item.summary || title,
         time: timeStr,
         link: item.link,
+        pageUrl: item.pageUrl || item.link,
         image: item.image || '',
-        isPdf
+        isPdf,
+        isOfficialDoc: !item.isCustom && item.agency !== 'SPACEX'
       });
       const thumbHtml = item.image
         ? `<img src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" class="w-16 h-14 sm:w-20 sm:h-16 rounded-xl object-cover border flex-shrink-0" style="border-color: var(--border-color);">`
@@ -910,7 +970,8 @@
             const title = await smartTranslate(g.title, lang);
             const storyId = registerNewsStory({
               scope: g.agency, source: g.verifiedBy, title,
-              summary: g.summary, time: g.publishedAt ? formatPrettyDate(g.publishedAt) : g.dateText, link: g.link, image: ''
+              summary: g.summary, time: g.publishedAt ? formatPrettyDate(g.publishedAt) : g.dateText,
+              link: g.link, pageUrl: g.link, image: '', isOfficialDoc: true
             });
             collected.push({
               type: 'news', storyId, label: g.agency,
