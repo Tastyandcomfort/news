@@ -1,4 +1,4 @@
-// api/gov.js — Real-time Official Indian Govt & Agency Feeds (PIB A-Z, ED, CBI) + Source Probe
+// api/gov.js — Unified Official Press Releases Engine (PIB 97 Ministries, Parliament, Supreme Court, ECI, ED, CBI, Space, State Police)
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -40,20 +40,26 @@ function parseFlexibleDate(val) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-async function fetchText(url, extraHeaders = {}, timeoutMs = 12000) {
+async function fetchResponse(url, options = {}, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
-      headers: { ...BROWSER_HEADERS, ...extraHeaders },
+      ...options,
+      headers: { ...BROWSER_HEADERS, ...(options.headers || {}) },
       redirect: 'follow',
       signal: controller.signal
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
+    return res;
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function fetchText(url, extraHeaders = {}, timeoutMs = 12000) {
+  const res = await fetchResponse(url, { headers: extraHeaders }, timeoutMs);
+  return await res.text();
 }
 
 async function fetchJson(url, extraHeaders = {}, timeoutMs = 12000) {
@@ -76,20 +82,28 @@ function parseRssItems(xmlText) {
       if (hrefAttr) link = decodeEntities(hrefAttr[1]).trim();
     }
     const rawDate = getTag('pubDate') || getTag('dc:date') || getTag('a10:updated') || getTag('updated') || getTag('published') || '';
-    const description = stripTags(getTag('description') || getTag('summary') || getTag('content'));
+    const rawDesc = getTag('description') || getTag('summary') || getTag('content');
+    const description = stripTags(rawDesc);
+    const imgUrl =
+      block.match(/<media:content[^>]+url=["']([^"']+)["']/i)?.[1] ||
+      block.match(/<media:thumbnail[^>]+url=["']([^"']+)["']/i)?.[1] ||
+      block.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]*type=["']image\/[^"']+["']/i)?.[1] ||
+      rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ||
+      '';
+    const image = imgUrl && /^https?:\/\//i.test(decodeEntities(imgUrl)) ? decodeEntities(imgUrl).replace(/^http:\/\//i, 'https://') : '';
     if (!title || !link) continue;
-    items.push({ title, link, pubDate: rawDate, publishedAt: parseFlexibleDate(rawDate), description });
+    items.push({ title, link, pubDate: rawDate, publishedAt: parseFlexibleDate(rawDate), description, image });
   }
   return items;
 }
 
 const PIB_LANG_MAP = { en: 1, hi: 2, kn: 8, ta: 11, ml: 15, te: 16 };
 const BASE_PIB_REGIONS = [
-  { regid: '3', name: 'All India (National HQ — All Ministries A–Z)' },
-  { regid: '1', name: 'PIB Delhi' }, { regid: '2', name: 'PIB Mumbai' }, { regid: '5', name: 'PIB Hyderabad' },
-  { regid: '6', name: 'PIB Chennai' }, { regid: '7', name: 'PIB Chandigarh' }, { regid: '8', name: 'PIB Kolkata' },
-  { regid: '12', name: 'PIB Guwahati' }, { regid: '14', name: 'PIB Bhubaneswar' }, { regid: '20', name: 'PIB Bengaluru' },
-  { regid: '22', name: 'PIB Ahmedabad' }, { regid: '24', name: 'PIB Thiruvananthapuram' }
+  { regid: '3', name: 'All India (National HQ)' },
+  { regid: '1', name: 'PIB Mumbai' }, { regid: '5', name: 'PIB Hyderabad' },
+  { regid: '6', name: 'PIB Chennai' }, { regid: '17', name: 'PIB Chandigarh' }, { regid: '19', name: 'PIB Kolkata' },
+  { regid: '20', name: 'PIB Bengaluru' }, { regid: '21', name: 'PIB Bhubaneswar' }, { regid: '22', name: 'PIB Ahmedabad' },
+  { regid: '23', name: 'PIB Guwahati' }, { regid: '24', name: 'PIB Thiruvananthapuram' }
 ];
 
 async function fetchPibRegionsLive() {
@@ -100,12 +114,7 @@ async function fetchPibRegionsLive() {
     let m;
     while ((m = linkRegex.exec(html)) !== null) {
       const id = m[1], name = stripTags(m[2]);
-      if (id && name && /PIB|National/i.test(name)) regionMap.set(id, id === '3' ? 'All India (National HQ — All Ministries A–Z)' : name);
-    }
-    const optRegex = /<option[^>]+value=["'](\d+)["'][^>]*>([\s\S]*?)<\/option>/gi;
-    while ((m = optRegex.exec(html)) !== null) {
-      const id = m[1], name = stripTags(m[2]);
-      if (id && name && id !== '0') regionMap.set(id, id === '3' ? 'All India (National HQ — All Ministries A–Z)' : name);
+      if (id && name && /PIB|National/i.test(name)) regionMap.set(id, id === '3' ? 'All India (National HQ)' : name);
     }
     if (regionMap.size > 0) {
       const list = Array.from(regionMap.entries()).map(([regid, name]) => ({ regid, name }));
@@ -118,7 +127,7 @@ async function fetchPibRegionsLive() {
 
 async function fetchPibPostedDate(url) {
   try {
-    const html = await fetchText(url, {}, 4500);
+    const html = await fetchText(url, {}, 4000);
     const clean = stripTags(html);
     const m = clean.match(/Posted\s+On:\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i);
     if (m) return { iso: parseFlexibleDate(`${m[1]} GMT+0530`), raw: m[1] };
@@ -163,13 +172,334 @@ async function fetchPibReleases(regid = '3', langCode = 'en') {
       department: regid === '3' ? 'Press Information Bureau (All India HQ)' : `Press Information Bureau (Region #${regid})`,
       title: it.title, summary: it.description || it.title,
       publishedAt: it.publishedAt, dateText: it.pubDate || 'Latest PIB Release',
-      link: it.link, pdfUrl: ''
+      link: it.link, pdfUrl: '', image: it.image || ''
     }));
 
     return { ok: items.length > 0, count: items.length, sourceUrl: activeUrl, items, error: items.length ? null : 'No releases returned by PIB RSS' };
   } catch (err) {
     return { ok: false, count: 0, sourceUrl: primaryUrl, items: [], error: `PIB server unreachable (${err.message})` };
   }
+}
+
+async function fetchPibMinistriesList() {
+  const url = 'https://pib.gov.in/AllRel.aspx?reg=3&lang=1';
+  try {
+    const html = await fetchText(url, {}, 10000);
+    const minSel = html.match(/<select[^>]+id=["']ContentPlaceHolder1_ddlMinistry["'][^>]*>([\s\S]*?)<\/select>/i)?.[1] || '';
+    const list = [...minSel.matchAll(/<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
+      .map((o) => ({ minid: o[1], name: stripTags(o[2]) }))
+      .filter((x) => x.minid && x.name);
+    if (list.length > 0) return { ok: true, ministries: list };
+  } catch {}
+  return {
+    ok: false,
+    ministries: [
+      { minid: '0', name: 'All Ministry' },
+      { minid: '3', name: "Prime Minister's Office" },
+      { minid: '2934', name: 'Rajya Sabha Secretariat' },
+      { minid: '2608', name: 'Lok Sabha Secretariat' },
+      { minid: '35', name: 'Election Commission' },
+      { minid: '14', name: 'Department of Space' }
+    ]
+  };
+}
+
+async function fetchPibByMinistry(minid = '0', agencyLabel = 'PIB', deptFallback = 'Union Ministry') {
+  if (!minid || minid === '0') return fetchPibReleases('3', 'en');
+  const pageUrl = 'https://pib.gov.in/AllRel.aspx?reg=3&lang=1';
+  try {
+    const getRes = await fetchResponse(pageUrl, {}, 11000);
+    const cookieHeader = (getRes.headers.get('set-cookie') || '').split(',').map((c) => c.split(';')[0]).filter(Boolean).join('; ');
+    const html = await getRes.text();
+
+    const hiddenVal = (name) => html.match(new RegExp(`name=["']${name}["'][^>]*value=["']([^"']*)["']`, 'i'))?.[1] || '';
+    const minLabelMatch = html.match(new RegExp(`<option[^>]+value=["']${minid}["'][^>]*>([\\s\\S]*?)<\\/option>`, 'i'));
+    const ministryName = minLabelMatch ? stripTags(minLabelMatch[1]) : deptFallback;
+
+    const now = new Date(Date.now() + 5.5 * 3600 * 1000);
+    const form = new URLSearchParams({
+      '__EVENTTARGET': 'ctl00$ContentPlaceHolder1$ddlMinistry',
+      '__EVENTARGUMENT': '',
+      '__LASTFOCUS': '',
+      '__VIEWSTATE': hiddenVal('__VIEWSTATE'),
+      '__VIEWSTATEGENERATOR': hiddenVal('__VIEWSTATEGENERATOR'),
+      '__EVENTVALIDATION': hiddenVal('__EVENTVALIDATION'),
+      'ctl00$Bar1$ddlregion': '3',
+      'ctl00$Bar1$ddlLang': '1',
+      'ctl00$ContentPlaceHolder1$ddlMinistry': String(minid),
+      'ctl00$ContentPlaceHolder1$ddlday': '0',
+      'ctl00$ContentPlaceHolder1$ddlMonth': String(now.getUTCMonth() + 1),
+      'ctl00$ContentPlaceHolder1$ddlYear': String(now.getUTCFullYear())
+    });
+
+    const postRes = await fetchResponse(pageUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Origin': 'https://pib.gov.in',
+        'Referer': pageUrl,
+        ...(cookieHeader ? { Cookie: cookieHeader } : {})
+      },
+      body: form.toString()
+    }, 12000);
+    const postHtml = await postRes.text();
+
+    const items = [];
+    const seen = new Set();
+    const linkRe = /<a[^>]+href=["']([^"']*PressRelease(?:Iframe)?Page\.aspx\?PRID=(\d+)[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    let m;
+    while ((m = linkRe.exec(postHtml)) !== null) {
+      const link = new URL(decodeEntities(m[1]), 'https://pib.gov.in').href;
+      const prid = m[2];
+      const title = stripTags(m[3]);
+      if (!title || title.length < 6 || seen.has(prid)) continue;
+      seen.add(prid);
+
+      const ctx = stripTags(postHtml.slice(m.index, m.index + m[0].length + 280));
+      const dateMatch = ctx.match(/(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM))?)/i);
+
+      items.push({
+        id: `pib-min-${minid}-${prid}`,
+        agency: agencyLabel,
+        verifiedBy: 'PIB India Official',
+        department: ministryName,
+        title,
+        summary: `${ministryName} — ${title}`,
+        publishedAt: dateMatch ? parseFlexibleDate(`${dateMatch[1]} GMT+0530`) : null,
+        dateText: dateMatch?.[1] || 'This Month on PIB',
+        link,
+        pdfUrl: '',
+        image: ''
+      });
+    }
+
+    // Grab Posted On dates for top 8 items if missing
+    await Promise.allSettled(
+      items.slice(0, 8).map(async (it) => {
+        if (!it.publishedAt) {
+          const d = await fetchPibPostedDate(it.link);
+          if (d.iso) { it.publishedAt = d.iso; it.dateText = d.raw; }
+        }
+      })
+    );
+
+    return {
+      ok: items.length > 0,
+      count: items.length,
+      ministryName,
+      sourceUrl: pageUrl,
+      items: items.slice(0, 25),
+      error: items.length ? null : `No releases published this month by ${ministryName} on PIB`
+    };
+  } catch (err) {
+    return { ok: false, count: 0, sourceUrl: pageUrl, items: [], error: `PIB Ministry query failed (${err.message})` };
+  }
+}
+
+async function fetchSupremeCourtPress() {
+  const url = 'https://www.sci.gov.in/press-release/';
+  try {
+    const html = await fetchText(url, {}, 12000);
+    const body = html.split(/<body[^>]*>/i)[1] || html;
+    const main = body.match(/<main[\s\S]*?<\/main>/i)?.[0] || body;
+
+    const items = [];
+    const seen = new Set();
+    const linkRe = /<a[^>]+href=["'](https:\/\/www\.sci\.gov\.in\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    let m;
+    while ((m = linkRe.exec(main)) !== null) {
+      const href = decodeEntities(m[1]).trim();
+      const text = stripTags(m[2]);
+      if (!text || text.length < 15 || /arrowDetails|View Details|Skip to|Home|Print/i.test(m[0])) continue;
+      if (href === url || seen.has(href)) continue;
+      seen.add(href);
+
+      const ctx = stripTags(main.slice(m.index, m.index + m[0].length + 450));
+      const dateMatch = ctx.match(/(?:dated\s+)?([A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4}|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})/i);
+
+      items.push({
+        id: `sci-${Buffer.from(href).toString('base64url').slice(-12)}`,
+        agency: 'SUPREME COURT',
+        verifiedBy: 'Supreme Court of India',
+        department: 'Supreme Court of India',
+        title: text,
+        summary: ctx.slice(0, 260) || text,
+        publishedAt: dateMatch ? parseFlexibleDate(dateMatch[1]) : null,
+        dateText: dateMatch?.[1] || 'Official SCI Release',
+        link: href,
+        pdfUrl: /\.pdf$/i.test(href) ? href : '',
+        image: ''
+      });
+    }
+
+    return { ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25), error: items.length ? null : 'No Supreme Court releases found' };
+  } catch (err) {
+    return { ok: false, count: 0, sourceUrl: url, items: [], error: `Supreme Court portal unreachable (${err.message})` };
+  }
+}
+
+async function fetchIsroPress() {
+  const url = 'https://www.isro.gov.in/Press.html';
+  try {
+    const html = await fetchText(url, {}, 12000);
+    const items = [];
+    const trMatches = html.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+    for (const tr of trMatches) {
+      const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
+      if (tds.length < 3) continue;
+      const sn = stripTags(tds[0]);
+      if (!/^\d+$/.test(sn)) continue;
+      const title = stripTags(tds[1]);
+      const dateStr = stripTags(tds[2]);
+      const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
+      const link = hrefMatch?.[1] ? new URL(decodeEntities(hrefMatch[1]), 'https://www.isro.gov.in/').href : url;
+      if (!title) continue;
+      items.push({
+        id: `isro-${sn}-${dateStr.replace(/\W+/g, '')}`,
+        agency: 'ISRO',
+        verifiedBy: 'ISRO Official',
+        department: 'Indian Space Research Organisation (ISRO)',
+        title,
+        summary: `${title} (${dateStr})`,
+        publishedAt: parseFlexibleDate(dateStr),
+        dateText: dateStr || 'Official ISRO Release',
+        link,
+        pdfUrl: /\.pdf$/i.test(link) ? link : '',
+        image: ''
+      });
+    }
+    return { ok: items.length > 0, count: items.length, sourceUrl: url, items: items.slice(0, 25), error: items.length ? null : 'ISRO press table unavailable' };
+  } catch (err) {
+    return { ok: false, count: 0, sourceUrl: url, items: [], error: `ISRO portal unreachable (${err.message})` };
+  }
+}
+
+async function fetchNasaPress() {
+  const url = 'https://www.nasa.gov/rss/dyn/breaking_news.rss';
+  try {
+    const xml = await fetchText(url, {}, 11000);
+    const items = parseRssItems(xml).slice(0, 20).map((it, idx) => ({
+      id: `nasa-${idx}-${Buffer.from(it.link).toString('base64url').slice(-10)}`,
+      agency: 'NASA',
+      verifiedBy: 'NASA Official',
+      department: 'NASA Breaking News & Missions',
+      title: it.title,
+      summary: it.description || it.title,
+      publishedAt: it.publishedAt,
+      dateText: it.pubDate || 'Official NASA Release',
+      link: it.link,
+      pdfUrl: '',
+      image: it.image || ''
+    }));
+    return { ok: items.length > 0, count: items.length, sourceUrl: 'https://www.nasa.gov/news/', items, error: items.length ? null : 'NASA RSS empty' };
+  } catch (err) {
+    return { ok: false, count: 0, sourceUrl: 'https://www.nasa.gov/news/', items: [], error: `NASA RSS unreachable (${err.message})` };
+  }
+}
+
+async function fetchSpaceXUpdates() {
+  const url = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=SpaceX&limit=10';
+  try {
+    const data = await fetchJson(url, {}, 10000);
+    const items = (data?.results || []).map((l) => ({
+      id: `spacex-${l.id}`,
+      agency: 'SPACEX',
+      verifiedBy: 'Launch Library / SpaceX',
+      department: `SpaceX • ${l.pad?.location?.name || 'Launch Complex'}`,
+      title: `${l.name} (${l.status?.abbrev || l.status?.name || 'Scheduled'})`,
+      summary: l.mission?.description || `Target Launch: ${l.net || 'TBD'} • Pad: ${l.pad?.name || 'SpaceX Launch Pad'}`,
+      publishedAt: parseFlexibleDate(l.net),
+      dateText: l.net ? `Launch Window: ${l.net}` : 'Upcoming Mission',
+      link: l.url || 'https://www.spacex.com/launches/',
+      pdfUrl: '',
+      image: l.image || ''
+    }));
+    return { ok: items.length > 0, count: items.length, sourceUrl: 'https://www.spacex.com/updates/', items, error: null };
+  } catch (err) {
+    return { ok: false, count: 0, sourceUrl: 'https://www.spacex.com/updates/', items: [], error: `SpaceX feed unreachable (${err.message})` };
+  }
+}
+
+async function fetchStatePolicePress(state = 'ALL') {
+  const st = String(state || 'ALL').toUpperCase();
+  const items = [];
+  const tasks = [];
+
+  if (st === 'ALL' || st === 'DELHI') {
+    tasks.push((async () => {
+      const url = 'https://delhipolice.gov.in/newpressrelease.aspx';
+      try {
+        const html = await fetchText(url, {}, 10000);
+        const trMatches = html.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+        for (const tr of trMatches) {
+          const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
+          if (tds.length < 6) continue;
+          const sn = stripTags(tds[0]);
+          if (!/^\d+$/.test(sn)) continue;
+          const title = stripTags(tds[1]);
+          const district = stripTags(tds[2]);
+          const category = stripTags(tds[4]);
+          const dateStr = stripTags(tds[5]);
+          const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
+          const link = hrefMatch?.[1] ? new URL(decodeEntities(hrefMatch[1]), 'https://delhipolice.gov.in/').href : url;
+          if (!title) continue;
+          items.push({
+            id: `police-dl-${sn}-${dateStr.replace(/\D/g, '')}`,
+            agency: 'POLICE',
+            stateName: 'DELHI',
+            verifiedBy: 'Delhi Police Official',
+            department: `Delhi Police • ${district || category || 'HQ'}`,
+            title,
+            summary: `${title} (${district ? district + ' • ' : ''}${category || 'Press Release'})`,
+            publishedAt: parseFlexibleDate(dateStr),
+            dateText: dateStr || 'Delhi Police Release',
+            link,
+            pdfUrl: /\.pdf$/i.test(link) ? link : '',
+            image: ''
+          });
+        }
+      } catch {}
+    })());
+  }
+
+  if (st === 'ALL' || st === 'KERALA') {
+    tasks.push((async () => {
+      const url = 'https://keralapolice.gov.in/page/press-releases';
+      try {
+        const html = await fetchText(url, {}, 11000);
+        const tbody = html.match(/<tbody[\s>][\s\S]*?<\/tbody>/i)?.[0] || html;
+        const trMatches = tbody.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+        for (const tr of trMatches.slice(0, 20)) {
+          const tds = tr.match(/<td[\s>][\s\S]*?<\/td>/gi) || [];
+          if (tds.length < 3) continue;
+          const sn = stripTags(tds[0]);
+          const dateStr = stripTags(tds[1]);
+          const title = stripTags(tds[2]);
+          const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
+          const link = hrefMatch?.[1] ? new URL(decodeEntities(hrefMatch[1]), 'https://keralapolice.gov.in/').href : url;
+          if (!title || !/^\d+$/.test(sn)) continue;
+          items.push({
+            id: `police-kl-${sn}-${dateStr.replace(/\D/g, '')}`,
+            agency: 'POLICE',
+            stateName: 'KERALA',
+            verifiedBy: 'Kerala Police Official',
+            department: 'Kerala State Police',
+            title,
+            summary: title,
+            publishedAt: parseFlexibleDate(dateStr),
+            dateText: dateStr || 'Kerala Police Release',
+            link,
+            pdfUrl: /\.pdf$/i.test(link) ? link : '',
+            image: ''
+          });
+        }
+      } catch {}
+    })());
+  }
+
+  await Promise.allSettled(tasks);
+  items.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+  return { ok: items.length > 0, count: items.length, items: items.slice(0, 30) };
 }
 
 function extractEdArray(payload) {
@@ -206,7 +536,7 @@ async function fetchEdPressReleases() {
         agency: 'ED', verifiedBy: 'ED Official', department: zone,
         title: desc.length > 165 ? desc.slice(0, 162) + '...' : desc, summary: desc,
         publishedAt: parseFlexibleDate(rawDate), dateText: rawDate || 'Official ED Release',
-        link, pdfUrl: link !== pageUrl ? link : ''
+        link, pdfUrl: link !== pageUrl ? link : '', image: ''
       };
     }).filter((x) => x.title);
 
@@ -296,7 +626,7 @@ async function fetchCbiOfficial() {
           id: `cbi-${Buffer.from(href).toString('base64url').slice(-12)}`,
           agency: 'CBI', verifiedBy: 'CBI Official', department: 'Central Bureau of Investigation (CBI)',
           title, summary: title, publishedAt: dmyMatch ? parseDmyDateToIso(dmyMatch[1]) : null,
-          dateText: dmyMatch?.[1] || 'Official CBI Portal', link: href, pdfUrl: ''
+          dateText: dmyMatch?.[1] || 'Official CBI Portal', link: href, pdfUrl: '', image: ''
         });
       }
     }
@@ -346,40 +676,6 @@ async function fetchCbiOfficial() {
   };
 }
 
-async function probePressSources() {
-  const results = {};
-  const tasks = [
-    // 1. Supreme Court body content (skip <head>)
-    fetchText('https://www.sci.gov.in/press-release/', {}, 8000).then((html) => {
-      const body = html.split(/<body[^>]*>/i)[1] || html;
-      const main = body.match(/<main[\s\S]*?<\/main>/i)?.[0] || body;
-      const pdfs = main.match(/<a[^>]+href=["'][^"']+["'][^>]*>[\s\S]*?<\/a>/gi) || [];
-      results.sci_body = { len: html.length, linksSample: pdfs.filter(l => /pdf|press|notice|circular/i.test(l)).slice(0, 8), textSample: stripTags(main).slice(0, 600) };
-    }).catch((e) => { results.sci_body = { error: e.message }; }),
-
-    // 2. PIB Ministries in English + test MinId query
-    fetchText('https://pib.gov.in/AllRel.aspx?reg=3&lang=1', {}, 8000).then((html) => {
-      const minSel = html.match(/<select[^>]+id=["']ContentPlaceHolder1_ddlMinistry["'][^>]*>([\s\S]*?)<\/select>/i)?.[1] || '';
-      const mins = [...minSel.matchAll(/<option[^>]+value=["']([^"']+)["'][^>]*>([\s\S]*?)<\/option>/gi)]
-        .map((o) => `${o[1]}:${stripTags(o[2])}`);
-      const relLinks = html.match(/PressReleasePage\.aspx\?PRID=\d+[^"']*/gi) || [];
-      results.pib_en = { ministryCount: mins.length, sampleMinistries: mins.slice(0, 20), relLinksSample: relLinks.slice(0, 6) };
-    }).catch((e) => { results.pib_en = { error: e.message }; }),
-
-    // 3. Test PIB RSS with Minid=2934 (Rajya Sabha)
-    fetchText('https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3&Minid=2934', {}, 8000).then((xml) => {
-      results.pib_min_rss = { count: (xml.match(/<item/gi) || []).length, firstTitle: stripTags(xml.match(/<item[\s\S]*?<title>([\s\S]*?)<\/title>/i)?.[1] || '') };
-    }).catch((e) => { results.pib_min_rss = { error: e.message }; }),
-
-    // 4. SpaceX Launch Library 2 official open feed
-    fetchJson('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?search=SpaceX&limit=5', {}, 8000).then((d) => {
-      results.spacex_ll2 = { count: (d.results || []).length, first: d.results?.[0]?.name || '' };
-    }).catch((e) => { results.spacex_ll2 = { error: e.message }; })
-  ];
-  await Promise.allSettled(tasks);
-  return results;
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -388,22 +684,34 @@ export default async function handler(req, res) {
   const sourceParam = String(req.query.source || 'pib,ed_press,cbi').toLowerCase();
   const sources = new Set(sourceParam.split(',').map((s) => s.trim()).filter(Boolean));
   const regid = String(req.query.regid || '3').replace(/[^\d]/g, '') || '3';
+  const minid = String(req.query.minid || '0').replace(/[^\d]/g, '') || '0';
   const lang = String(req.query.lang || 'en').toLowerCase();
-
-  if (sources.has('probe_press')) {
-    const probe = await probePressSources();
-    return res.status(200).json({ updatedAt: new Date().toISOString(), probe });
-  }
+  const policeState = String(req.query.state || 'ALL').toUpperCase();
 
   if (sources.has('pib_regions')) {
-    const regData = await fetchPibRegionsLive();
-    return res.status(200).json({ updatedAt: new Date().toISOString(), ...regData });
+    return res.status(200).json({ updatedAt: new Date().toISOString(), ...(await fetchPibRegionsLive()) });
+  }
+  if (sources.has('pib_ministries')) {
+    return res.status(200).json({ updatedAt: new Date().toISOString(), ...(await fetchPibMinistriesList()) });
   }
 
   const result = { updatedAt: new Date().toISOString(), sources: {} };
   const tasks = [];
 
   if (sources.has('all') || sources.has('pib')) tasks.push(fetchPibReleases(regid, lang).then((d) => { result.sources.pib = d; }));
+  if (sources.has('pib_ministry')) tasks.push(fetchPibByMinistry(minid, 'MINISTRY', 'Union Ministry').then((d) => { result.sources.pib_ministry = d; }));
+  if (sources.has('parliament')) {
+    tasks.push(fetchPibByMinistry('2934', 'RAJYA SABHA', 'Rajya Sabha Secretariat').then((d) => { result.sources.rajya_sabha = d; }));
+    tasks.push(fetchPibByMinistry('2608', 'LOK SABHA', 'Lok Sabha Secretariat').then((d) => { result.sources.lok_sabha = d; }));
+  }
+  if (sources.has('eci')) tasks.push(fetchPibByMinistry('35', 'ECI', 'Election Commission of India').then((d) => { result.sources.eci = d; }));
+  if (sources.has('sci')) tasks.push(fetchSupremeCourtPress().then((d) => { result.sources.sci = d; }));
+  if (sources.has('space')) {
+    tasks.push(fetchIsroPress().then((d) => { result.sources.isro = d; }));
+    tasks.push(fetchNasaPress().then((d) => { result.sources.nasa = d; }));
+    tasks.push(fetchSpaceXUpdates().then((d) => { result.sources.spacex = d; }));
+  }
+  if (sources.has('police')) tasks.push(fetchStatePolicePress(policeState).then((d) => { result.sources.police = d; }));
   if (sources.has('all') || sources.has('ed_press')) tasks.push(fetchEdPressReleases().then((d) => { result.sources.ed_press = d; }));
   if (sources.has('all') || sources.has('ed_proclamation')) tasks.push(fetchEdProclamations().then((d) => { result.sources.ed_proclamation = d; }));
   if (sources.has('all') || sources.has('cbi')) tasks.push(fetchCbiOfficial().then((d) => { result.sources.cbi = d; }));
