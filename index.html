@@ -343,7 +343,7 @@
         <button onclick="closeAnnouncementModal()" class="w-7 h-7 rounded-full flex items-center justify-center text-xs" style="background-color: var(--bg-sub); color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs mb-6" style="color: var(--text-main);">
-        <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> 🚨 Hyderabad Water Crisis Alert</div>
+        <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i>  Hyderabad Water Crisis Alert</div>
         <p class="leading-relaxed">Dear User, the <b>T&amp;C News Hub</b> Intell Brief: The Water reserves in the Singur and Manjeera reservoirs may reach critically low levels around December 15, 2026. However, a complete citywide water shutdown has not been officially confirmed. Residents are advised to conserve water and follow official updates.</p>
         <div class="p-3 rounded-xl space-y-1.5 font-mono text-[11px]" style="background-color: var(--bg-sub); border: 1px solid var(--border-color);">
           <div class="flex justify-between"><span> Hyderabad:</span> <b>0-Day estimated 15th December onwards</b></div>
@@ -553,15 +553,15 @@
 
             <div id="press-category-pills" class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
               <button type="button" onclick="selectPressCategory('all', this)" class="choice-pill selected">All Govt &amp; T&amp;C</button>
-              <button type="button" onclick="selectPressCategory('ministries', this)" class="choice-pill">🇮🇳 Ministries (A–Z)</button>
-              <button type="button" onclick="selectPressCategory('parliament', this)" class="choice-pill">🏛️ Parliament (RS &amp; LS)</button>
-              <button type="button" onclick="selectPressCategory('sci', this)" class="choice-pill">⚖️ Supreme Court</button>
-              <button type="button" onclick="selectPressCategory('eci', this)" class="choice-pill">🗳️ Election Commission</button>
-              <button type="button" onclick="selectPressCategory('ed', this)" class="choice-pill">⚖️ ED</button>
-              <button type="button" onclick="selectPressCategory('cbi', this)" class="choice-pill">🕵️ CBI</button>
-              <button type="button" onclick="selectPressCategory('space', this)" class="choice-pill">🚀 Space (ISRO · NASA · SpaceX)</button>
-              <button type="button" onclick="selectPressCategory('police', this)" class="choice-pill">🚓 State Police (A–Z)</button>
-              <button type="button" onclick="selectPressCategory('custom', this)" class="choice-pill">📄 T&amp;C Uploaded</button>
+              <button type="button" onclick="selectPressCategory('ministries', this)" class="choice-pill"> Ministries </button>
+              <button type="button" onclick="selectPressCategory('parliament', this)" class="choice-pill"> Parliament (RS &amp; LS)</button>
+              <button type="button" onclick="selectPressCategory('sci', this)" class="choice-pill"> Supreme Court</button>
+              <button type="button" onclick="selectPressCategory('eci', this)" class="choice-pill"> Election Commission</button>
+              <button type="button" onclick="selectPressCategory('ed', this)" class="choice-pill"> ED</button>
+              <button type="button" onclick="selectPressCategory('cbi', this)" class="choice-pill"> CBI</button>
+              <button type="button" onclick="selectPressCategory('space', this)" class="choice-pill"> Space (ISRO·NASA·SpaceX)</button>
+              <button type="button" onclick="selectPressCategory('police', this)" class="choice-pill"> State Police </button>
+              <button type="button" onclick="selectPressCategory('custom', this)" class="choice-pill"> T&amp;C Uploaded</button>
             </div>
 
             <div id="press-subcontrols" class="mb-4 p-3 rounded-2xl border space-y-2.5" style="background-color: var(--bg-sub); border-color: var(--border-color);"></div>
@@ -593,12 +593,12 @@
 
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2 mb-3" style="-webkit-overflow-scrolling: touch;">
               <button onclick="setWantedFilter('all', this)" class="choice-pill selected-red">All Official</button>
-              <button onclick="setWantedFilter('NIA', this)" class="choice-pill">🇮🇳 India (NIA)</button>
-              <button onclick="setWantedFilter('ED', this)" class="choice-pill">⚖️ ED Proclamations</button>
-              <button onclick="setWantedFilter('CBI', this)" class="choice-pill">🕵️ CBI / Red Notices</button>
-              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill">🌐 INTERPOL</button>
-              <button onclick="setWantedFilter('FBI', this)" class="choice-pill">🇺🇸 FBI Most Wanted</button>
-              <button onclick="setWantedFilter('MISSING', this)" class="choice-pill">🔍 Missing Persons (All India &amp; Global)</button>
+              <button onclick="setWantedFilter('NIA', this)" class="choice-pill"> NIA</button>
+              <button onclick="setWantedFilter('ED', this)" class="choice-pill"> ED Proclamations</button>
+              <button onclick="setWantedFilter('CBI', this)" class="choice-pill"> CBI / Red Notices</button>
+              <button onclick="setWantedFilter('INTERPOL', this)" class="choice-pill"> INTERPOL</button>
+              <button onclick="setWantedFilter('FBI', this)" class="choice-pill"> FBI Most Wanted</button>
+              <button onclick="setWantedFilter('MISSING', this)" class="choice-pill"> Missing Persons Global</button>
             </div>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 mb-4">
@@ -696,10 +696,10 @@
             </div>
             <div class="flex items-center gap-2 overflow-x-auto desktop-scrollbar pb-2.5 mb-4 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
               <button onclick="filterJobs('all', this)" class="choice-pill selected">All Sectors</button>
-              <button onclick="filterJobs('freshers', this)" class="choice-pill">🎓 Freshers / Any Degree</button>
-              <button onclick="filterJobs('it', this)" class="choice-pill">💻 IT &amp; Tech</button>
-              <button onclick="filterJobs('govt', this)" class="choice-pill">🏛️ Govt &amp; Banking</button>
-              <button onclick="filterJobs('healthcare', this)" class="choice-pill">🏥 Healthcare</button>
+              <button onclick="filterJobs('freshers', this)" class="choice-pill"> Freshers / Any Degree</button>
+              <button onclick="filterJobs('it', this)" class="choice-pill"> IT &amp; Tech</button>
+              <button onclick="filterJobs('govt', this)" class="choice-pill"> Govt &amp; Banking</button>
+              <button onclick="filterJobs('healthcare', this)" class="choice-pill"> Healthcare</button>
             </div>
             <div id="job-listings-container" class="space-y-3.5 max-h-[620px] overflow-y-auto pr-1"><div class="text-center py-10 text-xs" style="color: var(--text-sub);"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading live verified vacancies...</div></div>
           </div>
