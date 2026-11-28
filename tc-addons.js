@@ -1477,8 +1477,52 @@
     await Promise.allSettled(tasks);
   };
 
+  // 7. LIVE TRAFFIC & ACTIVE PRESENCE TRACKER (Firestore)
+  function getIstDayKey(offsetDays = 0) {
+    const d = new Date(Date.now() + 5.5 * 3600 * 1000 + offsetDays * 86400000);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function initLiveTrafficTracker() {
+    if (typeof db === 'undefined' || typeof firebase === 'undefined') return;
+    try {
+      let sid = sessionStorage.getItem('tc_session_id');
+      if (!sid) {
+        sid = 's_' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+        sessionStorage.setItem('tc_session_id', sid);
+      }
+
+      const todayKey = getIstDayKey(0);
+      const isNewDailyVisit = localStorage.getItem('tc_last_visit_day') !== todayKey;
+      if (isNewDailyVisit) localStorage.setItem('tc_last_visit_day', todayKey);
+
+      const dailyPayload = {
+        pageviews: firebase.firestore.FieldValue.increment(1),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (isNewDailyVisit) dailyPayload.visits = firebase.firestore.FieldValue.increment(1);
+      db.collection('traffic_daily').doc(todayKey).set(dailyPayload, { merge: true }).catch(() => {});
+
+      const deviceType = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+      const sendHeartbeat = () => {
+        if (document.visibilityState === 'hidden') return;
+        db.collection('active_sessions').doc(sid).set({
+          lastSeenMs: Math.floor(Date.now()),
+          device: deviceType
+        }, { merge: true }).catch(() => {});
+      };
+
+      sendHeartbeat();
+      setInterval(sendHeartbeat, 120000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') sendHeartbeat();
+      });
+    } catch {}
+  }
+  
   document.addEventListener('DOMContentLoaded', () => {
     injectAddonUI();
+    initLiveTrafficTracker();
     window.fetchBulletins();
     fetchLiveWantedExtras();
     startWantedAutoSyncScheduler();
