@@ -1,7 +1,7 @@
-/* T&C News Hub — Bulletins, Live Press Releases Hub (12h Auto-Sync / Manual Refresh, No Cache/Fallbacks), Apple Reader & Share */
+/* T&C News Hub — Bulletins, Live Press Releases & Most Wanted (12h Auto-Sync / Manual Refresh, No Cache/Fallbacks), Apple Reader & Share */
 (function () {
   const GOV_API_BASE = 'https://news-lemon-two.vercel.app';
-  const PRESS_AUTO_SYNC_MS = 12 * 60 * 60 * 1000; // 12 hours
+  const AUTO_SYNC_MS = 12 * 60 * 60 * 1000; // 12 hours
   window.tcNewsRegistry = window.tcNewsRegistry || {};
 
   let currentReaderStory = null;
@@ -9,7 +9,7 @@
   let currentBulletin = null;
   let isBulletinArchiveView = false;
 
-  // Press Releases Live State (No cached item arrays, no static fallback lists)
+  // Press Releases Live State
   let pressInitialized = false;
   let lastPressSyncAt = 0;
   let pressAutoSyncTimer = null;
@@ -24,12 +24,26 @@
   let pibRegionsList = [];
   let pibMinistriesList = [];
 
-  // Most Wanted & Missing State
-  let liveEdProclamations = [];
+  // Most Wanted & Missing Live State
+  let lastWantedSyncAt = 0;
+  let wantedAutoSyncTimer = null;
+  const liveWantedBuckets = { nia: [], ed: [], cbi: [], interpol: [], fbi: [] };
+  let liveNiaStatus = { ok: false, error: '' };
+  let liveInterpolStatus = { ok: false, error: '' };
   let liveEdStatus = { ok: false, error: '' };
   let liveCbiData = { ok: false, directAccessible: false, items: [], redNotices: [], error: '' };
   let missingDataset = [];
   let missingSourcesMeta = {};
+
+  function countryNameBrowser(code) {
+    if (!code) return '';
+    try {
+      if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+        return new Intl.DisplayNames(['en'], { type: 'region' }).of(String(code).toUpperCase()) || code;
+      }
+    } catch {}
+    return code;
+  }
 
   const STATE_POLICE_PORTALS = [
     { key: 'ALL', name: 'All Live Police Feeds (Delhi, Kerala & Chandigarh)', url: 'https://digitalpolice.gov.in/', live: true },
@@ -90,6 +104,10 @@
   document.head.appendChild(addonStyle);
 
   function injectAddonUI() {
+    document.querySelectorAll('a[href*="nia.mha.gov.in/wanted.htm"]').forEach((a) => {
+      a.href = 'https://nia.mha.gov.in/most-wanted';
+    });
+
     if (!document.getElementById('news-reader-modal')) {
       document.body.insertAdjacentHTML('beforeend', `
         <div id="news-reader-modal" class="hidden fixed inset-0 z-[124] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md transition-all overflow-y-auto">
@@ -525,23 +543,6 @@
     }
   };
 
-  window.printCurrentReaderDoc = function () {
-    if (!currentReaderStory) return;
-    const w = window.open('', '_blank', 'width=800,height=900');
-    if (!w) { window.print(); return; }
-    const doc = w.document;
-    doc.open();
-    doc.write('<!DOCTYPE html><html><head><title>T&C News Hub — Official Document</title><style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:740px;margin:32px auto;padding:0 20px;line-height:1.6;color:#111} .meta{color:#555;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:10px;margin-bottom:18px} h1{font-size:20px;margin:0 0 8px} .body{white-space:pre-line;font-size:14px} .foot{margin-top:24px;padding-top:12px;border-top:1px solid #ddd;font-size:12px;color:#555}</style></head><body></body></html>');
-    doc.close();
-    const h1 = doc.createElement('h1'); h1.textContent = currentReaderStory.title || '';
-    const meta = doc.createElement('div'); meta.className = 'meta'; meta.textContent = `${currentReaderStory.scope || 'OFFICIAL'} • ${currentReaderStory.source || ''} • ${currentReaderStory.time || ''}`;
-    const body = doc.createElement('div'); body.className = 'body'; body.textContent = currentReaderStory.summary || '';
-    const foot = doc.createElement('div'); foot.className = 'foot'; foot.textContent = `Source: ${currentReaderStory.link || ''} — Printed via T&C News Hub`;
-    doc.body.append(h1, meta, body, foot);
-    w.focus();
-    setTimeout(() => w.print(), 250);
-  };
-
   window.closeNewsReader = function () {
     document.getElementById('news-reader-modal').classList.add('hidden');
     if (window.location.search.includes('story=')) window.history.replaceState({}, '', window.location.pathname);
@@ -689,7 +690,7 @@
       if (pressView && !pressView.classList.contains('hidden')) {
         window.manualPressSync();
       }
-    }, PRESS_AUTO_SYNC_MS);
+    }, AUTO_SYNC_MS);
   }
 
   window.manualPressSync = async function () {
@@ -698,7 +699,7 @@
   };
 
   window.initOrRefreshPressTab = async function () {
-    const needsSync = !pressInitialized || !lastPressSyncAt || (Date.now() - lastPressSyncAt >= PRESS_AUTO_SYNC_MS);
+    const needsSync = !pressInitialized || !lastPressSyncAt || (Date.now() - lastPressSyncAt >= AUTO_SYNC_MS);
     if (!pressInitialized) {
       pressInitialized = true;
       startPressAutoSyncScheduler();
@@ -955,7 +956,7 @@
     container.innerHTML = cards.join('');
   };
 
-  // 5. Flash Scroller, Headlines (with Photos) & World Highlights (with Photos)
+  // 5. Flash Scroller, Headlines & World Highlights
   window.refreshLiveFlashTicker = async function () {
     const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
     const scopes = [
@@ -1145,35 +1146,170 @@
     }
   };
 
-  // 6. Live ED Proclamations, CBI Red Notices & Missing Persons inside Most Wanted Tab
+  // 6. LIVE MOST WANTED (NIA, INTERPOL, ED, CBI, FBI) + MISSING PERSONS (12h Auto-Sync + Browser INTERPOL Check)
+  function rebuildWantedDataset() {
+    const combined = [
+      ...liveWantedBuckets.nia,
+      ...liveWantedBuckets.ed,
+      ...liveWantedBuckets.cbi,
+      ...liveWantedBuckets.interpol,
+      ...liveWantedBuckets.fbi
+    ];
+    if (combined.length > 0 && typeof wantedDataset !== 'undefined') {
+      wantedDataset = combined;
+    }
+
+    const activeSources = [];
+    if (liveWantedBuckets.nia.length) activeSources.push('NIA India');
+    if (liveWantedBuckets.ed.length) activeSources.push('ED India');
+    if (liveWantedBuckets.cbi.length) activeSources.push('CBI');
+    if (liveWantedBuckets.interpol.length) activeSources.push('INTERPOL');
+    if (liveWantedBuckets.fbi.length) activeSources.push('FBI');
+
+    const syncClock = lastWantedSyncAt
+      ? new Date(lastWantedSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '';
+    const syncLabel = document.getElementById('wanted-last-synced');
+    const stripPill = document.getElementById('wanted-strip-sync-pill');
+    const countBadge = document.getElementById('wanted-count-badge');
+
+    if (syncLabel && syncClock) {
+      syncLabel.textContent = `Live Synced ${syncClock} (Auto 12h) • Active: ${activeSources.join(', ') || 'Checking...'}`;
+    }
+    if (stripPill && syncClock) {
+      stripPill.textContent = `Live ${syncClock}`;
+    }
+    if (countBadge && typeof wantedDataset !== 'undefined') {
+      countBadge.innerHTML = `<i class="fa-solid fa-shield-halved text-[10px]"></i> ${wantedDataset.length} Live Records`;
+    }
+
+    if (typeof window.renderWantedHomeStrip === 'function') window.renderWantedHomeStrip();
+    window.renderWantedDirectory();
+    if (typeof window.renderLiveFlashTrack === 'function') window.renderLiveFlashTrack();
+  }
+
+  async function tryBrowserInterpolDirect(type = 'red') {
+    const url = `https://ws-public.interpol.int/notices/v1/${type}?resultPerPage=20`;
+    const portalUrl = type === 'yellow'
+      ? 'https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices'
+      : 'https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices';
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const notices = data?._embedded?.notices || [];
+      return {
+        ok: notices.length > 0,
+        error: null,
+        items: notices.map((n) => {
+          const fullName = [n.forename, n.name].filter(Boolean).join(' ').trim();
+          const natList = (n.nationalities || []).map(countryNameBrowser).filter(Boolean);
+          const yearMatch = String(n.entity_id || '').match(/^(\d{4})\//);
+          return {
+            id: `interpol-${type}-${String(n.entity_id).replace(/[^a-zA-Z0-9-]/g, '-')}`,
+            agency: type === 'yellow' ? 'MISSING' : 'INTERPOL',
+            ...(type === 'yellow' ? { missingSource: 'INTERPOL_YELLOW', stateName: 'Global (INTERPOL)' } : {}),
+            verifiedBy: 'INTERPOL Official',
+            department: type === 'yellow' ? 'INTERPOL Yellow Notice (Global Missing Persons)' : 'INTERPOL Official Red Notice',
+            location: natList.length ? `Nationality: ${natList.join(', ')}` : 'International',
+            name: fullName || `Notice ${n.entity_id}`,
+            aliases: [],
+            photo: n._links?.thumbnail?.href || '',
+            charges: type === 'yellow'
+              ? `Active INTERPOL Yellow Notice — Missing Person Alert (Notice ID: ${n.entity_id})`
+              : `Active INTERPOL Red Notice — Arrest Warrant Issued (Notice ID: ${n.entity_id})`,
+            description: `INTERPOL Official Notice ID: ${n.entity_id}`,
+            caution: 'Report verified information to national police or INTERPOL via the official notice link.',
+            rewardText: '', rewardValue: 0,
+            publishedAt: yearMatch ? `Notice Year: ${yearMatch[1]}` : null,
+            updatedAt: null,
+            dob: n.date_of_birth || '',
+            nationality: natList.join(', ') || 'Not Specified',
+            noticeType: type === 'yellow' ? 'YELLOW NOTICE' : 'RED NOTICE',
+            sourceUrl: `${portalUrl}#${String(n.entity_id).replace('/', '-')}`
+          };
+        })
+      };
+    } catch (err) {
+      return { ok: false, items: [], error: err.message || 'Blocked by browser/Akamai' };
+    }
+  }
+
   async function fetchLiveWantedExtras() {
+    const lang = typeof currentLanguage !== 'undefined' ? currentLanguage : 'en';
     await Promise.allSettled([
+      // 1. Live NIA, INTERPOL, ED Proclamations, CBI from /api/gov
       (async () => {
         try {
-          const res = await fetch(`${GOV_API_BASE}/api/gov?source=ed_proclamation,cbi&_ts=${Date.now()}`, { cache: 'no-store' });
-          if (!res.ok) return;
+          const res = await fetch(`${GOV_API_BASE}/api/gov?source=nia,interpol,ed_proclamation,cbi&_ts=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
+
+          // NIA (auto-translate if page returned Hindi while user is viewing in English/other lang)
+          const niaData = data?.sources?.nia;
+          if (niaData) {
+            liveNiaStatus = { ok: !!niaData.ok, error: niaData.error || '' };
+            const rawNia = Array.isArray(niaData.items) ? niaData.items : [];
+            liveWantedBuckets.nia = await Promise.all(rawNia.map(async (item) => ({
+              ...item,
+              name: await smartTranslate(item.name, lang),
+              charges: await smartTranslate(item.charges, lang),
+              description: await smartTranslate(item.description, lang)
+            })));
+          }
+
+          // ED Proclamations
           const edData = data?.sources?.ed_proclamation;
           if (edData) {
             liveEdStatus = { ok: !!edData.ok, error: edData.error || '' };
-            liveEdProclamations = Array.isArray(edData.items) ? edData.items : [];
-            if (liveEdProclamations.length > 0 && typeof wantedDataset !== 'undefined') {
-              wantedDataset = [...wantedDataset.filter(i => i.agency !== 'ED'), ...liveEdProclamations];
-            }
+            liveWantedBuckets.ed = Array.isArray(edData.items) ? edData.items : [];
           }
+
+          // CBI Red Notices
           if (data?.sources?.cbi) {
             liveCbiData = data.sources.cbi;
-            const rn = Array.isArray(liveCbiData.redNotices) ? liveCbiData.redNotices : [];
-            if (rn.length > 0 && typeof wantedDataset !== 'undefined') {
-              wantedDataset = [...wantedDataset.filter(i => i.agency !== 'CBI'), ...rn];
+            liveWantedBuckets.cbi = Array.isArray(liveCbiData.redNotices) ? liveCbiData.redNotices : [];
+          }
+
+          // INTERPOL Red Notices (server first, browser-direct attempt if server got 403)
+          const intData = data?.sources?.interpol;
+          if (intData && Array.isArray(intData.items) && intData.items.length > 0) {
+            liveWantedBuckets.interpol = intData.items;
+            liveInterpolStatus = { ok: true, error: '' };
+          } else {
+            const directInt = await tryBrowserInterpolDirect('red');
+            if (directInt.ok) {
+              liveWantedBuckets.interpol = directInt.items;
+              liveInterpolStatus = { ok: true, error: '' };
+            } else {
+              liveWantedBuckets.interpol = [];
+              liveInterpolStatus = {
+                ok: false,
+                error: intData?.error || `INTERPOL blocked automated server & browser CORS (${directInt.error})`
+              };
+            }
+          }
+        } catch (err) {
+          liveNiaStatus = { ok: false, error: err.message };
+        }
+      })(),
+      // 2. Live FBI Wanted directly from api.fbi.gov
+      (async () => {
+        try {
+          const fbiRes = await fetch(`https://api.fbi.gov/wanted/v1/list?page=1&_ts=${Date.now()}`, { cache: 'no-store' });
+          if (fbiRes.ok) {
+            const fbiData = await fbiRes.json();
+            if (Array.isArray(fbiData.items) && typeof normalizeFbiDirectItem === 'function') {
+              liveWantedBuckets.fbi = fbiData.items.slice(0, 24).map(normalizeFbiDirectItem);
             }
           }
         } catch {}
       })(),
       fetchLiveMissingPersons()
     ]);
-    if (typeof window.renderWantedHomeStrip === 'function') window.renderWantedHomeStrip();
-    window.renderWantedDirectory();
+
+    lastWantedSyncAt = Date.now();
+    rebuildWantedDataset();
   }
 
   async function fetchLiveMissingPersons() {
@@ -1184,10 +1320,30 @@
       missingSourcesMeta = data?.sources || {};
       const zip = missingSourcesMeta.zipnet?.items || [];
       const fbiM = missingSourcesMeta.fbi_missing?.items || [];
-      const intY = missingSourcesMeta.interpol_yellow?.items || [];
+      let intY = missingSourcesMeta.interpol_yellow?.items || [];
+
+      if (intY.length === 0) {
+        const directY = await tryBrowserInterpolDirect('yellow');
+        if (directY.ok) {
+          intY = directY.items;
+          missingSourcesMeta.interpol_yellow = { ok: true, count: intY.length, items: intY };
+        }
+      }
       missingDataset = [...zip, ...fbiM, ...intY];
     } catch {}
     window.renderWantedDirectory();
+  }
+
+  // Override fetchWantedAlerts so 30-min interval or manual refresh in index.html stays 100% live & keeps NIA/INTERPOL/ED/CBI
+  window.fetchWantedAlerts = async function () {
+    await fetchLiveWantedExtras();
+  };
+
+  function startWantedAutoSyncScheduler() {
+    if (wantedAutoSyncTimer) clearInterval(wantedAutoSyncTimer);
+    wantedAutoSyncTimer = setInterval(() => {
+      fetchLiveWantedExtras();
+    }, AUTO_SYNC_MS);
   }
 
   const origOpenDossier = window.openWantedDossier;
@@ -1208,10 +1364,19 @@
     if (agency === 'MISSING') { renderMissingDirectoryView(); return; }
     if (typeof origRenderWantedDir === 'function') origRenderWantedDir();
 
+    const niaBanner = document.getElementById('wanted-nia-status-note');
+    if (niaBanner) {
+      niaBanner.querySelectorAll('a').forEach((a) => { a.href = 'https://nia.mha.gov.in/most-wanted'; });
+    }
+
     const container = document.getElementById('wanted-directory-container');
     if (!container) return;
 
-    if (agency === 'ED' && liveEdProclamations.length === 0) {
+    if (agency === 'NIA' && liveWantedBuckets.nia.length === 0) {
+      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">NIA India Live Data Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">${escapeHtml(liveNiaStatus.error || 'Live NIA records are temporarily unreachable. Open the official NIA portal directly:')}</p><a href="https://nia.mha.gov.in/most-wanted" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official NIA Most Wanted</a></div>`;
+    } else if (agency === 'INTERPOL' && liveWantedBuckets.interpol.length === 0) {
+      container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-globe text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">Global INTERPOL API Protected by Akamai WAF</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">${escapeHtml(liveInterpolStatus.error || 'INTERPOL blocks automated server requests. Check CBI / Red Notices for Indian INTERPOL Red Notices, or open INTERPOL directly:')}</p><a href="https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official INTERPOL Red Notices</a></div>`;
+    } else if (agency === 'ED' && liveWantedBuckets.ed.length === 0) {
       container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-scale-balanced text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">ED Proclamation Data Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">${escapeHtml(liveEdStatus.error || 'Could not load ED proclamations right now. Check the official ED portal directly:')}</p><a href="https://enforcementdirectorate.gov.in/wanted/notice-for-proclamation/" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official ED Proclamation Notices</a></div>`;
     } else if (agency === 'CBI' && (!liveCbiData.redNotices || liveCbiData.redNotices.length === 0)) {
       container.innerHTML = `<div class="p-6 rounded-2xl text-center space-y-3 border border-amber-500/30" style="background-color: var(--bg-sub);"><i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i><h4 class="text-xs sm:text-sm font-extrabold" style="color: var(--text-main);">CBI Red Notices Temporarily Unavailable</h4><p class="text-[11px] max-w-md mx-auto leading-relaxed" style="color: var(--text-sub);">Could not load CBI's Red Notice table right now. View directly on CBI's official portal:</p><a href="https://cbi.gov.in/interpol-red-notice" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Open Official CBI Red Notices</a></div>`;
@@ -1295,6 +1460,7 @@
     if (typeof origChangeLanguage === 'function') origChangeLanguage(langCode);
     window.fetchPinnedWorldNews();
     window.refreshLiveFlashTicker();
+    fetchLiveWantedExtras();
     const pressView = document.getElementById('view-press');
     if (pressInitialized && pressView && !pressView.classList.contains('hidden')) {
       window.manualPressSync();
@@ -1315,6 +1481,13 @@
     injectAddonUI();
     window.fetchBulletins();
     fetchLiveWantedExtras();
+    startWantedAutoSyncScheduler();
+
+    setTimeout(() => {
+      if (typeof wantedDataset !== 'undefined' && !wantedDataset.some(i => i.agency === 'NIA' || i.agency === 'ED' || i.agency === 'CBI')) {
+        rebuildWantedDataset();
+      }
+    }, 3500);
 
     const ensureFlashPlaying = () => {
       const t = document.getElementById('live-flash-track');
@@ -1324,8 +1497,11 @@
       if (document.visibilityState === 'visible') {
         ensureFlashPlaying();
         const pressView = document.getElementById('view-press');
-        if (pressInitialized && pressView && !pressView.classList.contains('hidden') && Date.now() - lastPressSyncAt >= PRESS_AUTO_SYNC_MS) {
+        if (pressInitialized && pressView && !pressView.classList.contains('hidden') && Date.now() - lastPressSyncAt >= AUTO_SYNC_MS) {
           window.manualPressSync();
+        }
+        if (lastWantedSyncAt && Date.now() - lastWantedSyncAt >= AUTO_SYNC_MS) {
+          fetchLiveWantedExtras();
         }
       }
     });
