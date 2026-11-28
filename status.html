@@ -1130,8 +1130,8 @@
         document.getElementById('tr-active-sub').textContent = err.message;
       }
     }
-    
-    
+        let syncSpinTimer = null;
+
     async function runAllLiveChecks() {
       const btn = document.getElementById('sync-btn');
       const spin = document.getElementById('sync-spinner');
@@ -1139,32 +1139,37 @@
       const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
       let frameIdx = 0;
 
+      clearInterval(syncSpinTimer);
       btn.disabled = true;
       spin.className = '';
       spin.textContent = frames[0];
       txt.textContent = 'Syncing';
 
-      const spinTimer = setInterval(() => {
+      syncSpinTimer = setInterval(() => {
         frameIdx = (frameIdx + 1) % frames.length;
         spin.textContent = frames[frameIdx];
       }, 80);
 
-      setPendingState();
-      await Promise.allSettled([fetchTrafficStats(), checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
-      
-      lastSyncAt = Date.now();
-      const istTime = new Date(lastSyncAt).toLocaleString('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        dateStyle: 'medium',
-        timeStyle: 'short'
-      });
-      document.getElementById('sync-meta').textContent = `Last Sync: ${istTime} IST |AS12H|`;
+      try {
+        setPendingState();
+        await Promise.allSettled([fetchTrafficStats(), checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
 
-      btn.disabled = false;
-      spin.className = '';
-      spin.textContent = '';
-      txt.textContent = 'Sync Live';
+        lastSyncAt = Date.now();
+        const istTime = new Date(lastSyncAt).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+        document.getElementById('sync-meta').textContent = `Last Sync: ${istTime} IST |AS12H|`;
+      } finally {
+        clearInterval(syncSpinTimer);
+        spin.className = '';
+        spin.textContent = '↻'; // Change to '' if you want no icon when idle
+        txt.textContent = 'Sync';
+        btn.disabled = false;
+      }
     }
+
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeInspector();
