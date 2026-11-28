@@ -1115,10 +1115,18 @@
       const btn = document.getElementById('sync-btn');
       const spin = document.getElementById('sync-spinner');
       const txt = document.getElementById('sync-btn-text');
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+      let frameIdx = 0;
+
       btn.disabled = true;
-      spin.className = 'spinning';
-      spin.textContent = '⠋';
+      spin.className = '';
+      spin.textContent = frames[0];
       txt.textContent = 'Syncing';
+
+      const spinTimer = setInterval(() => {
+        frameIdx = (frameIdx + 1) % frames.length;
+        spin.textContent = frames[frameIdx];
+      }, 80);
 
       setPendingState();
       await Promise.allSettled([fetchTrafficStats(), checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
