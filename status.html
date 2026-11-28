@@ -276,7 +276,7 @@
           <span id="sync-spinner"></span>
           <span id="sync-btn-text">Sync Live</span>
         </button>
-        <button class="btn" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
+        <button class="btn" id="theme-btn" onclick="toggleTheme()">DM</button>
         <a class="btn" href="./index.html">Open News Hub</a>
       </div>
     </div>
@@ -478,7 +478,7 @@
     function updateThemeBtnLabel() {
       const isDark = document.documentElement.classList.contains('dark');
       const btn = document.getElementById('theme-btn');
-      if (btn) btn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      if (btn) btn.textContent = isDark ? 'LM' : 'DM';
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', isDark ? '#090d16' : '#f5f5f7');
     }
@@ -1129,7 +1129,7 @@
         dateStyle: 'medium',
         timeStyle: 'short'
       });
-      document.getElementById('sync-meta').textContent = `Last Sync: ${istTime} IST • Au Sy 12h`;
+      document.getElementById('sync-meta').textContent = `Last Sync: ${istTime} IST |AS12H|`;
 
       btn.disabled = false;
       spin.className = '';
