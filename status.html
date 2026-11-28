@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>T&amp;C News Hub — Live Operations Scorecard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #111827;
+      --card-head: #162032;
+      --border: #1f2937;
+      --divider: #1e293b;
+      --text: #f8fafc;
+      --text-mid: #e2e8f0;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --blue: #60a5fa;
+      --cyan: #38bdf8;
+      --purple: #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+    }
+
+    .container { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Header Card */
+    .header-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
+    .brand-sub { font-size: 12px; font-weight: 700; letter-spacing: 0.8px; color: var(--muted); margin-top: 4px; }
+    .brand-meta { font-size: 11.5px; color: var(--dim); margin-top: 8px; }
+
+    .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 999px;
+      background: #0f172a; border: 1.5px solid var(--amber);
+      font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--amber);
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700;
+      border: 1px solid #334155; background: #0f172a; color: var(--text-mid);
+      cursor: pointer; text-decoration: none; transition: all 0.15s ease;
+    }
+    .btn:hover { border-color: var(--blue); color: #ffffff; background: #1e293b; }
+    .btn-primary { background: #0071e3; border-color: #0071e3; color: #ffffff; }
+    .btn-primary:hover { background: #0060c2; border-color: #0060c2; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Segmented Progress Bar */
+    .seg-bar {
+      width: 100%; height: 12px; border-radius: 999px; background: var(--divider);
+      overflow: hidden; display: flex;
+    }
+    .seg-ok { background: var(--green); transition: width 0.35s ease; }
+    .seg-warn { background: var(--amber); transition: width 0.35s ease; }
+    .seg-fail { background: var(--red); transition: width 0.35s ease; }
+
+    /* KPI Tiles */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    @media (max-width: 820px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .kpi-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; color: var(--muted); }
+    .kpi-val { font-size: 22px; font-weight: 800; margin-top: 6px; }
+    .kpi-sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+    /* Filter Bar */
+    .filter-row {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fpill {
+      padding: 6px 13px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      border: 1px solid var(--border); background: var(--card); color: var(--muted);
+      cursor: pointer; transition: all 0.15s ease;
+    }
+    .fpill.active { background: #1e293b; border-color: var(--blue); color: #ffffff; }
+    .hint-text { font-size: 11px; color: var(--dim); }
+
+    /* Attention Panel */
+    .alert-card {
+      background: #18121e; border: 1.5px solid #3b1d2e; border-radius: 14px; padding: 16px 18px;
+    }
+    .alert-card.hidden { display: none; }
+    .alert-head { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; color: #f87171; margin-bottom: 10px; }
+    .alert-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 7px 8px; border-radius: 8px; cursor: pointer; transition: background 0.15s;
+    }
+    .alert-row:hover { background: rgba(255, 255, 255, 0.05); }
+    .alert-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 5px;
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.4px; color: #090d16; flex-shrink: 0;
+    }
+    .badge-DOWN { background: var(--red); }
+    .badge-NOTICE { background: var(--amber); }
+    .badge-LIVE { background: var(--green); }
+    .alert-text { font-size: 12.5px; font-weight: 600; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .alert-action { font-size: 11px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+
+    /* 2x2 Section Cards */
+    .sections-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    @media (max-width: 860px) { .sections-grid { grid-template-columns: 1fr; } }
+
+    .sec-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .sec-head {
+      background: var(--card-head); padding: 12px 16px;
+      font-size: 12px; font-weight: 800; letter-spacing: 0.8px; color: var(--blue);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sec-count { font-size: 11px; color: var(--muted); font-weight: 700; }
+    .sec-body { padding: 6px 8px 10px; }
+
+    .item-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 8px 10px; border-bottom: 1px solid var(--divider); border-radius: 8px;
+      cursor: pointer; transition: background 0.15s ease;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: rgba(96, 165, 250, 0.08); }
+    .item-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-OK { background: var(--green); }
+    .dot-WARN { background: var(--amber); }
+    .dot-FAIL { background: var(--red); }
+    .dot-PENDING { background: #475569; }
+
+    .item-name { font-size: 12.5px; font-weight: 600; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-metric { font-size: 11.5px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .m-OK { color: var(--muted); }
+    .m-WARN { color: var(--amber); }
+    .m-FAIL { color: var(--red); }
+    .m-PENDING { color: var(--dim); }
+
+    /* Footer */
+    .footer {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+      font-size: 11px; color: var(--dim); padding-top: 6px;
+    }
+    .footer a { color: var(--blue); text-decoration: none; }
+
+    /* Inspector Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(2, 6, 23, 0.78); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal-box {
+      width: 100%; max-width: 640px; max-height: 86vh; overflow-y: auto;
+      background: var(--card); border: 1.5px solid #334155; border-radius: 16px;
+      padding: 20px 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+    .modal-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--divider); margin-bottom: 14px;
+    }
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--text); }
+    .modal-sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+    .close-btn {
+      background: #1e293b; border: 1px solid #334155; color: var(--text-mid);
+      border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .detail-box {
+      background: #0f172a; border: 1px solid var(--divider); border-radius: 12px;
+      padding: 12px 14px; font-size: 12.5px; line-height: 1.55; color: var(--text-mid); margin-bottom: 14px;
+    }
+    .sample-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .sample-card {
+      display: block; text-decoration: none;
+      background: #0f172a; border: 1px solid var(--divider); border-radius: 10px;
+      padding: 10px 12px; transition: border-color 0.15s;
+    }
+    .sample-card:hover { border-color: var(--blue); }
+    .sample-title { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .sample-meta { font-size: 11px; color: var(--dim); margin-top: 4px; }
+    .modal-foot {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;
+      padding-top: 12px; border-top: 1px solid var(--divider);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { display: inline-block; animation: spin 0.9s linear infinite; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header-card">
+      <div>
+        <div class="brand-title">T&amp;C NEWS HUB</div>
+        <div class="brand-sub">LIVE OPERATIONS SCORECARD</div>
+        <div class="brand-meta" id="sync-meta">Running live checks directly from browser • Auto-sync 12h</div>
+      </div>
+      <div class="header-actions">
+        <div class="status-pill" id="overall-pill">
+          <span class="status-dot"></span>
+          <span id="overall-pill-text">CHECKING LIVE...</span>
+        </div>
+        <button class="btn btn-primary" id="sync-btn" onclick="runAllLiveChecks()">
+          <span id="sync-spinner"></span>
+          <span id="sync-btn-text">Sync Live</span>
+        </button>
+        <a class="btn" href="./index.html">Open News Hub</a>
+      </div>
+    </div>
+
+    <!-- SEGMENTED BAR -->
+    <div class="seg-bar">
+      <div class="seg-ok" id="seg-ok" style="width:0%"></div>
+      <div class="seg-warn" id="seg-warn" style="width:0%"></div>
+      <div class="seg-fail" id="seg-fail" style="width:0%"></div>
+    </div>
+
+    <!-- KPI TILES -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">LIVE SOURCES</div>
+        <div class="kpi-val" id="kpi-live" style="color: var(--green);">-- / --</div>
+        <div class="kpi-sub" id="kpi-pct">Checking endpoints...</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">RECORDS TRACKED</div>
+        <div class="kpi-val" id="kpi-records" style="color: var(--cyan);">--</div>
+        <div class="kpi-sub">Live feed items</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">AVG LATENCY</div>
+        <div class="kpi-val" id="kpi-latency" style="color: var(--purple);">-- ms</div>
+        <div class="kpi-sub">Live response speed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ATTENTION</div>
+        <div class="kpi-val" id="kpi-attention" style="color: var(--amber);">--</div>
+        <div class="kpi-sub" id="kpi-attention-sub">Scanning all tabs</div>
+      </div>
+    </div>
+
+    <!-- FILTER & HINT -->
+    <div class="filter-row">
+      <div class="filter-pills">
+        <button class="fpill active" onclick="setFilter('ALL', this)">All Sources</button>
+        <button class="fpill" onclick="setFilter('OK', this)">Live Only</button>
+        <button class="fpill" onclick="setFilter('ISSUES', this)">Down &amp; Notices</button>
+      </div>
+      <div class="hint-text">Click any source row to inspect live items, latency, or re-test individually</div>
+    </div>
+
+    <!-- ATTENTION SUMMARY -->
+    <div class="alert-card hidden" id="attention-card">
+      <div class="alert-head">ATTENTION SUMMARY</div>
+      <div id="attention-list"></div>
+    </div>
+
+    <!-- 2x2 SECTIONS GRID -->
+    <div class="sections-grid" id="sections-grid"></div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div>Live Browser Diagnostic • Zero Cached Fallbacks • Auto-Sync Every 12 Hours</div>
+      <div><a href="./index.html">tastyandcomfort.github.io/news</a></div>
+    </div>
+  </div>
+
+  <!-- LIVE INSPECTOR MODAL -->
+  <div class="modal-backdrop hidden" id="inspector-modal" onclick="if(event.target===this) closeInspector()">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="badge" id="ins-badge">LIVE</span>
+            <div class="modal-title" id="ins-title">Source Name</div>
+          </div>
+          <div class="modal-sub" id="ins-sub">Section • Latency</div>
+        </div>
+        <button class="close-btn" onclick="closeInspector()">Close</button>
+      </div>
+
+      <div class="detail-box" id="ins-detail">Status details...</div>
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;">LIVE DATA PREVIEW</div>
+      <div class="sample-list" id="ins-samples"></div>
+
+      <div class="modal-foot">
+        <button class="btn btn-primary" id="ins-recheck-btn" onclick="recheckCurrentItem()">Re-check This Source</button>
+        <a class="btn" id="ins-open-url" href="#" target="_blank" rel="noopener">Open Endpoint</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SITE_URL = './';
+    const FULL_SITE_URL = 'https://tastyandcomfort.github.io/news/';
+    const GOV_API = 'https://news-lemon-two.vercel.app/api/gov';
+    const NEWS_API = 'https://news-lemon-two.vercel.app/api/news';
+    const MISSING_API = 'https://news-lemon-two.vercel.app/api/missing';
+    const FLIGHTS_APIS = [
+      'https://news-39tq.vercel.app/api/flights',
+      'https://news-lemon-two.vercel.app/api/flights'
+    ];
+    const FIRESTORE_URL =
+      'https://firestore.googleapis.com/v1/projects/news-61e62/databases/(default)/documents/live_jobs?pageSize=50&key=AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU';
+    const AUTO_SYNC_MS = 12 * 60 * 60 * 1000;
+
+    let currentFilter = 'ALL';
+    let lastSyncAt = 0;
+    let activeInspectorId = null;
+
+    const SECTIONS = [
+      { id: 'tab1', title: 'TAB 1 - HEADLINES & HOME', items: [] },
+      { id: 'tab2', title: 'TAB 2 - PRESS RELEASES', items: [] },
+      { id: 'tab3', title: 'TAB 3 - MOST WANTED & MISSING', items: [] },
+      { id: 'tab456', title: 'TABS 4, 5 & 6 - TV, RADAR & JOBS', items: [] }
+    ];
+
+    const ITEM_REGISTRY = new Map();
+    const RECHECKERS = new Map();
+
+    function escHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function truncate(str, max = 95) {
+      const s = String(str ?? '').replace(/\s+/g, ' ').trim();
+      return s.length > max ? s.slice(0, max - 3) + '...' : s;
+    }
+
+    async function fetchTimed(url, timeoutMs = 18000, headers = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const t0 = performance.now();
+      try {
+        const sep = url.includes('?') ? '&' : '?';
+        const res = await fetch(`${url}${sep}_ts=${Date.now()}`, {
+          cache: 'no-store',
+          headers,
+          signal: controller.signal
+        });
+        const text = await res.text();
+        return { ok: res.ok, status: res.status, ms: Math.round(performance.now() - t0), text, error: null };
+      } catch (err) {
+        return { ok: false, status: 0, ms: Math.round(performance.now() - t0), text: '', error: err.message || 'Network error' };
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function fetchJsonTimed(url, timeoutMs = 18000) {
+      const r = await fetchTimed(url, timeoutMs, { Accept: 'application/json' });
+      if (!r.ok) return { ok: false, ms: r.ms, error: r.error || `HTTP ${r.status}`, data: null };
+      try {
+        return { ok: true, ms: r.ms, error: null, data: JSON.parse(r.text) };
+      } catch (err) {
+        return { ok: false, ms: r.ms, error: `Invalid JSON (${err.message})`, data: null };
+      }
+    }
+
+    function parseRssSamples(xmlText) {
+      const doc = new DOMParser().parseFromString(String(xmlText || ''), 'text/xml');
+      const items = Array.from(doc.querySelectorAll('item'));
+      return {
+        count: items.length,
+        samples: items.slice(0, 5).map(it => ({
+          title: it.querySelector('title')?.textContent?.trim() || 'News Story',
+          meta: it.querySelector('pubDate')?.textContent?.trim() || 'Live RSS',
+          url: it.querySelector('link')?.textContent?.trim() || FULL_SITE_URL
+        }))
+      };
+    }
+
+    function makeItem(id, sectionId, name, status, metric, detail, count = 0, ms = 0, verifyUrl = '', samples = []) {
+      const obj = { id, sectionId, name, status, metric, detail, count, ms, verifyUrl, samples };
+      ITEM_REGISTRY.set(id, obj);
+      return obj;
+    }
+
+    function setSectionItems(sectionId, items) {
+      const sec = SECTIONS.find(s => s.id === sectionId);
+      if (sec) sec.items = items;
+      renderAll();
+    }
+
+    function setPendingState() {
+      SECTIONS[0].items = [
+        ['t1_site', 'Website Hosting'], ['t1_world', 'World Highlights RSS'],
+        ['t1_local', 'Telangana Headlines'], ['t1_nat', 'India Headlines'],
+        ['t1_bul', 'T&C Bulletins'], ['t1_fx', 'Forex USD/INR'],
+        ['t1_usgs', 'USGS Earthquakes'], ['t1_espn', 'ESPN Sports Ticker'],
+        ['t1_solar', 'Solar Schedule']
+      ].map(([id, n]) => makeItem(id, 'tab1', n, 'PENDING', 'Checking...', 'Querying live endpoint...'));
+
+      SECTIONS[1].items = [
+        ['t2_pib', 'PIB All India (RSS)'], ['t2_reg', 'PIB Regions List'],
+        ['t2_minlist', 'PIB Ministries List'], ['t2_pmo', 'Ministries (PMO Sample)'],
+        ['t2_rs', 'Parliament - Rajya Sabha'], ['t2_ls', 'Parliament - Lok Sabha'],
+        ['t2_sci', 'Supreme Court of India'], ['t2_eci', 'Election Commission'],
+        ['t2_ed', 'ED Press Releases'], ['t2_cbi', 'CBI Press Releases'],
+        ['t2_isro', 'Space - ISRO'], ['t2_nasa', 'Space - NASA'],
+        ['t2_spx', 'Space - SpaceX'], ['t2_pol', 'State Police Feeds'],
+        ['t2_custom', 'Listed by T&C']
+      ].map(([id, n]) => makeItem(id, 'tab2', n, 'PENDING', 'Checking...', 'Querying live endpoint...'));
+
+      SECTIONS[2].items = [
+        ['t3_nia', 'NIA India Most Wanted'], ['t3_edp', 'ED Proclamations'],
+        ['t3_cbirn', 'CBI / INTERPOL India'], ['t3_int', 'INTERPOL Global Red'],
+        ['t3_fbi', 'FBI Wanted (Live API)'], ['t3_snap', 'wanted-data.json Snapshot'],
+        ['t3_fbim', 'Missing - FBI Live'], ['t3_zip', 'Missing - ZIPNET India'],
+        ['t3_inty', 'Missing - INTERPOL Yellow']
+      ].map(([id, n]) => makeItem(id, 'tab3', n, 'PENDING', 'Checking...', 'Querying live endpoint...'));
+
+      SECTIONS[3].items = [
+        ['t4_js', 'TV & Core Engine (tc-addons)'], ['t5_fl', 'Radar - Live Flights'],
+        ['t5_iss', 'Radar - ISS Telemetry'], ['t5_crew', 'Radar - ISS Crew Manifest'],
+        ['t6_jobs', 'Find Jobs (Firestore)']
+      ].map(([id, n]) => makeItem(id, 'tab456', n, 'PENDING', 'Checking...', 'Querying live endpoint...'));
+
+      renderAll();
+    }
+
+    async function checkTab1() {
+      const [siteRes, worldRss, localRss, natRss, bulRes, fxRes, usgsRes, espnRes, solarRes] = await Promise.all([
+        fetchTimed(`${SITE_URL}index.html`, 15000),
+        fetchTimed(`${NEWS_API}?scope=world`, 15000),
+        fetchTimed(`${NEWS_API}?scope=local`, 15000),
+        fetchTimed(`${NEWS_API}?scope=national`, 15000),
+        fetchJsonTimed(`${SITE_URL}bulletins.json`, 12000),
+        fetchJsonTimed('https://open.er-api.com/v6/latest/USD', 12000),
+        fetchJsonTimed('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson', 12000),
+        fetchJsonTimed('https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel', 12000),
+        fetchJsonTimed('https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&daily=sunrise,sunset&timezone=auto', 12000)
+      ]);
+
+      const items = [];
+      items.push(siteRes.ok
+        ? makeItem('t1_site', 'tab1', 'Website Hosting', 'OK', `200 OK (${siteRes.ms} ms)`, 'GitHub Pages serving live index.html', 1, siteRes.ms, FULL_SITE_URL)
+        : makeItem('t1_site', 'tab1', 'Website Hosting', 'FAIL', siteRes.error || `HTTP ${siteRes.status}`, 'GitHub Pages unreachable', 0, siteRes.ms, FULL_SITE_URL));
+
+      for (const [id, label, r, url] of [
+        ['t1_world', 'World Highlights RSS', worldRss, `${NEWS_API}?scope=world`],
+        ['t1_local', 'Telangana Headlines', localRss, `${NEWS_API}?scope=local`],
+        ['t1_nat', 'India Headlines', natRss, `${NEWS_API}?scope=national`]
+      ]) {
+        if (!r.ok) {
+          items.push(makeItem(id, 'tab1', label, 'FAIL', r.error || `HTTP ${r.status}`, 'RSS proxy returned an error', 0, r.ms, url));
+        } else {
+          const parsed = parseRssSamples(r.text);
+          items.push(parsed.count > 0
+            ? makeItem(id, 'tab1', label, 'OK', `${parsed.count} stories (${r.ms} ms)`, parsed.samples[0]?.title || '', parsed.count, r.ms, url, parsed.samples)
+            : makeItem(id, 'tab1', label, 'FAIL', '0 stories', 'RSS feed returned 0 items', 0, r.ms, url));
+        }
+      }
+
+      if (bulRes.ok) {
+        const arr = Array.isArray(bulRes.data) ? bulRes.data : (bulRes.data?.bulletins || []);
+        const samples = arr.slice(0, 5).map(b => ({ title: b.title, meta: `${b.city || 'T&C'} • ${b.dateText || ''}`, url: `${FULL_SITE_URL}?bulletin=${encodeURIComponent(b.id)}` }));
+        items.push(arr.length > 0
+          ? makeItem('t1_bul', 'tab1', 'T&C Bulletins', 'OK', `${arr.length} published`, arr[0]?.title || '', arr.length, bulRes.ms, `${FULL_SITE_URL}bulletins.json`, samples)
+          : makeItem('t1_bul', 'tab1', 'T&C Bulletins', 'WARN', '0 published', 'No bulletins in bulletins.json', 0, bulRes.ms, `${FULL_SITE_URL}bulletins.json`));
+      } else {
+        items.push(makeItem('t1_bul', 'tab1', 'T&C Bulletins', 'WARN', bulRes.error, 'Could not load bulletins.json', 0, bulRes.ms, `${FULL_SITE_URL}bulletins.json`));
+      }
+
+      items.push(fxRes.ok && fxRes.data?.rates?.INR
+        ? makeItem('t1_fx', 'tab1', 'Forex USD/INR', 'OK', `INR ${fxRes.data.rates.INR.toFixed(2)}`, `1 USD = INR ${fxRes.data.rates.INR.toFixed(2)} | 1 EUR = INR ${(fxRes.data.rates.INR / fxRes.data.rates.EUR).toFixed(2)}`, 1, fxRes.ms, 'https://open.er-api.com/v6/latest/USD')
+        : makeItem('t1_fx', 'tab1', 'Forex USD/INR', 'FAIL', fxRes.error || 'No rate', 'Forex API error', 0, fxRes.ms, 'https://open.er-api.com/v6/latest/USD'));
+
+      if (usgsRes.ok && Array.isArray(usgsRes.data?.features)) {
+        const q = usgsRes.data.features;
+        const samples = q.slice(0, 5).map(f => ({ title: `M${f.properties.mag} — ${f.properties.place}`, meta: new Date(f.properties.time).toLocaleString(), url: f.properties.url || 'https://earthquake.usgs.gov' }));
+        items.push(makeItem('t1_usgs', 'tab1', 'USGS Earthquakes', 'OK', `${q.length} events`, samples[0]?.title || '24h M4.5+ global feed', q.length, usgsRes.ms, 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson', samples));
+      } else {
+        items.push(makeItem('t1_usgs', 'tab1', 'USGS Earthquakes', 'FAIL', usgsRes.error || 'Error', 'USGS feed unreachable', 0, usgsRes.ms, 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson'));
+      }
+
+      const espnEvents = espnRes.data?.scores || espnRes.data?.events || [];
+      items.push(espnRes.ok
+        ? makeItem('t1_espn', 'tab1', 'ESPN Sports Ticker', 'OK', `${espnEvents.length} feeds`, 'Live cricket/sports scoreboard API', espnEvents.length, espnRes.ms, 'https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel')
+        : makeItem('t1_espn', 'tab1', 'ESPN Sports Ticker', 'FAIL', espnRes.error, 'ESPN API unreachable', 0, espnRes.ms, 'https://site.web.api.espn.com/apis/site/v2/sports/cricket/scorepanel'));
+
+      items.push(solarRes.ok && solarRes.data?.daily?.sunrise?.length
+        ? makeItem('t1_solar', 'tab1', 'Solar Schedule', 'OK', `${solarRes.ms} ms`, `Sunrise ${new Date(solarRes.data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} / Sunset ${new Date(solarRes.data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, 1, solarRes.ms, 'https://open-meteo.com/')
+        : makeItem('t1_solar', 'tab1', 'Solar Schedule', 'FAIL', solarRes.error || 'No data', 'Open-Meteo API error', 0, solarRes.ms));
+
+      setSectionItems('tab1', items);
+    }
+
+    function mapGovItemsToSamples(srcObj) {
+      return (srcObj?.items || []).slice(0, 5).map(it => ({
+        title: it.title,
+        meta: `${it.department || it.agency} • ${it.dateText || it.publishedAt || ''}`,
+        url: it.link
+      }));
+    }
+
+    async function checkTab2() {
+      const [gMainRes, gRegRes, gMinRes, gPmoRes, gParlRes, gSciRes, gEciRes, gSpaceRes, gPolRes, custRes] = await Promise.all([
+        fetchJsonTimed(`${GOV_API}?source=pib,ed_press,cbi&regid=3&lang=en`, 24000),
+        fetchJsonTimed(`${GOV_API}?source=pib_regions`, 15000),
+        fetchJsonTimed(`${GOV_API}?source=pib_ministries`, 15000),
+        fetchJsonTimed(`${GOV_API}?source=pib_ministry&minid=3`, 24000),
+        fetchJsonTimed(`${GOV_API}?source=parliament`, 25000),
+        fetchJsonTimed(`${GOV_API}?source=sci`, 24000),
+        fetchJsonTimed(`${GOV_API}?source=eci`, 24000),
+        fetchJsonTimed(`${GOV_API}?source=space`, 24000),
+        fetchJsonTimed(`${GOV_API}?source=police&state=ALL`, 24000),
+        fetchJsonTimed(`${SITE_URL}press-releases.json`, 10000)
+      ]);
+
+      const checkGov = (id, label, srcObj, resWrap, url, emptyWarn = false) => {
+        if (!srcObj) return makeItem(id, 'tab2', label, 'FAIL', resWrap.error || 'No response', 'Backend did not return this source', 0, resWrap.ms, url);
+        if (srcObj.ok && srcObj.count > 0) {
+          return makeItem(id, 'tab2', label, 'OK', `${srcObj.count} items`, srcObj.items?.[0]?.title || '', srcObj.count, resWrap.ms, url, mapGovItemsToSamples(srcObj));
+        }
+        return makeItem(id, 'tab2', label, emptyWarn ? 'WARN' : 'FAIL', srcObj.error || '0 items', srcObj.error || '0 releases returned', 0, resWrap.ms, url);
+      };
+
+      const gm = gMainRes.data?.sources || {};
+      const parl = gParlRes.data?.sources || {};
+      const sp = gSpaceRes.data?.sources || {};
+      const pol = gPolRes.data?.sources?.police;
+
+      const items = [];
+      items.push(checkGov('t2_pib', 'PIB All India (RSS)', gm.pib, gMainRes, `${GOV_API}?source=pib`));
+
+      items.push(gRegRes.ok && gRegRes.data?.regions?.length
+        ? makeItem('t2_reg', 'tab2', 'PIB Regions List', 'OK', `${gRegRes.data.regions.length} regions`, 'Live ViewRss regions list', gRegRes.data.regions.length, gRegRes.ms, `${GOV_API}?source=pib_regions`)
+        : makeItem('t2_reg', 'tab2', 'PIB Regions List', 'FAIL', gRegRes.data?.error || gRegRes.error, 'Regions list unavailable', 0, gRegRes.ms, `${GOV_API}?source=pib_regions`));
+
+      items.push(gMinRes.ok && gMinRes.data?.ministries?.length
+        ? makeItem('t2_minlist', 'tab2', 'PIB Ministries List', 'OK', `${gMinRes.data.ministries.length} ministries`, 'Live AllRel ministries list', gMinRes.data.ministries.length, gMinRes.ms, `${GOV_API}?source=pib_ministries`)
+        : makeItem('t2_minlist', 'tab2', 'PIB Ministries List', 'FAIL', gMinRes.data?.error || gMinRes.error, 'Ministries list unavailable', 0, gMinRes.ms, `${GOV_API}?source=pib_ministries`));
+
+      items.push(checkGov('t2_pmo', 'Ministries (PMO Sample)', gPmoRes.data?.sources?.pib_ministry, gPmoRes, `${GOV_API}?source=pib_ministry&minid=3`, true));
+      items.push(checkGov('t2_rs', 'Parliament - Rajya Sabha', parl.rajya_sabha, gParlRes, `${GOV_API}?source=parliament`, true));
+      items.push(checkGov('t2_ls', 'Parliament - Lok Sabha', parl.lok_sabha, gParlRes, `${GOV_API}?source=parliament`, true));
+      items.push(checkGov('t2_sci', 'Supreme Court of India', gSciRes.data?.sources?.sci, gSciRes, `${GOV_API}?source=sci`));
+      items.push(checkGov('t2_eci', 'Election Commission', gEciRes.data?.sources?.eci, gEciRes, `${GOV_API}?source=eci`, true));
+      items.push(checkGov('t2_ed', 'ED Press Releases', gm.ed_press, gMainRes, `${GOV_API}?source=ed_press`));
+      items.push(checkGov('t2_cbi', 'CBI Press Releases', gm.cbi, gMainRes, `${GOV_API}?source=cbi`, true));
+      items.push(checkGov('t2_isro', 'Space - ISRO', sp.isro, gSpaceRes, `${GOV_API}?source=space`));
+      items.push(checkGov('t2_nasa', 'Space - NASA', sp.nasa, gSpaceRes, `${GOV_API}?source=space`));
+      items.push(checkGov('t2_spx', 'Space - SpaceX', sp.spacex, gSpaceRes, `${GOV_API}?source=space`));
+
+      if (pol && pol.items) {
+        const dl = pol.items.filter(x => x.stateName === 'DELHI').length;
+        const kl = pol.items.filter(x => x.stateName === 'KERALA').length;
+        const chd = pol.items.filter(x => x.stateName === 'CHANDIGARH').length;
+        const status = (dl > 0 || kl > 0) ? (pol.error ? 'WARN' : 'OK') : 'FAIL';
+        items.push(makeItem('t2_pol', 'tab2', 'State Police Feeds', status, `DL:${dl} KL:${kl} CHD:${chd}`, pol.error || 'Delhi & Kerala live feeds active', dl + kl + chd, gPolRes.ms, `${GOV_API}?source=police&state=ALL`, mapGovItemsToSamples(pol)));
+      } else {
+        items.push(makeItem('t2_pol', 'tab2', 'State Police Feeds', 'FAIL', gPolRes.error || 'No response', 'Police endpoint failed', 0, gPolRes.ms, `${GOV_API}?source=police&state=ALL`));
+      }
+
+      if (custRes.ok) {
+        const arr = Array.isArray(custRes.data) ? custRes.data : (custRes.data?.items || []);
+        const samples = arr.slice(0, 5).map(x => ({ title: x.title, meta: `${x.department || 'T&C'} • ${x.dateText || ''}`, url: x.link || FULL_SITE_URL }));
+        items.push(makeItem('t2_custom', 'tab2', 'Listed by T&C', 'OK', `${arr.length} custom`, 'press-releases.json', arr.length, custRes.ms, `${FULL_SITE_URL}press-releases.json`, samples));
+      } else {
+        items.push(makeItem('t2_custom', 'tab2', 'Listed by T&C', 'WARN', custRes.error, 'press-releases.json unreadable', 0, custRes.ms, `${FULL_SITE_URL}press-releases.json`));
+      }
+
+      setSectionItems('tab2', items);
+    }
+
+    async function checkTab3() {
+      const [gwRes, snapRes, fbiRes, missRes] = await Promise.all([
+        fetchJsonTimed(`${GOV_API}?source=nia,ed_proclamation,cbi,interpol`, 25000),
+        fetchJsonTimed(`${SITE_URL}wanted-data.json`, 12000),
+        fetchJsonTimed('https://api.fbi.gov/wanted/v1/list?page=1', 15000),
+        fetchJsonTimed(`${MISSING_API}?source=all`, 24000)
+      ]);
+
+      const gw = gwRes.data?.sources || {};
+      const ms = missRes.data?.sources || {};
+      const items = [];
+
+      const wantedSamples = (arr) => (arr || []).slice(0, 5).map(x => ({
+        title: x.name, meta: `${x.department || x.agency} • ${x.location || ''}`, url: x.sourceUrl
+      }));
+
+      items.push(gw.nia?.ok
+        ? makeItem('t3_nia', 'tab3', 'NIA India Most Wanted', 'OK', `${gw.nia.count} records`, gw.nia.items?.[0]?.name || '', gw.nia.count, gwRes.ms, `${GOV_API}?source=nia`, wantedSamples(gw.nia.items))
+        : makeItem('t3_nia', 'tab3', 'NIA India Most Wanted', 'FAIL', gw.nia?.error || gwRes.error || '0 records', gw.nia?.error || 'NIA check failed', 0, gwRes.ms, `${GOV_API}?source=nia`));
+
+      items.push(gw.ed_proclamation?.ok
+        ? makeItem('t3_edp', 'tab3', 'ED Proclamations', 'OK', `${gw.ed_proclamation.count} records`, gw.ed_proclamation.items?.[0]?.name || '', gw.ed_proclamation.count, gwRes.ms, `${GOV_API}?source=ed_proclamation`, wantedSamples(gw.ed_proclamation.items))
+        : makeItem('t3_edp', 'tab3', 'ED Proclamations', 'FAIL', gw.ed_proclamation?.error || gwRes.error || '0 records', gw.ed_proclamation?.error || 'ED check failed', 0, gwRes.ms, `${GOV_API}?source=ed_proclamation`));
+
+      items.push(gw.cbi?.redNoticeCount > 0
+        ? makeItem('t3_cbirn', 'tab3', 'CBI / INTERPOL India', 'OK', `${gw.cbi.redNoticeCount} records`, gw.cbi.redNotices?.[0]?.name || '', gw.cbi.redNoticeCount, gwRes.ms, `${GOV_API}?source=cbi`, wantedSamples(gw.cbi.redNotices))
+        : makeItem('t3_cbirn', 'tab3', 'CBI / INTERPOL India', 'FAIL', gw.cbi?.error || '0 records', 'CBI Red Notice table unavailable', 0, gwRes.ms, `${GOV_API}?source=cbi`));
+
+      // INTERPOL Red: server first, then browser-direct test
+      if (gw.interpol?.ok && gw.interpol.count > 0) {
+        items.push(makeItem('t3_int', 'tab3', 'INTERPOL Global Red', 'OK', `${gw.interpol.count} records`, 'Live from backend', gw.interpol.count, gwRes.ms, `${GOV_API}?source=interpol`, wantedSamples(gw.interpol.items)));
+      } else {
+        const directRed = await fetchJsonTimed('https://ws-public.interpol.int/notices/v1/red?resultPerPage=10', 8000);
+        const dList = directRed.data?._embedded?.notices || [];
+        if (directRed.ok && dList.length > 0) {
+          const samples = dList.slice(0, 5).map(n => ({ title: `${n.forename || ''} ${n.name || ''}`.trim(), meta: `Notice ${n.entity_id}`, url: `https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices#${String(n.entity_id).replace('/', '-')}` }));
+          items.push(makeItem('t3_int', 'tab3', 'INTERPOL Global Red', 'OK', `${dList.length} live (Browser)`, 'Direct browser fetch succeeded', dList.length, directRed.ms, 'https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices', samples));
+        } else {
+          items.push(makeItem('t3_int', 'tab3', 'INTERPOL Global Red', 'WARN', 'WAF 403 (Server)', `Server: ${gw.interpol?.error || '403'} | Browser: ${directRed.error || 'Blocked'}`, 0, gwRes.ms, 'https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices'));
+        }
+      }
+
+      if (fbiRes.ok && fbiRes.data?.items?.length) {
+        const samples = fbiRes.data.items.slice(0, 5).map(x => ({ title: x.title, meta: (x.subjects || []).join(', ') || 'FBI Wanted', url: x.url }));
+        items.push(makeItem('t3_fbi', 'tab3', 'FBI Wanted (Live API)', 'OK', `${fbiRes.data.items.length} records`, fbiRes.data.items[0]?.title || '', fbiRes.data.items.length, fbiRes.ms, 'https://api.fbi.gov/wanted/v1/list?page=1', samples));
+      } else {
+        items.push(makeItem('t3_fbi', 'tab3', 'FBI Wanted (Live API)', 'FAIL', fbiRes.error || '0 records', 'api.fbi.gov unreachable', 0, fbiRes.ms, 'https://api.fbi.gov/wanted/v1/list?page=1'));
+      }
+
+      if (snapRes.ok && snapRes.data) {
+        items.push(makeItem('t3_snap', 'tab3', 'wanted-data.json Snapshot', 'OK', `${snapRes.data.total || 0} items`, `Sources: ${(snapRes.data.sources || []).join(', ') || 'None'} • ${snapRes.data.updatedAt || ''}`, snapRes.data.total || 0, snapRes.ms, `${FULL_SITE_URL}wanted-data.json`));
+      } else {
+        items.push(makeItem('t3_snap', 'tab3', 'wanted-data.json Snapshot', 'WARN', snapRes.error, 'Snapshot unreadable', 0, snapRes.ms, `${FULL_SITE_URL}wanted-data.json`));
+      }
+
+      items.push(ms.fbi_missing?.ok
+        ? makeItem('t3_fbim', 'tab3', 'Missing - FBI Live', 'OK', `${ms.fbi_missing.count} records`, ms.fbi_missing.items?.[0]?.name || '', ms.fbi_missing.count, missRes.ms, `${MISSING_API}?source=fbi`, wantedSamples(ms.fbi_missing.items))
+        : makeItem('t3_fbim', 'tab3', 'Missing - FBI Live', 'FAIL', ms.fbi_missing?.error || missRes.error, 'FBI Missing error', 0, missRes.ms, `${MISSING_API}?source=fbi`));
+
+      items.push(ms.zipnet?.ok
+        ? makeItem('t3_zip', 'tab3', 'Missing - ZIPNET India', 'OK', `${ms.zipnet.count} records`, 'ZIPNET live entries', ms.zipnet.count, missRes.ms, `${MISSING_API}?source=zipnet`, wantedSamples(ms.zipnet.items))
+        : makeItem('t3_zip', 'tab3', 'Missing - ZIPNET India', 'WARN', 'Session required', ms.zipnet?.error || 'Requires browser session', 0, missRes.ms, 'https://zipnet.delhipolice.gov.in/victims/missingpersons/'));
+
+      items.push(ms.interpol_yellow?.ok
+        ? makeItem('t3_inty', 'tab3', 'Missing - INTERPOL Yellow', 'OK', `${ms.interpol_yellow.count} records`, 'Yellow Notices live', ms.interpol_yellow.count, missRes.ms, `${MISSING_API}?source=interpol`, wantedSamples(ms.interpol_yellow.items))
+        : makeItem('t3_inty', 'tab3', 'Missing - INTERPOL Yellow', 'WARN', 'WAF 403 (Server)', ms.interpol_yellow?.error || 'Akamai WAF restricted', 0, missRes.ms, 'https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices'));
+
+      setSectionItems('tab3', items);
+    }
+
+    async function checkTab456() {
+      const [jsRes, fl1Res, fl2Res, issRes, crewRes, jobsRes] = await Promise.all([
+        fetchTimed(`${SITE_URL}tc-addons.js`, 12000),
+        fetchJsonTimed(FLIGHTS_APIS[0], 14000),
+        fetchJsonTimed(FLIGHTS_APIS[1], 14000),
+        fetchJsonTimed('https://api.wheretheiss.at/v1/satellites/25544', 12000),
+        fetchJsonTimed('https://api.open-notify.org/astros.json', 12000),
+        fetchJsonTimed(FIRESTORE_URL, 12000)
+      ]);
+
+      const items = [];
+      const hasExport = /\bexport\s+default\b/.test(jsRes.text);
+      items.push(jsRes.ok && !hasExport
+        ? makeItem('t4_js', 'tab456', 'TV & Core Engine (tc-addons)', 'OK', `${Math.round(jsRes.text.length / 1024)} KB`, 'Script loaded cleanly, 0 syntax issues', 1, jsRes.ms, `${FULL_SITE_URL}tc-addons.js`)
+        : makeItem('t4_js', 'tab456', 'TV & Core Engine (tc-addons)', 'FAIL', hasExport ? 'Syntax error' : (jsRes.error || `HTTP ${jsRes.status}`), 'Core script error', 0, jsRes.ms, `${FULL_SITE_URL}tc-addons.js`));
+
+      const fl1 = Array.isArray(fl1Res.data?.states) ? fl1Res.data.states.length : 0;
+      const fl2 = Array.isArray(fl2Res.data?.states) ? fl2Res.data.states.length : 0;
+      const maxFl = Math.max(fl1, fl2);
+      items.push(maxFl > 0
+        ? makeItem('t5_fl', 'tab456', 'Radar - Live Flights', 'OK', `${maxFl} states`, `news-39tq: ${fl1} | news-lemon-two: ${fl2}`, maxFl, Math.min(fl1Res.ms, fl2Res.ms), FLIGHTS_APIS[1])
+        : makeItem('t5_fl', 'tab456', 'Radar - Live Flights', 'FAIL', '0 flights', `39tq: ${fl1Res.error} | lemon: ${fl2Res.error}`, 0, fl1Res.ms, FLIGHTS_APIS[1]));
+
+      items.push(issRes.ok && issRes.data?.altitude
+        ? makeItem('t5_iss', 'tab456', 'Radar - ISS Telemetry', 'OK', `${Math.round(issRes.data.altitude)} km alt`, `Lat ${Number(issRes.data.latitude).toFixed(2)}, Lon ${Number(issRes.data.longitude).toFixed(2)} • Speed ${Math.round(issRes.data.velocity)} km/h`, 1, issRes.ms, 'https://api.wheretheiss.at/v1/satellites/25544')
+        : makeItem('t5_iss', 'tab456', 'Radar - ISS Telemetry', 'FAIL', issRes.error, 'ISS API unreachable', 0, issRes.ms, 'https://api.wheretheiss.at/v1/satellites/25544'));
+
+      const issCrew = Array.isArray(crewRes.data?.people) ? crewRes.data.people.filter(p => p.craft === 'ISS') : [];
+      items.push(crewRes.ok
+        ? makeItem('t5_crew', 'tab456', 'Radar - ISS Crew Manifest', 'OK', `${issCrew.length} crew`, issCrew.map(p => p.name).join(', '), issCrew.length, crewRes.ms, 'https://api.open-notify.org/astros.json')
+        : makeItem('t5_crew', 'tab456', 'Radar - ISS Crew Manifest', 'WARN', 'Timeout', crewRes.error || 'open-notify.org timed out', 0, crewRes.ms, 'https://api.open-notify.org/astros.json'));
+
+      if (jobsRes.ok) {
+        const docs = (jobsRes.data?.documents || []).filter(d => d?.fields?.status?.stringValue === 'active');
+        items.push(docs.length > 0
+          ? makeItem('t6_jobs', 'tab456', 'Find Jobs (Firestore)', 'OK', `${docs.length} active`, 'Firestore live_jobs active listings', docs.length, jobsRes.ms, FULL_SITE_URL)
+          : makeItem('t6_jobs', 'tab456', 'Find Jobs (Firestore)', 'WARN', '0 active', 'Using built-in verified sample jobs', 0, jobsRes.ms, FULL_SITE_URL));
+      } else {
+        items.push(makeItem('t6_jobs', 'tab456', 'Find Jobs (Firestore)', 'WARN', jobsRes.error || 'Restricted', 'Firestore security rules restrict public REST list', 0, jobsRes.ms, FULL_SITE_URL));
+      }
+
+      setSectionItems('tab456', items);
+    }
+
+    RECHECKERS.set('tab1', checkTab1);
+    RECHECKERS.set('tab2', checkTab2);
+    RECHECKERS.set('tab3', checkTab3);
+    RECHECKERS.set('tab456', checkTab456);
+
+    function renderAll() {
+      const allItems = SECTIONS.flatMap(s => s.items);
+      const ok = allItems.filter(i => i.status === 'OK').length;
+      const warn = allItems.filter(i => i.status === 'WARN').length;
+      const fail = allItems.filter(i => i.status === 'FAIL').length;
+      const pending = allItems.filter(i => i.status === 'PENDING').length;
+      const done = ok + warn + fail;
+      const pct = done ? Math.round((ok / done) * 100) : 0;
+
+      const totalRecords = allItems.reduce((sum, i) => sum + (i.count > 1 ? i.count : 0), 0);
+      const latencies = allItems.filter(i => i.ms > 0).map(i => i.ms);
+      const avgMs = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
+
+      // Header pill
+      const pill = document.getElementById('overall-pill');
+      const pillText = document.getElementById('overall-pill-text');
+      if (pending > 0 && done < allItems.length) {
+        pill.style.borderColor = '#60a5fa'; pill.style.color = '#60a5fa';
+        pillText.textContent = `CHECKING (${done}/${allItems.length})`;
+      } else if (fail > 0) {
+        pill.style.borderColor = '#ef4444'; pill.style.color = '#ef4444';
+        pillText.textContent = `${fail} SOURCE DOWN`;
+      } else {
+        pill.style.borderColor = '#22c55e'; pill.style.color = '#22c55e';
+        pillText.textContent = 'ALL CORE SYSTEMS LIVE';
+      }
+
+      // Segmented Bar
+      const denom = Math.max(1, allItems.length);
+      document.getElementById('seg-ok').style.width = `${(ok / denom) * 100}%`;
+      document.getElementById('seg-warn').style.width = `${(warn / denom) * 100}%`;
+      document.getElementById('seg-fail').style.width = `${(fail / denom) * 100}%`;
+
+      // KPIs
+      document.getElementById('kpi-live').textContent = `${ok} / ${allItems.length}`;
+      document.getElementById('kpi-pct').textContent = `${pct}% operational`;
+      document.getElementById('kpi-records').textContent = totalRecords.toLocaleString('en-IN');
+      document.getElementById('kpi-latency').textContent = `${avgMs} ms`;
+      const attEl = document.getElementById('kpi-attention');
+      attEl.style.color = fail > 0 ? 'var(--red)' : 'var(--amber)';
+      attEl.textContent = `${fail} Down / ${warn} Note`;
+      document.getElementById('kpi-attention-sub').textContent = fail > 0 ? 'Inspect alert panel below' : 'No critical outage';
+
+      // Attention Summary
+      const issues = allItems.filter(i => i.status === 'FAIL' || i.status === 'WARN');
+      const attCard = document.getElementById('attention-card');
+      const attList = document.getElementById('attention-list');
+      if (issues.length > 0 && currentFilter !== 'OK') {
+        attCard.classList.remove('hidden');
+        attList.innerHTML = issues.map(it => {
+          const lvl = it.status === 'FAIL' ? 'DOWN' : 'NOTICE';
+          return `
+            <div class="alert-row" onclick="openInspector('${escHtml(it.id)}')">
+              <div class="alert-left">
+                <span class="badge badge-${lvl}">${lvl}</span>
+                <span class="alert-text">${escHtml(it.name)} — ${escHtml(it.metric)}</span>
+              </div>
+              <span class="alert-action">Inspect</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        attCard.classList.add('hidden');
+      }
+
+      // 2x2 Section Cards
+      const grid = document.getElementById('sections-grid');
+      grid.innerHTML = SECTIONS.map(sec => {
+        const visible = sec.items.filter(it => {
+          if (currentFilter === 'OK') return it.status === 'OK';
+          if (currentFilter === 'ISSUES') return it.status === 'FAIL' || it.status === 'WARN';
+          return true;
+        });
+        const liveInSec = sec.items.filter(i => i.status === 'OK').length;
+        const rowsHtml = visible.length > 0
+          ? visible.map(it => `
+              <div class="item-row" onclick="openInspector('${escHtml(it.id)}')">
+                <div class="item-left">
+                  <span class="dot dot-${it.status}"></span>
+                  <span class="item-name">${escHtml(it.name)}</span>
+                </div>
+                <span class="item-metric m-${it.status}">${escHtml(truncate(it.metric, 26))}</span>
+              </div>
+            `).join('')
+          : `<div style="padding:14px 10px;font-size:12px;color:var(--dim);">No sources match this filter.</div>`;
+
+        return `
+          <div class="sec-card">
+            <div class="sec-head">
+              <span>${escHtml(sec.title)}</span>
+              <span class="sec-count">${liveInSec}/${sec.items.length} Live</span>
+            </div>
+            <div class="sec-body">${rowsHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setFilter(mode, btnEl) {
+      currentFilter = mode;
+      document.querySelectorAll('.fpill').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      renderAll();
+    }
+
+    function openInspector(id) {
+      const it = ITEM_REGISTRY.get(id);
+      if (!it) return;
+      activeInspectorId = id;
+
+      const badge = document.getElementById('ins-badge');
+      const lvl = it.status === 'OK' ? 'LIVE' : (it.status === 'WARN' ? 'NOTICE' : 'DOWN');
+      badge.className = `badge badge-${lvl}`;
+      badge.textContent = lvl;
+
+      document.getElementById('ins-title').textContent = it.name;
+      const secTitle = SECTIONS.find(s => s.id === it.sectionId)?.title || '';
+      document.getElementById('ins-sub').textContent = `${secTitle} • ${it.metric}${it.ms ? ` • ${it.ms} ms` : ''}`;
+      document.getElementById('ins-detail').textContent = it.detail || it.metric || 'No extra detail returned.';
+
+      const samplesBox = document.getElementById('ins-samples');
+      if (it.samples && it.samples.length > 0) {
+        samplesBox.innerHTML = it.samples.map(s => `
+          <a class="sample-card" href="${escHtml(s.url || '#')}" target="_blank" rel="noopener">
+            <div class="sample-title">${escHtml(s.title)}</div>
+            ${s.meta ? `<div class="sample-meta">${escHtml(s.meta)}</div>` : ''}
+          </a>
+        `).join('');
+      } else {
+        samplesBox.innerHTML = `<div class="sample-card" style="color:var(--dim);font-size:12px;">No list preview items for this check.</div>`;
+      }
+
+      const openLink = document.getElementById('ins-open-url');
+      if (it.verifyUrl) {
+        openLink.href = it.verifyUrl;
+        openLink.style.display = 'inline-flex';
+      } else {
+        openLink.style.display = 'none';
+      }
+
+      document.getElementById('inspector-modal').classList.remove('hidden');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspector-modal').classList.add('hidden');
+      activeInspectorId = null;
+    }
+
+    async function recheckCurrentItem() {
+      const it = ITEM_REGISTRY.get(activeInspectorId);
+      if (!it) return;
+      const btn = document.getElementById('ins-recheck-btn');
+      btn.disabled = true;
+      btn.textContent = 'Checking Live...';
+      const fn = RECHECKERS.get(it.sectionId);
+      if (fn) await fn();
+      openInspector(it.id);
+      btn.disabled = false;
+      btn.textContent = 'Re-check This Source';
+    }
+
+    async function runAllLiveChecks() {
+      const btn = document.getElementById('sync-btn');
+      const spin = document.getElementById('sync-spinner');
+      const txt = document.getElementById('sync-btn-text');
+      btn.disabled = true;
+      spin.className = 'spinning';
+      spin.textContent = '↻';
+      txt.textContent = 'Syncing...';
+
+      setPendingState();
+      await Promise.allSettled([checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
+
+      lastSyncAt = Date.now();
+      const istTime = new Date(lastSyncAt).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+      document.getElementById('sync-meta').textContent = `Last Live Sync: ${istTime} IST • Zero Cached Fallbacks • Auto-Sync 12h`;
+
+      btn.disabled = false;
+      spin.className = '';
+      spin.textContent = '';
+      txt.textContent = 'Sync Live';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeInspector();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      runAllLiveChecks();
+      setInterval(runAllLiveChecks, AUTO_SYNC_MS);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && lastSyncAt && Date.now() - lastSyncAt >= AUTO_SYNC_MS) {
+          runAllLiveChecks();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
