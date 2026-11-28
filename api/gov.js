@@ -1,4 +1,4 @@
-// api/gov.js — Live Real-Time Official Press Releases Engine (No Caching, No Static Fallbacks)
+// api/gov.js — Live Real-Time Official Press Releases + Wanted (NIA, INTERPOL, ED, CBI) Engine
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -18,6 +18,12 @@ const ALLOWED_READER_HOSTS = new Set([
   'chandigarhpolice.gov.in', 'portal.chandigarhpolice.gov.in',
   'enforcementdirectorate.gov.in', 'www.enforcementdirectorate.gov.in'
 ]);
+
+const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+function countryName(code) {
+  if (!code) return '';
+  try { return regionNames.of(String(code).toUpperCase()) || code; } catch { return code; }
+}
 
 function decodeEntities(str) {
   return String(str || '')
@@ -116,7 +122,6 @@ async function fetchResponse(url, options = {}, timeoutMs = 12000) {
       ...options,
       headers: { ...BROWSER_HEADERS, ...(options.headers || {}) },
       redirect: 'follow',
-      cache: 'no-store',
       signal: controller.signal
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -988,6 +993,224 @@ async function fetchCbiOfficial() {
   };
 }
 
+// LIVE NIA MOST WANTED
+async function fetchNiaWanted() {
+  const niaUrls = [
+    'https://nia.mha.gov.in/most-wanted.htm',
+    'https://www.nia.gov.in/most-wanted.htm',
+    'https://nia.mha.gov.in/wanted.htm',
+    'https://nia.mha.gov.in/most-wanted-photos.htm'
+  ];
+
+  const seenNames = new Set();
+  const items = [];
+  const errors = [];
+  let activeUrl = niaUrls[0];
+
+  for (const pageUrl of niaUrls) {
+    try {
+      const html = await fetchText(pageUrl, {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Upgrade-Insecure-Requests': '1'
+      }, 9000);
+      if (!html || /Access Denied|Request Rejected|Just a moment/i.test(html)) {
+        errors.push(`${new URL(pageUrl).hostname}: blocked by WAF`);
+        continue;
+      }
+
+      const baseOrigin = new URL(pageUrl).origin;
+      activeUrl = pageUrl;
+
+      // Pattern A: "Name : ... Wanted in : ..." profile blocks
+      const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
+      for (let i = 0; i < chunks.length; i++) {
+        const block = chunks[i];
+        const prevTail = i > 0 ? stripTags(chunks[i - 1].slice(-300)) : '';
+        const clean = stripTags(block);
+        if (!/Name\s*:/i.test(clean) || !/Wanted\s+in\s*:/i.test(clean)) continue;
+
+        const nameMatch = clean.match(/Name\s*:\s*([^:]+?)(?=\s*(?:Aliases|Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+        const aliasMatch = clean.match(/Aliases\s*:\s*([^:]*?)(?=\s*(?:Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+        const addressMatch = clean.match(/Address\s*:\s*([^:]*?)(?=\s*(?:Wanted\s+in|Accused\s+Status|Age\/DOB|$))/i);
+        const wantedInMatch = clean.match(/Wanted\s+in\s*:\s*([^:]*?)(?=\s*(?:Accused\s+Status|Age\/DOB|Organization|Reward|For\s+any\s+information|$))/i);
+        const dobMatch = clean.match(/Age\/DOB\s*\(Approx\)\s*:\s*([^:]*?)(?=\s*(?:Organization|Reward|For\s+any\s+information|$))/i);
+        const orgMatch = clean.match(/Organization\s*:\s*([^:]*?)(?=\s*(?:Reward|For\s+any\s+information|E-mail|Close|$))/i);
+        const rewardInBlock = clean.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40}?)(?=\s*(?:For\s+any|E-mail|Close|Name|$))/i);
+        const rewardInPrev = prevTail.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40})$/i);
+        const rewardRaw = ((rewardInBlock?.[1] || rewardInPrev?.[1]) || '').trim();
+
+        const name = (nameMatch?.[1] || '').replace(/[.\s]+$/, '').trim();
+        if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
+        seenNames.add(name.toLowerCase());
+
+        const imgMatch = block.match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) ||
+          (i > 0 ? chunks[i - 1].slice(-600).match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) : null);
+        const rawPhoto = imgMatch?.[1] || '';
+        const photoUrl = rawPhoto && !/photo_not_available/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
+        const aliasesRaw = (aliasMatch?.[1] || '').trim();
+        const aliases = aliasesRaw ? aliasesRaw.split('@').map(a => a.replace(/[.\s]+$/, '').trim()).filter(a => a.length > 1).slice(0, 4) : [];
+        const address = (addressMatch?.[1] || '').trim();
+        const wantedIn = (wantedInMatch?.[1] || '').trim();
+        const org = (orgMatch?.[1] || '').trim();
+        const caseYearMatch = wantedIn.match(/\/(\d{4})\//);
+
+        items.push({
+          id: `nia-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`,
+          agency: 'NIA', verifiedBy: 'NIA India Official',
+          department: 'National Investigation Agency (NIA India)',
+          location: address || 'India (NIA Case Jurisdiction)',
+          name, aliases, photo: photoUrl,
+          charges: [wantedIn ? `Wanted in Case: ${wantedIn}` : '', org ? `Organization: ${org}` : ''].filter(Boolean).join(' • ') || 'NIA Official Most Wanted Absconder',
+          description: `Official NIA Case Reference: ${wantedIn || `Listed on ${new URL(pageUrl).hostname}`}`,
+          caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
+          rewardText: rewardRaw && !/^[-nil]+$/i.test(rewardRaw) ? rewardRaw : '',
+          rewardValue: rewardRaw ? (parseInt(rewardRaw.replace(/[^\d]/g, ''), 10) || 1) : 0,
+          publishedAt: caseYearMatch ? `Case Year: ${caseYearMatch[1]}` : null,
+          updatedAt: null, dob: (dobMatch?.[1] || '').trim(), nationality: 'India',
+          noticeType: 'NIA WANTED', sourceUrl: pageUrl
+        });
+      }
+
+      // Pattern B: Table rows if Pattern A found nothing
+      if (items.length === 0) {
+        const trMatches = html.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
+        for (const tr of trMatches) {
+          const cells = tr.match(/<(?:td|th)[\s>][\s\S]*?<\/(?:td|th)>/gi) || [];
+          if (cells.length < 2) continue;
+          const cols = cells.map(stripTags).filter(Boolean);
+          if (!cols.length || /Sr\.?\s*No|Sl\.?\s*No|Name\s+of/i.test(cols[0])) continue;
+          const name = (cols[1] && !/^\d+$/.test(cols[1]) ? cols[1] : cols[0]).trim();
+          if (!name || name.length < 3 || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) continue;
+          seenNames.add(name.toLowerCase());
+
+          const imgMatch = tr.match(/<img[^>]+src=["']([^"']+)["']/i);
+          const rawPhoto = imgMatch?.[1] || '';
+          const photoUrl = rawPhoto && !/photo_not_available|logo/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
+          const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
+          const sourceUrl = hrefMatch?.[1] ? new URL(decodeEntities(hrefMatch[1]), baseOrigin).href : pageUrl;
+
+          items.push({
+            id: `nia-tbl-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
+            agency: 'NIA', verifiedBy: 'NIA India Official',
+            department: 'National Investigation Agency (NIA India)',
+            location: cols[2] || 'India (NIA Case Jurisdiction)',
+            name, aliases: [], photo: photoUrl,
+            charges: cols.slice(2).join(' • ') || 'NIA Official Most Wanted Notice',
+            description: cols.join(' | '),
+            caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
+            rewardText: '', rewardValue: 0, publishedAt: null, updatedAt: null, dob: '',
+            nationality: 'India', noticeType: 'NIA WANTED', sourceUrl
+          });
+        }
+      }
+
+      if (items.length > 0) break;
+    } catch (err) {
+      errors.push(`${new URL(pageUrl).hostname}: ${err.message}`);
+    }
+  }
+
+  return {
+    ok: items.length > 0,
+    count: items.length,
+    sourceUrl: activeUrl,
+    items: items.slice(0, 40),
+    error: items.length ? null : `NIA portal blocked automated server access (${errors.join(' • ') || 'no records parsed'})`
+  };
+}
+
+// LIVE INTERPOL RED NOTICES
+async function fetchInterpolRedNotices() {
+  const portalUrl = 'https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices';
+  const queries = [
+    'https://ws-public.interpol.int/notices/v1/red?arrestWarrantCountryId=IN&resultPerPage=20',
+    'https://ws-public.interpol.int/notices/v1/red?nationality=IN&resultPerPage=15',
+    'https://ws-public.interpol.int/notices/v1/red?resultPerPage=20'
+  ];
+
+  const seen = new Map();
+  let lastError = null;
+
+  for (const q of queries) {
+    try {
+      const data = await fetchJson(q, {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cookie': '',
+        'Origin': 'https://www.interpol.int',
+        'Referer': 'https://www.interpol.int/'
+      }, 9000);
+      for (const n of data?._embedded?.notices || []) {
+        if (n?.entity_id && !seen.has(n.entity_id)) seen.set(n.entity_id, n);
+      }
+    } catch (err) {
+      lastError = err.message;
+    }
+  }
+
+  const rawNotices = Array.from(seen.values()).slice(0, 24);
+  const enriched = await Promise.all(
+    rawNotices.map(async (n) => {
+      let issuingCountries = [];
+      let charges = [];
+      let detailPlace = '';
+      try {
+        if (n._links?.self?.href) {
+          const detail = await fetchJson(n._links.self.href, {
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cookie': '',
+            'Origin': 'https://www.interpol.int',
+            'Referer': 'https://www.interpol.int/'
+          }, 5500);
+          for (const w of detail.arrest_warrants || []) {
+            if (w.issuing_country_id) issuingCountries.push(countryName(w.issuing_country_id));
+            if (w.charge_translation || w.charge) charges.push(w.charge_translation || w.charge);
+          }
+          if (detail.place_of_birth || detail.country_of_birth_id) {
+            detailPlace = [detail.place_of_birth, countryName(detail.country_of_birth_id)].filter(Boolean).join(', ');
+          }
+        }
+      } catch {}
+
+      const natList = (n.nationalities || []).map(countryName).filter(Boolean);
+      const wantedBy = [...new Set(issuingCountries)].join(', ') || 'INTERPOL Member State';
+      const fullName = [n.forename, n.name].filter(Boolean).join(' ').trim();
+      const yearMatch = String(n.entity_id || '').match(/^(\d{4})\//);
+
+      return {
+        id: `interpol-${String(n.entity_id).replace(/[^a-zA-Z0-9-]/g, '-')}`,
+        agency: 'INTERPOL',
+        verifiedBy: 'INTERPOL Official',
+        department: `INTERPOL (Requested by ${wantedBy})`,
+        location: detailPlace ? `Wanted by: ${wantedBy} • Origin: ${detailPlace}` : `Wanted by: ${wantedBy}`,
+        name: fullName || `Notice ${n.entity_id}`,
+        aliases: [],
+        photo: n._links?.thumbnail?.href || '',
+        charges: charges.length ? [...new Set(charges)].join('; ') : 'Active INTERPOL Red Notice — Arrest Warrant Issued',
+        description: `INTERPOL Official Notice ID: ${n.entity_id}`,
+        caution: '',
+        rewardText: '',
+        rewardValue: 0,
+        publishedAt: yearMatch ? `Notice Year: ${yearMatch[1]}` : null,
+        updatedAt: null,
+        dob: n.date_of_birth || '',
+        nationality: natList.join(', ') || 'Not Specified',
+        noticeType: 'RED NOTICE',
+        sourceUrl: `${portalUrl}#${String(n.entity_id).replace('/', '-')}`
+      };
+    })
+  );
+
+  return {
+    ok: enriched.length > 0,
+    count: enriched.length,
+    sourceUrl: portalUrl,
+    items: enriched,
+    error: enriched.length ? null : `INTERPOL API restricted from server (${lastError || '0 notices'})`
+  };
+}
+
 async function readOfficialDocument(rawUrl) {
   try {
     const parsedUrl = new URL(rawUrl);
@@ -1072,6 +1295,8 @@ export default async function handler(req, res) {
   if (sources.has('all') || sources.has('ed_press')) tasks.push(fetchEdPressReleases().then((d) => { result.sources.ed_press = d; }));
   if (sources.has('all') || sources.has('ed_proclamation')) tasks.push(fetchEdProclamations().then((d) => { result.sources.ed_proclamation = d; }));
   if (sources.has('all') || sources.has('cbi')) tasks.push(fetchCbiOfficial().then((d) => { result.sources.cbi = d; }));
+  if (sources.has('all') || sources.has('nia')) tasks.push(fetchNiaWanted().then((d) => { result.sources.nia = d; }));
+  if (sources.has('all') || sources.has('interpol')) tasks.push(fetchInterpolRedNotices().then((d) => { result.sources.interpol = d; }));
 
   await Promise.allSettled(tasks);
   return res.status(200).json(result);
