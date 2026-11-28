@@ -1,0 +1,31 @@
+name: T&C News Daily All-Tabs Report
+
+on:
+  schedule:
+    # Runs daily at 02:30 UTC = 08:00 AM IST
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  daily-health-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install nodemailer (temporary, no repo changes)
+        run: npm install --no-save nodemailer
+
+      - name: Run All-Tabs Check & Send Gmail + Telegram
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/daily-report.mjs
