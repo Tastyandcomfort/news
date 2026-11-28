@@ -18,10 +18,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install nodemailer (temporary, no repo changes)
-        run: npm install --no-save nodemailer
+      - name: Install report packages (temporary, no repo changes)
+        run: npm install --no-save nodemailer @resvg/resvg-js
 
-      - name: Run All-Tabs Check & Send Gmail + Telegram
+      - name: Run Visual Scorecard & Send Gmail + Telegram
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
