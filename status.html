@@ -871,8 +871,29 @@
       const latencies = allItems.filter(i => i.ms > 0).map(i => i.ms);
       const avgMs = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
 
-      const pill = document.getElementById('overall-pill');
+           const pill = document.getElementById('overall-pill');
       const pillText = document.getElementById('overall-pill-text');
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+      if (!window._pillSpinStarted && pill && pillText) {
+        window._pillSpinStarted = true;
+        let idx = 0;
+        const spinEl = document.createElement('span');
+        spinEl.textContent = frames[0];
+        spinEl.style.marginRight = '6px';
+        spinEl.style.fontWeight = 'bold';
+        // Replace existing dot element before pillText if one exists, otherwise insert it
+        if (pillText.previousElementSibling) {
+          pillText.previousElementSibling.replaceWith(spinEl);
+        } else {
+          pill.insertBefore(spinEl, pillText);
+        }
+        setInterval(() => {
+          idx = (idx + 1) % frames.length;
+          spinEl.textContent = frames[idx];
+        }, 80);
+      }
+
       if (pending > 0 && done < allItems.length) {
         pill.style.borderColor = 'var(--blue)'; pill.style.color = 'var(--blue)';
         pillText.textContent = `CHECKING (${done}/${allItems.length})`;
@@ -881,7 +902,7 @@
         pillText.textContent = `${fail} SOURCE DOWN`;
       } else {
         pill.style.borderColor = 'var(--green)'; pill.style.color = 'var(--green)';
-        pillText.textContent = 'ALL CORE SYSTEMS LIVE';
+        pillText.textContent = 'ALL SYSTEMS LIVE';
       }
 
       const denom = Math.max(1, allItems.length);
