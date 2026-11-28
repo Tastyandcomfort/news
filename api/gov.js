@@ -1008,7 +1008,8 @@ async function fetchNiaWanted() {
 
   const parseNiaHtml = (html, pageUrl) => {
     const baseOrigin = new URL(pageUrl).origin;
-    const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
+    // 1) Profile-block parser (handles &nbsp; and tags between "Name" and ":")
+    const chunks = html.split(/(?=Name(?:\s|&nbsp;|&#160;|<[^>]+>)*:)/gi);
     for (let i = 0; i < chunks.length; i++) {
       const block = chunks[i];
       const prevTail = i > 0 ? stripTags(chunks[i - 1].slice(-300)) : '';
@@ -1056,6 +1057,33 @@ async function fetchNiaWanted() {
         noticeType: 'NIA WANTED', sourceUrl: 'https://nia.mha.gov.in/most-wanted'
       });
     }
+
+    // 2) Fallback: Drupal photo-card blocks if Profile-block parser matched 0
+    if (items.length === 0) {
+      const photoRe = /<img[^>]+src=["']([^"']*\/sites\/default\/files\/Photo\/[^"']+)["'][^>]*>/gi;
+      let m;
+      while ((m = photoRe.exec(html)) !== null) {
+        const rawPhoto = m[1];
+        const photoUrl = !/photo_not_available/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
+        const altName = (m[0].match(/\balt=["']([^"']+)["']/i)?.[1] || '').trim();
+        const afterText = stripTags(html.slice(m.index + m[0].length, m.index + m[0].length + 450));
+        const nameGuess = (altName && altName.length > 2 ? altName : afterText.split(/Aliases|Wanted|Parentage|Address|Reward|\./i)[0]).trim();
+        if (!nameGuess || nameGuess.length < 2 || seenNames.has(nameGuess.toLowerCase())) continue;
+        seenNames.add(nameGuess.toLowerCase());
+        items.push({
+          id: `nia-ph-${nameGuess.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
+          agency: 'NIA', verifiedBy: 'NIA India Official',
+          department: 'National Investigation Agency (NIA India)',
+          location: 'India (NIA Case Jurisdiction)',
+          name: nameGuess, aliases: [], photo: photoUrl,
+          charges: afterText.slice(0, 180) || 'NIA Official Most Wanted Absconder',
+          description: afterText.slice(0, 300) || 'Listed on nia.mha.gov.in/most-wanted',
+          caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
+          rewardText: '', rewardValue: 0, publishedAt: null, updatedAt: null, dob: '',
+          nationality: 'India', noticeType: 'NIA WANTED', sourceUrl: 'https://nia.mha.gov.in/most-wanted'
+        });
+      }
+    }
   };
 
   for (const pageUrl of pageUrls) {
@@ -1069,7 +1097,12 @@ async function fetchNiaWanted() {
         continue;
       }
       activeUrl = pageUrl;
+      const before = items.length;
       parseNiaHtml(html, pageUrl);
+      if (items.length === before) {
+        const pageTitle = stripTags(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '');
+        errors.push(`${pageUrl}: len=${html.length}, title="${pageTitle}", hasName=${/Name/i.test(html)}, hasPhoto=${/\/Photo\//i.test(html)}`);
+      }
     } catch (err) {
       errors.push(`${pageUrl}: ${err.message}`);
     }
@@ -1089,7 +1122,7 @@ async function fetchNiaWanted() {
     count: items.length,
     sourceUrl: activeUrl,
     items: items.slice(0, 40),
-    error: items.length ? null : `NIA portal unreachable (${errors.join(' • ') || 'no records parsed'})`
+    error: items.length ? null : `NIA parser matched 0 (${errors.join(' • ')})`
   };
 }
 
