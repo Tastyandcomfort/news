@@ -995,20 +995,21 @@ async function fetchCbiOfficial() {
 
 // LIVE NIA MOST WANTED
 async function fetchNiaWanted() {
-  const pageUrls = [
-    'https://nia.mha.gov.in/most-wanted',
-    'https://nia.mha.gov.in/most-wanted?page=1'
+  const urlSets = [
+    ['https://nia.mha.gov.in/en/most-wanted', 'https://nia.mha.gov.in/en/most-wanted?page=1'],
+    ['https://nia.mha.gov.in/most-wanted', 'https://nia.mha.gov.in/most-wanted?page=1']
   ];
   const fallbackPhotoUrl = 'https://nia.mha.gov.in/most-wanted-photos';
 
   const seenNames = new Set();
   const items = [];
   const errors = [];
-  let activeUrl = pageUrls[0];
+  let activeUrl = urlSets[0][0];
 
   const parseNiaHtml = (html, pageUrl) => {
     const baseOrigin = new URL(pageUrl).origin;
-    // 1) Profile-block parser (handles &nbsp; and tags between "Name" and ":")
+
+    // 1) Profile-block parser ("Name : ... Wanted in : ...")
     const chunks = html.split(/(?=Name(?:\s|&nbsp;|&#160;|<[^>]+>)*:)/gi);
     for (let i = 0; i < chunks.length; i++) {
       const block = chunks[i];
@@ -1042,7 +1043,7 @@ async function fetchNiaWanted() {
       const caseYearMatch = wantedIn.match(/\/(\d{4})\//);
 
       items.push({
-        id: `nia-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`,
+        id: `nia-${items.length}-${Buffer.from(photoUrl || name).toString('base64url').slice(-10)}`,
         agency: 'NIA', verifiedBy: 'NIA India Official',
         department: 'National Investigation Agency (NIA India)',
         location: address || 'India (NIA Case Jurisdiction)',
@@ -1054,58 +1055,68 @@ async function fetchNiaWanted() {
         rewardValue: rewardRaw ? (parseInt(rewardRaw.replace(/[^\d]/g, ''), 10) || 1) : 0,
         publishedAt: caseYearMatch ? `Case Year: ${caseYearMatch[1]}` : null,
         updatedAt: null, dob: (dobMatch?.[1] || '').trim(), nationality: 'India',
-        noticeType: 'NIA WANTED', sourceUrl: 'https://nia.mha.gov.in/most-wanted'
+        noticeType: 'NIA WANTED', sourceUrl: pageUrl
       });
     }
 
-    // 2) Fallback: Drupal photo-card blocks if Profile-block parser matched 0
+    // 2) Card-based fallback parser (cleanly strips trailing partial HTML tags & stops before next card)
     if (items.length === 0) {
       const photoRe = /<img[^>]+src=["']([^"']*\/sites\/default\/files\/Photo\/[^"']+)["'][^>]*>/gi;
-      let m;
-      while ((m = photoRe.exec(html)) !== null) {
+      const matches = [...html.matchAll(photoRe)];
+      for (let idx = 0; idx < matches.length; idx++) {
+        const m = matches[idx];
         const rawPhoto = m[1];
         const photoUrl = !/photo_not_available/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
-        const altName = (m[0].match(/\balt=["']([^"']+)["']/i)?.[1] || '').trim();
-        const afterText = stripTags(html.slice(m.index + m[0].length, m.index + m[0].length + 450));
-        const nameGuess = (altName && altName.length > 2 ? altName : afterText.split(/Aliases|Wanted|Parentage|Address|Reward|\./i)[0]).trim();
+        const altName = decodeEntities(m[0].match(/\balt=["']([^"']+)["']/i)?.[1] || '').trim();
+
+        const startPos = m.index + m[0].length;
+        const nextPos = matches[idx + 1] ? matches[idx + 1].index : startPos + 900;
+        const rawSlice = html.slice(startPos, Math.min(nextPos, startPos + 900)).replace(/<[^>]*$/, '');
+        const cardText = stripTags(rawSlice);
+
+        const nameGuess = (altName && altName.length > 1 ? altName : cardText.split(/Aliases|Wanted|Parentage|Address|Reward|\./i)[0]).trim();
         if (!nameGuess || nameGuess.length < 2 || seenNames.has(nameGuess.toLowerCase())) continue;
         seenNames.add(nameGuess.toLowerCase());
+
+        const caseMatch = cardText.match(/(RC[-\s]?\d+\/\d{4}\/[A-Z0-9\/,-]+)/i);
+        const detailHref = rawSlice.match(/<a[^>]+href=["']([^"']+)["']/i)?.[1] || '';
+        const detailUrl = detailHref && !/^javascript:/i.test(detailHref) ? new URL(decodeEntities(detailHref), baseOrigin).href : pageUrl;
+
         items.push({
-          id: `nia-ph-${nameGuess.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
+          id: `nia-${items.length}-${Buffer.from(photoUrl || nameGuess).toString('base64url').slice(-10)}`,
           agency: 'NIA', verifiedBy: 'NIA India Official',
           department: 'National Investigation Agency (NIA India)',
           location: 'India (NIA Case Jurisdiction)',
           name: nameGuess, aliases: [], photo: photoUrl,
-          charges: afterText.slice(0, 180) || 'NIA Official Most Wanted Absconder',
-          description: afterText.slice(0, 300) || 'Listed on nia.mha.gov.in/most-wanted',
+          charges: (caseMatch ? `Wanted in Case: ${caseMatch[1]}` : cardText.slice(0, 180)) || 'NIA Official Most Wanted Notice',
+          description: cardText.slice(0, 350) || 'Listed on nia.mha.gov.in/most-wanted',
           caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
           rewardText: '', rewardValue: 0, publishedAt: null, updatedAt: null, dob: '',
-          nationality: 'India', noticeType: 'NIA WANTED', sourceUrl: 'https://nia.mha.gov.in/most-wanted'
+          nationality: 'India', noticeType: 'NIA WANTED', sourceUrl: detailUrl
         });
       }
     }
   };
 
-  for (const pageUrl of pageUrls) {
-    try {
-      const html = await fetchText(pageUrl, {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Upgrade-Insecure-Requests': '1'
-      }, 10000);
-      if (!html || /Access Denied|Request Rejected|Just a moment/i.test(html)) {
-        errors.push(`${pageUrl}: blocked by WAF`);
-        continue;
+  for (const urls of urlSets) {
+    for (const pageUrl of urls) {
+      try {
+        const html = await fetchText(pageUrl, {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Upgrade-Insecure-Requests': '1'
+        }, 10000);
+        if (!html || /Access Denied|Request Rejected|Just a moment/i.test(html)) {
+          errors.push(`${pageUrl}: blocked by WAF`);
+          continue;
+        }
+        activeUrl = pageUrl;
+        parseNiaHtml(html, pageUrl);
+      } catch (err) {
+        errors.push(`${pageUrl}: ${err.message}`);
       }
-      activeUrl = pageUrl;
-      const before = items.length;
-      parseNiaHtml(html, pageUrl);
-      if (items.length === before) {
-        const pageTitle = stripTags(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '');
-        errors.push(`${pageUrl}: len=${html.length}, title="${pageTitle}", hasName=${/Name/i.test(html)}, hasPhoto=${/\/Photo\//i.test(html)}`);
-      }
-    } catch (err) {
-      errors.push(`${pageUrl}: ${err.message}`);
     }
+    if (items.length > 0) break;
   }
 
   if (items.length === 0) {
