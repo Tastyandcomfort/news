@@ -4,24 +4,60 @@
   <meta charset="UTF-8">
   <title>T&amp;C News Hub — Live Operations Scorecard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#090d16">
+  <meta name="theme-color" content="#f5f5f7">
   <style>
     :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --card-head: #f8fafc;
+      --sub-box: #f1f5f9;
+      --pill-bg: #f8fafc;
+      --btn-bg: #ffffff;
+      --btn-border: #cbd5e1;
+      --border: #e2e8f0;
+      --divider: #f1f5f9;
+      --text: #0f172a;
+      --text-mid: #1e293b;
+      --muted: #475569;
+      --dim: #64748b;
+      --alert-bg: #fff5f5;
+      --alert-border: #fecaca;
+      --alert-head: #991b1b;
+      --hover-row: rgba(0, 113, 227, 0.06);
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+      --blue: #0071e3;
+      --cyan: #0284c7;
+      --purple: #7c3aed;
+      --shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    html.dark {
       --bg: #090d16;
       --card: #111827;
       --card-head: #162032;
+      --sub-box: #0f172a;
+      --pill-bg: #0f172a;
+      --btn-bg: #0f172a;
+      --btn-border: #334155;
       --border: #1f2937;
       --divider: #1e293b;
       --text: #f8fafc;
       --text-mid: #e2e8f0;
       --muted: #94a3b8;
       --dim: #64748b;
+      --alert-bg: #18121e;
+      --alert-border: #3b1d2e;
+      --alert-head: #f87171;
+      --hover-row: rgba(96, 165, 250, 0.08);
       --green: #22c55e;
       --amber: #f59e0b;
       --red: #ef4444;
       --blue: #60a5fa;
       --cyan: #38bdf8;
       --purple: #a78bfa;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,16 +68,17 @@
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       padding: 24px 16px 40px;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .container { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-    /* Header Card */
     .header-card {
       background: var(--card);
       border: 1.5px solid var(--border);
       border-radius: 16px;
       padding: 20px 24px;
+      box-shadow: var(--shadow);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -52,49 +89,46 @@
     .brand-sub { font-size: 12px; font-weight: 700; letter-spacing: 0.8px; color: var(--muted); margin-top: 4px; }
     .brand-meta { font-size: 11.5px; color: var(--dim); margin-top: 8px; }
 
-    .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .status-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 16px; border-radius: 999px;
-      background: #0f172a; border: 1.5px solid var(--amber);
-      font-size: 11.5px; font-weight: 800; letter-spacing: 0.4px; color: var(--amber);
+      padding: 8px 14px; border-radius: 999px;
+      background: var(--pill-bg); border: 1.5px solid var(--amber);
+      font-size: 11px; font-weight: 800; letter-spacing: 0.4px; color: var(--amber);
     }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
     .btn {
       display: inline-flex; align-items: center; gap: 7px;
-      padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700;
-      border: 1px solid #334155; background: #0f172a; color: var(--text-mid);
+      padding: 8px 13px; border-radius: 10px; font-size: 12px; font-weight: 700;
+      border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-mid);
       cursor: pointer; text-decoration: none; transition: all 0.15s ease;
     }
-    .btn:hover { border-color: var(--blue); color: #ffffff; background: #1e293b; }
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
     .btn-primary { background: #0071e3; border-color: #0071e3; color: #ffffff; }
-    .btn-primary:hover { background: #0060c2; border-color: #0060c2; }
+    .btn-primary:hover { background: #0060c2; border-color: #0060c2; color: #ffffff; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* Segmented Progress Bar */
     .seg-bar {
-      width: 100%; height: 12px; border-radius: 999px; background: var(--divider);
+      width: 100%; height: 12px; border-radius: 999px; background: var(--border);
       overflow: hidden; display: flex;
     }
     .seg-ok { background: var(--green); transition: width 0.35s ease; }
     .seg-warn { background: var(--amber); transition: width 0.35s ease; }
     .seg-fail { background: var(--red); transition: width 0.35s ease; }
 
-    /* KPI Tiles */
     .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
     @media (max-width: 820px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
 
     .kpi-card {
       background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
-      padding: 14px 16px;
+      padding: 14px 16px; box-shadow: var(--shadow);
     }
     .kpi-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; color: var(--muted); }
     .kpi-val { font-size: 22px; font-weight: 800; margin-top: 6px; }
     .kpi-sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
 
-    /* Filter Bar */
     .filter-row {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
     }
@@ -104,24 +138,23 @@
       border: 1px solid var(--border); background: var(--card); color: var(--muted);
       cursor: pointer; transition: all 0.15s ease;
     }
-    .fpill.active { background: #1e293b; border-color: var(--blue); color: #ffffff; }
-    .hint-text { font-size: 11px; color: var(--dim); }
+    .fpill.active { background: #0071e3; border-color: #0071e3; color: #ffffff; }
+    .repair-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
-    /* Attention Panel */
     .alert-card {
-      background: #18121e; border: 1.5px solid #3b1d2e; border-radius: 14px; padding: 16px 18px;
+      background: var(--alert-bg); border: 1.5px solid var(--alert-border); border-radius: 14px; padding: 16px 18px;
     }
     .alert-card.hidden { display: none; }
-    .alert-head { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; color: #f87171; margin-bottom: 10px; }
+    .alert-head { font-size: 12px; font-weight: 800; letter-spacing: 0.8px; color: var(--alert-head); margin-bottom: 10px; }
     .alert-row {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
       padding: 7px 8px; border-radius: 8px; cursor: pointer; transition: background 0.15s;
     }
-    .alert-row:hover { background: rgba(255, 255, 255, 0.05); }
+    .alert-row:hover { background: var(--hover-row); }
     .alert-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .badge {
       display: inline-block; padding: 2px 8px; border-radius: 5px;
-      font-size: 9.5px; font-weight: 800; letter-spacing: 0.4px; color: #090d16; flex-shrink: 0;
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.4px; color: #ffffff; flex-shrink: 0;
     }
     .badge-DOWN { background: var(--red); }
     .badge-NOTICE { background: var(--amber); }
@@ -129,16 +162,15 @@
     .alert-text { font-size: 12.5px; font-weight: 600; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .alert-action { font-size: 11px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
 
-    /* 2x2 Section Cards */
     .sections-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     @media (max-width: 860px) { .sections-grid { grid-template-columns: 1fr; } }
 
     .sec-card {
       background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden;
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; box-shadow: var(--shadow);
     }
     .sec-head {
-      background: var(--card-head); padding: 12px 16px;
+      background: var(--card-head); padding: 12px 16px; border-bottom: 1px solid var(--border);
       font-size: 12px; font-weight: 800; letter-spacing: 0.8px; color: var(--blue);
       display: flex; align-items: center; justify-content: space-between;
     }
@@ -151,13 +183,13 @@
       cursor: pointer; transition: background 0.15s ease;
     }
     .item-row:last-child { border-bottom: none; }
-    .item-row:hover { background: rgba(96, 165, 250, 0.08); }
+    .item-row:hover { background: var(--hover-row); }
     .item-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .dot-OK { background: var(--green); }
     .dot-WARN { background: var(--amber); }
     .dot-FAIL { background: var(--red); }
-    .dot-PENDING { background: #475569; }
+    .dot-PENDING { background: #94a3b8; }
 
     .item-name { font-size: 12.5px; font-weight: 600; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .item-metric { font-size: 11.5px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
@@ -166,56 +198,65 @@
     .m-FAIL { color: var(--red); }
     .m-PENDING { color: var(--dim); }
 
-    /* Footer */
     .footer {
       display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
       font-size: 11px; color: var(--dim); padding-top: 6px;
     }
-    .footer a { color: var(--blue); text-decoration: none; }
+    .footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
 
-    /* Inspector Modal */
     .modal-backdrop {
       position: fixed; inset: 0; z-index: 999;
-      background: rgba(2, 6, 23, 0.78); backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     .modal-backdrop.hidden { display: none; }
     .modal-box {
-      width: 100%; max-width: 640px; max-height: 86vh; overflow-y: auto;
-      background: var(--card); border: 1.5px solid #334155; border-radius: 16px;
-      padding: 20px 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      width: 100%; max-width: 660px; max-height: 88vh; overflow-y: auto;
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
+      padding: 20px 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
     }
     .modal-head {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-      padding-bottom: 14px; border-bottom: 1px solid var(--divider); margin-bottom: 14px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
     }
     .modal-title { font-size: 16px; font-weight: 800; color: var(--text); }
     .modal-sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
     .close-btn {
-      background: #1e293b; border: 1px solid #334155; color: var(--text-mid);
+      background: var(--sub-box); border: 1px solid var(--border); color: var(--text-mid);
       border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
     }
     .detail-box {
-      background: #0f172a; border: 1px solid var(--divider); border-radius: 12px;
-      padding: 12px 14px; font-size: 12.5px; line-height: 1.55; color: var(--text-mid); margin-bottom: 14px;
+      background: var(--sub-box); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; font-size: 12.5px; line-height: 1.55; color: var(--text-mid); margin-bottom: 12px;
     }
+    .repair-box {
+      background: var(--sub-box); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; font-size: 12px; line-height: 1.5; color: var(--muted); margin-bottom: 14px;
+    }
+    .repair-box strong { color: var(--text); }
     .sample-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .sample-card {
       display: block; text-decoration: none;
-      background: #0f172a; border: 1px solid var(--divider); border-radius: 10px;
+      background: var(--sub-box); border: 1px solid var(--border); border-radius: 10px;
       padding: 10px 12px; transition: border-color 0.15s;
     }
     .sample-card:hover { border-color: var(--blue); }
     .sample-title { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
     .sample-meta { font-size: 11px; color: var(--dim); margin-top: 4px; }
     .modal-foot {
-      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;
-      padding-top: 12px; border-top: 1px solid var(--divider);
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+      padding-top: 12px; border-top: 1px solid var(--border);
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinning { display: inline-block; animation: spin 0.9s linear infinite; }
   </style>
+  <script>
+    (function initSavedTheme() {
+      const saved = localStorage.getItem('tc_status_theme') || 'light';
+      if (saved === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -235,6 +276,7 @@
           <span id="sync-spinner"></span>
           <span id="sync-btn-text">Sync Live</span>
         </button>
+        <button class="btn" id="theme-btn" onclick="toggleTheme()">Dark Mode</button>
         <a class="btn" href="./index.html">Open News Hub</a>
       </div>
     </div>
@@ -270,19 +312,23 @@
       </div>
     </div>
 
-    <!-- FILTER & HINT -->
+    <!-- FILTER & QUICK REPAIR LINKS -->
     <div class="filter-row">
       <div class="filter-pills">
         <button class="fpill active" onclick="setFilter('ALL', this)">All Sources</button>
         <button class="fpill" onclick="setFilter('OK', this)">Live Only</button>
         <button class="fpill" onclick="setFilter('ISSUES', this)">Down &amp; Notices</button>
       </div>
-      <div class="hint-text">Click any source row to inspect live items, latency, or re-test individually</div>
+      <div class="repair-links">
+        <a class="btn" href="https://github.com/Tastyandcomfort/news" target="_blank" rel="noopener">GitHub Repo</a>
+        <a class="btn" href="https://github.com/Tastyandcomfort/news/actions" target="_blank" rel="noopener">Run Actions</a>
+        <a class="btn" href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel Backend</a>
+      </div>
     </div>
 
     <!-- ATTENTION SUMMARY -->
     <div class="alert-card hidden" id="attention-card">
-      <div class="alert-head">ATTENTION SUMMARY</div>
+      <div class="alert-head">ATTENTION SUMMARY (CLICK ANY ITEM TO INSPECT &amp; REPAIR)</div>
       <div id="attention-list"></div>
     </div>
 
@@ -296,7 +342,7 @@
     </div>
   </div>
 
-  <!-- LIVE INSPECTOR MODAL -->
+  <!-- LIVE INSPECTOR & REPAIR MODAL -->
   <div class="modal-backdrop hidden" id="inspector-modal" onclick="if(event.target===this) closeInspector()">
     <div class="modal-box">
       <div class="modal-head">
@@ -311,13 +357,20 @@
       </div>
 
       <div class="detail-box" id="ins-detail">Status details...</div>
+      <div class="repair-box" id="ins-repair">Repair guide...</div>
 
       <div style="font-size:11px;font-weight:800;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;">LIVE DATA PREVIEW</div>
       <div class="sample-list" id="ins-samples"></div>
 
       <div class="modal-foot">
-        <button class="btn btn-primary" id="ins-recheck-btn" onclick="recheckCurrentItem()">Re-check This Source</button>
-        <a class="btn" id="ins-open-url" href="#" target="_blank" rel="noopener">Open Endpoint</a>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-primary" id="ins-recheck-btn" onclick="recheckCurrentItem()">Re-check This Source</button>
+          <button class="btn" id="ins-copy-btn" onclick="copyCurrentDiagnostic()">Copy Diagnostic</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <a class="btn" id="ins-edit-repo" href="https://github.com/Tastyandcomfort/news" target="_blank" rel="noopener">Open File in GitHub</a>
+          <a class="btn" id="ins-open-url" href="#" target="_blank" rel="noopener">Open Endpoint</a>
+        </div>
       </div>
     </div>
   </div>
@@ -349,6 +402,64 @@
 
     const ITEM_REGISTRY = new Map();
     const RECHECKERS = new Map();
+
+    const REPAIR_HINTS = {
+      t1_site: { file: 'index.html', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'Check GitHub Pages deployment status under Repo Settings -> Pages.' },
+      t1_world: { file: 'api/news.js + tc-addons.js (fetchPinnedWorldNews)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Check Vercel deployment for /api/news and RSS upstream feeds.' },
+      t1_local: { file: 'api/news.js + tc-addons.js (fetchPortalNews)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Check Vercel /api/news?scope=local response.' },
+      t1_nat: { file: 'api/news.js + tc-addons.js (fetchPortalNews)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Check Vercel /api/news?scope=national response.' },
+      t1_bul: { file: 'bulletins.json', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/bulletins.json', note: 'Verify bulletins.json has valid JSON syntax.' },
+      t1_fx: { file: 'index.html (fetchRealTimeForex)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'External API open.er-api.com; usually recovers automatically.' },
+      t1_usgs: { file: 'index.html (initOSINTMap)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'External USGS GeoJSON feed.' },
+      t1_espn: { file: 'index.html (fetchLiveCricketTicker)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'External ESPN scorepanel feed.' },
+      t1_solar: { file: 'index.html (fetchSolarSchedule)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'External Open-Meteo API.' },
+
+      t2_pib: { file: 'api/gov.js (fetchPibReleases)', repoUrl: 'https://vercel.com/dashboard', note: 'Check www.pib.gov.in RSS availability or Vercel function logs.' },
+      t2_reg: { file: 'api/gov.js (fetchPibRegionsLive)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses https://www.pib.gov.in/ViewRss.aspx.' },
+      t2_minlist: { file: 'api/gov.js (fetchPibMinistriesList)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses dropdown from https://www.pib.gov.in/AllRel.aspx?reg=3&lang=1.' },
+      t2_pmo: { file: 'api/gov.js (fetchPibByMinistry)', repoUrl: 'https://vercel.com/dashboard', note: 'Uses ASP.NET postback across last 3 months on pib.gov.in/AllRel.aspx.' },
+      t2_rs: { file: 'api/gov.js (fetchParliamentAll)', repoUrl: 'https://vercel.com/dashboard', note: 'Queries sansad.in/rs + PIB minid=2934.' },
+      t2_ls: { file: 'api/gov.js (fetchParliamentAll)', repoUrl: 'https://vercel.com/dashboard', note: 'Queries sansad.in/ls + PIB minid=2608.' },
+      t2_sci: { file: 'api/gov.js (fetchSupremeCourtPress)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses https://www.sci.gov.in/press-release/.' },
+      t2_eci: { file: 'api/gov.js (fetchEciAll)', repoUrl: 'https://vercel.com/dashboard', note: 'Queries eci.gov.in + PIB minid=35.' },
+      t2_ed: { file: 'api/gov.js (fetchEdPressReleases)', repoUrl: 'https://vercel.com/dashboard', note: 'Calls ED Umbraco PressReleaseApi JSON endpoint.' },
+      t2_cbi: { file: 'api/gov.js (fetchCbiOfficial)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses cbi.gov.in/press-releases.' },
+      t2_isro: { file: 'api/gov.js (fetchIsroPress)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses https://www.isro.gov.in/Press.html.' },
+      t2_nasa: { file: 'api/gov.js (fetchNasaPress)', repoUrl: 'https://vercel.com/dashboard', note: 'NASA RSS sometimes rate-limits shared Vercel IPs (HTTP 429).' },
+      t2_spx: { file: 'api/gov.js (fetchSpaceXUpdates)', repoUrl: 'https://vercel.com/dashboard', note: 'SpaceDev Launch Library API.' },
+      t2_pol: { file: 'api/gov.js (fetchStatePolicePress)', repoUrl: 'https://vercel.com/dashboard', note: 'Live scrapers for Delhi, Kerala & Chandigarh Police.' },
+      t2_custom: { file: 'press-releases.json', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/press-releases.json', note: 'Verify press-releases.json is valid JSON in repo root.' },
+
+      t3_nia: { file: 'api/gov.js (fetchNiaWanted)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses https://nia.mha.gov.in/most-wanted.' },
+      t3_edp: { file: 'api/gov.js (fetchEdProclamations)', repoUrl: 'https://vercel.com/dashboard', note: 'Calls ED Umbraco NoticeForProclamationApi JSON.' },
+      t3_cbirn: { file: 'api/gov.js (fetchCbiOfficial)', repoUrl: 'https://vercel.com/dashboard', note: 'Parses https://cbi.gov.in/interpol-red-notice.' },
+      t3_int: { file: 'api/gov.js + tc-addons.js (tryBrowserInterpolDirect)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Akamai WAF on ws-public.interpol.int often blocks datacenter IPs; user browsers attempt direct fetch.' },
+      t3_fbi: { file: 'tc-addons.js + index.html', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Direct public JSON API api.fbi.gov/wanted/v1/list.' },
+      t3_snap: { file: 'update-wanted.mjs + wanted-data.json', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/update-wanted.mjs', note: 'Updated by GitHub Actions; check Actions tab if stale.' },
+      t3_fbim: { file: 'api/missing.js (fetchFbiMissing)', repoUrl: 'https://vercel.com/dashboard', note: 'Calls api.fbi.gov?poster_classification=missing.' },
+      t3_zip: { file: 'api/missing.js (fetchZipnetMissing)', repoUrl: 'https://vercel.com/dashboard', note: 'ZIPNET requires interactive browser session for search.' },
+      t3_inty: { file: 'api/missing.js (fetchInterpolYellow)', repoUrl: 'https://vercel.com/dashboard', note: 'INTERPOL Yellow API protected by Akamai WAF.' },
+
+      t4_js: { file: 'tc-addons.js', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/tc-addons.js', note: 'Ensure no server-side export syntax is pasted inside tc-addons.js.' },
+      t5_fl: { file: 'index.html (fetchLiveAirTraffic)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'Checks news-39tq and news-lemon-two /api/flights.' },
+      t5_iss: { file: 'index.html (initISSTracker)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'External wheretheiss.at telemetry API.' },
+      t5_crew: { file: 'index.html (initISSManifest)', repoUrl: 'https://github.com/Tastyandcomfort/news/blob/main/index.html', note: 'open-notify.org occasionally times out intermittently.' },
+      t6_jobs: { file: 'index.html (fetchLiveJobs) + Firebase Console', repoUrl: 'https://console.firebase.google.com/', note: 'Firestore rules may restrict public REST list; index.html falls back cleanly to built-in jobs.' }
+    };
+
+    function updateThemeBtnLabel() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', isDark ? '#090d16' : '#f5f5f7');
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tc_status_theme', isDark ? 'dark' : 'light');
+      updateThemeBtnLabel();
+    }
 
     function escHtml(str) {
       return String(str ?? '')
@@ -629,7 +740,6 @@
         ? makeItem('t3_cbirn', 'tab3', 'CBI / INTERPOL India', 'OK', `${gw.cbi.redNoticeCount} records`, gw.cbi.redNotices?.[0]?.name || '', gw.cbi.redNoticeCount, gwRes.ms, `${GOV_API}?source=cbi`, wantedSamples(gw.cbi.redNotices))
         : makeItem('t3_cbirn', 'tab3', 'CBI / INTERPOL India', 'FAIL', gw.cbi?.error || '0 records', 'CBI Red Notice table unavailable', 0, gwRes.ms, `${GOV_API}?source=cbi`));
 
-      // INTERPOL Red: server first, then browser-direct test
       if (gw.interpol?.ok && gw.interpol.count > 0) {
         items.push(makeItem('t3_int', 'tab3', 'INTERPOL Global Red', 'OK', `${gw.interpol.count} records`, 'Live from backend', gw.interpol.count, gwRes.ms, `${GOV_API}?source=interpol`, wantedSamples(gw.interpol.items)));
       } else {
@@ -733,27 +843,24 @@
       const latencies = allItems.filter(i => i.ms > 0).map(i => i.ms);
       const avgMs = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
 
-      // Header pill
       const pill = document.getElementById('overall-pill');
       const pillText = document.getElementById('overall-pill-text');
       if (pending > 0 && done < allItems.length) {
-        pill.style.borderColor = '#60a5fa'; pill.style.color = '#60a5fa';
+        pill.style.borderColor = 'var(--blue)'; pill.style.color = 'var(--blue)';
         pillText.textContent = `CHECKING (${done}/${allItems.length})`;
       } else if (fail > 0) {
-        pill.style.borderColor = '#ef4444'; pill.style.color = '#ef4444';
+        pill.style.borderColor = 'var(--red)'; pill.style.color = 'var(--red)';
         pillText.textContent = `${fail} SOURCE DOWN`;
       } else {
-        pill.style.borderColor = '#22c55e'; pill.style.color = '#22c55e';
+        pill.style.borderColor = 'var(--green)'; pill.style.color = 'var(--green)';
         pillText.textContent = 'ALL CORE SYSTEMS LIVE';
       }
 
-      // Segmented Bar
       const denom = Math.max(1, allItems.length);
       document.getElementById('seg-ok').style.width = `${(ok / denom) * 100}%`;
       document.getElementById('seg-warn').style.width = `${(warn / denom) * 100}%`;
       document.getElementById('seg-fail').style.width = `${(fail / denom) * 100}%`;
 
-      // KPIs
       document.getElementById('kpi-live').textContent = `${ok} / ${allItems.length}`;
       document.getElementById('kpi-pct').textContent = `${pct}% operational`;
       document.getElementById('kpi-records').textContent = totalRecords.toLocaleString('en-IN');
@@ -763,7 +870,6 @@
       attEl.textContent = `${fail} Down / ${warn} Note`;
       document.getElementById('kpi-attention-sub').textContent = fail > 0 ? 'Inspect alert panel below' : 'No critical outage';
 
-      // Attention Summary
       const issues = allItems.filter(i => i.status === 'FAIL' || i.status === 'WARN');
       const attCard = document.getElementById('attention-card');
       const attList = document.getElementById('attention-list');
@@ -785,7 +891,6 @@
         attCard.classList.add('hidden');
       }
 
-      // 2x2 Section Cards
       const grid = document.getElementById('sections-grid');
       grid.innerHTML = SECTIONS.map(sec => {
         const visible = sec.items.filter(it => {
@@ -840,6 +945,16 @@
       document.getElementById('ins-sub').textContent = `${secTitle} • ${it.metric}${it.ms ? ` • ${it.ms} ms` : ''}`;
       document.getElementById('ins-detail').textContent = it.detail || it.metric || 'No extra detail returned.';
 
+      const hint = REPAIR_HINTS[it.id];
+      const repairBox = document.getElementById('ins-repair');
+      repairBox.innerHTML = hint
+        ? `<strong>Where to fix:</strong> ${escHtml(hint.file)}<br><strong>Guidance:</strong> ${escHtml(hint.note)}`
+        : `<strong>Guidance:</strong> Inspect the live endpoint or check browser DevTools Network tab.`;
+
+      const editLink = document.getElementById('ins-edit-repo');
+      editLink.href = hint?.repoUrl || 'https://github.com/Tastyandcomfort/news';
+      editLink.textContent = hint?.repoUrl?.includes('vercel.com') ? 'Open Vercel Backend' : 'Open File in GitHub';
+
       const samplesBox = document.getElementById('ins-samples');
       if (it.samples && it.samples.length > 0) {
         samplesBox.innerHTML = it.samples.map(s => `
@@ -866,6 +981,29 @@
     function closeInspector() {
       document.getElementById('inspector-modal').classList.add('hidden');
       activeInspectorId = null;
+    }
+
+    async function copyCurrentDiagnostic() {
+      const it = ITEM_REGISTRY.get(activeInspectorId);
+      if (!it) return;
+      const hint = REPAIR_HINTS[it.id];
+      const summary = [
+        `Source: ${it.name}`,
+        `Status: ${it.status} (${it.metric})`,
+        `Latency: ${it.ms} ms`,
+        `Detail: ${it.detail}`,
+        `Endpoint: ${it.verifyUrl || 'N/A'}`,
+        hint ? `File: ${hint.file}` : ''
+      ].filter(Boolean).join('\n');
+
+      const btn = document.getElementById('ins-copy-btn');
+      try {
+        await navigator.clipboard.writeText(summary);
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Diagnostic'; }, 1600);
+      } catch {
+        prompt('Copy diagnostic:', summary);
+      }
     }
 
     async function recheckCurrentItem() {
@@ -912,6 +1050,7 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      updateThemeBtnLabel();
       runAllLiveChecks();
       setInterval(runAllLiveChecks, AUTO_SYNC_MS);
       document.addEventListener('visibilitychange', () => {
