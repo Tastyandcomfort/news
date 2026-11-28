@@ -312,6 +312,31 @@
       </div>
     </div>
 
+   <!-- LIVE TRAFFIC STRIP -->
+    <div class="kpi-grid" id="traffic-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">ACTIVE USERS NOW</div>
+        <div class="kpi-val" id="tr-active" style="color: var(--green);">--</div>
+        <div class="kpi-sub" id="tr-active-sub">Online in last 3 mins</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">TODAY'S VISITORS</div>
+        <div class="kpi-val" id="tr-today-visits" style="color: var(--blue);">--</div>
+        <div class="kpi-sub" id="tr-today-views">-- pageviews today</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">YESTERDAY'S VISITORS</div>
+        <div class="kpi-val" id="tr-yest-visits" style="color: var(--cyan);">--</div>
+        <div class="kpi-sub" id="tr-yest-views">-- pageviews</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">TRAFFIC TRACKER</div>
+        <div class="kpi-val" id="tr-status" style="color: var(--purple);">Checking</div>
+        <div class="kpi-sub">Firebase live presence</div>
+      </div>
+    </div>
+    
+    
     <!-- FILTER & QUICK REPAIR LINKS -->
     <div class="filter-row">
       <div class="filter-pills">
@@ -1019,6 +1044,70 @@
       btn.textContent = 'Re-check This Source';
     }
 
+    const FS_KEY = 'AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU';
+    const FS_BASE = 'https://firestore.googleapis.com/v1/projects/news-61e62/databases/(default)/documents';
+
+    function istDayKey(offsetDays = 0) {
+      return new Date(Date.now() + 5.5 * 3600 * 1000 + offsetDays * 86400000).toISOString().slice(0, 10);
+    }
+
+    async function fetchTrafficStats() {
+      const readDocCount = async (dayKey) => {
+        const res = await fetch(`${FS_BASE}/traffic_daily/${dayKey}?key=${FS_KEY}&_ts=${Date.now()}`, { cache: 'no-store' });
+        if (res.status === 404) return { visits: 0, pageviews: 0 };
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const d = await res.json();
+        return {
+          visits: Number(d.fields?.visits?.integerValue || d.fields?.visits?.doubleValue || 0),
+          pageviews: Number(d.fields?.pageviews?.integerValue || d.fields?.pageviews?.doubleValue || 0)
+        };
+      };
+
+      try {
+        const cutoffMs = Math.floor(Date.now() - 180000);
+        const [activeRes, todayStats, yestStats] = await Promise.all([
+          fetch(`${FS_BASE}:runQuery?key=${FS_KEY}`, {
+            method: 'POST',
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              structuredQuery: {
+                from: [{ collectionId: 'active_sessions' }],
+                where: {
+                  fieldFilter: {
+                    field: { fieldPath: 'lastSeenMs' },
+                    op: 'GREATER_THAN_OR_EQUAL',
+                    value: { integerValue: String(cutoffMs) }
+                  }
+                }
+              }
+            })
+          }),
+          readDocCount(istDayKey(0)),
+          readDocCount(istDayKey(-1))
+        ]);
+
+        if (!activeRes.ok) throw new Error(`HTTP ${activeRes.status}`);
+        const rows = (await activeRes.json()).filter(r => r.document);
+        const mobile = rows.filter(r => r.document.fields?.device?.stringValue === 'mobile').length;
+        const desktop = rows.length - mobile;
+
+        document.getElementById('tr-active').textContent = String(rows.length);
+        document.getElementById('tr-active-sub').textContent = `${mobile} mobile • ${desktop} desktop (last 3m)`;
+        document.getElementById('tr-today-visits').textContent = todayStats.visits.toLocaleString('en-IN');
+        document.getElementById('tr-today-views').textContent = `${todayStats.pageviews.toLocaleString('en-IN')} pageviews today`;
+        document.getElementById('tr-yest-visits').textContent = yestStats.visits.toLocaleString('en-IN');
+        document.getElementById('tr-yest-views').textContent = `${yestStats.pageviews.toLocaleString('en-IN')} pageviews`;
+        document.getElementById('tr-status').textContent = 'Live';
+        document.getElementById('tr-status').style.color = 'var(--green)';
+      } catch (err) {
+        document.getElementById('tr-status').textContent = 'Rules Needed';
+        document.getElementById('tr-status').style.color = 'var(--amber)';
+        document.getElementById('tr-active-sub').textContent = err.message;
+      }
+    }
+    
+    
     async function runAllLiveChecks() {
       const btn = document.getElementById('sync-btn');
       const spin = document.getElementById('sync-spinner');
@@ -1029,8 +1118,8 @@
       txt.textContent = 'Syncing...';
 
       setPendingState();
-      await Promise.allSettled([checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
-
+      await Promise.allSettled([fetchTrafficStats(), checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
+      
       lastSyncAt = Date.now();
       const istTime = new Date(lastSyncAt).toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
