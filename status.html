@@ -274,7 +274,7 @@
         </div>
         <button class="btn btn-primary" id="sync-btn" onclick="runAllLiveChecks()">
           <span id="sync-spinner"></span>
-          <span id="sync-btn-text">Sync Live</span>
+          <span id="sync-btn-text">Sync</span>
         </button>
         <button class="btn" id="theme-btn" onclick="toggleTheme()">DM</button>
         <a class="btn" href="./index.html">HUB</a>
@@ -1117,8 +1117,8 @@
       const txt = document.getElementById('sync-btn-text');
       btn.disabled = true;
       spin.className = 'spinning';
-      spin.textContent = '↻';
-      txt.textContent = 'Syncing...';
+      spin.textContent = '⠋';
+      txt.textContent = 'Syncing';
 
       setPendingState();
       await Promise.allSettled([fetchTrafficStats(), checkTab1(), checkTab2(), checkTab3(), checkTab456()]);
