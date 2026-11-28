@@ -1,4 +1,4 @@
-// api/missing.js — Real-time All-India & Global Missing Persons (ZIPNET, FBI, INTERPOL Yellow)
+// api/missing.js — Real-time All-India & Global Missing Persons (ZIPNET, FBI, INTERPOL Yellow — No Cache)
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/json,application/xhtml+xml,*/*;q=0.8',
@@ -36,6 +36,17 @@ function parseDmyToIso(dmy) {
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+function extractSetCookieHeader(res) {
+  let rawCookies = [];
+  if (typeof res.headers.getSetCookie === 'function') {
+    rawCookies = res.headers.getSetCookie();
+  } else {
+    const single = res.headers.get('set-cookie');
+    if (single) rawCookies = single.split(/,\s*(?=[A-Za-z0-9_.-]+=)/);
+  }
+  return rawCookies.map((c) => String(c).split(';')[0].trim()).filter(Boolean).join('; ');
+}
+
 async function fetchWithTimeout(url, extraHeaders = {}, timeoutMs = 14000, method = 'GET', body = undefined) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -58,14 +69,12 @@ async function fetchZipnetMissing(stateFilter = 'ALL', debug = false) {
     const res = await fetchWithTimeout(url, {}, 15000);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const html = await res.text();
-    const setCookie = res.headers.get('set-cookie') || '';
-    const cookieHeader = setCookie ? setCookie.split(',').map((c) => c.split(';')[0]).join('; ') : '';
+    const cookieHeader = extractSetCookieHeader(res);
 
     let items = [];
     const totalMatch = html.match(/Showing\s+\d+\s+to\s+\d+\s+of\s+([\d,]+)\s+entries/i);
     let totalDatabaseEntries = totalMatch?.[1] || null;
 
-    // 1. Parse initial SSR table rows if present
     const tbodyMatch = html.match(/<tbody[\s>][\s\S]*?<\/tbody>/i);
     if (tbodyMatch) {
       const trMatches = tbodyMatch[0].match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
@@ -110,7 +119,6 @@ async function fetchZipnetMissing(stateFilter = 'ALL', debug = false) {
       }
     }
 
-    // 2. Discover DataTables / AJAX endpoint embedded in page scripts if tbody was empty
     const ajaxMatches = [];
     const scriptRegex = /(?:url|ajax)\s*:\s*["']([^"']+)["']/gi;
     let sm;
@@ -248,7 +256,9 @@ async function fetchInterpolYellow() {
   const portalUrl = 'https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices';
   try {
     const res = await fetchWithTimeout(apiUrl, {
-      'Accept': 'application/json',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Cookie': '',
       'Origin': 'https://www.interpol.int',
       'Referer': 'https://www.interpol.int/'
     }, 10000);
@@ -292,7 +302,8 @@ async function fetchInterpolYellow() {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
 
   const source = String(req.query.source || 'all').toLowerCase();
   const state = String(req.query.state || 'ALL').trim();
