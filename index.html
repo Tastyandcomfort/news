@@ -919,6 +919,7 @@
     function switchMainTab(tab) {
       document.getElementById('view-news').classList.add('hidden');
       document.getElementById('view-press').classList.add('hidden');
+      document.getElementById('view-press').classList.remove('flex');
       document.getElementById('view-wanted').classList.add('hidden');
       document.getElementById('view-osint').classList.add('hidden');
       document.getElementById('view-jobs').classList.add('hidden');
@@ -927,7 +928,7 @@
 
       let activeBtn = btnNews;
       if (tab === 'news') { document.getElementById('view-news').classList.remove('hidden'); activeBtn = btnNews; }
-      else if (tab === 'press') { document.getElementById('view-press').classList.remove('hidden'); activeBtn = btnPress; window.scrollTo({ top: 0, behavior: 'smooth' }); if (typeof window.initOrRefreshPressTab === 'function') window.initOrRefreshPressTab(); }
+      else if (tab === 'press') { const vp = document.getElementById('view-press'); vp.classList.remove('hidden'); vp.classList.add('flex'); activeBtn = btnPress; window.scrollTo({ top: 0, behavior: 'smooth' }); if (typeof window.initOrRefreshPressTab === 'function') window.initOrRefreshPressTab(); }
       else if (tab === 'wanted') { document.getElementById('view-wanted').classList.remove('hidden'); activeBtn = btnWanted; window.scrollTo({ top: 0, behavior: 'smooth' }); }
       else if (tab === 'video') { activeBtn = btnVideo; }
       else if (tab === 'osint') { document.getElementById('view-osint').classList.remove('hidden'); activeBtn = btnOsint; if (leafletMap) setTimeout(() => leafletMap.invalidateSize(), 150); }
