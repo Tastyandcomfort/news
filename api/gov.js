@@ -995,118 +995,92 @@ async function fetchCbiOfficial() {
 
 // LIVE NIA MOST WANTED
 async function fetchNiaWanted() {
-  const niaUrls = [
-    'https://nia.mha.gov.in/most-wanted.htm',
-    'https://www.nia.gov.in/most-wanted.htm',
-    'https://nia.mha.gov.in/wanted.htm',
-    'https://nia.mha.gov.in/most-wanted-photos.htm'
+  const pageUrls = [
+    'https://nia.mha.gov.in/most-wanted',
+    'https://nia.mha.gov.in/most-wanted?page=1'
   ];
+  const fallbackPhotoUrl = 'https://nia.mha.gov.in/most-wanted-photos';
 
   const seenNames = new Set();
   const items = [];
   const errors = [];
-  let activeUrl = niaUrls[0];
+  let activeUrl = pageUrls[0];
 
-  for (const pageUrl of niaUrls) {
+  const parseNiaHtml = (html, pageUrl) => {
+    const baseOrigin = new URL(pageUrl).origin;
+    const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
+    for (let i = 0; i < chunks.length; i++) {
+      const block = chunks[i];
+      const prevTail = i > 0 ? stripTags(chunks[i - 1].slice(-300)) : '';
+      const clean = stripTags(block);
+      if (!/Name\s*:/i.test(clean) || !/Wanted\s+in\s*:/i.test(clean)) continue;
+
+      const nameMatch = clean.match(/Name\s*:\s*([^:]+?)(?=\s*(?:Aliases|Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+      const aliasMatch = clean.match(/Aliases\s*:\s*([^:]*?)(?=\s*(?:Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
+      const addressMatch = clean.match(/Address\s*:\s*([^:]*?)(?=\s*(?:Wanted\s+in|Accused\s+Status|Age\/DOB|$))/i);
+      const wantedInMatch = clean.match(/Wanted\s+in\s*:\s*([^:]*?)(?=\s*(?:Accused\s+Status|Age\/DOB|Organization|Reward|For\s+any\s+information|$))/i);
+      const dobMatch = clean.match(/Age\/DOB\s*\(Approx\)\s*:\s*([^:]*?)(?=\s*(?:Organization|Reward|For\s+any\s+information|$))/i);
+      const orgMatch = clean.match(/Organization\s*:\s*([^:]*?)(?=\s*(?:Reward|For\s+any\s+information|E-mail|Close|$))/i);
+      const rewardInBlock = clean.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40}?)(?=\s*(?:For\s+any|E-mail|Close|Name|$))/i);
+      const rewardInPrev = prevTail.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40})$/i);
+      const rewardRaw = ((rewardInBlock?.[1] || rewardInPrev?.[1]) || '').trim();
+
+      const name = (nameMatch?.[1] || '').replace(/[.\s]+$/, '').trim();
+      if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
+      seenNames.add(name.toLowerCase());
+
+      const imgMatch = block.match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) ||
+        (i > 0 ? chunks[i - 1].slice(-600).match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) : null);
+      const rawPhoto = imgMatch?.[1] || '';
+      const photoUrl = rawPhoto && !/photo_not_available/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
+      const aliasesRaw = (aliasMatch?.[1] || '').trim();
+      const aliases = aliasesRaw ? aliasesRaw.split('@').map(a => a.replace(/[.\s]+$/, '').trim()).filter(a => a.length > 1).slice(0, 4) : [];
+      const address = (addressMatch?.[1] || '').trim();
+      const wantedIn = (wantedInMatch?.[1] || '').trim();
+      const org = (orgMatch?.[1] || '').trim();
+      const caseYearMatch = wantedIn.match(/\/(\d{4})\//);
+
+      items.push({
+        id: `nia-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`,
+        agency: 'NIA', verifiedBy: 'NIA India Official',
+        department: 'National Investigation Agency (NIA India)',
+        location: address || 'India (NIA Case Jurisdiction)',
+        name, aliases, photo: photoUrl,
+        charges: [wantedIn ? `Wanted in Case: ${wantedIn}` : '', org ? `Organization: ${org}` : ''].filter(Boolean).join(' • ') || 'NIA Official Most Wanted Absconder',
+        description: `Official NIA Case Reference: ${wantedIn || 'Listed on nia.mha.gov.in'}`,
+        caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
+        rewardText: rewardRaw && !/^[-nil]+$/i.test(rewardRaw) ? rewardRaw : '',
+        rewardValue: rewardRaw ? (parseInt(rewardRaw.replace(/[^\d]/g, ''), 10) || 1) : 0,
+        publishedAt: caseYearMatch ? `Case Year: ${caseYearMatch[1]}` : null,
+        updatedAt: null, dob: (dobMatch?.[1] || '').trim(), nationality: 'India',
+        noticeType: 'NIA WANTED', sourceUrl: 'https://nia.mha.gov.in/most-wanted'
+      });
+    }
+  };
+
+  for (const pageUrl of pageUrls) {
     try {
       const html = await fetchText(pageUrl, {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Upgrade-Insecure-Requests': '1'
-      }, 9000);
+      }, 10000);
       if (!html || /Access Denied|Request Rejected|Just a moment/i.test(html)) {
-        errors.push(`${new URL(pageUrl).hostname}: blocked by WAF`);
+        errors.push(`${pageUrl}: blocked by WAF`);
         continue;
       }
-
-      const baseOrigin = new URL(pageUrl).origin;
       activeUrl = pageUrl;
-
-      // Pattern A: "Name : ... Wanted in : ..." profile blocks
-      const chunks = html.split(/(?=Name\s*(?:<[^>]+>\s*)*:)/gi);
-      for (let i = 0; i < chunks.length; i++) {
-        const block = chunks[i];
-        const prevTail = i > 0 ? stripTags(chunks[i - 1].slice(-300)) : '';
-        const clean = stripTags(block);
-        if (!/Name\s*:/i.test(clean) || !/Wanted\s+in\s*:/i.test(clean)) continue;
-
-        const nameMatch = clean.match(/Name\s*:\s*([^:]+?)(?=\s*(?:Aliases|Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
-        const aliasMatch = clean.match(/Aliases\s*:\s*([^:]*?)(?=\s*(?:Parentage|Address|Wanted\s+in|Accused\s+Status|$))/i);
-        const addressMatch = clean.match(/Address\s*:\s*([^:]*?)(?=\s*(?:Wanted\s+in|Accused\s+Status|Age\/DOB|$))/i);
-        const wantedInMatch = clean.match(/Wanted\s+in\s*:\s*([^:]*?)(?=\s*(?:Accused\s+Status|Age\/DOB|Organization|Reward|For\s+any\s+information|$))/i);
-        const dobMatch = clean.match(/Age\/DOB\s*\(Approx\)\s*:\s*([^:]*?)(?=\s*(?:Organization|Reward|For\s+any\s+information|$))/i);
-        const orgMatch = clean.match(/Organization\s*:\s*([^:]*?)(?=\s*(?:Reward|For\s+any\s+information|E-mail|Close|$))/i);
-        const rewardInBlock = clean.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40}?)(?=\s*(?:For\s+any|E-mail|Close|Name|$))/i);
-        const rewardInPrev = prevTail.match(/Reward\s*:\s*((?:Rs\.?|₹)?[^:]{1,40})$/i);
-        const rewardRaw = ((rewardInBlock?.[1] || rewardInPrev?.[1]) || '').trim();
-
-        const name = (nameMatch?.[1] || '').replace(/[.\s]+$/, '').trim();
-        if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
-        seenNames.add(name.toLowerCase());
-
-        const imgMatch = block.match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) ||
-          (i > 0 ? chunks[i - 1].slice(-600).match(/<img[^>]+src=["']([^"']*\/Photo\/[^"']+)["']/i) : null);
-        const rawPhoto = imgMatch?.[1] || '';
-        const photoUrl = rawPhoto && !/photo_not_available/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
-        const aliasesRaw = (aliasMatch?.[1] || '').trim();
-        const aliases = aliasesRaw ? aliasesRaw.split('@').map(a => a.replace(/[.\s]+$/, '').trim()).filter(a => a.length > 1).slice(0, 4) : [];
-        const address = (addressMatch?.[1] || '').trim();
-        const wantedIn = (wantedInMatch?.[1] || '').trim();
-        const org = (orgMatch?.[1] || '').trim();
-        const caseYearMatch = wantedIn.match(/\/(\d{4})\//);
-
-        items.push({
-          id: `nia-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}`,
-          agency: 'NIA', verifiedBy: 'NIA India Official',
-          department: 'National Investigation Agency (NIA India)',
-          location: address || 'India (NIA Case Jurisdiction)',
-          name, aliases, photo: photoUrl,
-          charges: [wantedIn ? `Wanted in Case: ${wantedIn}` : '', org ? `Organization: ${org}` : ''].filter(Boolean).join(' • ') || 'NIA Official Most Wanted Absconder',
-          description: `Official NIA Case Reference: ${wantedIn || `Listed on ${new URL(pageUrl).hostname}`}`,
-          caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
-          rewardText: rewardRaw && !/^[-nil]+$/i.test(rewardRaw) ? rewardRaw : '',
-          rewardValue: rewardRaw ? (parseInt(rewardRaw.replace(/[^\d]/g, ''), 10) || 1) : 0,
-          publishedAt: caseYearMatch ? `Case Year: ${caseYearMatch[1]}` : null,
-          updatedAt: null, dob: (dobMatch?.[1] || '').trim(), nationality: 'India',
-          noticeType: 'NIA WANTED', sourceUrl: pageUrl
-        });
-      }
-
-      // Pattern B: Table rows if Pattern A found nothing
-      if (items.length === 0) {
-        const trMatches = html.match(/<tr[\s>][\s\S]*?<\/tr>/gi) || [];
-        for (const tr of trMatches) {
-          const cells = tr.match(/<(?:td|th)[\s>][\s\S]*?<\/(?:td|th)>/gi) || [];
-          if (cells.length < 2) continue;
-          const cols = cells.map(stripTags).filter(Boolean);
-          if (!cols.length || /Sr\.?\s*No|Sl\.?\s*No|Name\s+of/i.test(cols[0])) continue;
-          const name = (cols[1] && !/^\d+$/.test(cols[1]) ? cols[1] : cols[0]).trim();
-          if (!name || name.length < 3 || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) continue;
-          seenNames.add(name.toLowerCase());
-
-          const imgMatch = tr.match(/<img[^>]+src=["']([^"']+)["']/i);
-          const rawPhoto = imgMatch?.[1] || '';
-          const photoUrl = rawPhoto && !/photo_not_available|logo/i.test(rawPhoto) ? new URL(rawPhoto, baseOrigin).href : '';
-          const hrefMatch = tr.match(/<a[^>]+href=["']([^"']+)["']/i);
-          const sourceUrl = hrefMatch?.[1] ? new URL(decodeEntities(hrefMatch[1]), baseOrigin).href : pageUrl;
-
-          items.push({
-            id: `nia-tbl-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 36)}`,
-            agency: 'NIA', verifiedBy: 'NIA India Official',
-            department: 'National Investigation Agency (NIA India)',
-            location: cols[2] || 'India (NIA Case Jurisdiction)',
-            name, aliases: [], photo: photoUrl,
-            charges: cols.slice(2).join(' • ') || 'NIA Official Most Wanted Notice',
-            description: cols.join(' | '),
-            caution: 'Report official information to NIA HQ: 011-24368800 / assistance.nia@gov.in or Dial 112.',
-            rewardText: '', rewardValue: 0, publishedAt: null, updatedAt: null, dob: '',
-            nationality: 'India', noticeType: 'NIA WANTED', sourceUrl
-          });
-        }
-      }
-
-      if (items.length > 0) break;
+      parseNiaHtml(html, pageUrl);
     } catch (err) {
-      errors.push(`${new URL(pageUrl).hostname}: ${err.message}`);
+      errors.push(`${pageUrl}: ${err.message}`);
+    }
+  }
+
+  if (items.length === 0) {
+    try {
+      const html = await fetchText(fallbackPhotoUrl, { 'Upgrade-Insecure-Requests': '1' }, 10000);
+      parseNiaHtml(html, fallbackPhotoUrl);
+    } catch (err) {
+      errors.push(`${fallbackPhotoUrl}: ${err.message}`);
     }
   }
 
@@ -1115,7 +1089,7 @@ async function fetchNiaWanted() {
     count: items.length,
     sourceUrl: activeUrl,
     items: items.slice(0, 40),
-    error: items.length ? null : `NIA portal blocked automated server access (${errors.join(' • ') || 'no records parsed'})`
+    error: items.length ? null : `NIA portal unreachable (${errors.join(' • ') || 'no records parsed'})`
   };
 }
 
