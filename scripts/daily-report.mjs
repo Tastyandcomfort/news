@@ -1,5 +1,6 @@
-// scripts/daily-report.mjs — Full All-Tabs Daily Website Monitor (Gmail HTML + Telegram Bot)
+// scripts/daily-report.mjs — Zero-Emoji Visual Scorecard (PNG for Telegram + Executive HTML for Gmail)
 import nodemailer from 'nodemailer';
+import { Resvg } from '@resvg/resvg-js';
 
 const SITE_URL = 'https://tastyandcomfort.github.io/news/';
 const GOV_API = 'https://news-lemon-two.vercel.app/api/gov';
@@ -9,6 +10,8 @@ const FLIGHTS_APIS = [
   'https://news-39tq.vercel.app/api/flights',
   'https://news-lemon-two.vercel.app/api/flights'
 ];
+const FIRESTORE_URL =
+  'https://firestore.googleapis.com/v1/projects/news-61e62/databases/(default)/documents/live_jobs?pageSize=50&key=AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU';
 
 function escHtml(str) {
   return String(str ?? '')
@@ -18,7 +21,11 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-function truncate(str, max = 95) {
+function escXml(str) {
+  return escHtml(str).replace(/'/g, '&apos;');
+}
+
+function truncate(str, max = 90) {
   const s = String(str ?? '').replace(/\s+/g, ' ').trim();
   return s.length > max ? s.slice(0, max - 3) + '...' : s;
 }
@@ -29,10 +36,7 @@ async function fetchWithTimeout(url, timeoutMs = 18000, headers = {}) {
   const started = Date.now();
   try {
     const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'TC-News-Monitor/1.0',
-        ...headers
-      },
+      headers: { 'User-Agent': 'TC-News-Monitor/2.0', ...headers },
       signal: controller.signal
     });
     const text = await res.text();
@@ -65,22 +69,21 @@ function countRssItems(xmlText) {
   return { count: items.length, firstTitle };
 }
 
-function row(name, status, detail) {
+function row(name, status, metric, detail = '', count = 0, ms = 0, verifyUrl = '') {
   // status: 'OK' | 'WARN' | 'FAIL'
-  return { name, status, detail };
+  return { name, status, metric, detail, count, ms, verifyUrl };
 }
 
 async function runAllChecks() {
   const sections = [];
 
-  // Parallel fetches for speed
   const [
     siteRes,
     worldRss, localRss, natRss,
     bulletinsRes, forexRes, usgsRes, espnRes, solarRes,
     govMainRes, govRegionsRes, govMinListRes, govPmoRes, govParlRes, govSciRes, govEciRes, govSpaceRes, govPoliceRes, customPressRes,
     govWantedRes, wantedJsonRes, fbiLiveRes, missingRes,
-    flights1Res, flights2Res, issPosRes, issCrewRes, jobsRes
+    tcAddonsRes, flights1Res, flights2Res, issPosRes, issCrewRes, jobsRes
   ] = await Promise.all([
     fetchWithTimeout(SITE_URL, 15000),
     fetchWithTimeout(`${NEWS_API}?scope=world`, 15000),
@@ -108,270 +111,478 @@ async function runAllChecks() {
     fetchJsonSafe('https://api.fbi.gov/wanted/v1/list?page=1', 15000),
     fetchJsonSafe(`${MISSING_API}?source=all`, 22000),
 
+    fetchWithTimeout(`${SITE_URL}tc-addons.js?t=${Date.now()}`, 12000),
     fetchJsonSafe(FLIGHTS_APIS[0], 14000),
     fetchJsonSafe(FLIGHTS_APIS[1], 14000),
     fetchJsonSafe('https://api.wheretheiss.at/v1/satellites/25544', 12000),
     fetchJsonSafe('https://api.open-notify.org/astros.json', 12000),
-    fetchJsonSafe('https://firestore.googleapis.com/v1/projects/news-61e62/databases/(default)/documents/live_jobs?pageSize=50', 12000)
+    fetchJsonSafe(FIRESTORE_URL, 12000)
   ]);
 
   // --- TAB 1: HEADLINES & HOME ---
   const t1 = [];
   t1.push(siteRes.ok
-    ? row('Live Website (GitHub Pages)', 'OK', `HTTP ${siteRes.status} (${siteRes.ms} ms)`)
-    : row('Live Website (GitHub Pages)', 'FAIL', siteRes.error || `HTTP ${siteRes.status}`));
+    ? row('Website Hosting', 'OK', `200 OK (${siteRes.ms} ms)`, 'GitHub Pages live', 1, siteRes.ms, SITE_URL)
+    : row('Website Hosting', 'FAIL', siteRes.error || `HTTP ${siteRes.status}`, 'GitHub Pages unreachable', 0, siteRes.ms, SITE_URL));
 
-  for (const [label, r] of [['World Highlights RSS', worldRss], ['Telangana Headlines RSS', localRss], ['India Headlines RSS', natRss]]) {
-    if (!r.ok) { t1.push(row(label, 'FAIL', r.error || `HTTP ${r.status}`)); continue; }
+  for (const [label, r, url] of [
+    ['World Highlights RSS', worldRss, `${NEWS_API}?scope=world`],
+    ['Telangana Headlines', localRss, `${NEWS_API}?scope=local`],
+    ['India Headlines', natRss, `${NEWS_API}?scope=national`]
+  ]) {
+    if (!r.ok) { t1.push(row(label, 'FAIL', r.error || `HTTP ${r.status}`, 'RSS feed error', 0, r.ms, url)); continue; }
     const { count, firstTitle } = countRssItems(r.text);
     t1.push(count > 0
-      ? row(label, 'OK', `${count} stories | Latest: "${truncate(firstTitle, 70)}"`)
-      : row(label, 'FAIL', '0 RSS items returned'));
+      ? row(label, 'OK', `${count} stories (${r.ms} ms)`, firstTitle, count, r.ms, url)
+      : row(label, 'FAIL', '0 items', 'No RSS items returned', 0, r.ms, url));
   }
 
   if (bulletinsRes.ok) {
     const arr = Array.isArray(bulletinsRes.data) ? bulletinsRes.data : (bulletinsRes.data?.bulletins || []);
     t1.push(arr.length > 0
-      ? row('T&C Bulletins (bulletins.json)', 'OK', `${arr.length} published | Latest: "${truncate(arr[0]?.title, 65)}"`)
-      : row('T&C Bulletins (bulletins.json)', 'WARN', '0 bulletins published'));
+      ? row('T&C Bulletins', 'OK', `${arr.length} published`, arr[0]?.title || '', arr.length, bulletinsRes.ms, `${SITE_URL}bulletins.json`)
+      : row('T&C Bulletins', 'WARN', '0 published', 'No bulletins in bulletins.json', 0, bulletinsRes.ms, `${SITE_URL}bulletins.json`));
   } else {
-    t1.push(row('T&C Bulletins (bulletins.json)', 'WARN', bulletinsRes.error));
+    t1.push(row('T&C Bulletins', 'WARN', bulletinsRes.error, 'Could not read bulletins.json', 0, bulletinsRes.ms));
   }
 
   t1.push(forexRes.ok && forexRes.data?.rates?.INR
-    ? row('Live Forex (USD/INR)', 'OK', `₹${forexRes.data.rates.INR.toFixed(2)}`)
-    : row('Live Forex (USD/INR)', 'FAIL', forexRes.error || 'No INR rate'));
+    ? row('Forex USD/INR', 'OK', `INR ${forexRes.data.rates.INR.toFixed(2)}`, 'Open ER-API live rate', 1, forexRes.ms)
+    : row('Forex USD/INR', 'FAIL', forexRes.error || 'No rate', 'Forex API error', 0, forexRes.ms));
 
   t1.push(usgsRes.ok && Array.isArray(usgsRes.data?.features)
-    ? row('USGS Earthquakes (24h M4.5+)', 'OK', `${usgsRes.data.features.length} events`)
-    : row('USGS Earthquakes (24h M4.5+)', 'FAIL', usgsRes.error || 'Feed error'));
+    ? row('USGS Earthquakes', 'OK', `${usgsRes.data.features.length} events`, '24h M4.5+ global feed', usgsRes.data.features.length, usgsRes.ms)
+    : row('USGS Earthquakes', 'FAIL', usgsRes.error || 'Error', 'USGS feed unreachable', 0, usgsRes.ms));
 
   const espnEvents = espnRes.data?.scores?.length || espnRes.data?.events?.length || 0;
   t1.push(espnRes.ok
-    ? row('Live Sports Ticker (ESPN)', 'OK', `${espnEvents} match feed(s) checked`)
-    : row('Live Sports Ticker (ESPN)', 'FAIL', espnRes.error));
+    ? row('ESPN Sports Ticker', 'OK', `${espnEvents} feeds`, 'Live cricket/sports feed', espnEvents, espnRes.ms)
+    : row('ESPN Sports Ticker', 'FAIL', espnRes.error, 'ESPN scorepanel error', 0, espnRes.ms));
 
   t1.push(solarRes.ok && solarRes.data?.daily?.sunrise?.length
-    ? row('Solar Sunrise/Sunset (Open-Meteo)', 'OK', 'Synced live')
-    : row('Solar Sunrise/Sunset (Open-Meteo)', 'FAIL', solarRes.error || 'No daily data'));
+    ? row('Solar Schedule', 'OK', `${solarRes.ms} ms`, 'Hyderabad sunrise/sunset synced', 1, solarRes.ms)
+    : row('Solar Schedule', 'FAIL', solarRes.error || 'No data', 'Open-Meteo error', 0, solarRes.ms));
 
-  sections.push({ title: 'TAB 1: HEADLINES & HOME', items: t1 });
+  sections.push({ title: 'TAB 1 - HEADLINES & HOME', items: t1 });
 
   // --- TAB 2: PRESS RELEASES ---
   const t2 = [];
   const gMain = govMainRes.data?.sources || {};
-  const checkGovBucket = (label, srcObj, treatEmptyAsWarn = false) => {
-    if (!srcObj) return row(label, 'FAIL', govMainRes.error || 'No response from /api/gov');
+  const checkGov = (label, srcObj, ms, url, treatEmptyAsWarn = false) => {
+    if (!srcObj) return row(label, 'FAIL', govMainRes.error || 'No response', 'Server unreachable', 0, ms, url);
     if (srcObj.ok && srcObj.count > 0) {
-      return row(label, 'OK', `${srcObj.count} items | Latest: "${truncate(srcObj.items?.[0]?.title, 65)}"`);
+      return row(label, 'OK', `${srcObj.count} items`, srcObj.items?.[0]?.title || '', srcObj.count, ms, url);
     }
-    return row(label, treatEmptyAsWarn ? 'WARN' : 'FAIL', srcObj.error || '0 items returned');
+    return row(label, treatEmptyAsWarn ? 'WARN' : 'FAIL', srcObj.error || '0 items', srcObj.error || '0 items returned', 0, ms, url);
   };
 
-  t2.push(checkGovBucket('PIB All India (RSS)', gMain.pib));
+  t2.push(checkGov('PIB All India (RSS)', gMain.pib, govMainRes.ms, `${GOV_API}?source=pib`));
   t2.push(govRegionsRes.ok && govRegionsRes.data?.regions?.length
-    ? row('PIB Regions Dropdown', 'OK', `${govRegionsRes.data.regions.length} regions`)
-    : row('PIB Regions Dropdown', 'FAIL', govRegionsRes.data?.error || govRegionsRes.error));
+    ? row('PIB Regions List', 'OK', `${govRegionsRes.data.regions.length} regions`, 'Live ViewRss dropdown', govRegionsRes.data.regions.length, govRegionsRes.ms, `${GOV_API}?source=pib_regions`)
+    : row('PIB Regions List', 'FAIL', govRegionsRes.data?.error || govRegionsRes.error, 'Failed to load regions', 0, govRegionsRes.ms, `${GOV_API}?source=pib_regions`));
 
   t2.push(govMinListRes.ok && govMinListRes.data?.ministries?.length
-    ? row('PIB Ministries Dropdown', 'OK', `${govMinListRes.data.ministries.length} ministries`)
-    : row('PIB Ministries Dropdown', 'FAIL', govMinListRes.data?.error || govMinListRes.error));
+    ? row('PIB Ministries List', 'OK', `${govMinListRes.data.ministries.length} ministries`, 'Live AllRel dropdown', govMinListRes.data.ministries.length, govMinListRes.ms, `${GOV_API}?source=pib_ministries`)
+    : row('PIB Ministries List', 'FAIL', govMinListRes.data?.error || govMinListRes.error, 'Failed to load ministries', 0, govMinListRes.ms, `${GOV_API}?source=pib_ministries`));
 
-  t2.push(checkGovBucket('Ministries Sample (PMO)', govPmoRes.data?.sources?.pib_ministry, true));
+  t2.push(checkGov('Ministries (PMO Sample)', govPmoRes.data?.sources?.pib_ministry, govPmoRes.ms, `${GOV_API}?source=pib_ministry&minid=3`, true));
 
   const parl = govParlRes.data?.sources || {};
-  t2.push(checkGovBucket('Parliament — Rajya Sabha', parl.rajya_sabha, true));
-  t2.push(checkGovBucket('Parliament — Lok Sabha', parl.lok_sabha, true));
-  t2.push(checkGovBucket('Supreme Court of India', govSciRes.data?.sources?.sci));
-  t2.push(checkGovBucket('Election Commission (ECI)', govEciRes.data?.sources?.eci, true));
-  t2.push(checkGovBucket('Enforcement Directorate (ED Press)', gMain.ed_press));
-  t2.push(checkGovBucket('CBI Press Releases', gMain.cbi, true));
+  t2.push(checkGov('Parliament - Rajya Sabha', parl.rajya_sabha, govParlRes.ms, `${GOV_API}?source=parliament`, true));
+  t2.push(checkGov('Parliament - Lok Sabha', parl.lok_sabha, govParlRes.ms, `${GOV_API}?source=parliament`, true));
+  t2.push(checkGov('Supreme Court of India', govSciRes.data?.sources?.sci, govSciRes.ms, `${GOV_API}?source=sci`));
+  t2.push(checkGov('Election Commission', govEciRes.data?.sources?.eci, govEciRes.ms, `${GOV_API}?source=eci`, true));
+  t2.push(checkGov('ED Press Releases', gMain.ed_press, govMainRes.ms, `${GOV_API}?source=ed_press`));
+  t2.push(checkGov('CBI Press Releases', gMain.cbi, govMainRes.ms, `${GOV_API}?source=cbi`, true));
 
   const sp = govSpaceRes.data?.sources || {};
-  t2.push(checkGovBucket('Space — ISRO', sp.isro));
-  t2.push(checkGovBucket('Space — NASA', sp.nasa));
-  t2.push(checkGovBucket('Space — SpaceX', sp.spacex));
+  t2.push(checkGov('Space - ISRO', sp.isro, govSpaceRes.ms, `${GOV_API}?source=space`));
+  t2.push(checkGov('Space - NASA', sp.nasa, govSpaceRes.ms, `${GOV_API}?source=space`));
+  t2.push(checkGov('Space - SpaceX', sp.spacex, govSpaceRes.ms, `${GOV_API}?source=space`));
 
   const pol = govPoliceRes.data?.sources?.police;
   if (pol && pol.items) {
-    const dlCount = pol.items.filter(x => x.stateName === 'DELHI').length;
-    const klCount = pol.items.filter(x => x.stateName === 'KERALA').length;
-    const chdCount = pol.items.filter(x => x.stateName === 'CHANDIGARH').length;
-    const status = (dlCount > 0 || klCount > 0) ? (pol.error ? 'WARN' : 'OK') : 'FAIL';
-    t2.push(row('State Police (Delhi / Kerala / Chandigarh)', status,
-      `Delhi: ${dlCount}, Kerala: ${klCount}, Chandigarh: ${chdCount}${pol.error ? ` | Note: ${truncate(pol.error, 60)}` : ''}`));
+    const dl = pol.items.filter(x => x.stateName === 'DELHI').length;
+    const kl = pol.items.filter(x => x.stateName === 'KERALA').length;
+    const chd = pol.items.filter(x => x.stateName === 'CHANDIGARH').length;
+    const status = (dl > 0 || kl > 0) ? (pol.error ? 'WARN' : 'OK') : 'FAIL';
+    t2.push(row('State Police Feeds', status, `DL:${dl} KL:${kl} CHD:${chd}`, pol.error || 'Delhi & Kerala live', dl + kl + chd, govPoliceRes.ms, `${GOV_API}?source=police&state=ALL`));
   } else {
-    t2.push(row('State Police', 'FAIL', govPoliceRes.error || 'No response'));
+    t2.push(row('State Police Feeds', 'FAIL', govPoliceRes.error || 'No response', 'Police endpoint error', 0, govPoliceRes.ms, `${GOV_API}?source=police&state=ALL`));
   }
 
   if (customPressRes.ok) {
     const cArr = Array.isArray(customPressRes.data) ? customPressRes.data : (customPressRes.data?.items || []);
-    t2.push(row('Listed by T&C (press-releases.json)', 'OK', `${cArr.length} custom entries`));
+    t2.push(row('Listed by T&C', 'OK', `${cArr.length} custom`, 'press-releases.json', cArr.length, customPressRes.ms, `${SITE_URL}press-releases.json`));
   } else {
-    t2.push(row('Listed by T&C (press-releases.json)', 'WARN', customPressRes.error));
+    t2.push(row('Listed by T&C', 'WARN', customPressRes.error, 'press-releases.json missing', 0, customPressRes.ms));
   }
 
-  sections.push({ title: 'TAB 2: PRESS RELEASES', items: t2 });
+  sections.push({ title: 'TAB 2 - PRESS RELEASES', items: t2 });
 
   // --- TAB 3: MOST WANTED & MISSING ---
   const t3 = [];
   const gw = govWantedRes.data?.sources || {};
 
   t3.push(gw.nia?.ok
-    ? row('NIA India Most Wanted', 'OK', `${gw.nia.count} records | Top: "${truncate(gw.nia.items?.[0]?.name, 50)}"`)
-    : row('NIA India Most Wanted', 'FAIL', gw.nia?.error || govWantedRes.error || '0 records'));
+    ? row('NIA India Most Wanted', 'OK', `${gw.nia.count} records`, gw.nia.items?.[0]?.name || '', gw.nia.count, govWantedRes.ms, `${GOV_API}?source=nia`)
+    : row('NIA India Most Wanted', 'FAIL', gw.nia?.error || govWantedRes.error || '0 records', gw.nia?.error || 'Failed', 0, govWantedRes.ms, `${GOV_API}?source=nia`));
 
   t3.push(gw.ed_proclamation?.ok
-    ? row('ED Proclamations', 'OK', `${gw.ed_proclamation.count} records`)
-    : row('ED Proclamations', 'FAIL', gw.ed_proclamation?.error || govWantedRes.error || '0 records'));
+    ? row('ED Proclamations', 'OK', `${gw.ed_proclamation.count} records`, gw.ed_proclamation.items?.[0]?.name || '', gw.ed_proclamation.count, govWantedRes.ms, `${GOV_API}?source=ed_proclamation`)
+    : row('ED Proclamations', 'FAIL', gw.ed_proclamation?.error || govWantedRes.error || '0 records', gw.ed_proclamation?.error || 'Failed', 0, govWantedRes.ms, `${GOV_API}?source=ed_proclamation`));
 
   t3.push(gw.cbi?.redNoticeCount > 0
-    ? row('CBI / INTERPOL India Red Notices', 'OK', `${gw.cbi.redNoticeCount} records`)
-    : row('CBI / INTERPOL India Red Notices', 'FAIL', gw.cbi?.error || '0 records'));
+    ? row('CBI / INTERPOL India', 'OK', `${gw.cbi.redNoticeCount} records`, gw.cbi.redNotices?.[0]?.name || '', gw.cbi.redNoticeCount, govWantedRes.ms, `${GOV_API}?source=cbi`)
+    : row('CBI / INTERPOL India', 'FAIL', gw.cbi?.error || '0 records', 'CBI Red Notice table failed', 0, govWantedRes.ms, `${GOV_API}?source=cbi`));
 
   t3.push(gw.interpol?.ok
-    ? row('INTERPOL Global Red Notices (Server)', 'OK', `${gw.interpol.count} records`)
-    : row('INTERPOL Global Red Notices (Server)', 'WARN', `${gw.interpol?.error || 'Restricted'} (browser-direct fallback active on user device)`));
+    ? row('INTERPOL Global (Server)', 'OK', `${gw.interpol.count} records`, gw.interpol.items?.[0]?.name || '', gw.interpol.count, govWantedRes.ms, `${GOV_API}?source=interpol`)
+    : row('INTERPOL Global (Server)', 'WARN', 'WAF 403 (Server)', 'Browser-direct fallback active on user device', 0, govWantedRes.ms, `${GOV_API}?source=interpol`));
 
   t3.push(fbiLiveRes.ok && fbiLiveRes.data?.items?.length
-    ? row('FBI Most Wanted (Live API)', 'OK', `${fbiLiveRes.data.items.length} records (page 1)`)
-    : row('FBI Most Wanted (Live API)', 'FAIL', fbiLiveRes.error || '0 records'));
+    ? row('FBI Wanted (Live API)', 'OK', `${fbiLiveRes.data.items.length} records`, fbiLiveRes.data.items[0]?.title || '', fbiLiveRes.data.items.length, fbiLiveRes.ms, 'https://api.fbi.gov/wanted/v1/list?page=1')
+    : row('FBI Wanted (Live API)', 'FAIL', fbiLiveRes.error || '0 records', 'FBI API unreachable', 0, fbiLiveRes.ms));
 
   if (wantedJsonRes.ok && wantedJsonRes.data) {
     const wSrc = (wantedJsonRes.data.sources || []).join(', ') || 'None';
-    t3.push(row('Snapshot File (wanted-data.json)', 'OK', `${wantedJsonRes.data.total || 0} items [${wSrc}] (${wantedJsonRes.data.updatedAt || 'no date'})`));
+    t3.push(row('wanted-data.json Snapshot', 'OK', `${wantedJsonRes.data.total || 0} items`, `Sources: ${wSrc}`, wantedJsonRes.data.total || 0, wantedJsonRes.ms, `${SITE_URL}wanted-data.json`));
   } else {
-    t3.push(row('Snapshot File (wanted-data.json)', 'WARN', wantedJsonRes.error));
+    t3.push(row('wanted-data.json Snapshot', 'WARN', wantedJsonRes.error, 'Snapshot unreadable', 0, wantedJsonRes.ms));
   }
 
   const ms = missingRes.data?.sources || {};
   t3.push(ms.fbi_missing?.ok
-    ? row('Missing — FBI Missing', 'OK', `${ms.fbi_missing.count} records`)
-    : row('Missing — FBI Missing', 'FAIL', ms.fbi_missing?.error || missingRes.error));
+    ? row('Missing - FBI Live', 'OK', `${ms.fbi_missing.count} records`, ms.fbi_missing.items?.[0]?.name || '', ms.fbi_missing.count, missingRes.ms, `${MISSING_API}?source=fbi`)
+    : row('Missing - FBI Live', 'FAIL', ms.fbi_missing?.error || missingRes.error, 'FBI Missing API failed', 0, missingRes.ms, `${MISSING_API}?source=fbi`));
+
   t3.push(ms.zipnet?.ok
-    ? row('Missing — ZIPNET India', 'OK', `${ms.zipnet.count} records`)
-    : row('Missing — ZIPNET India', 'WARN', ms.zipnet?.error || 'Interactive session required'));
+    ? row('Missing - ZIPNET India', 'OK', `${ms.zipnet.count} records`, 'ZIPNET live rows', ms.zipnet.count, missingRes.ms, `${MISSING_API}?source=zipnet`)
+    : row('Missing - ZIPNET India', 'WARN', 'Session required', ms.zipnet?.error || 'Interactive session portal', 0, missingRes.ms, `${MISSING_API}?source=zipnet`));
+
   t3.push(ms.interpol_yellow?.ok
-    ? row('Missing — INTERPOL Yellow', 'OK', `${ms.interpol_yellow.count} records`)
-    : row('Missing — INTERPOL Yellow', 'WARN', ms.interpol_yellow?.error || 'Restricted from server'));
+    ? row('Missing - INTERPOL Yellow', 'OK', `${ms.interpol_yellow.count} records`, 'Yellow Notices live', ms.interpol_yellow.count, missingRes.ms, `${MISSING_API}?source=interpol`)
+    : row('Missing - INTERPOL Yellow', 'WARN', 'WAF 403 (Server)', 'Browser-direct fallback active on user device', 0, missingRes.ms, `${MISSING_API}?source=interpol`));
 
-  sections.push({ title: 'TAB 3: MOST WANTED & MISSING', items: t3 });
+  sections.push({ title: 'TAB 3 - MOST WANTED & MISSING', items: t3 });
 
-  // --- TAB 4, 5, 6: TV, RADAR, JOBS ---
+  // --- TABS 4, 5 & 6: TV, RADAR & JOBS ---
   const t456 = [];
-  const tcAddonsCheck = await fetchWithTimeout(`${SITE_URL}tc-addons.js?t=${Date.now()}`, 12000);
-  const tcHasExportErr = /\bexport\s+default\b/.test(tcAddonsCheck.text);
-  t456.push(tcAddonsCheck.ok && !tcHasExportErr
-    ? row('Tab 4 & Core JS (tc-addons.js + TV Embeds)', 'OK', `Loaded cleanly (${Math.round(tcAddonsCheck.text.length / 1024)} KB)`)
-    : row('Tab 4 & Core JS (tc-addons.js)', 'FAIL', tcHasExportErr ? 'Syntax issue: export keyword found!' : (tcAddonsCheck.error || `HTTP ${tcAddonsCheck.status}`)));
+  const tcHasExportErr = /\bexport\s+default\b/.test(tcAddonsRes.text);
+  t456.push(tcAddonsRes.ok && !tcHasExportErr
+    ? row('TV & Core Engine (tc-addons)', 'OK', `${Math.round(tcAddonsRes.text.length / 1024)} KB`, 'Parsed cleanly, 0 syntax flags', 1, tcAddonsRes.ms, `${SITE_URL}tc-addons.js`)
+    : row('TV & Core Engine (tc-addons)', 'FAIL', tcHasExportErr ? 'Syntax error' : (tcAddonsRes.error || `HTTP ${tcAddonsRes.status}`), 'Script load/syntax problem', 0, tcAddonsRes.ms));
 
-  const fl1Count = Array.isArray(flights1Res.data?.states) ? flights1Res.data.states.length : 0;
-  const fl2Count = Array.isArray(flights2Res.data?.states) ? flights2Res.data.states.length : 0;
-  t456.push((fl1Count > 0 || fl2Count > 0)
-    ? row('Tab 5: Radar — Live Flights', 'OK', `news-39tq: ${fl1Count} states | news-lemon-two: ${fl2Count} states`)
-    : row('Tab 5: Radar — Live Flights', 'FAIL', `news-39tq (${flights1Res.error || '0'}) • news-lemon-two (${flights2Res.error || '0'})`));
+  const fl1 = Array.isArray(flights1Res.data?.states) ? flights1Res.data.states.length : 0;
+  const fl2 = Array.isArray(flights2Res.data?.states) ? flights2Res.data.states.length : 0;
+  t456.push((fl1 > 0 || fl2 > 0)
+    ? row('Radar - Live Flights', 'OK', `${Math.max(fl1, fl2)} states`, `39tq: ${fl1} | lemon-two: ${fl2}`, Math.max(fl1, fl2), Math.min(flights1Res.ms, flights2Res.ms), FLIGHTS_APIS[1])
+    : row('Radar - Live Flights', 'FAIL', '0 flights', `39tq (${flights1Res.error}) | lemon (${flights2Res.error})`, 0, flights1Res.ms));
 
   t456.push(issPosRes.ok && issPosRes.data?.altitude
-    ? row('Tab 5: Radar — ISS Live Position', 'OK', `Alt ${Math.round(issPosRes.data.altitude)} km, Spd ${Math.round(issPosRes.data.velocity)} km/h`)
-    : row('Tab 5: Radar — ISS Live Position', 'FAIL', issPosRes.error));
+    ? row('Radar - ISS Telemetry', 'OK', `${Math.round(issPosRes.data.altitude)} km alt`, `${Math.round(issPosRes.data.velocity)} km/h`, 1, issPosRes.ms)
+    : row('Radar - ISS Telemetry', 'FAIL', issPosRes.error, 'wheretheiss.at error', 0, issPosRes.ms));
 
   const issPeople = Array.isArray(issCrewRes.data?.people) ? issCrewRes.data.people.filter(p => p.craft === 'ISS').length : 0;
   t456.push(issCrewRes.ok
-    ? row('Tab 5: Radar — ISS Crew Manifest', 'OK', `${issPeople} ISS crew active`)
-    : row('Tab 5: Radar — ISS Crew Manifest', 'WARN', issCrewRes.error || 'Timed out'));
+    ? row('Radar - ISS Crew Manifest', 'OK', `${issPeople} crew`, 'open-notify.org live', issPeople, issCrewRes.ms)
+    : row('Radar - ISS Crew Manifest', 'WARN', 'Timeout', issCrewRes.error || 'open-notify.org slow', 0, issCrewRes.ms));
 
   if (jobsRes.ok) {
     const activeJobs = (jobsRes.data?.documents || []).filter(d => d?.fields?.status?.stringValue === 'active').length;
     t456.push(activeJobs > 0
-      ? row('Tab 6: Find Jobs (Firestore live_jobs)', 'OK', `${activeJobs} active job(s) in Firestore`)
-      : row('Tab 6: Find Jobs (Firestore live_jobs)', 'WARN', '0 active jobs in Firestore (showing built-in sample jobs)'));
+      ? row('Find Jobs (Firestore)', 'OK', `${activeJobs} active`, 'Firestore live_jobs', activeJobs, jobsRes.ms)
+      : row('Find Jobs (Firestore)', 'WARN', '0 active', 'Using built-in listings', 0, jobsRes.ms));
   } else {
-    t456.push(row('Tab 6: Find Jobs (Firestore live_jobs)', 'WARN', `Firestore REST: ${jobsRes.error}`));
+    t456.push(row('Find Jobs (Firestore)', 'WARN', jobsRes.error || 'Restricted', 'Firestore rules restrict public REST list', 0, jobsRes.ms));
   }
 
-  sections.push({ title: 'TABS 4, 5 & 6: TV, RADAR & JOBS', items: t456 });
+  sections.push({ title: 'TABS 4, 5 & 6 - TV, RADAR & JOBS', items: t456 });
   return sections;
 }
 
-function buildReports(sections) {
-  const istNow = new Date().toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  });
+function summarize(sections) {
+  let okCount = 0, warnCount = 0, failCount = 0, totalItems = 0;
+  const latencies = [];
+  const attention = [];
 
-  let okCount = 0, warnCount = 0, failCount = 0;
   for (const sec of sections) {
     for (const it of sec.items) {
       if (it.status === 'OK') okCount++;
       else if (it.status === 'WARN') warnCount++;
       else failCount++;
+
+      if (it.count > 1) totalItems += it.count;
+      if (it.ms > 0) latencies.push(it.ms);
+      if (it.status === 'FAIL' || it.status === 'WARN') {
+        attention.push({ section: sec.title, ...it });
+      }
     }
   }
 
-  const icon = (s) => (s === 'OK' ? '✅' : s === 'WARN' ? '⚠️' : '❌');
+  const totalChecks = okCount + warnCount + failCount;
+  const healthPct = totalChecks ? Math.round((okCount / totalChecks) * 100) : 0;
+  const avgMs = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
 
-  // Plain-text report for Telegram
-  const lines = [
-    `📰 T&C NEWS HUB — DAILY STATUS REPORT`,
-    `🕒 ${istNow} IST`,
-    `📊 Summary: ✅ ${okCount} OK | ⚠️ ${warnCount} Notice | ❌ ${failCount} Down`,
-    ``
+  return { okCount, warnCount, failCount, totalChecks, healthPct, totalItems, avgMs, attention };
+}
+
+function buildScorecardPng(sections, stats, istNow) {
+  const W = 1080;
+  const PAD = 36;
+  const INNER_W = W - PAD * 2; // 1008
+  const COL_GAP = 24;
+  const COL_W = (INNER_W - COL_GAP) / 2; // 492
+
+  const fails = stats.attention.filter(a => a.status === 'FAIL');
+  const warns = stats.attention.filter(a => a.status === 'WARN');
+  const alertLines = [
+    ...fails.map(a => ({ level: 'DOWN', text: `${a.name} — ${a.metric}` })),
+    ...warns.slice(0, 4).map(a => ({ level: 'NOTICE', text: `${a.name} — ${a.metric}` }))
   ];
 
-  for (const sec of sections) {
-    lines.push(`━━ ${sec.title} ━━`);
-    sec.items.forEach((it, idx) => {
-      lines.push(`${idx + 1}. ${icon(it.status)} ${it.name}: ${it.detail}`);
-    });
-    lines.push('');
-  }
+  const HEADER_H = 108;
+  const KPI_H = 104;
+  const ALERT_H = alertLines.length > 0 ? (44 + alertLines.length * 24 + 14) : 0;
 
-  const textReport = lines.join('\n');
+  const row1Max = Math.max(sections[0].items.length, sections[1].items.length);
+  const row2Max = Math.max(sections[2].items.length, sections[3].items.length);
+  const ROW1_H = 44 + row1Max * 28 + 14;
+  const ROW2_H = 44 + row2Max * 28 + 14;
+  const FOOTER_H = 42;
 
-  // Clean HTML report for Gmail
-  const badgeStyle = (s) =>
-    s === 'OK'
-      ? 'background:#dcfce7;color:#166534;border:1px solid #86efac;'
-      : s === 'WARN'
-        ? 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
-        : 'background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;';
+  let y = 28;
+  const headerY = y; y += HEADER_H + 16;
+  const kpiY = y; y += KPI_H + 16;
+  const alertY = y; if (ALERT_H > 0) y += ALERT_H + 16;
+  const row1Y = y; y += ROW1_H + 16;
+  const row2Y = y; y += ROW2_H + 14;
+  const footerY = y;
+  const H = y + FOOTER_H;
 
-  const sectionHtml = sections.map((sec) => `
-    <div style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-      <div style="background:#f8fafc;padding:10px 14px;font-weight:800;font-size:13px;color:#0f172a;border-bottom:1px solid #e5e7eb;">
+  const okW = Math.round((INNER_W * stats.okCount) / Math.max(1, stats.totalChecks));
+  const warnW = Math.round((INNER_W * stats.warnCount) / Math.max(1, stats.totalChecks));
+  const failW = Math.max(0, INNER_W - okW - warnW);
+
+  const statusColor = (s) => (s === 'OK' ? '#22c55e' : s === 'WARN' ? '#f59e0b' : '#ef4444');
+  const overallColor = stats.failCount > 0 ? '#ef4444' : (stats.warnCount > 0 ? '#f59e0b' : '#22c55e');
+  const overallText = stats.failCount > 0 ? `${stats.failCount} SOURCE DOWN` : 'ALL CORE SYSTEMS LIVE';
+
+  const drawCard = (sec, x, cy, cardH) => {
+    const rowsSvg = sec.items.map((it, idx) => {
+      const ry = cy + 44 + idx * 28;
+      const dotColor = statusColor(it.status);
+      const label = truncate(it.name, 27);
+      const metric = truncate(it.metric, 22);
+      return `
+        <line x1="${x + 16}" y1="${ry + 20}" x2="${x + COL_W - 16}" y2="${ry + 20}" stroke="#1e293b" stroke-width="1"/>
+        <circle cx="${x + 22}" cy="${ry + 7}" r="4" fill="${dotColor}"/>
+        <text x="${x + 34}" y="${ry + 11}" fill="#e2e8f0" font-size="12.5" font-weight="600">${escXml(label)}</text>
+        <text x="${x + COL_W - 16}" y="${ry + 11}" text-anchor="end" fill="${it.status === 'OK' ? '#94a3b8' : dotColor}" font-size="11.5" font-weight="700">${escXml(metric)}</text>
+      `;
+    }).join('');
+
+    return `
+      <rect x="${x}" y="${cy}" width="${COL_W}" height="${cardH}" rx="14" fill="#111827" stroke="#1f2937" stroke-width="1.5"/>
+      <rect x="${x}" y="${cy}" width="${COL_W}" height="36" rx="14" fill="#162032"/>
+      <rect x="${x}" y="${cy + 22}" width="${COL_W}" height="14" fill="#162032"/>
+      <text x="${x + 16}" y="${cy + 23}" fill="#60a5fa" font-size="12" font-weight="800" letter-spacing="0.8">${escXml(sec.title)}</text>
+      ${rowsSvg}
+    `;
+  };
+
+  const kpiCardW = (INNER_W - 16 * 3) / 4;
+  const kpis = [
+    { label: 'LIVE SOURCES', value: `${stats.okCount} / ${stats.totalChecks}`, sub: `${stats.healthPct}% operational`, color: '#22c55e' },
+    { label: 'RECORDS TRACKED', value: stats.totalItems.toLocaleString('en-IN'), sub: 'Live feed items', color: '#38bdf8' },
+    { label: 'AVG LATENCY', value: `${stats.avgMs} ms`, sub: 'API response time', color: '#a78bfa' },
+    { label: 'ATTENTION', value: `${stats.failCount} Down / ${stats.warnCount} Note`, sub: stats.failCount ? 'Check alert panel' : 'No critical outage', color: overallColor }
+  ];
+
+  const kpisSvg = kpis.map((k, i) => {
+    const kx = PAD + i * (kpiCardW + 16);
+    return `
+      <rect x="${kx}" y="${kpiY + 26}" width="${kpiCardW}" height="78" rx="12" fill="#111827" stroke="#1f2937" stroke-width="1.5"/>
+      <text x="${kx + 16}" y="${kpiY + 46}" fill="#94a3b8" font-size="10.5" font-weight="700" letter-spacing="0.8">${escXml(k.label)}</text>
+      <text x="${kx + 16}" y="${kpiY + 72}" fill="${k.color}" font-size="20" font-weight="800">${escXml(k.value)}</text>
+      <text x="${kx + 16}" y="${kpiY + 91}" fill="#64748b" font-size="10.5">${escXml(k.sub)}</text>
+    `;
+  }).join('');
+
+  const alertSvg = ALERT_H > 0 ? `
+    <rect x="${PAD}" y="${alertY}" width="${INNER_W}" height="${ALERT_H}" rx="14" fill="#18121e" stroke="#3b1d2e" stroke-width="1.5"/>
+    <text x="${PAD + 18}" y="${alertY + 26}" fill="#f87171" font-size="12" font-weight="800" letter-spacing="0.8">ATTENTION SUMMARY</text>
+    ${alertLines.map((a, idx) => {
+      const ay = alertY + 48 + idx * 24;
+      const c = a.level === 'DOWN' ? '#ef4444' : '#f59e0b';
+      return `
+        <rect x="${PAD + 18}" y="${ay - 12}" width="54" height="16" rx="4" fill="${c}"/>
+        <text x="${PAD + 45}" y="${ay}" text-anchor="middle" fill="#090d16" font-size="9.5" font-weight="800">${a.level}</text>
+        <text x="${PAD + 84}" y="${ay}" fill="#e2e8f0" font-size="12" font-weight="600">${escXml(truncate(a.text, 92))}</text>
+      `;
+    }).join('')}
+  ` : '';
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+      <g font-family="DejaVu Sans, Liberation Sans, Ubuntu, Arial, sans-serif">
+        <rect width="${W}" height="${H}" fill="#090d16"/>
+
+        <!-- HEADER -->
+        <rect x="${PAD}" y="${headerY}" width="${INNER_W}" height="${HEADER_H}" rx="16" fill="#111827" stroke="#1f2937" stroke-width="1.5"/>
+        <text x="${PAD + 24}" y="${headerY + 40}" fill="#f8fafc" font-size="24" font-weight="800">T&amp;C NEWS HUB</text>
+        <text x="${PAD + 24}" y="${headerY + 64}" fill="#94a3b8" font-size="13" font-weight="600">AUTOMATED LIVE OPERATIONS SCORECARD</text>
+        <text x="${PAD + 24}" y="${headerY + 88}" fill="#64748b" font-size="11.5">${escXml(istNow)} IST  •  Private Daily Diagnostic</text>
+
+        <rect x="${W - PAD - 230}" y="${headerY + 26}" width="206" height="34" rx="17" fill="#0f172a" stroke="${overallColor}" stroke-width="1.5"/>
+        <circle cx="${W - PAD - 210}" cy="${headerY + 43}" r="5" fill="${overallColor}"/>
+        <text x="${W - PAD - 196}" y="${headerY + 48}" fill="${overallColor}" font-size="11.5" font-weight="800">${escXml(overallText)}</text>
+
+        <!-- SEGMENTED HEALTH BAR -->
+        <rect x="${PAD}" y="${kpiY}" width="${INNER_W}" height="12" rx="6" fill="#1e293b"/>
+        ${okW > 0 ? `<rect x="${PAD}" y="${kpiY}" width="${okW}" height="12" rx="6" fill="#22c55e"/>` : ''}
+        ${warnW > 0 ? `<rect x="${PAD + okW}" y="${kpiY}" width="${warnW}" height="12" fill="#f59e0b"/>` : ''}
+        ${failW > 0 ? `<rect x="${PAD + okW + warnW}" y="${kpiY}" width="${failW}" height="12" rx="6" fill="#ef4444"/>` : ''}
+
+        <!-- KPI TILES -->
+        ${kpisSvg}
+
+        <!-- ATTENTION PANEL -->
+        ${alertSvg}
+
+        <!-- ROW 1: TAB 1 & TAB 2 -->
+        ${drawCard(sections[0], PAD, row1Y, ROW1_H)}
+        ${drawCard(sections[1], PAD + COL_W + COL_GAP, row1Y, ROW1_H)}
+
+        <!-- ROW 2: TAB 3 & TABS 4-6 -->
+        ${drawCard(sections[2], PAD, row2Y, ROW2_H)}
+        ${drawCard(sections[3], PAD + COL_W + COL_GAP, row2Y, ROW2_H)}
+
+        <!-- FOOTER -->
+        <text x="${PAD}" y="${footerY + 18}" fill="#64748b" font-size="11">Generated by GitHub Actions  •  Full source-by-source brief &amp; verification links sent to Gmail</text>
+        <text x="${W - PAD}" y="${footerY + 18}" text-anchor="end" fill="#64748b" font-size="11">tastyandcomfort.github.io/news</text>
+      </g>
+    </svg>
+  `;
+
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: 'width', value: 1200 },
+    font: { loadSystemFonts: true, defaultFontFamily: 'DejaVu Sans' }
+  });
+  return resvg.render().asPng();
+}
+
+function buildExecutiveHtml(sections, stats, istNow) {
+  const okPct = ((stats.okCount / Math.max(1, stats.totalChecks)) * 100).toFixed(1);
+  const warnPct = ((stats.warnCount / Math.max(1, stats.totalChecks)) * 100).toFixed(1);
+  const failPct = ((stats.failCount / Math.max(1, stats.totalChecks)) * 100).toFixed(1);
+
+  const pillHtml = (s) => {
+    if (s === 'OK') return '<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.4px;background:#dcfce7;color:#166534;border:1px solid #86efac;">LIVE</span>';
+    if (s === 'WARN') return '<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.4px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">NOTICE</span>';
+    return '<span style="display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.4px;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;">DOWN</span>';
+  };
+
+  const attentionHtml = stats.attention.length > 0 ? `
+    <div style="margin-bottom:20px;border:1px solid #fecaca;background:#fff5f5;border-radius:14px;padding:14px 16px;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.8px;color:#991b1b;margin-bottom:8px;">ITEMS REQUIRING ATTENTION</div>
+      ${stats.attention.map(a => `
+        <div style="padding:6px 0;border-top:1px solid #fee2e2;font-size:12.5px;color:#1e293b;">
+          ${pillHtml(a.status)}
+          <strong style="margin-left:6px;">${escHtml(a.name)}</strong>
+          <span style="color:#64748b;"> — ${escHtml(a.detail || a.metric)}</span>
+          ${a.verifyUrl ? `<a href="${escHtml(a.verifyUrl)}" style="margin-left:8px;color:#0071e3;font-weight:600;text-decoration:none;">Inspect</a>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const sectionCards = sections.map(sec => `
+    <div style="margin-bottom:18px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#ffffff;">
+      <div style="background:#f8fafc;padding:11px 16px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:800;letter-spacing:0.6px;color:#0f172a;">
         ${escHtml(sec.title)}
       </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        ${sec.items.map((it, idx) => `
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        ${sec.items.map(it => `
           <tr style="border-bottom:1px solid #f1f5f9;">
-            <td style="padding:8px 12px;width:28px;color:#64748b;">${idx + 1}.</td>
-            <td style="padding:8px 12px;font-weight:600;color:#1e293b;">${escHtml(it.name)}</td>
-            <td style="padding:8px 12px;width:72px;">
-              <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;${badgeStyle(it.status)}">${it.status}</span>
+            <td style="padding:10px 14px;vertical-align:top;">
+              <div style="font-weight:700;color:#0f172a;">${escHtml(it.name)}</div>
+              ${it.detail ? `<div style="font-size:11.5px;color:#64748b;margin-top:2px;">${escHtml(truncate(it.detail, 110))}</div>` : ''}
             </td>
-            <td style="padding:8px 12px;color:#475569;">${escHtml(it.detail)}</td>
+            <td style="padding:10px 12px;width:90px;text-align:center;vertical-align:top;">${pillHtml(it.status)}</td>
+            <td style="padding:10px 14px;width:150px;text-align:right;vertical-align:top;color:#334155;font-weight:600;">
+              <div>${escHtml(it.metric)}</div>
+              ${it.verifyUrl ? `<div style="margin-top:3px;"><a href="${escHtml(it.verifyUrl)}" style="font-size:11px;color:#0071e3;text-decoration:none;font-weight:600;">Verify Endpoint</a></div>` : ''}
+            </td>
           </tr>
         `).join('')}
       </table>
     </div>
   `).join('');
 
-  const htmlReport = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:860px;margin:0 auto;padding:16px;color:#0f172a;">
-      <div style="background:#0071e3;color:#ffffff;padding:16px 20px;border-radius:14px;margin-bottom:18px;">
-        <h2 style="margin:0;font-size:18px;">T&amp;C News Hub — Daily All-Tabs Report</h2>
-        <p style="margin:6px 0 0;font-size:13px;opacity:0.92;">${escHtml(istNow)} IST • ✅ ${okCount} OK &nbsp;|&nbsp; ⚠️ ${warnCount} Notice &nbsp;|&nbsp; ❌ ${failCount} Down</p>
+  return `
+    <div style="background:#f1f5f9;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;">
+      <div style="max-width:820px;margin:0 auto;">
+        <div style="background:#0f172a;color:#ffffff;padding:22px 24px;border-radius:16px;margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:#94a3b8;">PRIVATE OPERATIONS BRIEF</div>
+          <h1 style="margin:4px 0 6px;font-size:21px;font-weight:800;">T&amp;C News Hub</h1>
+          <div style="font-size:12.5px;color:#cbd5e1;">${escHtml(istNow)} IST &nbsp;•&nbsp; ${stats.healthPct}% Operational (${stats.okCount} Live, ${stats.warnCount} Notice, ${stats.failCount} Down)</div>
+          <div style="margin-top:14px;height:8px;border-radius:999px;background:#1e293b;overflow:hidden;display:flex;">
+            <div style="width:${okPct}%;background:#22c55e;"></div>
+            <div style="width:${warnPct}%;background:#f59e0b;"></div>
+            <div style="width:${failPct}%;background:#ef4444;"></div>
+          </div>
+        </div>
+
+        <table style="width:100%;border-collapse:separate;border-spacing:10px 0;margin:0 -10px 18px;">
+          <tr>
+            <td style="width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+              <div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:0.6px;">LIVE SOURCES</div>
+              <div style="font-size:20px;font-weight:800;color:#16a34a;margin-top:4px;">${stats.okCount} / ${stats.totalChecks}</div>
+            </td>
+            <td style="width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+              <div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:0.6px;">LIVE RECORDS</div>
+              <div style="font-size:20px;font-weight:800;color:#0284c7;margin-top:4px;">${stats.totalItems.toLocaleString('en-IN')}</div>
+            </td>
+            <td style="width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+              <div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:0.6px;">AVG LATENCY</div>
+              <div style="font-size:20px;font-weight:800;color:#7c3aed;margin-top:4px;">${stats.avgMs} ms</div>
+            </td>
+            <td style="width:25%;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;">
+              <div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:0.6px;">ALERTS</div>
+              <div style="font-size:20px;font-weight:800;color:${stats.failCount ? '#dc2626' : '#d97706'};margin-top:4px;">${stats.failCount} Down / ${stats.warnCount}</div>
+            </td>
+          </tr>
+        </table>
+
+        ${attentionHtml}
+        ${sectionCards}
+
+        <div style="text-align:center;font-size:11px;color:#64748b;padding:8px 0;">
+          Automated Daily Monitor &bull; <a href="${SITE_URL}" style="color:#0071e3;text-decoration:none;">tastyandcomfort.github.io/news</a>
+        </div>
       </div>
-      ${sectionHtml}
-      <p style="font-size:11px;color:#64748b;text-align:center;">Automated check from Tastyandcomfort/news • <a href="${SITE_URL}">${SITE_URL}</a></p>
     </div>
   `;
-
-  return { okCount, warnCount, failCount, textReport, htmlReport, istNow };
 }
 
-async function sendTelegramChunks(text) {
+function buildPlainText(sections, stats, istNow) {
+  const lines = [
+    `T&C NEWS HUB — DAILY OPERATIONS BRIEF (${istNow} IST)`,
+    `Status: ${stats.healthPct}% Operational | ${stats.okCount} Live | ${stats.warnCount} Notice | ${stats.failCount} Down`,
+    ''
+  ];
+  for (const sec of sections) {
+    lines.push(`[${sec.title}]`);
+    sec.items.forEach((it) => {
+      lines.push(`- [${it.status}] ${it.name}: ${it.metric}${it.detail ? ` (${truncate(it.detail, 70)})` : ''}`);
+    });
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+async function sendTelegramVisual(pngBuffer, stats, istNow, fallbackText) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
@@ -379,37 +590,58 @@ async function sendTelegramChunks(text) {
     return;
   }
 
-  const chunks = [];
-  let current = '';
-  for (const line of text.split('\n')) {
-    if ((current + '\n' + line).length > 3800) {
-      chunks.push(current);
-      current = line;
-    } else {
-      current = current ? `${current}\n${line}` : line;
-    }
-  }
-  if (current) chunks.push(current);
+  const caption = [
+    `T&C News Hub | ${istNow} IST`,
+    `${stats.healthPct}% Operational — ${stats.okCount} Live, ${stats.warnCount} Notice, ${stats.failCount} Down.`,
+    `Full interactive breakdown & verify links sent to Gmail.`
+  ].join('\n');
 
-  for (const chunk of chunks) {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const replyMarkup = JSON.stringify({
+    inline_keyboard: [
+      [
+        { text: 'Open Live Website', url: SITE_URL },
+        { text: 'Headlines RSS (Local)', url: `${NEWS_API}?scope=local` }
+      ],
+      [
+        { text: 'Press: PIB / ED / CBI', url: `${GOV_API}?source=pib,ed_press,cbi` },
+        { text: 'Press: Parl / SCI / ECI', url: `${GOV_API}?source=parliament,sci,eci` }
+      ],
+      [
+        { text: 'Press: Space & Police', url: `${GOV_API}?source=space,police&state=ALL` },
+        { text: 'Wanted: NIA / ED / CBI', url: `${GOV_API}?source=nia,ed_proclamation,cbi,interpol` }
+      ],
+      [
+        { text: 'Missing Persons API', url: `${MISSING_API}?source=all` },
+        { text: 'Radar: Live Flights', url: FLIGHTS_APIS[1] }
+      ]
+    ]
+  });
+  
+  const form = new FormData();
+  form.append('chat_id', chatId);
+  form.append('photo', new Blob([pngBuffer], { type: 'image/png' }), 'tc-news-scorecard.png');
+  form.append('caption', caption);
+  form.append('reply_markup', replyMarkup);
+
+  const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+    method: 'POST',
+    body: form
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.warn(`sendPhoto failed (${res.status}): ${errText}. Falling back to plain text.`);
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: chunk,
-        disable_web_page_preview: true
-      })
+      body: JSON.stringify({ chat_id: chatId, text: fallbackText.slice(0, 3900), disable_web_page_preview: true })
     });
-    if (!res.ok) {
-      const errBody = await res.text();
-      throw new Error(`Telegram API failed (${res.status}): ${errBody}`);
-    }
+    return;
   }
-  console.log(`Telegram report sent (${chunks.length} message(s)).`);
+  console.log('Telegram visual PNG scorecard sent.');
 }
 
-async function sendGmailReport({ okCount, warnCount, failCount, textReport, htmlReport, istNow }) {
+async function sendGmailReport(htmlReport, textReport, stats, istNow) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
   const to = process.env.REPORT_TO_EMAIL || user;
@@ -425,25 +657,35 @@ async function sendGmailReport({ okCount, warnCount, failCount, textReport, html
     auth: { user, pass }
   });
 
-  const statusTag = failCount > 0 ? `❌ ${failCount} Down` : '✅ All Core OK';
+  const summaryTag = stats.failCount > 0 ? `${stats.failCount} Down` : `${stats.healthPct}% Live`;
   await transporter.sendMail({
     from: `"T&C News Monitor" <${user}>`,
     to,
-    subject: `T&C News Daily Report (${istNow}) — ${statusTag} | ⚠️ ${warnCount}`,
+    subject: `T&C News Hub Report (${istNow}) — ${summaryTag}`,
     text: textReport,
     html: htmlReport
   });
-  console.log(`Gmail report sent to ${to}.`);
+  console.log(`Gmail executive report sent to ${to}.`);
 }
 
 async function main() {
+  const istNow = new Date().toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+
   const sections = await runAllChecks();
-  const report = buildReports(sections);
-  console.log(report.textReport);
+  const stats = summarize(sections);
+  const textReport = buildPlainText(sections, stats, istNow);
+  const htmlReport = buildExecutiveHtml(sections, stats, istNow);
+  const pngBuffer = buildScorecardPng(sections, stats, istNow);
+
+  console.log(textReport);
 
   await Promise.all([
-    sendTelegramChunks(report.textReport),
-    sendGmailReport(report)
+    sendTelegramVisual(pngBuffer, stats, istNow, textReport),
+    sendGmailReport(htmlReport, textReport, stats, istNow)
   ]);
 }
 
